@@ -42,7 +42,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 					Params: json.RawMessage(`{
                     				"uri": "petstore.swagger.io/v2/pet/3"
 					}`),
-					Reference: "github.com/aambhaik/resources/response-flow.json",
+					Reference: "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
 				},
 			},
 			EventLinks: []types.EventLink{
