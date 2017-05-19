@@ -1,0 +1,94 @@
+{
+	"ImportPath": "github.com/TIBCOSoftware/mashling-cli",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v74",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.11.5-12-g10f801e",
+			"Rev": "10f801ebc38b33738c9d17d50860f484a0988ff5"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-cli/app",
+			"Comment": "v0.3.3-15-g8d9093c",
+			"Rev": "8d9093c7f1c3025789a48acd5bed771da117fb10"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-cli/cli",
+			"Comment": "v0.3.3-15-g8d9093c",
+			"Rev": "8d9093c7f1c3025789a48acd5bed771da117fb10"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-cli/env",
+			"Comment": "v0.3.3-15-g8d9093c",
+			"Rev": "8d9093c7f1c3025789a48acd5bed771da117fb10"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-cli/util",
+			"Comment": "v0.3.3-15-g8d9093c",
+			"Rev": "8d9093c7f1c3025789a48acd5bed771da117fb10"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/app",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/config",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/core/action",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/core/activity",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/core/data",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/core/trigger",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/flow/flowdef",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/flow/support",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/logger",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/TIBCOSoftware/flogo-lib/util",
+			"Comment": "v0.3.3-18-gceb0599",
+			"Rev": "ceb0599bbe542e53df831e38ef00556fb0be0140"
+		},
+		{
+			"ImportPath": "github.com/pkg/errors",
+			"Comment": "v0.8.0-4-gff09b13",
+			"Rev": "ff09b135c25aae272398c51a07235b90a75aa4f0"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "002cbb5f952456d0c50e0d2aff17ea5eca716979"
+		}
+	]
+}

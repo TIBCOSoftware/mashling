@@ -1,0 +1,49 @@
+{
+	"gateway": {
+		"name": "demoapp",
+		"version": "1.0.0",
+		"description": "This is the first microgateway app",
+		"configurations": [
+			{
+				"name": "kafkaConfig",
+				"type": "github.com/wnichols/kafkasub",
+				"description": "Configuration for kafka cluster",
+				"settings": {
+					"BrokerUrl": "localhost:9092"
+				}
+			}
+		],
+		"triggers": [
+			{
+				"name": "rest_trigger",
+				"description": "The trigger on 'users' endpoint",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+				"settings": {
+					"port": "9096",
+					"method": "GET",
+					"path": "/pets/:petId"
+				}
+			}
+		],
+		"event_handlers": [
+			{
+				"name": "get_user_success_handler",
+				"description": "Handle the user access",
+				"reference": "github.com/aambhaik/resources/response-flow.json",
+				"params": {
+					"uri": "petstore.swagger.io/v2/pet/3"
+				}
+			}
+		],
+		"event_links": [
+			{
+				"trigger": "rest_trigger",
+				"success_paths": [
+					{
+						"handler": "get_user_success_handler"
+					}
+				]
+			}
+		]
+	}
+}

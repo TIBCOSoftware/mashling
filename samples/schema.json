@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Microgateway",
+  "definitions": {
+    "Config": {
+      "required": ["name", "type", "settings"],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "settings": {
+          "items": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "type": "object"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EventHandler": {
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "params": {
+          "items": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "type": "object"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "definition": {
+          "$ref": "#/definitions/FlowDef"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EventLink": {
+      "required": ["trigger", "success_paths"],
+      "properties": {
+        "error_paths": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Path"
+          },
+          "type": "array"
+        },
+        "success_paths": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Path"
+          },
+          "type": "array"
+        },
+        "trigger": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Gateway": {
+      "required": ["name", "version", "configurations", "triggers", "event_handlers", "event_links"],
+      "properties": {
+        "configurations": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Config"
+          },
+          "type": "array"
+        },
+        "description": {
+          "type": "string"
+        },
+        "event_handlers": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/EventHandler"
+          },
+          "type": "array"
+        },
+        "event_links": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/EventLink"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "triggers": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Trigger"
+          },
+          "type": "array"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Microgateway": {
+      "required": ["gateway"],
+      "properties": {
+        "gateway": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Gateway"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Path": {
+      "required": ["handler"],
+      "properties": {
+        "handler": {
+          "type": "string"
+        },
+        "if": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Trigger": {
+      "required": ["name", "type", "settings"],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "settings": {
+          "items": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "type": "object"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "FlowDef": {
+      "required": ["data", "id", "ref"],
+      "properties": {
+        "data": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "https://raw.githubusercontent.com/TIBCOSoftware/flogo-lib/master/flow/flowdef/schema.json"
+        },
+        "id": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
