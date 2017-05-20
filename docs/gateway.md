@@ -85,7 +85,7 @@ The *mashling.json* file is the metadata describing the gateway project.
 			{
 				"name": "get_user_success_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/aambhaik/resources/response-flow.json",
+				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}
