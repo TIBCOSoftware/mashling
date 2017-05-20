@@ -27,7 +27,7 @@ mashling create myApp
 
 ```
 
-- Cd bin folder 
+- Cd myApp/bin folder
 - Start mashling engine by running ./myApp
 - Mashling will start a REST server
 - Send GET request to run the flow. eg: http://localhost:9096/pets/1
