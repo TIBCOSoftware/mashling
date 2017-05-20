@@ -53,7 +53,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 		"triggers": [
 			{
 				"name": "rest_trigger",
-				"description": "The trigger on 'users' endpoint",
+				"description": "The trigger on 'pets' endpoint",
 				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
 				"settings": {
 					"port": "9096",
@@ -64,7 +64,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 		],
 		"event_handlers": [
 			{
-				"name": "get_user_success_handler",
+				"name": "get_pet_success_handler",
 				"description": "Handle the user access",
 				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
 				"params": {
@@ -77,7 +77,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 				"trigger": "rest_trigger",
 				"success_paths": [
 					{
-						"handler": "get_user_success_handler"
+						"handler": "get_pet_success_handler"
 					}
 				]
 			}

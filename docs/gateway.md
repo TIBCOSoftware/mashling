@@ -72,7 +72,7 @@ The *mashling.json* file is the metadata describing the gateway project.
 		"triggers": [
 			{
 				"name": "rest_trigger",
-				"description": "The trigger on 'users' endpoint",
+				"description": "The trigger on 'pets' endpoint",
 				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
 				"settings": {
 					"port": "9096",
@@ -83,8 +83,8 @@ The *mashling.json* file is the metadata describing the gateway project.
 		],
 		"event_handlers": [
 			{
-				"name": "get_user_success_handler",
-				"description": "Handle the user access",
+				"name": "get_pet_success_handler",
+				"description": "Handle the pet access",
 				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
@@ -96,7 +96,7 @@ The *mashling.json* file is the metadata describing the gateway project.
 				"trigger": "rest_trigger",
 				"success_paths": [
 					{
-						"handler": "get_user_success_handler"
+						"handler": "get_pet_success_handler"
 					}
 				]
 			}
