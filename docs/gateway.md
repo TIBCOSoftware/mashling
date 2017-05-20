@@ -11,12 +11,12 @@ This command is used to create a mashling gateway project.
 	
 *Create a mashling gateway project from an existing mashling gateway descriptor.*
 	
-	flogo create -f myapp.json
+	mashling create -f myapp.json
 
 ### help
 This command is used to display help on a particular command
 	
-	flogo help build 
+	mashling help create
 
 ##Gateway Project
 
