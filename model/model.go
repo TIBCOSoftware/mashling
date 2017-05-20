@@ -26,7 +26,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 			Triggers: []types.Trigger{
 				{
 					Name:        "rest_trigger",
-					Description: "The trigger on 'users' endpoint",
+					Description: "The trigger on 'pets' endpoint",
 					Type:        "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
 					Settings: json.RawMessage(`{
 					  "port": "9096",
@@ -37,7 +37,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 			},
 			EventHandlers: []types.EventHandler{
 				{
-					Name:        "get_user_success_handler",
+					Name:        "get_pet_success_handler",
 					Description: "Handle the user access",
 					Params: json.RawMessage(`{
                     				"uri": "petstore.swagger.io/v2/pet/3"
@@ -50,7 +50,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 					Trigger: "rest_trigger",
 					SuccessPaths: []types.Path{
 						{
-							Handler: "get_user_success_handler",
+							Handler: "get_pet_success_handler",
 						},
 					},
 					ErrorPaths: []types.Path{},
