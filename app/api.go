@@ -13,6 +13,7 @@ import (
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling-lib/model"
 	"github.com/TIBCOSoftware/mashling-lib/types"
+	"github.com/TIBCOSoftware/mashling-lib/util"
 	"path"
 )
 
@@ -56,6 +57,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	flogoAppTriggers := []*ftrigger.Config{}
 	flogoAppActions := []*faction.Config{}
 
+	//1. load the configuration, if provided.
 	configNamedMap := make(map[string]types.Config)
 	for _, config := range descriptor.Gateway.Configurations {
 		configNamedMap[config.Name] = config
@@ -79,7 +81,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 		for _, path := range successPaths {
 			handlerName := path.Handler
 
-			flogoTrigger, err := model.CreateFlogoTrigger(triggerNamedMap[triggerName], handlerNamedMap[handlerName])
+			flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap[handlerName])
 			if err != nil {
 				return err
 			}
@@ -97,7 +99,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 	flogoApp := app.Config{
 		Name:        descriptor.Gateway.Name,
-		Type:        "flogo:app",
+		Type:        util.Flogo_App_Type,
 		Version:     descriptor.Gateway.Version,
 		Description: descriptor.Gateway.Description,
 		Triggers:    flogoAppTriggers,
@@ -123,7 +125,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 
-	err = fgutil.CreateFileFromString(path.Join(appDir, "mashling.json"), gatewayJson)
+	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJson)
 	if err != nil {
 		return err
 	}

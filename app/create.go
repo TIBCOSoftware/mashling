@@ -41,7 +41,6 @@ func (c *cmdCreate) OptionInfo() *cli.OptionInfo {
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
-	fs.StringVar(&(c.vendorDir), "vendor", "", "vendor dir")
 }
 
 // Exec implementation of cli.Command.Exec
