@@ -3,12 +3,11 @@ package model
 import (
 	"encoding/json"
 	"errors"
-	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling-lib/types"
-	"io/ioutil"
+	"github.com/TIBCOSoftware/mashling-lib/util"
 	"os"
 	"strings"
 )
@@ -35,10 +34,31 @@ func CreateFlogoTrigger(trigger types.Trigger, handler types.EventHandler) (*ftr
 	if err := json.Unmarshal([]byte(trigger.Settings), &ftSettings); err != nil {
 		return nil, err
 	}
-	flogoTrigger.Settings = ftSettings.(map[string]interface{})
+	//check if the trigger has valid settings required
+	//1. get the trigger resource from github
+	triggerMD, err := util.GetTriggerMetadata(trigger.Type)
+	if err != nil {
+		return nil, err
+	}
+	//2. check if the trigger metadata contains the settings
+	triggerSettings := make(map[string]interface{})
+	handlerSettings := make(map[string]interface{})
+
+	for key, value := range ftSettings.(map[string]interface{}) {
+		if util.IsValidTriggerSetting(triggerMD, key) {
+			triggerSettings[key] = value
+		}
+
+		if util.IsValidTriggerHandlerSetting(triggerMD, key) {
+			handlerSettings[key] = value
+		}
+	}
+	//3. check if the trigger handler metadata contain the settings
+
+	flogoTrigger.Settings = triggerSettings
 	flogoHandler := ftrigger.HandlerConfig{
 		ActionId: handler.Name,
-		Settings: ftSettings.(map[string]interface{}),
+		Settings: handlerSettings,
 	}
 
 	handlers := []*ftrigger.HandlerConfig{}
@@ -69,24 +89,7 @@ func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) 
 
 		resourceFile := referenceString[index+1 : len(referenceString)]
 
-		gbProject := env.NewGbProjectEnv()
-
-		gbProject.Init(os.Getenv("GOPATH"))
-
-		resourceDir := gbProject.GetVendorSrcDir()
-		resourcePath := resourceDir + "/" + gitHubPath + "/" + resourceFile
-
-		gbProject.InstallDependency(gitHubPath, "")
-
-		data, err := ioutil.ReadFile(resourcePath)
-		if err != nil {
-			return nil, err
-		}
-
-		err = gbProject.UninstallDependency(gitHubPath)
-		if err != nil {
-			return nil, err
-		}
+		data, err := util.GetGithubResource(gitHubPath, resourceFile)
 
 		var flogoFlowDef *app.Config
 		err = json.Unmarshal(data, &flogoFlowDef)
