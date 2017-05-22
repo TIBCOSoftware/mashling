@@ -3,16 +3,7 @@
 		"name": "demoapp",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
-		"configurations": [
-			{
-				"name": "kafkaConfig",
-				"type": "github.com/wnichols/kafkasub",
-				"description": "Configuration for kafka cluster",
-				"settings": {
-					"BrokerUrl": "localhost:9092"
-				}
-			}
-		],
+		"configurations": [],
 		"triggers": [
 			{
 				"name": "rest_trigger",
