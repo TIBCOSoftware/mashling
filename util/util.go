@@ -6,6 +6,7 @@ import (
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
@@ -36,7 +37,7 @@ func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 	gbProject.Init(os.Getenv("GOPATH"))
 
 	resourceDir := gbProject.GetVendorSrcDir()
-	triggerPath := resourceDir + "/" + gitHubPath + "/trigger.json"
+	triggerPath := resourceDir + "/" + gitHubPath + "/" + Gateway_Trigger_Metadata_JSON_Name
 
 	gbProject.InstallDependency(gitHubPath, "")
 	data, err := ioutil.ReadFile(triggerPath)
@@ -69,4 +70,19 @@ func IsValidTriggerHandlerSetting(metadata *ftrigger.Metadata, property string) 
 	}
 
 	return false
+}
+
+func ValidateTriggerConfigExpr(expression *string) (bool, *string) {
+	if expression == nil {
+		return false, nil
+	}
+
+	exprValue := *expression
+	if strings.HasPrefix(exprValue, Gateway_Trigger_Config_Prefix) && strings.HasSuffix(exprValue, Gateway_Trigger_Config_Suffix) {
+		//get name of the config
+		str := exprValue[17 : len(exprValue)-1]
+		return true, &str
+	} else {
+		return false, &exprValue
+	}
 }
