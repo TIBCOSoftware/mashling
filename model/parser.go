@@ -66,9 +66,12 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 			configSettingsMap := configObjSettings.(map[string]interface{})
 			//delete the "config" key from the the Usable trigger settings map
 			delete(mashTriggerSettingsUsable, util.Gateway_Trigger_Config_Ref_Key)
-			//copy from the config settings into the usable trigger settings map
+			//copy from the config settings into the usable trigger settings map, if the key does NOT exist in the trigger already.
+			//this is to ensure that the individual trigger can override a property defined in a "common" configuration
 			for k, v := range configSettingsMap {
-				mashTriggerSettingsUsable[k] = v
+				if _, ok := mashTriggerSettingsUsable[k]; !ok {
+					mashTriggerSettingsUsable[k] = v
+				}
 			}
 
 		}
