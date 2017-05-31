@@ -40,9 +40,9 @@ type EventHandler struct {
 }
 
 type EventLink struct {
-	Trigger      string `json:"trigger"`
-	SuccessPaths []Path `json:"success_paths"`
-	ErrorPaths   []Path `json:"error_paths,omitempty"`
+	Triggers     []string `json:"triggers"`
+	SuccessPaths []Path   `json:"success_paths"`
+	ErrorPaths   []Path   `json:"error_paths,omitempty"`
 }
 
 type Path struct {

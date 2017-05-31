@@ -47,7 +47,9 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 			},
 			EventLinks: []types.EventLink{
 				{
-					Trigger: "rest_trigger",
+					Triggers: []string{
+						"rest_trigger",
+					},
 					SuccessPaths: []types.Path{
 						{
 							Handler: "get_pet_success_handler",
