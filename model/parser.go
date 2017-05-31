@@ -26,7 +26,7 @@ func ParseGatewayDescriptor(appJson string) (*types.Microgateway, error) {
 	return descriptor, nil
 }
 
-func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, handler types.EventHandler) (*ftrigger.Config, error) {
+func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, namedHandlerMap map[string]types.EventHandler, dispatches []types.Dispatch) (*ftrigger.Config, error) {
 	var flogoTrigger ftrigger.Config
 	flogoTrigger.Name = trigger.Name
 	flogoTrigger.Id = trigger.Name
@@ -97,18 +97,29 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 		}
 	}
 	//3. check if the trigger handler metadata contain the settings
+	handlers := []*ftrigger.HandlerConfig{}
+	var handler types.EventHandler
+	for _, dispatch := range dispatches {
+		if dispatch.Default != "" {
+			//default is provided
+			handler = namedHandlerMap[dispatch.Default]
+		} else {
+			//default is not provided
+			handler = namedHandlerMap[dispatch.Handler]
+		}
 
-	flogoTrigger.Settings = triggerSettings
-	flogoHandler := ftrigger.HandlerConfig{
-		ActionId: handler.Name,
-		Settings: handlerSettings,
+		flogoTrigger.Settings = triggerSettings
+		flogoHandler := ftrigger.HandlerConfig{
+			ActionId: handler.Name,
+			Settings: handlerSettings,
+		}
+
+		flogoHandler.Settings[util.Gateway_Trigger_Handler_UseReplyHandler] = util.Gateway_Trigger_Handler_UseReplyHandler_Default
+		flogoHandler.Settings[util.Gateway_Trigger_Handler_AutoIdReply] = util.Gateway_Trigger_Handler_AutoIdReply_Default
+
+		handlers = append(handlers, &flogoHandler)
 	}
 
-	handlers := []*ftrigger.HandlerConfig{}
-	handlers = append(handlers, &flogoHandler)
-
-	flogoHandler.Settings[util.Gateway_Trigger_Handler_UseReplyHandler] = util.Gateway_Trigger_Handler_UseReplyHandler_Default
-	flogoHandler.Settings[util.Gateway_Trigger_Handler_AutoIdReply] = util.Gateway_Trigger_Handler_AutoIdReply_Default
 	flogoTrigger.Handlers = handlers
 
 	return &flogoTrigger, nil

@@ -40,14 +40,18 @@ type EventHandler struct {
 }
 
 type EventLink struct {
-	Triggers     []string `json:"triggers"`
-	SuccessPaths []Path   `json:"success_paths"`
-	ErrorPaths   []Path   `json:"error_paths,omitempty"`
+	Triggers   []string   `json:"triggers"`
+	Dispatches []Dispatch `json:"dispatches"`
 }
 
 type Path struct {
 	If      string `json:"if,omitempty"`
-	Handler string `json:"handler"`
+	Handler string `json:"handler,omitempty"`
+}
+
+type Dispatch struct {
+	Path
+	Default string `json:"default_handler,omitempty"`
 }
 
 type FlogoAction struct {
