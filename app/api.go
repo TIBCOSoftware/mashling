@@ -14,6 +14,7 @@ import (
 	"github.com/TIBCOSoftware/mashling-lib/model"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
+	"os"
 	"path"
 )
 
@@ -75,26 +76,29 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 	//translate the gateway model to the flogo model
 	for _, link := range descriptor.Gateway.EventLinks {
-		triggerName := link.Trigger
+		triggerNames := link.Triggers
 
-		successPaths := link.SuccessPaths
-		for _, path := range successPaths {
-			handlerName := path.Handler
+		for _, triggerName := range triggerNames {
+			successPaths := link.SuccessPaths
+			for _, path := range successPaths {
+				handlerName := path.Handler
 
-			flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap[handlerName])
-			if err != nil {
-				return err
+				flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap[handlerName])
+				if err != nil {
+					return err
+				}
+
+				flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+
+				flogoAction, err := model.CreateFlogoFlowAction(handlerNamedMap[handlerName])
+				if err != nil {
+					return err
+				}
+
+				flogoAppActions = append(flogoAppActions, flogoAction)
 			}
-
-			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
-
-			flogoAction, err := model.CreateFlogoFlowAction(handlerNamedMap[handlerName])
-			if err != nil {
-				return err
-			}
-
-			flogoAppActions = append(flogoAppActions, flogoAction)
 		}
+
 	}
 
 	flogoApp := app.Config{
@@ -125,6 +129,10 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 
+	//delete flogo.json file from the app dir
+	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
+
+	//create the mashling json descriptor file
 	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJson)
 	if err != nil {
 		return err
@@ -133,4 +141,63 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	fmt.Println("Mashling gateway successfully built!")
 
 	return nil
+}
+
+func ListComponents(env env.Project, cType ComponentType) ([]*Component, error) {
+
+	var components []*Component
+
+	rootDir := env.GetRootDir()
+	mashlingDescriptorFile := rootDir + "/" + util.Gateway_Definition_File_Name
+	mashlingJson, err1 := fgutil.LoadLocalFile(mashlingDescriptorFile)
+	if err1 != nil {
+		fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", mashlingDescriptorFile, err1.Error())
+		os.Exit(2)
+	}
+
+	microgateway, err := model.ParseGatewayDescriptor(mashlingJson)
+
+	if cType == 2 || cType == TRIGGER {
+		if microgateway.Gateway.Triggers != nil {
+			for _, trigger := range microgateway.Gateway.Triggers {
+				components = append(components, &Component{Name: trigger.Name, Type: TRIGGER, Ref: trigger.Type})
+			}
+		}
+	}
+
+	if cType == 3 || cType == HANDLER {
+		if microgateway.Gateway.EventHandlers != nil {
+			for _, handler := range microgateway.Gateway.EventHandlers {
+				cType.String()
+				components = append(components, &Component{Name: handler.Name, Type: HANDLER, Ref: handler.Reference})
+			}
+		}
+	}
+
+	return components, err
+}
+
+func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error) {
+
+	rootDir := env.GetRootDir()
+	var links []*types.EventLink
+
+	mashlingDescriptorFile := rootDir + "/" + util.Gateway_Definition_File_Name
+	mashlingJson, err1 := fgutil.LoadLocalFile(mashlingDescriptorFile)
+	if err1 != nil {
+		fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", mashlingDescriptorFile, err1.Error())
+		os.Exit(2)
+	}
+
+	microgateway, err := model.ParseGatewayDescriptor(mashlingJson)
+
+	if cType == 1 || cType == LINK {
+		if microgateway.Gateway.EventLinks != nil {
+			for _, link := range microgateway.Gateway.EventLinks {
+				links = append(links, &link)
+			}
+		}
+	}
+
+	return links, err
 }
