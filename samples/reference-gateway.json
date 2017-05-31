@@ -1,13 +1,13 @@
 {
 	"gateway": {
-		"name": "demoapp",
+		"name": "demo",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
 		"configurations": [],
 		"triggers": [
 			{
 				"name": "rest_trigger",
-				"description": "The trigger on 'users' endpoint",
+				"description": "The trigger on 'pets' endpoint",
 				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
 				"settings": {
 					"port": "9096",
@@ -18,9 +18,9 @@
 		],
 		"event_handlers": [
 			{
-				"name": "get_user_success_handler",
+				"name": "get_pet_success_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/aambhaik/resources/response-flow.json",
+				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}
@@ -28,10 +28,13 @@
 		],
 		"event_links": [
 			{
-				"trigger": "rest_trigger",
-				"success_paths": [
+				"triggers": [
+					"rest_trigger"
+				],
+				"dispatches": [
 					{
-						"handler": "get_user_success_handler"
+						"if": "trigger.content != undefined",
+						"handler": "get_pet_success_handler"
 					}
 				]
 			}

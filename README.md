@@ -39,7 +39,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 ```json
 {
 	"gateway": {
-		"name": "demoapp",
+		"name": "demo",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
 		"configurations": [
@@ -76,9 +76,12 @@ The built in sample gateway is based of the following mashling.json.  This file 
 		],
 		"event_links": [
 			{
-				"trigger": "rest_trigger",
-				"success_paths": [
+				"triggers": [
+					"rest_trigger"
+				],
+				"dispatch": [
 					{
+						"if": "trigger.content != undefined",
 						"handler": "get_pet_success_handler"
 					}
 				]

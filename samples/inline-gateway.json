@@ -92,16 +92,10 @@
 		"event_links": [
 			{
 				"trigger": "OrdersTrigger",
-				"success_paths": [
+				"dispatches": [
 					{
 						"if": "${(trigger).content.Country == 'USA'}",
 						"handler": "OrderSuccessHandler"
-					}
-				],
-				"error_paths": [
-					{
-						"if": "${(trigger).content.Country == undefined}",
-						"handler": "OrderErrorHandler"
 					}
 				]
 			}

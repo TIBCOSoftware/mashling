@@ -74,28 +74,49 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 		handlerNamedMap[evtHandler.Name] = evtHandler
 	}
 
+	createdHandlers := make(map[string]bool)
+
 	//translate the gateway model to the flogo model
 	for _, link := range descriptor.Gateway.EventLinks {
 		triggerNames := link.Triggers
 
 		for _, triggerName := range triggerNames {
-			successPaths := link.SuccessPaths
-			for _, path := range successPaths {
-				handlerName := path.Handler
+			dispatches := link.Dispatches
 
-				flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap[handlerName])
-				if err != nil {
-					return err
+			//create trigger sections for flogo
+			/**
+			TODO handle condition parsing and setting the condition in the trigger.
+			//get the condition if available
+			condition := path.If
+			//create the trigger using the condition
+			.......
+			*/
+			flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches)
+			if err != nil {
+				return err
+			}
+
+			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+
+			//create unique handler actions
+			for _, dispatch := range dispatches {
+				var handlerName string
+
+				handlerName = dispatch.Default
+				if handlerName == "" {
+					handlerName = dispatch.Handler
 				}
 
-				flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+				if !createdHandlers[handlerName] {
+					//not already created, so create it
+					flogoAction, err := model.CreateFlogoFlowAction(handlerNamedMap[handlerName])
+					if err != nil {
+						return err
+					}
 
-				flogoAction, err := model.CreateFlogoFlowAction(handlerNamedMap[handlerName])
-				if err != nil {
-					return err
+					flogoAppActions = append(flogoAppActions, flogoAction)
+					createdHandlers[handlerName] = true
 				}
-
-				flogoAppActions = append(flogoAppActions, flogoAction)
 			}
 		}
 

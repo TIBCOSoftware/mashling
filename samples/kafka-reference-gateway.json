@@ -1,6 +1,6 @@
 {
 	"gateway": {
-		"name": "demoapp",
+		"name": "kafka",
 		"version": "1.0.0",
 		"description": "This is the kafka based microgateway app",
 		"configurations": [
@@ -29,14 +29,16 @@
 				"name": "user_topic_handler",
 				"description": "Handle the user access",
 				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/kafkaFlow.json",
-				"params": {}
+				"params": {
+				}
 			}
 		],
 		"event_links": [
 			{
-				"trigger": "kafka_trigger",
-				"success_paths": [
+				"triggers": ["kafka_trigger"],
+				"dispatches": [
 					{
+						"if": "trigger.content != undefined",
 						"handler": "user_topic_handler"
 					}
 				]
