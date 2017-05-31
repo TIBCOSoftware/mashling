@@ -139,7 +139,7 @@ func PrintCmdUsage(w io.Writer, toolName string, command Command) {
 
 var tplCmdUsage = `Usage:
 
-    gateway {{if .ToolName}}{{.ToolName}}{{end}} {{.CmdUsageLine}}
+    mashling {{if .ToolName}}{{.ToolName}}{{end}} {{.CmdUsageLine}}
 
 `
 
@@ -163,7 +163,7 @@ func PrintCmdHelp(toolName string, command Command) {
 
 var tplCmdHelp = `Usage:
 
-    gateway {{if .ToolName}}{{.ToolName}}{{end}} {{.CmdUsageLine}}
+    mashling {{if .ToolName}}{{.ToolName}}{{end}} {{.CmdUsageLine}}
 
 {{.CmdLong | trim}}
 

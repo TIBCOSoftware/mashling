@@ -18,6 +18,11 @@ This command is used to display help on a particular command
 	
 	mashling help create
 
+### list
+This command is used to display components of a mashling gateway
+
+	mashling help list
+
 ##Gateway Project
 
 ###Structure
@@ -26,7 +31,6 @@ The create command creates a basic structure and files for a gateway.
 
 
 	my_app/
-		flogo.json
 		mashling.json
 		src/
 			my_app/
@@ -36,7 +40,6 @@ The create command creates a basic structure and files for a gateway.
 		
 **files**
 
-- *flogo.json* : flogo project application configuration descriptor file
 - *mashling.json* : mashling gateway configuration descriptor file
 - *imports.go* : contains go imports for contributions (activities, triggers and models) used by the gateway
 - *main.go* : main file for the engine.
@@ -56,19 +59,10 @@ The *mashling.json* file is the metadata describing the gateway project.
 ```json
 {
 	"gateway": {
-		"name": "demoapp",
+		"name": "demo",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
-		"configurations": [
-			{
-				"name": "kafkaConfig",
-				"type": "github.com/wnichols/kafkasub",
-				"description": "Configuration for kafka cluster",
-				"settings": {
-					"BrokerUrl": "localhost:9092"
-				}
-			}
-		],
+		"configurations": [],
 		"triggers": [
 			{
 				"name": "rest_trigger",
@@ -84,7 +78,7 @@ The *mashling.json* file is the metadata describing the gateway project.
 		"event_handlers": [
 			{
 				"name": "get_pet_success_handler",
-				"description": "Handle the pet access",
+				"description": "Handle the user access",
 				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
@@ -93,9 +87,12 @@ The *mashling.json* file is the metadata describing the gateway project.
 		],
 		"event_links": [
 			{
-				"trigger": "rest_trigger",
-				"success_paths": [
+				"triggers": [
+					"rest_trigger"
+				],
+				"dispatches": [
 					{
+						"if": "trigger.content != undefined",
 						"handler": "get_pet_success_handler"
 					}
 				]

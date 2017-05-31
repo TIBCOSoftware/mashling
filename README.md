@@ -79,7 +79,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 				"triggers": [
 					"rest_trigger"
 				],
-				"dispatch": [
+				"dispatches": [
 					{
 						"if": "trigger.content != undefined",
 						"handler": "get_pet_success_handler"
