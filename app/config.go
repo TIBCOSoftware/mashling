@@ -6,6 +6,7 @@ const (
 	LINK ComponentType = 1 + iota
 	TRIGGER
 	HANDLER
+	ALL
 )
 
 var ctStr = [...]string{

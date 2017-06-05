@@ -5,6 +5,11 @@ import (
 	"strings"
 
 	"fmt"
+	"os"
+	"path"
+
+	"bytes"
+
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -14,8 +19,6 @@ import (
 	"github.com/TIBCOSoftware/mashling-lib/model"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
-	"os"
-	"path"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
@@ -221,4 +224,118 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 	}
 
 	return links, err
+}
+
+// GetGatewayDetails returns gateway details i.e all Triggers, Handlers & Links
+func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
+	gwInfoBuffer := bytes.NewBufferString("")
+	rootDir := env.GetRootDir()
+	mashlingDescriptorFile := rootDir + "/" + util.Gateway_Definition_File_Name
+	mashlingJSON, err := fgutil.LoadLocalFile(mashlingDescriptorFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", mashlingDescriptorFile, err.Error())
+		os.Exit(2)
+	}
+	microgateway, err := model.ParseGatewayDescriptor(mashlingJSON)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Error while parsing gateway description json - %s\n\n", err.Error())
+		os.Exit(2)
+	}
+
+	tmpString := ""
+	//Triggers info
+	if cType == TRIGGER || cType == ALL {
+		tmpString = fmt.Sprintf("Triggers: %d\n", len(microgateway.Gateway.Triggers))
+		gwInfoBuffer.WriteString(tmpString)
+		for _, trigger := range microgateway.Gateway.Triggers {
+			tmpString = "\t" + trigger.Name + "  " + trigger.Type + "\n"
+			gwInfoBuffer.WriteString(tmpString)
+		}
+	}
+
+	//Handlers info
+	if cType == HANDLER || cType == ALL {
+		tmpString = fmt.Sprintf("Handlers: %d\n", len(microgateway.Gateway.EventHandlers))
+		gwInfoBuffer.WriteString(tmpString)
+		for _, handler := range microgateway.Gateway.EventHandlers {
+			tmpString = "\t" + handler.Name + "  " + handler.Reference + "\n"
+			gwInfoBuffer.WriteString(tmpString)
+		}
+	}
+
+	//Links info
+	if cType == LINK || cType == ALL {
+		links := microgateway.Gateway.EventLinks
+		tmpString = fmt.Sprintf("Links: %d\n", len(links))
+		gwInfoBuffer.WriteString(tmpString)
+		//loop through links
+		for _, link := range links {
+			gwInfoBuffer.WriteString("\tTrigger: ")
+			for _, trigger := range link.Triggers {
+				gwInfoBuffer.WriteString(trigger + " ")
+			}
+			gwInfoBuffer.WriteString("\n")
+			gwInfoBuffer.WriteString("\tHandlers:\n")
+			for _, dispatcher := range link.Dispatches {
+				gwInfoBuffer.WriteString("\t\t" + dispatcher.Handler + "\n")
+			}
+			gwInfoBuffer.WriteString("\n")
+		}
+	}
+
+	unLinkedTriggers := 0
+	tmpBuf := bytes.NewBufferString("")
+	if cType == ALL {
+		//Unlinked triggers
+		for _, trigger := range microgateway.Gateway.Triggers {
+			triggerFound := false
+			for _, link := range microgateway.Gateway.EventLinks {
+				for _, trigger2 := range link.Triggers {
+					if trigger.Name == trigger2 {
+						triggerFound = true
+						break
+					}
+				}
+				if triggerFound {
+					break
+				}
+			}
+			if !triggerFound {
+				unLinkedTriggers++
+				tmpBuf.WriteString("\t" + trigger.Name + "  " + trigger.Type + "\n")
+			}
+		}
+		if unLinkedTriggers != 0 {
+			gwInfoBuffer.WriteString(fmt.Sprintf("Unlinked Triggers: %d", unLinkedTriggers) + "\n")
+			gwInfoBuffer.WriteString(tmpBuf.String())
+		}
+
+		//Unliked handlers
+		unlinkedHandlers := 0
+		tmpBuf.Reset()
+		for _, handler := range microgateway.Gateway.EventHandlers {
+			handlerFound := false
+			for _, link := range microgateway.Gateway.EventLinks {
+				for _, dispatch := range link.Dispatches {
+					if handler.Name == dispatch.Handler {
+						handlerFound = true
+						break
+					}
+				}
+				if handlerFound {
+					break
+				}
+			}
+			if !handlerFound {
+				unlinkedHandlers++
+				tmpBuf.WriteString("\t" + handler.Name + "  " + handler.Reference + "\n")
+			}
+		}
+		if unlinkedHandlers != 0 {
+			gwInfoBuffer.WriteString(fmt.Sprintf("Unlinked Handlers: %d", unlinkedHandlers) + "\n")
+			gwInfoBuffer.WriteString(tmpBuf.String())
+		}
+	}
+
+	return gwInfoBuffer.String(), nil
 }

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"encoding/json"
 	"github.com/TIBCOSoftware/mashling-cli/cli"
 )
 
 var optList = &cli.OptionInfo{
 	Name:      "list",
-	UsageLine: "list [links|triggers|handlers]",
+	UsageLine: "list [triggers|handlers|links|all]",
 	Short:     "list installed components in the mashling gateway recipe",
 	Long: `List installed components in the mashling gateway recipe.
 
@@ -20,9 +19,10 @@ Options:
 }
 
 const (
-	ctLinks    = "links"
 	ctTriggers = "triggers"
 	ctHandlers = "handlers"
+	ctLinks    = "links"
+	ctAll      = "all"
 )
 
 func init() {
@@ -64,6 +64,8 @@ func (c *cmdList) Exec(args []string) error {
 			cType = TRIGGER
 		case ctHandlers:
 			cType = HANDLER
+		case ctAll:
+			cType = ALL
 		default:
 			fmt.Fprintf(os.Stderr, "Error: Unknown component type - %s\n\n", listCT)
 			cmdUsage(c)
@@ -79,22 +81,10 @@ func (c *cmdList) Exec(args []string) error {
 		os.Exit(2)
 	}
 
-	var components interface{}
-	if cType == LINK {
-		components, err = ListLinks(SetupExistingProjectEnv(appDir), cType)
-	} else {
-		components, err = ListComponents(SetupExistingProjectEnv(appDir), cType)
-	}
-
+	gwDetails, err := GetGatewayDetails(SetupExistingProjectEnv(appDir), cType)
 	if err != nil {
 		return err
 	}
-
-	json, err := json.MarshalIndent(components, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Fprintln(os.Stdout, string(json))
-
+	fmt.Fprintln(os.Stdout, gwDetails)
 	return nil
 }
