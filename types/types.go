@@ -51,7 +51,6 @@ type Path struct {
 
 type Dispatch struct {
 	Path
-	Default string `json:"default_handler,omitempty"`
 }
 
 type FlogoAction struct {

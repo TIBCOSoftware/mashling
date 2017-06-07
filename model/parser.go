@@ -100,13 +100,8 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	handlers := []*ftrigger.HandlerConfig{}
 	var handler types.EventHandler
 	for _, dispatch := range dispatches {
-		if dispatch.Default != "" {
-			//default is provided
-			handler = namedHandlerMap[dispatch.Default]
-		} else {
-			//default is not provided
-			handler = namedHandlerMap[dispatch.Handler]
-		}
+
+		handler = namedHandlerMap[dispatch.Handler]
 
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{

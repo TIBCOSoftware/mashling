@@ -57,9 +57,6 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 								Handler: "get_pet_success_handler",
 							},
 						},
-						//{
-						//	Default: "get_pet_error_handler",
-						//},
 					},
 				},
 			},
