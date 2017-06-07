@@ -12,10 +12,7 @@ var optList = &cli.OptionInfo{
 	Name:      "list",
 	UsageLine: "list [triggers|handlers|links|all]",
 	Short:     "list installed components in the mashling gateway recipe",
-	Long: `List installed components in the mashling gateway recipe.
-
-Options:
-    -json generate output as json`,
+	Long:      `List installed components in the mashling gateway recipe.`,
 }
 
 const (
@@ -30,8 +27,7 @@ func init() {
 }
 
 type cmdList struct {
-	option     *cli.OptionInfo
-	outputJson *bool
+	option *cli.OptionInfo
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -41,7 +37,6 @@ func (c *cmdList) OptionInfo() *cli.OptionInfo {
 
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdList) AddFlags(fs *flag.FlagSet) {
-	c.outputJson = fs.Bool("json", true, "generate output as json")
 }
 
 // Exec implementation of cli.Command.Exec
