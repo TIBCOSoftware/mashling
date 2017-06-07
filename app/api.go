@@ -103,12 +103,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 			//create unique handler actions
 			for _, dispatch := range dispatches {
-				var handlerName string
-
-				handlerName = dispatch.Default
-				if handlerName == "" {
-					handlerName = dispatch.Handler
-				}
+				handlerName := dispatch.Handler
 
 				if !createdHandlers[handlerName] {
 					//not already created, so create it
