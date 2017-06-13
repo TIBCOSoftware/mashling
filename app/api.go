@@ -147,10 +147,8 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
-
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
-
 	//create the mashling json descriptor file
 	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJson)
 	if err != nil {
@@ -160,6 +158,127 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	fmt.Println("Mashling gateway successfully built!")
 
 	return nil
+}
+
+// TranslateGatewayJSON2FlogoJSON tanslates mashling json to flogo json
+func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
+	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
+	if err != nil {
+		return "", err
+	}
+
+	flogoAppTriggers := []*ftrigger.Config{}
+	flogoAppActions := []*faction.Config{}
+
+	//1. load the configuration, if provided.
+	configNamedMap := make(map[string]types.Config)
+	for _, config := range descriptor.Gateway.Configurations {
+		configNamedMap[config.Name] = config
+	}
+
+	triggerNamedMap := make(map[string]types.Trigger)
+	for _, trigger := range descriptor.Gateway.Triggers {
+		triggerNamedMap[trigger.Name] = trigger
+	}
+
+	handlerNamedMap := make(map[string]types.EventHandler)
+	for _, evtHandler := range descriptor.Gateway.EventHandlers {
+		handlerNamedMap[evtHandler.Name] = evtHandler
+	}
+
+	createdHandlers := make(map[string]bool)
+
+	//translate the gateway model to the flogo model
+	for _, link := range descriptor.Gateway.EventLinks {
+		triggerNames := link.Triggers
+
+		for _, triggerName := range triggerNames {
+			dispatches := link.Dispatches
+
+			//create trigger sections for flogo
+			/**
+			TODO handle condition parsing and setting the condition in the trigger.
+			//get the condition if available
+			condition := path.If
+			//create the trigger using the condition
+			.......
+			*/
+			flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches)
+			if err != nil {
+				return "", err
+			}
+
+			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+
+			//create unique handler actions
+			for _, dispatch := range dispatches {
+				var handlerName string
+
+				handlerName = dispatch.Default
+				if handlerName == "" {
+					handlerName = dispatch.Handler
+				}
+
+				if !createdHandlers[handlerName] {
+					//not already created, so create it
+					flogoAction, err := model.CreateFlogoFlowAction(handlerNamedMap[handlerName])
+					if err != nil {
+						return "", err
+					}
+
+					flogoAppActions = append(flogoAppActions, flogoAction)
+					createdHandlers[handlerName] = true
+				}
+			}
+		}
+
+	}
+
+	flogoApp := app.Config{
+		Name:        descriptor.Gateway.Name,
+		Type:        util.Flogo_App_Type,
+		Version:     descriptor.Gateway.Version,
+		Description: descriptor.Gateway.Description,
+		Triggers:    flogoAppTriggers,
+		Actions:     flogoAppActions,
+	}
+
+	//create flogo PP JSON
+	bytes, err := json.MarshalIndent(flogoApp, "", "\t")
+	if err != nil {
+		return "", nil
+	}
+
+	flogoJSON := string(bytes)
+
+	return flogoJSON, nil
+}
+
+// BuildMashling Builds mashling gateway
+func BuildMashling(appDir string, gatewayJSON string) error {
+
+	//create flogo.json from gateway descriptor
+	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON)
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
+		return err
+	}
+	err = fgutil.CreateFileFromString(path.Join(appDir, "flogo.json"), flogoJSON)
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Error: Error while creating flogo.json.\n\n")
+		return err
+	}
+
+	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
+	api.BuildApp(SetupExistingProjectEnv(appDir), options)
+
+	//delete flogo.json file from the app dir
+	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
+
+	fmt.Println("Mashling gateway successfully built!")
+
+	return nil
+
 }
 
 func ListComponents(env env.Project, cType ComponentType) ([]*Component, error) {
