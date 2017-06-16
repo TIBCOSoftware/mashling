@@ -83,10 +83,7 @@
 			{
 				"name": "OrderErrorHandler",
 				"description": "Handle the order error processing",
-				"reference": "github.com/TIBCOSoftware/mashling/flows/ConsoleErrorHandler/flow.json",
-				"params": {
-					"message": "${(trigger).content}"
-				}
+				"reference": "github.com/TIBCOSoftware/mashling/flows/ConsoleErrorHandler/flow.json"
 			}
 		],
 		"event_links": [
@@ -94,7 +91,6 @@
 				"trigger": "OrdersTrigger",
 				"dispatches": [
 					{
-						"if": "${(trigger).content.Country == 'USA'}",
 						"handler": "OrderSuccessHandler"
 					}
 				]
