@@ -68,7 +68,7 @@
                   {
                     "type": 1,
                     "value": "{T.pathParams}",
-                    "mapTo": "pathParams"
+                    "mapTo": "message"
                   }
                 ]
               },
