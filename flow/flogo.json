@@ -114,6 +114,41 @@
               },
               {
                 "id": 4,
+                "name": "Log Message(1)",
+                 "description": "Simple Log Activity",
+                "type": 1,
+                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                "attributes": [
+                  {
+                    "name": "message",
+                    "value": "success",
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "flowInfo",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "addToFlow",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{A3.result}",
+                    "mapTo": "data"
+                  }
+                ]
+              },
+              {
+                "id": 5,
                 "name": "Reply To Trigger",
                 "description": "Simple Reply Activity",
                 "type": 1,
@@ -153,6 +188,12 @@
                 "id": 2,
                 "from": 3,
                 "to": 4,
+                "type": 0
+              },
+              {
+                "id": 3,
+                "from": 4,
+                "to": 5,
                 "type": 0
               }
             ],
