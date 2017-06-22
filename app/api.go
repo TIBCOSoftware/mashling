@@ -264,6 +264,22 @@ func BuildMashling(appDir string, gatewayJSON string) error {
 		return err
 	}
 
+	//Install dependencies explicitly, as api.BuildApp() doesn't install newly added dependencies.
+	//Workaround for https://github.com/TIBCOSoftware/flogo-cli/issues/56
+	fmt.Println("Installing dependencies...")
+	env := SetupExistingProjectEnv(appDir)
+	flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
+	deps := api.ExtractDependencies(flogoAppDescriptor)
+
+	for _, dep := range deps {
+		path, version := splitVersion(dep.Ref)
+		err = env.InstallDependency(path, version)
+		if err != nil {
+			return err
+		}
+	}
+	//END of workaround https://github.com/TIBCOSoftware/flogo-cli/issues/56
+
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 
