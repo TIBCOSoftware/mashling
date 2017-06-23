@@ -88,7 +88,7 @@
                   },
                   {
                     "name": "uri",
-                    "value": "http://192.168.99.100:8000/service/:serviceId",
+                    "value": "http://192.168.99.100:8000/pets/:petId",
                     "required": true,
                     "type": "string"
                   },
