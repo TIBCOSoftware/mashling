@@ -12,7 +12,7 @@
 				"settings": {
 					"port": "9096",
 					"method": "GET",
-					"path": "/envoy/:serviceId"
+					"path": "/envoy/pets/:petId"
 				}
 			}
 		],
