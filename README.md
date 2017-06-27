@@ -58,9 +58,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 				"description": "The trigger on 'pets' endpoint",
 				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
 				"settings": {
-					"port": "9096",
-					"method": "GET",
-					"path": "/pets/:petId"
+					"port": "9096"
 				}
 			}
 		],
@@ -82,7 +80,11 @@ The built in sample gateway is based of the following mashling.json.  This file 
 				"dispatches": [
 					{
 						"if": "trigger.content != undefined",
-						"handler": "get_pet_success_handler"
+						"handler": "get_pet_success_handler",
+						"settings": {
+							"method": "GET",
+							"path": "/pets/:petId"
+						}
 					}
 				]
 			}
