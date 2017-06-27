@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
-	"os"
-	"strings"
 )
 
 // ParseGatewayDescriptor parse the application descriptor
@@ -39,9 +40,6 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	//resolve any configuration references if the "config" param is set in the settings
 	mashTriggerSettings := mtSettings.(map[string]interface{})
 	mashTriggerSettingsUsable := mtSettings.(map[string]interface{})
-	for k, v := range mashTriggerSettings {
-		mashTriggerSettingsUsable[k] = v
-	}
 
 	if configRef, ok := mashTriggerSettings[util.Gateway_Trigger_Config_Ref_Key]; ok {
 		//get the configuration details
@@ -85,15 +83,10 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	}
 	//2. check if the trigger metadata contains the settings
 	triggerSettings := make(map[string]interface{})
-	handlerSettings := make(map[string]interface{})
 
 	for key, value := range mashTriggerSettingsUsable {
 		if util.IsValidTriggerSetting(triggerMD, key) {
 			triggerSettings[key] = value
-		}
-
-		if util.IsValidTriggerHandlerSetting(triggerMD, key) {
-			handlerSettings[key] = value
 		}
 	}
 	//3. check if the trigger handler metadata contain the settings
@@ -102,6 +95,19 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	for _, dispatch := range dispatches {
 
 		handler = namedHandlerMap[dispatch.Handler]
+
+		//check any settings mentioned in dispatch
+		handlerSettings := make(map[string]interface{})
+		var dispatchSettings interface{}
+		if err := json.Unmarshal([]byte(dispatch.Settings), &dispatchSettings); err != nil {
+			return nil, err
+		}
+		dispatchSettingsMap := dispatchSettings.(map[string]interface{})
+		for key, value := range dispatchSettingsMap {
+			if util.IsValidTriggerHandlerSetting(triggerMD, key) {
+				handlerSettings[key] = value
+			}
+		}
 
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{
