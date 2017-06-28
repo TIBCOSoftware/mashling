@@ -10,9 +10,7 @@
 				"description": "The trigger on envoy endpoint",
 				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
 				"settings": {
-					"port": "9096",
-					"method": "GET",
-					"path": "/envoy/pets/:petId"
+					"port": "9096"
 				}
 			}
 		],
@@ -30,7 +28,12 @@
 				],
 				"dispatches": [
 					{
-						"handler": "get_envoy_success_handler"
+						"handler": "get_envoy_success_handler",
+						"settings": {
+							"port": "9096",
+							"method": "GET",
+							"path": "/envoy/pets/:petId"
+						}
 					}
 				]
 			}
