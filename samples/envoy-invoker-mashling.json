@@ -30,7 +30,6 @@
 					{
 						"handler": "get_envoy_success_handler",
 						"settings": {
-							"port": "9096",
 							"method": "GET",
 							"path": "/envoy/pets/:petId"
 						}
