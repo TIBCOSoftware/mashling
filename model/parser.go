@@ -96,8 +96,14 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 		handler = namedHandlerMap[dispatch.Handler]
 
-		//check any settings mentioned in dispatch
+		//get handler settings from trigger section
 		handlerSettings := make(map[string]interface{})
+		for key, value := range mashTriggerSettingsUsable {
+			if util.IsValidTriggerHandlerSetting(triggerMD, key) {
+				handlerSettings[key] = value
+			}
+		}
+		//check any settings mentioned in dispatch section
 		if dispatch.Settings != nil {
 			var dispatchSettings interface{}
 			if err := json.Unmarshal([]byte(dispatch.Settings), &dispatchSettings); err != nil {
