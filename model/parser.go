@@ -103,19 +103,6 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 				handlerSettings[key] = value
 			}
 		}
-		//check any settings mentioned in dispatch section
-		if dispatch.Settings != nil {
-			var dispatchSettings interface{}
-			if err := json.Unmarshal([]byte(dispatch.Settings), &dispatchSettings); err != nil {
-				return nil, fmt.Errorf("not able to unmarshal dipatch settings - %v", err)
-			}
-			dispatchSettingsMap := dispatchSettings.(map[string]interface{})
-			for key, value := range dispatchSettingsMap {
-				if util.IsValidTriggerHandlerSetting(triggerMD, key) {
-					handlerSettings[key] = value
-				}
-			}
-		}
 
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{

@@ -45,9 +45,8 @@ type EventLink struct {
 }
 
 type Path struct {
-	If       string          `json:"if,omitempty"`
-	Handler  string          `json:"handler,omitempty"`
-	Settings json.RawMessage `json:"settings,omitempty"`
+	If      string `json:"if,omitempty"`
+	Handler string `json:"handler,omitempty"`
 }
 
 type Dispatch struct {

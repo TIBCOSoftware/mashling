@@ -30,7 +30,9 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 					Description: "The trigger on 'pets' endpoint",
 					Type:        "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
 					Settings: json.RawMessage(`{
-					  "port": "9096"
+					  "port": "9096",
+					  "method": "GET",
+					  "path": "/pets/:petId"
 					}`),
 				},
 			},
@@ -54,10 +56,6 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 							Path: types.Path{
 								If:      "trigger.content != undefined",
 								Handler: "get_pet_success_handler",
-								Settings: json.RawMessage(`{
-									"method": "GET",
-									"path": "/pets/:petId"
-								}`),
 							},
 						},
 					},
