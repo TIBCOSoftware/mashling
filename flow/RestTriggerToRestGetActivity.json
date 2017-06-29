@@ -335,7 +335,7 @@
                                 "from": 2,
                                 "to": 6,
                                 "type": 1,
-                                "value": "$${A2.result}.id!=${T.pathParams}.petId"
+                                "value": "${A2.result}.id!=${T.pathParams}.petId"
                             },
                             {
                                 "id": 6,
