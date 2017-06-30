@@ -12,6 +12,8 @@ import (
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
+	"reflect"
+	"sort"
 )
 
 // ParseGatewayDescriptor parse the application descriptor
@@ -27,19 +29,24 @@ func ParseGatewayDescriptor(appJson string) (*types.Microgateway, error) {
 	return descriptor, nil
 }
 
-func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, namedHandlerMap map[string]types.EventHandler, dispatches []types.Dispatch) (*ftrigger.Config, error) {
+func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, namedHandlerMap map[string]types.EventHandler,
+	dispatches []types.Dispatch, createdTriggersMap map[string]*ftrigger.Config) (*ftrigger.Config, *bool, error) {
+
 	var flogoTrigger ftrigger.Config
 	flogoTrigger.Name = trigger.Name
 	flogoTrigger.Id = trigger.Name
 	flogoTrigger.Ref = trigger.Type
 	var mtSettings interface{}
 	if err := json.Unmarshal([]byte(trigger.Settings), &mtSettings); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	//resolve any configuration references if the "config" param is set in the settings
 	mashTriggerSettings := mtSettings.(map[string]interface{})
 	mashTriggerSettingsUsable := mtSettings.(map[string]interface{})
+	for k, v := range mashTriggerSettings {
+		mashTriggerSettingsUsable[k] = v
+	}
 
 	if configRef, ok := mashTriggerSettings[util.Gateway_Trigger_Config_Ref_Key]; ok {
 		//get the configuration details
@@ -47,19 +54,19 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 		configExpr := configRef.(string)
 		valid, configName := util.ValidateTriggerConfigExpr(&configExpr)
 		if !valid {
-			return nil, fmt.Errorf("Invalid Configuration reference specified in the Trigger settings [%v]", configName)
+			return nil, nil, fmt.Errorf("Invalid Configuration reference specified in the Trigger settings [%v]", configName)
 		}
 		//lets get the config object details
 		configNameStr := *configName
 
 		if configObject, ok := configDefinitions[configNameStr]; ok {
 			if configObject.Type != trigger.Type {
-				return nil, fmt.Errorf("Mismatch in the Configuration reference [%v] and the Trigger type [%v]", configObject.Type, trigger.Type)
+				return nil, nil, fmt.Errorf("Mismatch in the Configuration reference [%v] and the Trigger type [%v]", configObject.Type, trigger.Type)
 			}
 
 			var configObjSettings interface{}
 			if err := json.Unmarshal([]byte(configObject.Settings), &configObjSettings); err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			configSettingsMap := configObjSettings.(map[string]interface{})
 			//delete the "config" key from the the Usable trigger settings map
@@ -79,30 +86,53 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	//1. get the trigger resource from github
 	triggerMD, err := util.GetTriggerMetadata(trigger.Type)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	//2. check if the trigger metadata contains the settings
 	triggerSettings := make(map[string]interface{})
+	handlerSettings := make(map[string]interface{})
 
 	for key, value := range mashTriggerSettingsUsable {
 		if util.IsValidTriggerSetting(triggerMD, key) {
 			triggerSettings[key] = value
 		}
+
+		if util.IsValidTriggerHandlerSetting(triggerMD, key) {
+			handlerSettings[key] = value
+		}
 	}
+
+	//2.1 check if a trigger having the same settings is already created
+	isNew := true
+	//2.2 organize the trigger names as a list so that they can be sorted alphabetically. Golang maps are unordered and the iteration order is not guaranteed across multiple iterations.
+	triggerNames := make([]string, len(createdTriggersMap))
+	i := 0
+	for k, _ := range createdTriggersMap {
+		triggerNames[i] = k
+		i++
+	}
+	sort.Strings(triggerNames)
+
+	//iterate over the list of trigger names, now sorted alphabetically.
+	for _, name := range triggerNames {
+		createdTrigger := createdTriggersMap[name]
+		if reflect.DeepEqual(createdTrigger.Settings, triggerSettings) {
+			//looks like we found an existing trigger that has the same settings. No need to create a new trigger object. just create a new handler on the existing trigger
+			fmt.Sprintf("Found a trigger having same settings %v %v ", name, triggerSettings)
+			flogoTrigger = *createdTrigger
+			isNew = false
+			break
+		} else {
+			fmt.Sprintf("Current trigger %v did not match settings of trigger %v %v", flogoTrigger.Name, name, triggerSettings)
+		}
+	}
+
 	//3. check if the trigger handler metadata contain the settings
 	handlers := []*ftrigger.HandlerConfig{}
 	var handler types.EventHandler
 	for _, dispatch := range dispatches {
 
 		handler = namedHandlerMap[dispatch.Handler]
-
-		//get handler settings from trigger section
-		handlerSettings := make(map[string]interface{})
-		for key, value := range mashTriggerSettingsUsable {
-			if util.IsValidTriggerHandlerSetting(triggerMD, key) {
-				handlerSettings[key] = value
-			}
-		}
 
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{
@@ -116,9 +146,14 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 		handlers = append(handlers, &flogoHandler)
 	}
 
-	flogoTrigger.Handlers = handlers
+	flogoTrigger.Handlers = append(flogoTrigger.Handlers, handlers...)
 
-	return &flogoTrigger, nil
+	if isNew {
+		fmt.Sprintf("Adding a new trigger with settings %v %v ", flogoTrigger.Name, triggerSettings)
+		createdTriggersMap[flogoTrigger.Name] = &flogoTrigger
+	}
+
+	return &flogoTrigger, &isNew, nil
 }
 
 func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) {

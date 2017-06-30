@@ -18,3 +18,5 @@ const Gateway_Trigger_Metadata_JSON_Name = "trigger.json"
 Flogo constants
 */
 const Flogo_App_Type = "flogo:app"
+const Flogo_App_Embed_Config_Property = "FLOGO_EMBED"
+const Flogo_App_Embed_Config_Property_Default = true
