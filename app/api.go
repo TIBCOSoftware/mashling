@@ -19,6 +19,7 @@ import (
 	"github.com/TIBCOSoftware/mashling-lib/model"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
+	"strconv"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
@@ -79,6 +80,10 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 	createdHandlers := make(map[string]bool)
 
+	//new map to maintain existing trigger and its settings, to be used in comparing one trigger definition with another
+	//createdTriggersSettingsMap := make(map[*ftrigger.Config]map[string]interface{})
+	createdTriggersMap := make(map[string]*ftrigger.Config)
+
 	//translate the gateway model to the flogo model
 	for _, link := range descriptor.Gateway.EventLinks {
 		triggerNames := link.Triggers
@@ -94,12 +99,26 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 			//create the trigger using the condition
 			.......
 			*/
-			flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches)
+			flogoTrigger, isNew, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
 			if err != nil {
 				return err
 			}
 
-			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+			if *isNew {
+				//looks like a new trigger has been added
+				flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+			} else {
+				//looks like an existing trigger with matching settings is found and modified with a new handler
+				for index, v := range flogoAppTriggers {
+					if v.Name == flogoTrigger.Name {
+						// Found the old trigger entry in the list!
+						//remove it..
+						flogoAppTriggers = append(flogoAppTriggers[:index], flogoAppTriggers[index+1:]...)
+						//...and add the modified trigger to the list
+						flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+					}
+				}
+			}
 
 			//create unique handler actions
 			for _, dispatch := range dispatches {
@@ -145,7 +164,14 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	fmt.Println("Generated mashling Artifacts.")
 	fmt.Println("Building mashling Artifacts.")
 
-	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
+	embed := util.Flogo_App_Embed_Config_Property_Default
+
+	envFlogoEmbed := os.Getenv(util.Flogo_App_Embed_Config_Property)
+	if len(envFlogoEmbed) > 0 {
+		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
+	}
+
+	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
@@ -188,6 +214,9 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
 
 	createdHandlers := make(map[string]bool)
 
+	//new map to maintain existing trigger and its settings, to be used in comparing one trigger definition with another
+	createdTriggersMap := make(map[string]*ftrigger.Config)
+
 	//translate the gateway model to the flogo model
 	for _, link := range descriptor.Gateway.EventLinks {
 		triggerNames := link.Triggers
@@ -203,12 +232,27 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
 			//create the trigger using the condition
 			.......
 			*/
-			flogoTrigger, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches)
+			flogoTrigger, isNew, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
 			if err != nil {
 				return "", err
 			}
 
-			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+			//	check if the trigger is a new trigger or a "logically" same trigger.
+			if *isNew {
+				//looks like a new trigger has been added
+				flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+			} else {
+				//looks like an existing trigger with matching settings is found and is now modified with a new handler
+				for index, v := range flogoAppTriggers {
+					if v.Name == flogoTrigger.Name {
+						// Found the old trigger entry in the list!
+						//remove it..
+						flogoAppTriggers = append(flogoAppTriggers[:index], flogoAppTriggers[index+1:]...)
+						//...and add the modified trigger to the list
+						flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
+					}
+				}
+			}
 
 			//create unique handler actions
 			for _, dispatch := range dispatches {
