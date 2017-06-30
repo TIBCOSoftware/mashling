@@ -13,6 +13,8 @@ const Gateway_Trigger_Handler_UseReplyHandler_Default = "false"
 const Gateway_Trigger_Handler_AutoIdReply = "autoIdReply"
 const Gateway_Trigger_Handler_AutoIdReply_Default = "false"
 const Gateway_Trigger_Metadata_JSON_Name = "trigger.json"
+const Gateway_Trigger_Optimize_Property = "optimize"
+const Gateway_Trigger_Optimize_Property_Default = false
 
 /**
 Flogo constants

@@ -102,28 +102,34 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 		}
 	}
 
-	//2.1 check if a trigger having the same settings is already created
 	isNew := true
-	//2.2 organize the trigger names as a list so that they can be sorted alphabetically. Golang maps are unordered and the iteration order is not guaranteed across multiple iterations.
-	triggerNames := make([]string, len(createdTriggersMap))
-	i := 0
-	for k, _ := range createdTriggersMap {
-		triggerNames[i] = k
-		i++
-	}
-	sort.Strings(triggerNames)
 
-	//iterate over the list of trigger names, now sorted alphabetically.
-	for _, name := range triggerNames {
-		createdTrigger := createdTriggersMap[name]
-		if reflect.DeepEqual(createdTrigger.Settings, triggerSettings) {
-			//looks like we found an existing trigger that has the same settings. No need to create a new trigger object. just create a new handler on the existing trigger
-			fmt.Sprintf("Found a trigger having same settings %v %v ", name, triggerSettings)
-			flogoTrigger = *createdTrigger
-			isNew = false
-			break
-		} else {
-			fmt.Sprintf("Current trigger %v did not match settings of trigger %v %v", flogoTrigger.Name, name, triggerSettings)
+	//check if the trigger specifies a boolean setting key named 'optimize'
+	if util.CheckTriggerOptimization(mashTriggerSettingsUsable) {
+		fmt.Sprintf("Trigger specifies %v property setting true", util.Gateway_Trigger_Optimize_Property)
+
+		//2.1 check if a trigger having the same settings is already created
+		//2.2 organize the trigger names as a list so that they can be sorted alphabetically. Golang maps are unordered and the iteration order is not guaranteed across multiple iterations.
+		triggerNames := make([]string, len(createdTriggersMap))
+		i := 0
+		for k, _ := range createdTriggersMap {
+			triggerNames[i] = k
+			i++
+		}
+		sort.Strings(triggerNames)
+
+		//iterate over the list of trigger names, now sorted alphabetically.
+		for _, name := range triggerNames {
+			createdTrigger := createdTriggersMap[name]
+			if reflect.DeepEqual(createdTrigger.Settings, triggerSettings) {
+				//looks like we found an existing trigger that has the same settings. No need to create a new trigger object. just create a new handler on the existing trigger
+				fmt.Sprintf("Found a trigger having same settings %v %v ", name, triggerSettings)
+				flogoTrigger = *createdTrigger
+				isNew = false
+				break
+			} else {
+				fmt.Sprintf("Current trigger %v did not match settings of trigger %v %v", flogoTrigger.Name, name, triggerSettings)
+			}
 		}
 	}
 

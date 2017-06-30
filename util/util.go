@@ -6,6 +6,7 @@ import (
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -84,5 +85,22 @@ func ValidateTriggerConfigExpr(expression *string) (bool, *string) {
 		return true, &str
 	} else {
 		return false, &exprValue
+	}
+}
+
+func CheckTriggerOptimization(triggerSettings map[string]interface{}) bool {
+	if val, ok := triggerSettings[Gateway_Trigger_Optimize_Property]; ok {
+		optimize, err := strconv.ParseBool(val.(string))
+		if err != nil {
+			//check if its a boolean
+			optimize, found := val.(bool)
+			if !found {
+				return found
+			}
+			return optimize
+		}
+		return optimize
+	} else {
+		return Gateway_Trigger_Optimize_Property_Default
 	}
 }
