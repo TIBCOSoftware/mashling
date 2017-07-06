@@ -7,13 +7,14 @@ import (
 	"os"
 	"strings"
 
+	"reflect"
+	"sort"
+
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
-	"reflect"
-	"sort"
 )
 
 // ParseGatewayDescriptor parse the application descriptor
@@ -148,6 +149,11 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 		flogoHandler.Settings[util.Gateway_Trigger_Handler_UseReplyHandler] = util.Gateway_Trigger_Handler_UseReplyHandler_Default
 		flogoHandler.Settings[util.Gateway_Trigger_Handler_AutoIdReply] = util.Gateway_Trigger_Handler_AutoIdReply_Default
+
+		//Check if there is any dispatch condition specified for handler
+		if dispatchCondition := dispatch.If; dispatchCondition != "" {
+			flogoHandler.Settings[util.Gateway_Trigger_Handler_If] = dispatchCondition
+		}
 
 		handlers = append(handlers, &flogoHandler)
 	}
