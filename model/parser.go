@@ -13,6 +13,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/TIBCOSoftware/mashling-lib/conditions"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
 )
@@ -128,7 +129,7 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 			//check if the trigger metadata supports Condition handler setting
 			if util.IsValidTriggerHandlerSetting(triggerMD, util.Flogo_Trigger_Handler_Setting_Condition) {
 				//check if the condition is valid.
-				//condition.ValidateOperatorInExpression(dispatch.If)
+				condition.ValidateOperatorInExpression(dispatch.If)
 				//set the condition on the trigger as is. the trigger should parse and interpret it.
 				handlerSettings[handler.Name][util.Flogo_Trigger_Handler_Setting_Condition] = dispatch.If
 			} else {
