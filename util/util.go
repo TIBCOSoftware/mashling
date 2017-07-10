@@ -81,7 +81,7 @@ func ValidateTriggerConfigExpr(expression *string) (bool, *string) {
 	exprValue := *expression
 	if strings.HasPrefix(exprValue, Gateway_Trigger_Config_Prefix) && strings.HasSuffix(exprValue, Gateway_Trigger_Config_Suffix) {
 		//get name of the config
-		str := exprValue[17 : len(exprValue)-1]
+		str := exprValue[len(Gateway_Trigger_Config_Prefix) : len(exprValue)-1]
 		return true, &str
 	} else {
 		return false, &exprValue
@@ -102,5 +102,20 @@ func CheckTriggerOptimization(triggerSettings map[string]interface{}) bool {
 		return optimize
 	} else {
 		return Gateway_Trigger_Optimize_Property_Default
+	}
+}
+
+func ValidateEnvPropertySettingExpr(expression *string) (bool, *string) {
+	if expression == nil {
+		return false, nil
+	}
+
+	exprValue := *expression
+	if strings.HasPrefix(exprValue, Gateway_Trigger_Setting_Env_Prefix) && strings.HasSuffix(exprValue, Gateway_Trigger_Setting_Env_Suffix) {
+		//get name of the property
+		str := exprValue[len(Gateway_Trigger_Setting_Env_Prefix) : len(exprValue)-1]
+		return true, &str
+	} else {
+		return false, &exprValue
 	}
 }

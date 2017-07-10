@@ -49,38 +49,18 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 		mashTriggerSettingsUsable[k] = v
 	}
 
-	if configRef, ok := mashTriggerSettings[util.Gateway_Trigger_Config_Ref_Key]; ok {
-		//get the configuration details
-		//the expression would be e.g. ${configurations.kafkaConfig}
-		configExpr := configRef.(string)
-		valid, configName := util.ValidateTriggerConfigExpr(&configExpr)
-		if !valid {
-			return nil, nil, fmt.Errorf("Invalid Configuration reference specified in the Trigger settings [%v]", configName)
+	if configDefinitions != nil && len(configDefinitions) > 0 {
+		//inherit the configuration settings if the trigger uses configuration reference
+		err := resolveConfigurationReference(configDefinitions, trigger, mashTriggerSettingsUsable)
+		if err != nil {
+			return nil, nil, err
 		}
-		//lets get the config object details
-		configNameStr := *configName
+	}
 
-		if configObject, ok := configDefinitions[configNameStr]; ok {
-			if configObject.Type != trigger.Type {
-				return nil, nil, fmt.Errorf("Mismatch in the Configuration reference [%v] and the Trigger type [%v]", configObject.Type, trigger.Type)
-			}
-
-			var configObjSettings interface{}
-			if err := json.Unmarshal([]byte(configObject.Settings), &configObjSettings); err != nil {
-				return nil, nil, err
-			}
-			configSettingsMap := configObjSettings.(map[string]interface{})
-			//delete the "config" key from the the Usable trigger settings map
-			delete(mashTriggerSettingsUsable, util.Gateway_Trigger_Config_Ref_Key)
-			//copy from the config settings into the usable trigger settings map, if the key does NOT exist in the trigger already.
-			//this is to ensure that the individual trigger can override a property defined in a "common" configuration
-			for k, v := range configSettingsMap {
-				if _, ok := mashTriggerSettingsUsable[k]; !ok {
-					mashTriggerSettingsUsable[k] = v
-				}
-			}
-
-		}
+	//substitute for any ENV variable values referenced in the settings. the expressions will be in the format ${ENV.HOST_NAME} where HOST_NAME is the env property
+	err := resolveEnvironmentProperties(mashTriggerSettingsUsable)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	//check if the trigger has valid settings required
@@ -91,6 +71,7 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	}
 	//2. check if the trigger metadata contains the settings
 	triggerSettings := make(map[string]interface{})
+	handlerSettings := make(map[string]map[string]interface{})
 
 	for key, value := range mashTriggerSettingsUsable {
 		if util.IsValidTriggerSetting(triggerMD, key) {
@@ -133,30 +114,35 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	handlers := []*ftrigger.HandlerConfig{}
 	var handler types.EventHandler
 	for _, dispatch := range dispatches {
-
 		handler = namedHandlerMap[dispatch.Handler]
 
-		//check trigger meta data contains any flogo-handler level settings
-		handlerSettings := make(map[string]interface{})
+		handlerSettings[handler.Name] = make(map[string]interface{})
 		for key, value := range mashTriggerSettingsUsable {
 			if util.IsValidTriggerHandlerSetting(triggerMD, key) {
-				handlerSettings[key] = value
+				handlerSettings[handler.Name][key] = value
 			}
 		}
 
+		//check if any condition is specified & if the Condition setting is part of the trigger metadata
+		if dispatch.If != "" {
+			//check if the trigger metadata supports Condition handler setting
+			if util.IsValidTriggerHandlerSetting(triggerMD, util.Flogo_Trigger_Handler_Setting_Condition) {
+				//check if the condition is valid.
+				//condition.ValidateOperatorInExpression(dispatch.If)
+				//set the condition on the trigger as is. the trigger should parse and interpret it.
+				handlerSettings[handler.Name][util.Flogo_Trigger_Handler_Setting_Condition] = dispatch.If
+			} else {
+				fmt.Sprintf("The trigger [%v] does not support [%v] handler setting. skippng the condition logic.", trigger.Type, util.Flogo_Trigger_Handler_Setting_Condition)
+			}
+		}
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{
 			ActionId: handler.Name,
-			Settings: handlerSettings,
+			Settings: handlerSettings[handler.Name],
 		}
 
 		flogoHandler.Settings[util.Gateway_Trigger_Handler_UseReplyHandler] = util.Gateway_Trigger_Handler_UseReplyHandler_Default
 		flogoHandler.Settings[util.Gateway_Trigger_Handler_AutoIdReply] = util.Gateway_Trigger_Handler_AutoIdReply_Default
-
-		//Check if there is any dispatch condition specified for handler
-		if dispatchCondition := dispatch.If; dispatchCondition != "" {
-			flogoHandler.Settings[util.Gateway_Trigger_Handler_If] = dispatchCondition
-		}
 
 		handlers = append(handlers, &flogoHandler)
 	}
@@ -173,21 +159,37 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) {
 	flogoAction := types.FlogoAction{}
-	reference := &handler.Reference
+	reference := handler.Reference
 	gatewayAction := faction.Config{}
 
-	if reference != nil {
-		//reference is provided, get the referenced resource inline. the provided path should be the git path e.g. github.com/<userid>/resources/app.json
-		referenceString := *reference
+	// handle param name-values provided as part of the handler
+	if handler.Params != nil {
+		var handlerParams interface{}
+		if err := json.Unmarshal([]byte(handler.Params), &handlerParams); err != nil {
+			return nil, err
+		}
+		if handlerParams != nil {
+			handlerParamsMap := handlerParams.(map[string]interface{})
+			//substitute for any ENV variable values referenced in the params. the expressions will be in the format ${ENV.HOST_NAME} where HOST_NAME is the env property
+			err := resolveEnvironmentProperties(handlerParamsMap)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
 
-		index := strings.LastIndex(referenceString, "/")
+	//TODO use the params as inputs to the flow action. flogo tunables can be used to validate the params and, if valid, the values can be injected into the flow
+
+	if reference != "" {
+		//reference is provided, get the referenced resource inline. the provided path should be the git path e.g. github.com/<userid>/resources/app.json
+		index := strings.LastIndex(reference, "/")
 
 		if index < 0 {
 			return nil, errors.New("Invalid URL reference. Pls provide the github path to mashling flow json")
 		}
-		gitHubPath := referenceString[0:index]
+		gitHubPath := reference[0:index]
 
-		resourceFile := referenceString[index+1 : len(referenceString)]
+		resourceFile := reference[index+1 : len(reference)]
 
 		data, err := util.GetGithubResource(gitHubPath, resourceFile)
 
@@ -235,4 +237,58 @@ func exists(path string) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+func resolveConfigurationReference(configDefinitions map[string]types.Config, trigger types.Trigger, settings map[string]interface{}) error {
+	if configRef, ok := settings[util.Gateway_Trigger_Config_Ref_Key]; ok {
+		//get the configuration details
+		//the expression would be e.g. ${configurations.kafkaConfig}
+		configExpr := configRef.(string)
+		valid, configName := util.ValidateTriggerConfigExpr(&configExpr)
+		if !valid {
+			return fmt.Errorf("Invalid Configuration reference specified in the Trigger settings [%v]", configName)
+		}
+		//lets get the config object details
+		configNameStr := *configName
+
+		if configObject, ok := configDefinitions[configNameStr]; ok {
+			if configObject.Type != trigger.Type {
+				return fmt.Errorf("Mismatch in the Configuration reference [%v] and the Trigger type [%v]", configObject.Type, trigger.Type)
+			}
+
+			var configObjSettings interface{}
+			if err := json.Unmarshal([]byte(configObject.Settings), &configObjSettings); err != nil {
+				return err
+			}
+			configSettingsMap := configObjSettings.(map[string]interface{})
+			//delete the "config" key from the the Usable trigger settings map
+			delete(settings, util.Gateway_Trigger_Config_Ref_Key)
+			//copy from the config settings into the usable trigger settings map, if the key does NOT exist in the trigger already.
+			//this is to ensure that the individual trigger can override a property defined in a "common" configuration
+			for k, v := range configSettingsMap {
+				if _, ok := settings[k]; !ok {
+					settings[k] = v
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func resolveEnvironmentProperties(settings map[string]interface{}) error {
+	for k, v := range settings {
+		value := v.(string)
+		valid, propertyName := util.ValidateEnvPropertySettingExpr(&value)
+		if !valid {
+			continue
+		}
+		//lets get the env property value
+		propertyNameStr := *propertyName
+		propertyValue, found := os.LookupEnv(propertyNameStr)
+		if !found {
+			return errors.New(fmt.Sprintf("ENV property [%v] referenced by the gateway is not set.", propertyNameStr))
+		}
+		settings[k] = propertyValue
+	}
+	return nil
 }
