@@ -54,7 +54,6 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 					Dispatches: []types.Dispatch{
 						{
 							Path: types.Path{
-								If:      "trigger.content != undefined",
 								Handler: "get_pet_success_handler",
 							},
 						},
