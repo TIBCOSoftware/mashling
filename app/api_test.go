@@ -1,6 +1,8 @@
 package app
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGetGatewayDetails(t *testing.T) {
 	//Need to create gateway project under temp folder and pass the same for testing.

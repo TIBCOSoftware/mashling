@@ -6,12 +6,10 @@
 		"configurations": [
 			{
 				"name": "kafkaConfig",
-				"type": "github.com/TIBCOSoftware/flogo-contrib/config/kafkaConfig",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
 				"description": "Configuration for kafka cluster",
 				"settings": {
-					"BrokerUrl": "localhost:9092",
-					"userName": "admin",
-					"password": "admin"
+					"BrokerUrl": "localhost:9092"
 				}
 			}
 		],
@@ -19,9 +17,9 @@
 			{
 				"name": "OrdersTrigger",
 				"description": "The trigger on 'orders' topic",
-				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkaConsumer",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
 				"settings": {
-					"topic": "orders",
+					"Topic": "orders",
 					"config": "${configurations.kafkaConfig}"
 				}
 			}
@@ -79,16 +77,13 @@
 					"id": "order_success_handler",
 					"ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
 				}
-			},
-			{
-				"name": "OrderErrorHandler",
-				"description": "Handle the order error processing",
-				"reference": "github.com/TIBCOSoftware/mashling/flows/ConsoleErrorHandler/flow.json"
 			}
 		],
 		"event_links": [
 			{
-				"trigger": "OrdersTrigger",
+				"triggers": [
+					"OrdersTrigger"
+				],
 				"dispatches": [
 					{
 						"handler": "OrderSuccessHandler"
