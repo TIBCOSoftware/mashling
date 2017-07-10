@@ -91,15 +91,10 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	}
 	//2. check if the trigger metadata contains the settings
 	triggerSettings := make(map[string]interface{})
-	handlerSettings := make(map[string]interface{})
 
 	for key, value := range mashTriggerSettingsUsable {
 		if util.IsValidTriggerSetting(triggerMD, key) {
 			triggerSettings[key] = value
-		}
-
-		if util.IsValidTriggerHandlerSetting(triggerMD, key) {
-			handlerSettings[key] = value
 		}
 	}
 
@@ -140,6 +135,14 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	for _, dispatch := range dispatches {
 
 		handler = namedHandlerMap[dispatch.Handler]
+
+		//check trigger meta data contains any flogo-handler level settings
+		handlerSettings := make(map[string]interface{})
+		for key, value := range mashTriggerSettingsUsable {
+			if util.IsValidTriggerHandlerSetting(triggerMD, key) {
+				handlerSettings[key] = value
+			}
+		}
 
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{
