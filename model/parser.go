@@ -142,8 +142,13 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 			Settings: handlerSettings[handler.Name],
 		}
 
-		flogoHandler.Settings[util.Gateway_Trigger_Handler_UseReplyHandler] = util.Gateway_Trigger_Handler_UseReplyHandler_Default
-		flogoHandler.Settings[util.Gateway_Trigger_Handler_AutoIdReply] = util.Gateway_Trigger_Handler_AutoIdReply_Default
+		//Add autoIdReply & useReplyHandler settings only for valid trigger (i.e http trigger. For kafka these settings are invalid).
+		if util.IsValidTriggerHandlerSetting(triggerMD, util.Gateway_Trigger_Handler_UseReplyHandler) {
+			flogoHandler.Settings[util.Gateway_Trigger_Handler_UseReplyHandler] = util.Gateway_Trigger_Handler_UseReplyHandler_Default
+		}
+		if util.IsValidTriggerHandlerSetting(triggerMD, util.Gateway_Trigger_Handler_AutoIdReply) {
+			flogoHandler.Settings[util.Gateway_Trigger_Handler_AutoIdReply] = util.Gateway_Trigger_Handler_AutoIdReply_Default
+		}
 
 		handlers = append(handlers, &flogoHandler)
 	}
