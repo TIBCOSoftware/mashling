@@ -1,7 +1,7 @@
 {
   "name": "tibco-gateway-rest",
   "type": "flogo:trigger",
-  "ref": "github.com/rameshpolishetti/triggerhttpnew",
+  "ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew",
   "version": "0.0.1",
   "title": "Receive Mashling HTTP Message",
   "description": "Simple REST Trigger for mashling gateway",

@@ -4,7 +4,7 @@ triggerhttpnew
 ## Installation
 
 ```bash
-flogo add trigger github.com/rameshpolishetti/triggerhttpnew
+flogo add trigger github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew
 ```
 
 ## Schema
@@ -99,7 +99,7 @@ Triggers are configured via triggers.json of your application. The follwing are 
 		{
 		    "name": "rest_trigger",
 			"id": "rest_trigger",
-			"ref": "github.com/rameshpolishetti/triggerhttpnew",
+			"ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew",
 			"settings": {
 				"port": "9096"
 			},
@@ -128,7 +128,7 @@ Triggers are configured via triggers.json of your application. The follwing are 
 		{
 		    "name": "rest_trigger",
 			"id": "rest_trigger",
-			"ref": "github.com/rameshpolishetti/triggerhttpnew",
+			"ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew",
 			"settings": {
 				"port": "9096"
 			},
