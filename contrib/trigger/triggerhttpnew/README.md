@@ -1,0 +1,160 @@
+# triggerhttpnew
+triggerhttpnew
+
+## Installation
+
+```bash
+flogo add trigger github.com/rameshpolishetti/triggerhttpnew
+```
+
+## Schema
+settings, outputs and handler:
+
+```json
+"settings": [
+    {
+      "name": "port",
+      "type": "integer",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "params",
+      "type": "params"
+    },
+    {
+      "name": "pathParams",
+      "type": "params"
+    },
+    {
+      "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "content",
+      "type": "object"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "method",
+        "type": "string",
+        "required" : true,
+        "allowed" : ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      },
+      {
+        "name": "path",
+        "type": "string",
+        "required" : true
+      },
+      {
+        "name": "autoIdReply",
+        "type": "boolean"
+      },
+      {
+        "name": "useReplyHandler",
+        "type": "boolean"
+      },
+      {
+        "name": "Condition",
+        "type": "string"
+      }
+    ]
+  }
+```
+
+### Settings
+| Key    | Description   |
+|:-----------|:--------------|
+| port | The port to listen on |
+
+### Outputs
+| Key    | Description   |
+|:-----------|:--------------|
+| params | HTTP request params |
+| pathParams | HTTP request path params |
+| queryParams | HTTP request query params |
+| content | HTTP request paylod |
+
+### Handler settings
+| Key    | Description   |
+|:-----------|:--------------|
+| method | HTTP request method. It can be  |
+| path | URL path to be registered with handler |
+| Condition | Handler condtion |
+| autoIdReply | boolean flag to enable or disable auto reply |
+| useReplyHandler | boolean flag to use reply handler |
+
+## Example configuration
+
+Triggers are configured via triggers.json of your application. The follwing are some example configuration of the REST trigger.
+
+### POST
+
+```json
+{
+    "triggers": [
+		{
+		    "name": "rest_trigger",
+			"id": "rest_trigger",
+			"ref": "github.com/rameshpolishetti/triggerhttpnew",
+			"settings": {
+				"port": "9096"
+			},
+			"handlers": [
+				{
+					"actionId": "get_pet_success_handler_usa",
+					"settings": {
+						"Condition": "${trigger.content.country == USA}",
+						"autoIdReply": "false",
+						"method": "POST",
+						"path": "/test",
+						"useReplyHandler": "false"
+					}
+				}
+            ]
+        }
+    ]
+}
+```
+
+### Multiple handlers
+
+```json
+{
+    "triggers": [
+		{
+		    "name": "rest_trigger",
+			"id": "rest_trigger",
+			"ref": "github.com/rameshpolishetti/triggerhttpnew",
+			"settings": {
+				"port": "9096"
+			},
+			"handlers": [
+				{
+					"actionId": "get_pet_success_handler_india",
+					"settings": {
+						"Condition": "${trigger.content.country == INDIA}",
+						"autoIdReply": "false",
+						"method": "POST",
+						"path": "/test",
+						"useReplyHandler": "false"
+					}
+				},
+                {
+					"actionId": "get_pet_success_handler_usa",
+					"settings": {
+						"Condition": "${trigger.content.country == USA}",
+						"autoIdReply": "false",
+						"method": "POST",
+						"path": "/test",
+						"useReplyHandler": "false"
+					}
+				}
+            ]
+        }
+    ]
+}
+```
