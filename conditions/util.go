@@ -3,11 +3,12 @@ package condition
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/TIBCOSoftware/mashling-lib/util"
-	"github.com/pkg/errors"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/TIBCOSoftware/mashling-lib/util"
+	"github.com/pkg/errors"
 )
 
 func GetOperatorInExpression(expression string) (*Operator, *string, error) {
@@ -64,11 +65,13 @@ func ValidateOperatorInExpression(expression string) {
 	expression = expression[len(util.Gateway_Link_Condition_LHS_Start_Expr) : len(expression)-len(util.Gateway_Link_Condition_LHS_End_Expr)]
 	contentRoot := GetContentRoot()
 
-	if !strings.HasPrefix(expression, contentRoot) {
-		panic(fmt.Errorf("Condition expression must start with prefix [%v]", contentRoot))
+	if !strings.HasPrefix(expression, contentRoot) &&
+		!strings.HasPrefix(expression, util.Gateway_Link_Condition_LHS_Header_Prifix) {
+		panic(fmt.Errorf("Condition expression must start with prefix [%v] or [%v]", contentRoot,
+			util.Gateway_Link_Condition_LHS_Header_Prifix))
 	}
 
-	expression = strings.Replace(expression, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
+	//expression = strings.Replace(expression, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
 
 	expression = strings.TrimSpace(expression)
 

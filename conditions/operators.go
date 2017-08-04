@@ -3,13 +3,24 @@ package condition
 import (
 	"errors"
 	"fmt"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling-lib/util"
 	"strings"
 	"sync"
+
+	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/mashling-lib/util"
 )
 
 var fLogger = logger.GetLogger("event-link-operator")
+
+// ExpressionType for expression type
+type ExpressionType int
+
+const (
+	EXPR_TYPE_NOT_VALID ExpressionType = iota - 1
+	EXPR_TYPE_CONTENT
+	EXPR_TYPE_ENV
+	EXPR_TYPE_HEADER
+)
 
 var (
 	OperatorRegistry = NewOperatorRegistry()
@@ -201,4 +212,54 @@ func Insert(slice []string, index int, value string) []string {
 	slice[index] = value
 	// Return the result.
 	return slice
+}
+
+// GetConditionOperationAndExpressionType takes expression string as input and
+//identifies expression type. type can be condtion/header/environment/etc based expression and
+//prepares condtion operation and returs
+func GetConditionOperationAndExpressionType(expressionStr string) (*Condition, ExpressionType, error) {
+	if !strings.HasPrefix(expressionStr, util.Gateway_Link_Condition_LHS_Start_Expr) {
+		return nil, EXPR_TYPE_NOT_VALID, errors.New("expression does not match expected semantics, missing '${' at the start")
+	}
+	if !strings.HasSuffix(expressionStr, util.Gateway_Link_Condition_LHS_End_Expr) {
+		return nil, EXPR_TYPE_NOT_VALID, errors.New("expression does not match expected semantics, missing '}' at the end")
+	}
+
+	//trim expression starting and ending semantics i.e ${ and }
+	expressionStr = strings.TrimPrefix(expressionStr, util.Gateway_Link_Condition_LHS_Start_Expr)
+	expressionStr = strings.TrimSuffix(expressionStr, util.Gateway_Link_Condition_LHS_End_Expr)
+	expressionStr = strings.TrimSpace(expressionStr)
+
+	//decode condtion from expression string
+	oper, name, err := GetOperatorInExpression(expressionStr)
+	if err != nil {
+		fLogger.Debugf("error getting the operator from expression [%v], [%v]", expressionStr, err)
+		return nil, EXPR_TYPE_NOT_VALID, err
+	}
+	//found the operation!
+	index := strings.Index(expressionStr, *name)
+	// find the LHS
+	lhs := strings.TrimSpace(expressionStr[:index])
+	//find the RHS
+	rhs := strings.TrimSpace(expressionStr[index+len(*name):])
+
+	exprType := EXPR_TYPE_NOT_VALID
+	contentRoot := GetContentRoot()
+
+	if strings.HasPrefix(expressionStr, contentRoot) {
+		//update lhs
+		// Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
+		lhs = strings.Replace(lhs, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1) + "+"
+		//update expression type
+		exprType = EXPR_TYPE_CONTENT
+	} else if strings.HasPrefix(expressionStr, util.Gateway_Link_Condition_LHS_Header_Prifix) {
+		//update lhs
+		lhs = strings.TrimPrefix(lhs, util.Gateway_Link_Condition_LHS_Header_Prifix)
+		//update expression type
+		exprType = EXPR_TYPE_HEADER
+	}
+
+	//prepare condition and return
+	condition := Condition{*oper, lhs, rhs}
+	return &condition, exprType, nil
 }

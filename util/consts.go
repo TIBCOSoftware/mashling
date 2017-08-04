@@ -24,6 +24,7 @@ const Gateway_Link_Condition_LHS_End_Expr = "}"
 const Gateway_JSON_Content_Root_Env_Key = "TRIGGER_CONTENT_ROOT"
 const Gateway_Link_Condition_LHS_JSON_Content_Prefix_Default = "trigger.content"
 const Gateway_Link_Condition_LHS_JSONPath_Root = "$"
+const Gateway_Link_Condition_LHS_Header_Prifix = "trigger.header."
 
 /**
 Flogo constants

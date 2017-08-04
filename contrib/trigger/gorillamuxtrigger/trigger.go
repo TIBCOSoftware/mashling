@@ -237,18 +237,44 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 
 		for _, dispatch := range handler.dispatches {
 			expressionStr := dispatch.condition
-			conditionOperation, err := condition.GetConditionOperation(expressionStr)
-			if err != nil {
+			//Get condtion and expression type
+			conditionOperation, exprType, err := condition.GetConditionOperationAndExpressionType(expressionStr)
+
+			if err != nil || exprType == condition.EXPR_TYPE_NOT_VALID {
 				log.Errorf("not able parse the condition '%v' mentioned for content based handler. skipping the handler.", expressionStr)
 				continue
 			}
-			//evaluate expression
-			exprResult, err := condition.EvaluateCondition(*conditionOperation, contentStr)
-			if err != nil {
-				log.Errorf("not able evaluate expression - %v with error - %v. skipping the handler.", expressionStr, err)
+
+			log.Debugf("Expression type: %v", exprType)
+			log.Debugf("conditionOperation.LHS %v", conditionOperation.LHS)
+			log.Debugf("conditionOperation.OperatorInfo %v", conditionOperation.OperatorInfo().Names)
+			log.Debugf("conditionOperation.RHS %v", conditionOperation.RHS)
+
+			//Resolve expression's LHS based on expression type and
+			//evaluate the expression
+			if exprType == condition.EXPR_TYPE_CONTENT {
+				exprResult, err := condition.EvaluateCondition(*conditionOperation, contentStr)
+				if err != nil {
+					log.Errorf("not able evaluate expression - %v with error - %v. skipping the handler.", expressionStr, err)
+				}
+				if exprResult {
+					actionId = dispatch.actionId
+				}
+			} else if exprType == condition.EXPR_TYPE_HEADER {
+				//resolve LHS i.e header value from http request
+				headerVal := r.Header.Get(conditionOperation.LHS)
+				log.Debugf("header key = %v, val = %v", conditionOperation.LHS, headerVal)
+				if headerVal != "" {
+					conditionOperation.LHS = headerVal
+					op := conditionOperation.Operator
+					exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
+					if exprResult {
+						actionId = dispatch.actionId
+					}
+				}
 			}
-			if exprResult {
-				actionId = dispatch.actionId
+
+			if actionId != "" {
 				log.Debugf("dispatch resolved with the actionId - %v", actionId)
 				break
 			}
