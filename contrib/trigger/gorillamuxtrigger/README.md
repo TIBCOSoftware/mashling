@@ -87,85 +87,15 @@ settings, outputs and handler:
 | autoIdReply | boolean flag to enable or disable auto reply |
 | useReplyHandler | boolean flag to use reply handler |
 
-## Example configuration
 
-Triggers are configured via triggers.json of your application. The follwing are some example configuration of the REST trigger.
-
-### POST
-
-```json
-{
-    "triggers": [
-		{
-		    "name": "rest_trigger",
-			"id": "rest_trigger",
-			"ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
-			"settings": {
-				"port": "9096"
-			},
-			"handlers": [
-				{
-					"actionId": "get_pet_success_handler_usa",
-					"settings": {
-						"Condition": "${trigger.content.country == USA}",
-						"autoIdReply": "false",
-						"method": "POST",
-						"path": "/test",
-						"useReplyHandler": "false"
-					}
-				}
-            ]
-        }
-    ]
-}
-```
-
-### Multiple handlers
-
-```json
-{
-    "triggers": [
-		{
-		    "name": "rest_trigger",
-			"id": "rest_trigger",
-			"ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
-			"settings": {
-				"port": "9096"
-			},
-			"handlers": [
-				{
-					"actionId": "get_pet_success_handler_india",
-					"settings": {
-						"Condition": "${trigger.content.country == INDIA}",
-						"autoIdReply": "false",
-						"method": "POST",
-						"path": "/test",
-						"useReplyHandler": "false"
-					}
-				},
-                {
-					"actionId": "get_pet_success_handler_usa",
-					"settings": {
-						"Condition": "${trigger.content.country == USA}",
-						"autoIdReply": "false",
-						"method": "POST",
-						"path": "/test",
-						"useReplyHandler": "false"
-					}
-				}
-            ]
-        }
-    ]
-}
-```
-### Mashling Gateway Recipie
+### Sample Mashling Gateway Recipie
 
 Following is the example mashling gateway descriptor uses gorillamuxtrigger as a http trigger.
 
 ```json
 {
   "gateway": {
-    "name": "muxGw",
+    "name": "rest",
     "version": "1.0.0",
     "description": "This is the rest based microgateway app",
     "configurations": [
@@ -180,72 +110,81 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
     ],
     "triggers": [
       {
-        "name": "users_trigger",
-        "description": "Users rest trigger",
+        "name": "animals_rest_trigger",
+        "description": "Animals rest trigger - PUT animal details",
         "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "PUT",
-		      "path": "/users/{petId}",
+		      "path": "/pets",
           "optimize":"true"
         }
       },
       {
-        "name": "users_get_trigger",
-        "description": "Users rest trigger",
+        "name": "get_animals_rest_trigger",
+        "description": "Animals rest trigger - get animal details",
         "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "GET",
-		      "path": "/users/{petId}",
+		      "path": "/pets/:petId",
           "optimize":"true"
         }
       }
     ],
     "event_handlers": [
       {
-        "name": "usa_users_http_handler",
-        "description": "Handle the user access for USA users",
+        "name": "mammals_handler",
+        "description": "Handle mammals",
         "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
-        "name": "asia_users_http_handler",
-        "description": "Handle the user access for asia users",
+        "name": "birds_handler",
+        "description": "Handle birds",
         "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
-        "name": "global_users_http_handler",
-        "description": "Handle the user access for asia users",
+        "name": "reptils_handler",
+        "description": "Handle reptils",
         "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
-        "name": "get_users_http_handler",
-        "description": "Handle the user access for asia users",
+        "name": "animals_handler",
+        "description": "Handle other animals",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+      },
+      {
+        "name": "animals_get_handler",
+        "description": "Handle other animals",
         "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestGetActivity.json"
       }
     ],
     "event_links": [
       {
-        "triggers": ["users_trigger"],
+        "triggers": ["animals_rest_trigger"],
         "dispatches": [
           {
-            "if": "${trigger.content.category.name == USA}",
-            "handler": "usa_users_http_handler"
+            "if": "${trigger.content.name in (ELEPHANT,CAT)}",
+            "handler": "mammals_handler"
           },
           {
-            "if": "${trigger.content.category.name in (IND,CHN,JPN)}",
-            "handler": "asia_users_http_handler"
+            "if": "${trigger.content.name == SPARROW}",
+            "handler": "birds_handler"
           },
           {
-            "handler": "global_users_http_handler"
+            "if": "${trigger.header.category in (COBRA,KINGCOBRA)}",
+            "handler": "reptils_handler"
+          },
+          {
+            "handler": "animals_handler"
           }
         ]
       },
       {
-        "triggers": ["users_get_trigger"],
+        "triggers": ["get_animals_rest_trigger"],
         "dispatches": [
           {
-            "handler": "get_users_http_handler"
+            "handler": "animals_get_handler"
           }
         ]
       }
@@ -260,11 +199,11 @@ Follwing is the sample payload. Try changing the value of category.name ("USA" t
 ```json
 {
     "category": {
-        "id": 10,
-        "name": "USA"
+        "id": 1,
+        "name": "Mammals"
     },
-    "id": 10,
-    "name": "OSI",
+    "id": 38,
+    "name": "CAT",
     "photoUrls": [
         "string"
     ],
