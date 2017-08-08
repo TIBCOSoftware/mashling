@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"os"
+
 	"github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
@@ -266,6 +268,18 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 				log.Debugf("header key = %v, val = %v", conditionOperation.LHS, headerVal)
 				if headerVal != "" {
 					conditionOperation.LHS = headerVal
+					op := conditionOperation.Operator
+					exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
+					if exprResult {
+						actionId = dispatch.actionId
+					}
+				}
+			} else if exprType == condition.EXPR_TYPE_ENV {
+				//environment variable based condition
+				envFlagValue := os.Getenv(conditionOperation.LHS)
+				log.Debugf("environment flag = %v, val = %v", conditionOperation.LHS, envFlagValue)
+				if envFlagValue != "" {
+					conditionOperation.LHS = envFlagValue
 					op := conditionOperation.Operator
 					exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
 					if exprResult {
