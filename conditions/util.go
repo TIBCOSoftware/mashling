@@ -66,9 +66,11 @@ func ValidateOperatorInExpression(expression string) {
 	contentRoot := GetContentRoot()
 
 	if !strings.HasPrefix(expression, contentRoot) &&
-		!strings.HasPrefix(expression, util.Gateway_Link_Condition_LHS_Header_Prifix) {
-		panic(fmt.Errorf("Condition expression must start with prefix [%v] or [%v]", contentRoot,
-			util.Gateway_Link_Condition_LHS_Header_Prifix))
+		!strings.HasPrefix(expression, util.Gateway_Link_Condition_LHS_Header_Prifix) &&
+		!strings.HasPrefix(expression, util.Gateway_Link_Condition_LHS_Environment_Prifix) {
+		panic(fmt.Errorf("Condition expression must start with prefix [%v] or [%v] or [%v]", contentRoot,
+			util.Gateway_Link_Condition_LHS_Header_Prifix,
+			util.Gateway_Link_Condition_LHS_Environment_Prifix))
 	}
 
 	//expression = strings.Replace(expression, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)

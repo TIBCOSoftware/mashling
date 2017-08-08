@@ -257,6 +257,11 @@ func GetConditionOperationAndExpressionType(expressionStr string) (*Condition, E
 		lhs = strings.TrimPrefix(lhs, util.Gateway_Link_Condition_LHS_Header_Prifix)
 		//update expression type
 		exprType = EXPR_TYPE_HEADER
+	} else if strings.HasPrefix(expressionStr, util.Gateway_Link_Condition_LHS_Environment_Prifix) {
+		//update lhs
+		lhs = strings.TrimPrefix(lhs, util.Gateway_Link_Condition_LHS_Environment_Prifix)
+		//update expression type
+		exprType = EXPR_TYPE_ENV
 	}
 
 	//prepare condition and return
