@@ -127,7 +127,7 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "GET",
-		      "path": "/pets/:petId",
+		      "path": "/pets/{petId}",
           "optimize":"true"
         }
       }
