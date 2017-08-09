@@ -87,6 +87,14 @@ settings, outputs and handler:
 | autoIdReply | boolean flag to enable or disable auto reply |
 | useReplyHandler | boolean flag to use reply handler |
 
+#### Supported Handler conditions
+
+| Condition Prefix | Description | Example |
+|:----------|:-----------|:-------|
+| trigger.content | Trigger content / payload based condition | trigger.content.region == APAC |
+| trigger.header | HTTP trigger's header based condition | trigger.header.Accept == text/plain |
+| env | Environment flag / variable based condition | env.APP_ENVIRONMENT == UAT |
+
 
 ### Sample Mashling Gateway Recipie
 
@@ -194,7 +202,7 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
 ```
 #### Sample request payload
 
-Follwing is the sample payload. Try changing the value of category.name ("USA" to some other value) to notice handler routing. 
+Follwing is the sample payload. Try changing the value of name ("CAT" to some other value) to notice handler routing. 
 
 ```json
 {
