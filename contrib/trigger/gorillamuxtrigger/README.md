@@ -152,8 +152,13 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
         "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
-        "name": "reptils_handler",
+        "name": "content_type_multipart_handler",
         "description": "Handle reptils",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+      },
+      {
+        "name": "env_prod_handler",
+        "description": "Handle prod environment",
         "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
@@ -180,8 +185,12 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
             "handler": "birds_handler"
           },
           {
-            "if": "${trigger.header.category in (COBRA,KINGCOBRA)}",
-            "handler": "reptils_handler"
+            "if": "${trigger.header.Content-Type == multipart/form-data}",
+            "handler": "content_type_multipart_handler"
+          },
+          {
+            "if": "${env.APP_ENVIRONMENT == PRODUCTION}",
+            "handler": "env_prod_handler"
           },
           {
             "handler": "animals_handler"
