@@ -10,6 +10,8 @@ import (
 
 	"bytes"
 
+	"strconv"
+
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -19,7 +21,8 @@ import (
 	"github.com/TIBCOSoftware/mashling-lib/model"
 	"github.com/TIBCOSoftware/mashling-lib/types"
 	"github.com/TIBCOSoftware/mashling-lib/util"
-	"strconv"
+	"github.com/xeipuuv/gojsonschema"
+	assets "github.com/TIBCOSoftware/mashling-cli/assets"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
@@ -507,4 +510,33 @@ func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 	}
 
 	return gwInfoBuffer.String(), nil
+}
+
+//ValidateGateway validates the gatewway schema instance
+func ValidateGateway(gatewayJson string) error {
+
+	schema, err := assets.Asset("schema/gateway_schema.json")
+	if err != nil {
+		panic(err.Error())
+	}
+	schemaString := string(schema)
+	schemaLoader := gojsonschema.NewStringLoader(schemaString)
+	documentLoader := gojsonschema.NewStringLoader(gatewayJson)
+
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if result.Valid() {
+		fmt.Printf("The gateway json is valid\n")
+	} else {
+		fmt.Printf("The gatewya json not valid. see errors :\n")
+		for _, desc := range result.Errors() {
+			fmt.Printf("- %s\n", desc)
+		}
+	}
+
+	return err
+
 }
