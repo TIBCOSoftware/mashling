@@ -4,9 +4,7 @@ language :
 
 services:
   - docker
-os:
-  - linux
-  - osx
+
   
 cache:
   bundler: false
