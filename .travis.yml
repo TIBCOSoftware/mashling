@@ -47,8 +47,9 @@ after_success:
   - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
   - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
     source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
-    mashling::module::postbuild mashling-lib mashling-lib ;
+    mashling::module::postbuild mashling-cli mashling-cli ;
     fi"
+  - cd $GOPATH   
   - rm -rf $GOPATH/src/github.com/TIBCOSoftware/mashling-cli 
   - go get -u github.com/TIBCOSoftware/flogo-lib/...
   - go get -u github.com/TIBCOSoftware/flogo-cli/...
