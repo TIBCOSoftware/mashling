@@ -1,0 +1,69 @@
+sudo: required
+language : 
+  - go  
+
+services:
+  - docker
+os:
+  - linux
+  - osx
+  
+cache:
+  bundler: false
+  directories:
+  - .build-cache          # images.txt
+# Handle git submodules yourself
+git:
+    submodules: false
+# Do a github login using token
+before_install:
+  - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
+install:
+  - go get -u github.com/constabulary/gb/...
+  
+script:
+  - touch mashling-cli.tgz
+  - tar cvfz mashling-cli.tgz --exclude=mashling-cli.tgz .
+  - find . -not -name "mashling-cli.tgz" -not  -name "\." -not -name "\.\."  -print0 | xargs -0 rm -rf --
+  - "git ls-remote --exit-code https://github.com/TIBCOSoftware/mashling-cicd.git ${TRAVIS_BRANCH} ;
+    if [ $? -eq 0 ]; then 
+        echo \"Branch ${TRAVIS_BRANCH} found on mashling-cicd\" ;
+        git clone https://github.com/TIBCOSoftware/mashling-cicd.git --branch ${TRAVIS_BRANCH} --single-branch mashling-cicd ;
+    else 
+        echo \"Branch ${TRAVIS_BRANCH} not found on mashling-cicd using master\" ;
+        git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd ;
+    fi"
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then    
+    pushd mashling-cicd/docker/mashling-cli;
+    chmod ugo+x ./build-mashling-cli.sh ;
+    ./build-mashling-cli.sh ;
+    popd ;
+    fi 
+    
+after_script:
+  - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
+
+after_success:
+  - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
+  - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
+    source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
+    mashling::module::postbuild mashling-lib mashling-lib ;
+    fi" 
+  - go get -u github.com/TIBCOSoftware/flogo-lib/...
+  - go get -u github.com/TIBCOSoftware/flogo-cli/...
+  - go get github.com/TIBCOSoftware/mashling-cli/...
+  - go get -u github.com/TIBCOSoftware/mashling-cli/... 
+  - pushd mashling-cicd/sample-recipes
+  - chmod ugo+x ./build-recipes.sh
+  - ./build-recipes.sh
+  - popd
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then      
+    pushd mashling-cicd/docker/mashling-sample;
+    chmod ugo+x ./build-mashling-sample.sh ;
+    ./build-mashling-sample.sh ;
+    popd ;
+    fi
+  - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
+    source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
+    mashling::module::postbuild mashling-sample mashling-sample ;
+    fi"  
