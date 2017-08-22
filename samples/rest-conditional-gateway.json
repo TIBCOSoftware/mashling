@@ -6,7 +6,7 @@
     "configurations": [
       {
         "name": "restConfig",
-        "type": "github.com/rameshpolishetti/triggerhttpnew",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew",
         "description": "Configuration for rest trigger",
         "settings": {
           "port": "9096"
@@ -17,7 +17,7 @@
       {
         "name": "animals_rest_trigger",
         "description": "Animals rest trigger - PUT animal details",
-        "type": "github.com/rameshpolishetti/triggerhttpnew",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "PUT",
@@ -28,7 +28,7 @@
       {
         "name": "get_animals_rest_trigger",
         "description": "Animals rest trigger - get animal details",
-        "type": "github.com/rameshpolishetti/triggerhttpnew",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "GET",
