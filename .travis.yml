@@ -7,6 +7,7 @@ services:
 os:
   - linux
   - osx
+  - windows
   
 cache:
   bundler: false
@@ -68,7 +69,6 @@ after_success:
     popd ;
     fi
   - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
-    #source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
     source  $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh;
     mashling::module::postbuild mashling-sample mashling-sample ;
     fi"  
