@@ -58,10 +58,14 @@ after_success:
   - go get -u github.com/TIBCOSoftware/mashling-cli/...
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git
-  - pushd mashling-cicd/sample-recipes
+  - cd mashling-cicd
+  - git checkout -b historical-builds origin/historical-builds
+  - pushd sample-recipes
   - chmod ugo+x ./build-recipes.sh
   - ./build-recipes.sh
   - popd
+  - cd ../../../
+  - export TRAVIS_BUILD_DIR=$GOPATH/src/github.com/TIBCOSoftware
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then      
     pushd mashling-cicd/docker/mashling-sample;
     chmod ugo+x ./build-mashling-sample.sh ;
