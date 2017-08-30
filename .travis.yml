@@ -21,6 +21,10 @@ before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
 install:
   - go get -u github.com/constabulary/gb/...
+  - go get -u github.com/TIBCOSoftware/flogo-lib/...
+  - go get -u github.com/TIBCOSoftware/flogo-cli/...
+  - go get github.com/TIBCOSoftware/mashling-cli/...
+  - go get -u github.com/TIBCOSoftware/mashling-cli/...
   
 script:
   - touch mashling-cli.tgz
@@ -50,12 +54,6 @@ after_success:
     source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
     mashling::module::postbuild mashling-cli mashling-cli ;
     fi"
-  - cd $GOPATH   
-  - rm -rf $GOPATH/src/github.com/TIBCOSoftware/mashling-cli 
-  - go get -u github.com/TIBCOSoftware/flogo-lib/...
-  - go get -u github.com/TIBCOSoftware/flogo-cli/...
-  - go get github.com/TIBCOSoftware/mashling-cli/...
-  - go get -u github.com/TIBCOSoftware/mashling-cli/...
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git
   - cd mashling-cicd
@@ -64,8 +62,7 @@ after_success:
   - chmod ugo+x ./build-recipes.sh
   - ./build-recipes.sh
   - popd
-  - cd ../../../
-  - export TRAVIS_BUILD_DIR=$GOPATH/src/github.com/TIBCOSoftware
+  - cd $GOPATH/src/github.com/TIBCOSoftware
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then      
     pushd mashling-cicd/docker/mashling-sample;
     chmod ugo+x ./build-mashling-sample.sh ;
@@ -73,6 +70,14 @@ after_success:
     popd ;
     fi
   - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
-    source  $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh;
+    source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh;
     mashling::module::postbuild mashling-sample mashling-sample ;
     fi"  
+
+notifications:
+  email:
+    - jpark@tibco.com
+    - rpolishe@tibco.com
+    - lmekala@tibco.com
+    - nthota@tibco.com
+    - ykalidin@tibco.com
