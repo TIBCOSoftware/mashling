@@ -48,3 +48,10 @@ after_success:
     source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
     mashling::module::postbuild mashling-lib mashling-lib ;
     fi"
+notifications:
+  email:
+    - jpark@tibco.com
+    - rpolishe@tibco.com
+    - lmekala@tibco.com
+    - nthota@tibco.com
+    - ykalidin@tibco.com    
