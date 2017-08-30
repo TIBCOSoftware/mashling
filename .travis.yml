@@ -55,6 +55,8 @@ after_success:
     mashling::module::postbuild mashling-cli mashling-cli ;
     fi"
   - cd $GOPATH/src/github.com/TIBCOSoftware
+  - go get github.com/TIBCOSoftware/mashling-cli/...
+  - go get -u github.com/TIBCOSoftware/mashling-cli/...
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git
   - cd mashling-cicd
   - git checkout -b historical-builds origin/historical-builds
