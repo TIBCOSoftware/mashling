@@ -11,6 +11,18 @@
       "name": "port",
       "type": "integer",
       "required": true
+    },
+    {
+      "name": "enableTLS",
+      "type": "boolean"
+    },
+    {
+      "name": "serverCert",
+      "type": "string"
+    },
+    {
+      "name": "serverKey",
+      "type": "string"
     }
   ],
   "outputs": [

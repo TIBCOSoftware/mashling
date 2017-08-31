@@ -2,6 +2,7 @@ package gorillamuxtrigger
 
 import (
 	"crypto/md5"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -16,9 +17,12 @@ import (
 
 // NewServer create a new server instance
 //param server - is a instance of http.Server, can be nil and a default one will be created
-func NewServer(addr string, handler http.Handler) *Server {
+func NewServer(addr string, handler http.Handler, enableTLS bool, serverCert string, serverKey string) *Server {
 	srv := &Server{}
 	srv.Server = &http.Server{Addr: addr, Handler: handler}
+	srv.enableTLS = enableTLS
+	srv.serverCert = serverCert
+	srv.serverKey = serverKey
 
 	return srv
 }
@@ -32,6 +36,9 @@ type Server struct {
 	lastError        error
 	serverGroup      *sync.WaitGroup
 	clientsGroup     chan bool
+	enableTLS        bool
+	serverCert       string
+	serverKey        string
 }
 
 // InstanceID the server instance id
@@ -55,15 +62,34 @@ func (s *Server) Start() error {
 		addr = ":http"
 	}
 
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		return err
-	}
-
 	hostname, _ := os.Hostname()
 	s.serverInstanceID = fmt.Sprintf("%x", md5.Sum([]byte(hostname+addr)))
 
-	s.listener = listener
+	if s.enableTLS {
+		log.Debugf("TLS is enabled for the trigger instance - %v%v", s.serverInstanceID, addr)
+		//TLS is enabled, load server certificate & key files
+		cer, err := tls.LoadX509KeyPair(s.serverCert, s.serverKey)
+		if err != nil {
+			fmt.Printf("Error while loading certificates - %v", err)
+			return err
+		}
+		config := &tls.Config{Certificates: []tls.Certificate{cer}}
+
+		// bind secure listener
+		listener, err := tls.Listen("tcp", addr, config)
+		if err != nil {
+			return err
+		}
+		s.listener = listener
+	} else {
+		log.Debugf("TLS is not enabled for the trigger instance - %v at port %v", s.serverInstanceID, addr)
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			return err
+		}
+		s.listener = listener
+	}
+
 	s.serverGroup = &sync.WaitGroup{}
 	s.clientsGroup = make(chan bool, 50000)
 
@@ -73,13 +99,13 @@ func (s *Server) Start() error {
 	//    }
 	//}
 	//
+
 	s.Handler = &serverHandler{s.Handler, s.clientsGroup, s.serverInstanceID}
 
 	s.serverGroup.Add(1)
 	go func() {
 		defer s.serverGroup.Done()
-
-		err := s.Serve(listener)
+		err := s.Serve(s.listener)
 		if err != nil {
 			if strings.Contains(err.Error(), "use of closed network connection") {
 				return
