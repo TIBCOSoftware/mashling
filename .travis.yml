@@ -4,7 +4,10 @@ language :
 
 services:
   - docker
-
+os:
+  - linux
+  - osx
+  - windows
   
 cache:
   bundler: false
@@ -20,7 +23,6 @@ install:
   - go get -u github.com/constabulary/gb/...
   
 script:
-#  - git clone https://github.com/TIBCOSoftware/mashling-lib.git
   - touch mashling-lib.tgz
   - tar cvfz mashling-lib.tgz --exclude=mashling-lib.tgz .
   - find . -not -name "mashling-lib.tgz" -not  -name "\." -not -name "\.\."  -print0 | xargs -0 rm -rf --
@@ -48,6 +50,20 @@ after_success:
     source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
     mashling::module::postbuild mashling-lib mashling-lib ;
     fi"
+  - cd $GOPATH   
+  - rm -rf $GOPATH/src/github.com/TIBCOSoftware/mashling-lib 
+  - go get -u github.com/TIBCOSoftware/flogo-lib/...
+  - go get -u github.com/TIBCOSoftware/flogo-cli/...
+  - go get github.com/TIBCOSoftware/mashling-cli/...
+  - go get -u github.com/TIBCOSoftware/mashling-cli/...
+  - cd $GOPATH/src/github.com/TIBCOSoftware
+  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git
+  - cd mashling-cicd
+  - git checkout -b historical-builds origin/historical-builds
+  - pushd sample-recipes
+  - chmod ugo+x ./build-recipes.sh
+  - ./build-recipes.sh
+  - popd	
 notifications:
   email:
     - jpark@tibco.com
