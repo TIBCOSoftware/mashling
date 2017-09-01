@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors"
@@ -85,6 +86,28 @@ func (t *RestTrigger) Init(runner action.Runner) {
 	addr := ":" + t.config.GetSetting("port")
 	t.runner = runner
 
+	//Check whether TLS (Transport Layer Security) is enabled for the trigger
+	enableTLS := false
+	serverCert := ""
+	serverKey := ""
+	if _, ok := t.config.Settings["enableTLS"]; ok {
+		enableTLSSetting, err := strconv.ParseBool(t.config.GetSetting("enableTLS"))
+
+		if err == nil && enableTLSSetting {
+			//TLS is enabled, get server certificate & key
+			enableTLS = true
+			if _, ok := t.config.Settings["serverCert"]; !ok {
+				panic(fmt.Sprintf("No serverCert found for trigger '%s' in settings", t.config.Id))
+			}
+			serverCert = t.config.GetSetting("serverCert")
+
+			if _, ok := t.config.Settings["serverKey"]; !ok {
+				panic(fmt.Sprintf("No serverKey found for trigger '%s' in settings", t.config.Id))
+			}
+			serverKey = t.config.GetSetting("serverKey")
+		}
+	}
+
 	//optimize flog-handlers i.e merge handlers having same settings
 	optHandlers := []*OptimizedHandler{}
 	for _, handler := range t.config.Handlers {
@@ -156,7 +179,7 @@ func (t *RestTrigger) Init(runner action.Runner) {
 	}
 
 	log.Debugf("REST Trigger: Configured on port %s", t.config.Settings["port"])
-	t.server = NewServer(addr, router)
+	t.server = NewServer(addr, router, enableTLS, serverCert, serverKey)
 }
 
 func (t *RestTrigger) Start() error {

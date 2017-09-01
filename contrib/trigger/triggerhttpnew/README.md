@@ -16,6 +16,18 @@ settings, outputs and handler:
       "name": "port",
       "type": "integer",
       "required": true
+    },
+    {
+      "name": "enableTLS",
+      "type": "boolean"
+    },
+    {
+      "name": "serverCert",
+      "type": "string"
+    },
+    {
+      "name": "serverKey",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -69,6 +81,9 @@ settings, outputs and handler:
 | Key    | Description   |
 |:-----------|:--------------|
 | port | The port to listen on |
+| enableTLS | true - To enable TLS (Transport Layer Security), false - No TLS security  |
+| serverCert | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
+| serverKey | Server private key file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 
 ### Outputs
 | Key    | Description   |
@@ -82,7 +97,7 @@ settings, outputs and handler:
 | Key    | Description   |
 |:-----------|:--------------|
 | method | HTTP request method. It can be  |
-| path | URL path to be registered with handler |
+| path | URL path to be registered with handler. Example: "/pets/:petId" where petId is path param |
 | Condition | Handler condtion |
 | autoIdReply | boolean flag to enable or disable auto reply |
 | useReplyHandler | boolean flag to use reply handler |
