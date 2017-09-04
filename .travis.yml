@@ -40,7 +40,9 @@ script:
     ./build-mashling-lib.sh ;
     popd ;
     fi
-  - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
+    fi
   - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
     source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
     mashling::module::postbuild mashling-lib mashling-lib ;
