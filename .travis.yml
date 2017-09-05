@@ -40,9 +40,12 @@ script:
     ./build-mashling-lib.sh ;
     popd ;
     fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com
-    fi
+
+after_script:
+  - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
+
+after_success:
+  - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
   - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
     source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
     mashling::module::postbuild mashling-lib mashling-lib ;
@@ -60,21 +63,7 @@ script:
   - pushd sample-recipes
   - chmod ugo+x ./build-recipes.sh
   - ./build-recipes.sh
-  - popd
-  - cd $GOPATH/src/github.com/TIBCOSoftware
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then      
-    pushd mashling-cicd/docker/mashling-sample;
-    chmod ugo+x ./build-mashling-sample.sh ;
-    ./build-mashling-sample.sh ;
-    popd ;
-    fi	 
-  - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
-    source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh;
-    mashling::module::postbuild mashling-sample mashling-sample ;
-    fi"	
-after_script:
-  - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"  
-    
+  - popd	
 notifications: 
   email: 
     on_failure: always
