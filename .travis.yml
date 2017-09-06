@@ -58,9 +58,7 @@ after_success:
   - go get -u github.com/TIBCOSoftware/mashling-cli/...
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git
-  - cd mashling-cicd
-  - git checkout -b historical-builds origin/historical-builds
-  - pushd sample-recipes
+  - pushd mashling-cicd/sample-recipes
   - chmod ugo+x ./build-recipes.sh
   - ./build-recipes.sh
   - popd	
