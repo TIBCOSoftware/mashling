@@ -62,7 +62,6 @@ after_success:
   - chmod ugo+x ./build-recipes.sh
   - ./build-recipes.sh
   - popd	
-
 deploy:
   on:
     branch: master
