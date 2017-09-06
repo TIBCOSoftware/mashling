@@ -74,7 +74,7 @@ deploy:
   bucket: $AWS_BUCKET
   region: $AWS_REGION
   skip_cleanup: true
-  local_dir: $gopath/src/github.com/TIBCOSoftware/mashling-cicd/sample-recipes/builds
+  local_dir: $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/sample-recipes/builds
   
 notifications: 
   email: 
