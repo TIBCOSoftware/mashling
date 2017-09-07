@@ -57,11 +57,8 @@ after_success:
   - go get github.com/TIBCOSoftware/mashling-cli/...
   - go get -u github.com/TIBCOSoftware/mashling-cli/...
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git $GOPATH/src/github.com/TIBCOSoftware/mashling-cli/mashling-cicd
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git
-  - cd mashling-cicd
-  - git checkout -b historical-builds origin/historical-builds
-  - pushd sample-recipes
+  - pushd mashling-cicd/sample-recipes
   - chmod ugo+x ./build-recipes.sh
   - ./build-recipes.sh
   - popd
@@ -87,10 +84,13 @@ deploy:
   skip_cleanup: true
   local_dir: $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/sample-recipes/builds
   upload-dir: builds
-notifications:
-  email:
-    - jpark@tibco.com
-    - rpolishe@tibco.com
-    - lmekala@tibco.com
-    - nthota@tibco.com
-    - ykalidin@tibco.com
+notifications: 
+  email: 
+    on_failure: always
+    on_success: always
+    recipients: 
+      - jpark@tibco.com
+      - rpolishe@tibco.com
+      - lmekala@tibco.com
+      - nthota@tibco.com
+      - ykalidin@tibco.com
