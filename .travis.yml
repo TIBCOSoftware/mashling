@@ -76,7 +76,17 @@ after_success:
     source  $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh;
     mashling::module::postbuild mashling-sample mashling-sample ;
     fi"  
-
+deploy:
+  on:
+    branch: master
+  provider: s3
+  access_key_id: $SITE_KEY
+  secret_access_key: $SITE_KEY_SECRET
+  bucket: $AWS_BUCKET
+  region: $AWS_REGION
+  skip_cleanup: true
+  local_dir: $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/sample-recipes/builds
+  upload-dir: builds
 notifications:
   email:
     - jpark@tibco.com
