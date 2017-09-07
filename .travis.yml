@@ -61,7 +61,8 @@ after_success:
   - pushd mashling-cicd/sample-recipes
   - chmod ugo+x ./build-recipes.sh
   - ./build-recipes.sh
-  - popd	
+  - popd
+  
 deploy:
   on:
     branch: master
