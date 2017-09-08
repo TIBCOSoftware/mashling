@@ -75,7 +75,7 @@ deploy:
   region: $AWS_REGION
   skip_cleanup: true
   local_dir: $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/sample-recipes/builds
-  upload-dir: builds
+  upload-dir: master-builds
   
 notifications: 
   email: 
