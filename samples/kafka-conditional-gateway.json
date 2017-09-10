@@ -1,0 +1,55 @@
+{
+  "gateway": {
+    "name": "kafka",
+    "version": "1.0.0",
+    "description": "This is the kafka based microgateway app",
+    "configurations": [
+      {
+        "name": "kafkaConfig",
+        "type": "github.com/aambhaik/kafkasubv2",
+        "description": "Configuration for kafka cluster",
+        "settings": {
+          "BrokerUrl": "localhost:9092"
+        }
+      }
+    ],
+    "triggers": [
+      {
+        "name": "users_trigger",
+        "description": "The trigger on kafka 'users' topic",
+        "type": "github.com/aambhaik/kafkasubv2",
+        "settings": {
+          "Topic": "users",
+          "config": "${configurations.kafkaConfig}"
+        }
+      }
+    ],
+    "event_handlers": [
+      {
+        "name": "usa_users_topic_handler",
+        "description": "Handle the user access for USA users",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/kafkaFlow.json"
+      },
+      {
+        "name": "asia_users_topic_handler",
+        "description": "Handle the user access for asia users",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/kafkaFlow.json"
+      }
+    ],
+    "event_links": [
+      {
+        "triggers": ["users_trigger"],
+        "dispatches": [
+          {
+            "if": "${trigger.content.country == USA}",
+            "handler": "usa_users_topic_handler"
+          },
+          {
+            "if": "${trigger.content.country in (IND,CHN,JPN)}",
+            "handler": "asia_users_topic_handler"
+          }
+        ]
+      }
+    ]
+  }
+}

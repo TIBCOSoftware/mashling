@@ -1,0 +1,95 @@
+{
+	"gateway": {
+		"name": "microgateway",
+		"version": "1.0.0",
+		"description": "This is the first microgateway app",
+		"configurations": [
+			{
+				"name": "kafkaConfig",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+				"description": "Configuration for kafka cluster",
+				"settings": {
+					"BrokerUrl": "localhost:9092"
+				}
+			}
+		],
+		"triggers": [
+			{
+				"name": "OrdersTrigger",
+				"description": "The trigger on 'orders' topic",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+				"settings": {
+					"Topic": "orders",
+					"config": "${configurations.kafkaConfig}"
+				}
+			}
+		],
+		"event_handlers": [
+			{
+				"name": "OrderSuccessHandler",
+				"description": "Handle the order processing",
+				"params": {
+					"message": "${(trigger).content}"
+				},
+				"definition": {
+					"data": {
+						"flow": {
+							"type": 1,
+							"attributes": [],
+							"rootTask": {
+								"id": 1,
+								"type": 1,
+								"tasks": [
+									{
+										"id": 2,
+										"name": "Log Message",
+										"description": "Simple Log Activity",
+										"type": 1,
+										"activityType": "tibco-log",
+										"activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+										"attributes": [
+											{
+												"name": "message",
+												"value": "${message}",
+												"required": false,
+												"type": "string"
+											},
+											{
+												"name": "flowInfo",
+												"value": "false",
+												"required": false,
+												"type": "boolean"
+											},
+											{
+												"name": "addToFlow",
+												"value": "false",
+												"required": false,
+												"type": "boolean"
+											}
+										]
+									}
+								],
+								"links": [],
+								"attributes": []
+							}
+						}
+					},
+					"id": "order_success_handler",
+					"ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+				}
+			}
+		],
+		"event_links": [
+			{
+				"triggers": [
+					"OrdersTrigger"
+				],
+				"dispatches": [
+					{
+						"handler": "OrderSuccessHandler"
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,197 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "gateway": {
+            "type": "object",
+            "required": [
+                "name",
+                "version",
+                "configurations",
+                "triggers",
+                "event_handlers",
+                "event_links"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "configurations": {
+                    "items": {
+                        "$ref": "#/definitions/configuration"
+                    },
+                    "type": "array"
+                },
+                "event_handlers": {
+                    "items": {
+                        "$ref": "#/definitions/event_handler"
+                    },
+                    "type": "array"
+                },
+                "event_links": {
+                    "items": {
+                        "$ref": "#/definitions/event_link"
+                    },
+                    "type": "array"
+                },
+                "triggers": {
+                    "items": {
+                        "$ref": "#/definitions/trigger"
+                    },
+                    "type": "array"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "definitions": {
+        "configuration": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "settings"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "trigger": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "settings"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "event_handler": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "oneOf": [
+                {
+                    "required": [
+                        "reference"
+                    ]
+                },
+                {
+                    "required": [
+                        "definition"
+                    ]
+                }
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "definition": {
+                    "type": "object",
+                    "required": [
+                        "data",
+                        "id",
+                        "ref"
+                    ],
+                    "properties": {
+                        "data": {
+                            "type": "object"
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "ref": {
+                            "type": "string",
+                            "default": "https://github.com/TIBCOSoftware/flogo-contrib/blob/master/action/flow/definition/schema.json"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "event_link": {
+            "type": "object",
+            "required": [
+                "triggers",
+                "dispatches"
+            ],
+            "properties": {
+                "triggers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "dispatches": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "handler"
+                        ],
+                        "properties": {
+                            "if": {
+                                "type": "string"
+                            },
+                            "handler": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

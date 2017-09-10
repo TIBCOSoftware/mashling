@@ -1,0 +1,119 @@
+{
+  "gateway": {
+    "name": "demoRestGw",
+    "version": "1.0.0",
+    "description": "This is the rest based microgateway app",
+    "configurations": [
+      {
+        "name": "restConfig",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "description": "Configuration for rest trigger",
+        "settings": {
+          "port": "9096"
+        }
+      },
+      {
+        "name": "restSecureConfig",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "description": "Configuration for rest secure trigger",
+        "settings": {
+          "port": "9097",
+          "enableTLS": "true",
+          "serverCert":"${ENV.SERVER_CERT}",
+          "serverKey":"${ENV.SERVER_KEY}"
+        }
+      }
+    ],
+    "triggers": [
+      {
+        "name": "animals_rest_trigger",
+        "description": "Animals rest trigger - PUT animal details",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "settings": {
+          "config": "${configurations.restConfig}",
+          "method": "PUT",
+		      "path": "/pets",
+          "optimize":"true"
+        }
+      },
+      {
+        "name": "get_animals_rest_trigger",
+        "description": "Animals rest trigger - get animal details",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "settings": {
+          "config": "${configurations.restConfig}",
+          "method": "GET",
+		      "path": "/pets/{petId}",
+          "optimize":"true"
+        }
+      },
+      {
+        "name": "get_animals_rest_secure_trigger",
+        "description": "Animals rest secure trigger - get animal details",
+        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "settings": {
+          "config": "${configurations.restSecureConfig}",
+          "method": "GET",
+		      "path": "/pets/{petId}",
+          "optimize":"true"
+        }
+      }
+    ],
+    "event_handlers": [
+      {
+        "name": "mammals_handler",
+        "description": "Handle mammals",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+      },
+      {
+        "name": "birds_handler",
+        "description": "Handle birds",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+      },
+      {
+        "name": "animals_handler",
+        "description": "Handle other animals",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+      },
+      {
+        "name": "animals_get_handler",
+        "description": "Handle other animals",
+        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestGetActivity.json"
+      }
+    ],
+    "event_links": [
+      {
+        "triggers": ["animals_rest_trigger"],
+        "dispatches": [
+          {
+            "if": "${trigger.content.name in (ELEPHANT,CAT)}",
+            "handler": "mammals_handler"
+          },
+          {
+            "if": "${trigger.content.name == SPARROW}",
+            "handler": "birds_handler"
+          },
+          {
+            "handler": "animals_handler"
+          }
+        ]
+      },
+      {
+        "triggers": ["get_animals_rest_trigger"],
+        "dispatches": [
+          {
+            "handler": "animals_get_handler"
+          }
+        ]
+      },
+      {
+        "triggers": ["get_animals_rest_secure_trigger"],
+        "dispatches": [
+          {
+            "handler": "animals_get_handler"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+	"gateway": {
+		"name": "kafka",
+		"version": "1.0.0",
+		"description": "This is the kafka based microgateway app",
+		"configurations": [
+			{
+				"name": "kafkaConfig",
+				"type": "github.com/wnichols/kafkasub",
+				"description": "Configuration for kafka cluster",
+				"settings": {
+					"BrokerUrl": "localhost:9092"
+				}
+			}
+		],
+		"triggers": [
+			{
+				"name": "kafka_trigger",
+				"description": "The trigger on kafka 'users' topic",
+				"type": "github.com/wnichols/kafkasub",
+				"settings": {
+					"Topic": "users",
+					"config": "${configurations.kafkaConfig}"
+				}
+			}
+		],
+		"event_handlers": [
+			{
+				"name": "user_topic_handler",
+				"description": "Handle the user access",
+				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/kafkaFlow.json",
+				"params": {
+				}
+			}
+		],
+		"event_links": [
+			{
+				"triggers": ["kafka_trigger"],
+				"dispatches": [
+					{
+						"if": "trigger.content != undefined",
+						"handler": "user_topic_handler"
+					}
+				]
+			}
+		]
+	}
+}

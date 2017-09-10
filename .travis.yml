@@ -1,0 +1,100 @@
+sudo: required
+language : 
+  - go  
+
+services:
+  - docker
+os:
+  - linux
+  - osx
+  - windows
+  
+cache:
+  bundler: false
+  directories:
+  - .build-cache          # images.txt
+# Handle git submodules yourself
+git:
+    submodules: false
+# Do a github login using token
+before_install:
+  - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
+install:
+  - go get -u github.com/constabulary/gb/...
+  
+script:
+  - touch mashling-cli.tgz
+  - tar cvfz mashling-cli.tgz --exclude=mashling-cli.tgz .
+  - find . -not -name "mashling-cli.tgz" -not  -name "\." -not -name "\.\."  -print0 | xargs -0 rm -rf --
+  - "git ls-remote --exit-code https://github.com/TIBCOSoftware/mashling-cicd.git ${TRAVIS_BRANCH} ;
+    if [ $? -eq 0 ]; then 
+        echo \"Branch ${TRAVIS_BRANCH} found on mashling-cicd\" ;
+        git clone https://github.com/TIBCOSoftware/mashling-cicd.git --branch ${TRAVIS_BRANCH} --single-branch mashling-cicd ;
+    else 
+        echo \"Branch ${TRAVIS_BRANCH} not found on mashling-cicd using master\" ;
+        git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd ;
+    fi"
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then    
+    pushd mashling-cicd/docker/mashling-cli;
+    chmod ugo+x ./build-mashling-cli.sh ;
+    ./build-mashling-cli.sh ;
+    popd ;
+    fi 
+    
+after_script:
+  - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
+
+after_success:
+  - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
+  - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
+    source ${TRAVIS_BUILD_DIR}/mashling-cicd/scripts/init.sh ;
+    mashling::module::postbuild mashling-cli mashling-cli ;
+    fi"
+  - cd $GOPATH   
+  - rm -rf $GOPATH/src/github.com/TIBCOSoftware/mashling-cli 
+  - go get -u github.com/TIBCOSoftware/flogo-lib/...
+  - go get -u github.com/TIBCOSoftware/flogo-cli/...
+  - go get github.com/TIBCOSoftware/mashling-cli/...
+  - go get -u github.com/TIBCOSoftware/mashling-cli/...
+  - cd $GOPATH/src/github.com/TIBCOSoftware
+  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git
+  - pushd mashling-cicd/sample-recipes
+  - rm -rf builds
+  - mkdir -p builds/latest
+  - chmod ugo+x ./build-recipes.sh ./sanity.sh
+  - ./build-recipes.sh
+  - ./sanity.sh
+  - popd
+  - cd $GOPATH/src/github.com/TIBCOSoftware
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then      
+    pushd mashling-cicd/docker/mashling-sample;
+    chmod ugo+x ./build-mashling-sample.sh ;
+    ./build-mashling-sample.sh ;
+    popd ;
+    fi
+  - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
+    source  $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh;
+    mashling::module::postbuild mashling-sample mashling-sample ;
+    fi"  
+deploy:
+  on:
+    branch: master
+  provider: s3
+  access_key_id: $SITE_KEY
+  secret_access_key: $SITE_KEY_SECRET
+  bucket: $AWS_BUCKET
+  region: $AWS_REGION
+  skip_cleanup: true
+  local_dir: $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/sample-recipes/builds
+  upload-dir: master-builds
+
+notifications: 
+  email: 
+    on_failure: always
+    on_success: always
+    recipients: 
+      - jpark@tibco.com
+      - rpolishe@tibco.com
+      - lmekala@tibco.com
+      - nthota@tibco.com
+      - ykalidin@tibco.com

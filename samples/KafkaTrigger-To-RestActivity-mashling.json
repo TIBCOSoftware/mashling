@@ -1,0 +1,51 @@
+{
+	"gateway": {
+		"name": "3recipe",
+		"version": "1.0.0",
+		"description": "This is the first microgateway app",
+		"configurations": [
+			{
+				"name": "kafkaConfig",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+				"description": "Configuration for kafka cluster",
+				"settings": {
+					"BrokerUrl": "localhost:9092"
+				}
+			}
+		],
+		"triggers": [
+           
+			{
+				"name": "kafka_trigger",
+				"description": "The trigger on kafka 'users' topic",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+				"settings": {
+					"Topic": "syslog",
+					"config": "${configurations.kafkaConfig}"
+				}
+			}
+		],
+		"event_handlers": [
+            
+			{
+				"name": "kafka_handler",
+				"description": "Handle the user access",
+				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/KafkaTriggerToRestActivity.json",
+				"params": {
+				}
+			}
+		],
+		"event_links": [
+            
+			{
+				"triggers": ["kafka_trigger"],
+				"dispatches": [
+					{
+						"if": "trigger.content != undefined",
+						"handler": "kafka_handler"
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"gateway": {
+		"name": "envoy",
+		"version": "1.0.0",
+		"description": "This is the microgateway app that invokes envoy front-proxy",
+		"configurations": [],
+		"triggers": [
+			{
+				"name": "rest_trigger",
+				"description": "The trigger on envoy endpoint",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+				"settings": {
+					"port": "9096",
+					"method": "GET",
+					"path": "/envoy/pets/:petId"
+				}
+			}
+		],
+		"event_handlers": [
+			{
+				"name": "get_envoy_success_handler",
+				"description": "Handle the envoy service access",
+				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/envoyInvokerFlow.json"
+			}
+		],
+		"event_links": [
+			{
+				"triggers": [
+					"rest_trigger"
+				],
+				"dispatches": [
+					{
+						"handler": "get_envoy_success_handler"
+					}
+				]
+			}
+		]
+	}
+}
