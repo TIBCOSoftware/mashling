@@ -3,7 +3,7 @@ package model
 import (
 	"encoding/json"
 
-	"github.com/TIBCOSoftware/mashling-lib/types"
+	"github.com/TIBCOSoftware/mashling/lib/types"
 )
 
 func CreateMashlingSampleModel() (types.Microgateway, error) {
@@ -43,7 +43,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 					Params: json.RawMessage(`{
                     				"uri": "petstore.swagger.io/v2/pet/3"
 					}`),
-					Reference: "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
+					Reference: "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
 				},
 			},
 			EventLinks: []types.EventLink{

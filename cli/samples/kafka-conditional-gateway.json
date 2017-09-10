@@ -28,12 +28,12 @@
       {
         "name": "usa_users_topic_handler",
         "description": "Handle the user access for USA users",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/kafkaFlow.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/kafkaFlow.json"
       },
       {
         "name": "asia_users_topic_handler",
         "description": "Handle the user access for asia users",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/kafkaFlow.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/kafkaFlow.json"
       }
     ],
     "event_links": [

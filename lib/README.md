@@ -1,2 +1,2 @@
-# mashling-lib
+# mashling/lib
 Project Mashling Lib

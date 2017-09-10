@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/TIBCOSoftware/mashling-lib/util"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 	"github.com/pkg/errors"
 )
 

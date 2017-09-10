@@ -6,7 +6,7 @@
     "configurations": [
       {
         "name": "restConfig",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "description": "Configuration for rest trigger",
         "settings": {
           "port": "9096"
@@ -14,7 +14,7 @@
       },
       {
         "name": "restSecureConfig",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "description": "Configuration for rest secure trigger",
         "settings": {
           "port": "9097",
@@ -28,7 +28,7 @@
       {
         "name": "animals_rest_trigger",
         "description": "Animals rest trigger - PUT animal details",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "PUT",
@@ -39,7 +39,7 @@
       {
         "name": "get_animals_rest_trigger",
         "description": "Animals rest trigger - get animal details",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "GET",
@@ -50,7 +50,7 @@
       {
         "name": "get_animals_rest_secure_trigger",
         "description": "Animals rest secure trigger - get animal details",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restSecureConfig}",
           "method": "GET",
@@ -63,22 +63,22 @@
       {
         "name": "mammals_handler",
         "description": "Handle mammals",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "birds_handler",
         "description": "Handle birds",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "animals_handler",
         "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "animals_get_handler",
         "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestGetActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestGetActivity.json"
       }
     ],
     "event_links": [

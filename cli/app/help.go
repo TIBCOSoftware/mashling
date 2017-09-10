@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/TIBCOSoftware/mashling-cli/cli"
+	"github.com/TIBCOSoftware/mashling/cli/cli"
 )
 
 var optHelp = &cli.OptionInfo{

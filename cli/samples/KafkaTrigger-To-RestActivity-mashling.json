@@ -30,7 +30,7 @@
 			{
 				"name": "kafka_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/KafkaTriggerToRestActivity.json",
+				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/KafkaTriggerToRestActivity.json",
 				"params": {
 				}
 			}

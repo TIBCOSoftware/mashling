@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/TIBCOSoftware/mashling-cli",
+	"ImportPath": "github.com/TIBCOSoftware/mashling/cli",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v74",
 	"Packages": [

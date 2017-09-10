@@ -7,8 +7,8 @@ import (
 
 	"encoding/json"
 	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/TIBCOSoftware/mashling-cli/cli"
-	"github.com/TIBCOSoftware/mashling-lib/model"
+	"github.com/TIBCOSoftware/mashling/cli/cli"
+	"github.com/TIBCOSoftware/mashling/lib/model"
 	"path"
 )
 

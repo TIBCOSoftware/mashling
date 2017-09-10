@@ -1,11 +1,11 @@
 {
   "name": "tibco-gateway-rest",
   "type": "flogo:trigger",
-  "ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/triggerhttpnew",
+  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
   "version": "0.0.1",
   "title": "Receive Mashling HTTP Message",
+  "author": "Ramesh Polishetti <rpolishe@tibco.com>",
   "description": "Simple REST Trigger for mashling gateway",
-  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/rest",
   "settings": [
     {
       "name": "port",

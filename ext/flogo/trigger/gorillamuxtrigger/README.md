@@ -4,7 +4,7 @@ gorillamuxtrigger
 ## Installation
 
 ```bash
-flogo add trigger github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger
+flogo add trigger github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger
 ```
 
 ## Schema
@@ -124,7 +124,7 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
     "configurations": [
       {
         "name": "restConfig",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "description": "Configuration for rest trigger",
         "settings": {
           "port": "9096"
@@ -135,7 +135,7 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
       {
         "name": "animals_rest_trigger",
         "description": "Animals rest trigger - PUT animal details",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "PUT",
@@ -146,7 +146,7 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
       {
         "name": "get_animals_rest_trigger",
         "description": "Animals rest trigger - get animal details",
-        "type": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "GET",
@@ -159,32 +159,32 @@ Following is the example mashling gateway descriptor uses gorillamuxtrigger as a
       {
         "name": "mammals_handler",
         "description": "Handle mammals",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "birds_handler",
         "description": "Handle birds",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "content_type_multipart_handler",
         "description": "Handle reptils",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "env_prod_handler",
         "description": "Handle prod environment",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "animals_handler",
         "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "animals_get_handler",
         "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling-lib/flow/RestTriggerToRestGetActivity.json"
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestGetActivity.json"
       }
     ],
     "event_links": [

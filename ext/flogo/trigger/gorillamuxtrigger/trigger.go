@@ -1,4 +1,4 @@
-package triggerhttpnew
+package gorillamuxtrigger
 
 import (
 	"context"
@@ -9,13 +9,15 @@ import (
 	"strconv"
 	"strings"
 
+	"os"
+
 	"github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	condition "github.com/TIBCOSoftware/mashling-lib/conditions"
-	"github.com/TIBCOSoftware/mashling-lib/util"
-	"github.com/julienschmidt/httprouter"
+	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
+	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -73,7 +75,8 @@ func (t *RestTrigger) Init(runner action.Runner) {
 
 	log.SetLogLevel(logger.DebugLevel)
 
-	router := httprouter.New()
+	// router := httprouter.New()
+	router := mux.NewRouter()
 
 	if t.config.Settings == nil {
 		panic(fmt.Sprintf("No Settings found for trigger '%s'", t.config.Id))
@@ -173,8 +176,12 @@ func (t *RestTrigger) Init(runner action.Runner) {
 			method := strings.ToUpper(optHandler.settings["method"].(string))
 			path := optHandler.settings["path"].(string)
 			log.Debugf("REST Trigger: Registering handler [%s: %s] with default Action Id: [%s]", method, path, optHandler.defaultActionId)
-			router.OPTIONS(path, handleCorsPreflight)
-			router.Handle(method, path, newActionHandler(t, optHandler))
+			//Register Cross-Origin Resource Sharing (CORS) handler
+			router.HandleFunc(path, handleCorsPreflight).
+				Methods("OPTIONS")
+			//register action handler
+			router.HandleFunc(path, newActionHandler(t, optHandler)).
+				Methods(method)
 		}
 	}
 
@@ -192,7 +199,7 @@ func (t *RestTrigger) Stop() error {
 }
 
 // Handles the cors preflight request
-func handleCorsPreflight(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func handleCorsPreflight(w http.ResponseWriter, r *http.Request) {
 
 	log.Infof("Received [OPTIONS] request to CorsPreFlight: %+v", r)
 
@@ -205,18 +212,20 @@ type IDResponse struct {
 	ID string `json:"id"`
 }
 
-func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) httprouter.Handle {
+func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFunc {
 
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
 		log.Infof("REST Trigger: Received request for id '%s'", rt.config.Id)
 
 		c := cors.New(REST_CORS_PREFIX, log)
 		c.WriteCorsActualRequestHeaders(w)
 
+		//get path params
+		vars := mux.Vars(r)
 		pathParams := make(map[string]string)
-		for _, param := range ps {
-			pathParams[param.Key] = param.Value
+		for k, v := range vars {
+			pathParams[k] = v
 		}
 
 		var content interface{}
@@ -253,18 +262,56 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) httprouter.Han
 
 		for _, dispatch := range handler.dispatches {
 			expressionStr := dispatch.condition
-			conditionOperation, err := condition.GetConditionOperation(expressionStr)
-			if err != nil {
+			//Get condtion and expression type
+			conditionOperation, exprType, err := condition.GetConditionOperationAndExpressionType(expressionStr)
+
+			if err != nil || exprType == condition.EXPR_TYPE_NOT_VALID {
 				log.Errorf("not able parse the condition '%v' mentioned for content based handler. skipping the handler.", expressionStr)
 				continue
 			}
-			//evaluate expression
-			exprResult, err := condition.EvaluateCondition(*conditionOperation, contentStr)
-			if err != nil {
-				log.Errorf("not able evaluate expression - %v with error - %v. skipping the handler.", expressionStr, err)
+
+			log.Debugf("Expression type: %v", exprType)
+			log.Debugf("conditionOperation.LHS %v", conditionOperation.LHS)
+			log.Debugf("conditionOperation.OperatorInfo %v", conditionOperation.OperatorInfo().Names)
+			log.Debugf("conditionOperation.RHS %v", conditionOperation.RHS)
+
+			//Resolve expression's LHS based on expression type and
+			//evaluate the expression
+			if exprType == condition.EXPR_TYPE_CONTENT {
+				exprResult, err := condition.EvaluateCondition(*conditionOperation, contentStr)
+				if err != nil {
+					log.Errorf("not able evaluate expression - %v with error - %v. skipping the handler.", expressionStr, err)
+				}
+				if exprResult {
+					actionId = dispatch.actionId
+				}
+			} else if exprType == condition.EXPR_TYPE_HEADER {
+				//resolve LHS i.e header value from http request
+				headerVal := r.Header.Get(conditionOperation.LHS)
+				log.Debugf("header key = %v, val = %v", conditionOperation.LHS, headerVal)
+				if headerVal != "" {
+					conditionOperation.LHS = headerVal
+					op := conditionOperation.Operator
+					exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
+					if exprResult {
+						actionId = dispatch.actionId
+					}
+				}
+			} else if exprType == condition.EXPR_TYPE_ENV {
+				//environment variable based condition
+				envFlagValue := os.Getenv(conditionOperation.LHS)
+				log.Debugf("environment flag = %v, val = %v", conditionOperation.LHS, envFlagValue)
+				if envFlagValue != "" {
+					conditionOperation.LHS = envFlagValue
+					op := conditionOperation.Operator
+					exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
+					if exprResult {
+						actionId = dispatch.actionId
+					}
+				}
 			}
-			if exprResult {
-				actionId = dispatch.actionId
+
+			if actionId != "" {
 				log.Debugf("dispatch resolved with the actionId - %v", actionId)
 				break
 			}

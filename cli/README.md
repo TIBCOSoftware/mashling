@@ -1,4 +1,4 @@
-# mashling-cli
+# mashling/cli
 > Command line tool for building **Mashling**-based gateways.
 
 **Mashling** is a Micro-gateway framework written in Go. It was designed from the ground up to be robust enough for microservices.
@@ -13,10 +13,10 @@
     git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 ### Install Mashling
-    go get github.com/TIBCOSoftware/mashling-cli/...
+    go get github.com/TIBCOSoftware/mashling/cli/...
 
 ### Update Mashling
-    go get -u github.com/TIBCOSoftware/mashling-cli/...
+    go get -u github.com/TIBCOSoftware/mashling/cli/...
 
 ## Getting Started
 A mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
@@ -68,7 +68,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 			{
 				"name": "get_pet_success_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling-lib/flow/flogo.json",
+				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}
@@ -118,9 +118,9 @@ Please submit a github issue if you would like to propose a significant change o
 
 ### Build mashling from source
 ```
-$go get github.com/TIBCOSoftware/mashling-cli/...
+$go get github.com/TIBCOSoftware/mashling/cli/...
 
-$cd $GOPATH/src/github.com/TIBCOSoftware/mashling-cli
+$cd $GOPATH/src/github.com/TIBCOSoftware/mashling/cli
 
 [optional, only if building from branch] 
 $git checkout my_branch
@@ -132,7 +132,7 @@ $go install ./...
 ```
 
 ##License
-mashling-cli is licensed under a BSD-type license. See TIBCO LICENSE.txt for license text.
+mashling/cli is licensed under a BSD-type license. See TIBCO LICENSE.txt for license text.
 
 
 ### Support
