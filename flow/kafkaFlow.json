@@ -1,0 +1,84 @@
+{
+  "name": "kafka",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "triggers": [
+    {
+      "name": "Receive Kafka Messages",
+      "ref": "github.com/wnichols/kafkasub",
+      "description": "Simple Kafka Trigger",
+      "settings": {
+        "BrokerUrl": "localhost:9092"
+      },
+      "id": "receive_kafka_messages",
+      "handlers": [
+        {
+          "settings": {
+            "Topic": "users",
+            "partitions": null,
+            "group": null,
+            "offset": null
+          },
+          "actionId": "kafka"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "kafka",
+      "data": {
+        "flow": {
+          "type": 1,
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "name": "Log Message",
+                "description": "Simple Log Activity",
+                "type": 1,
+                "activityType": "tibco-log",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                "attributes": [
+                  {
+                    "name": "message",
+                    "value": "",
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "flowInfo",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "addToFlow",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{T.message}",
+                    "mapTo": "message"
+                  }
+                ]
+              }
+            ],
+            "links": [],
+            "attributes": []
+          }
+        }
+      },
+      "id": "kafka",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+    }
+  ]
+}

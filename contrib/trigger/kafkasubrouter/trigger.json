@@ -1,0 +1,61 @@
+{
+  "name": "tibco-kafkasub-router",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/kafkasubrouter",
+  "version": "0.0.1",
+  "title": "Receive Kafka Messages",
+  "author": "Anant Ambhaikar <aambhaik@tibco.com>",
+  "description": "Kafka Trigger with condition-based routing",
+  "settings":[
+    {
+      "name": "BrokerUrl",
+      "type": "string"
+    },
+    {
+      "name": "user",
+      "type": "string"
+    },
+    {
+      "name": "password",
+      "type": "string"
+    },
+    {
+      "name": "truststore",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "message",
+      "type": "string"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "Topic",
+        "type": "string",
+        "required":"true"
+      },
+      {
+        "name": "partitions",
+        "type": "string",
+        "required": "false"
+      },
+      {
+        "name": "group",
+        "type": "string",
+        "required":"false"
+      },
+      {
+        "name": "offset",
+        "type": "int",
+        "required":"false"
+      },
+      {
+        "name": "Condition",
+        "type": "string"
+      }
+    ]
+  }
+}

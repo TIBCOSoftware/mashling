@@ -1,0 +1,73 @@
+{
+  "name": "tibco-gateway-rest",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/mashling-lib/contrib/trigger/gorillamuxtrigger",
+  "version": "0.0.1",
+  "title": "Receive Mashling HTTP Message",
+  "author": "Ramesh Polishetti <rpolishe@tibco.com>",
+  "description": "Simple REST Trigger for mashling gateway",
+  "settings": [
+    {
+      "name": "port",
+      "type": "integer",
+      "required": true
+    },
+    {
+      "name": "enableTLS",
+      "type": "boolean"
+    },
+    {
+      "name": "serverCert",
+      "type": "string"
+    },
+    {
+      "name": "serverKey",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "params",
+      "type": "params"
+    },
+    {
+      "name": "pathParams",
+      "type": "params"
+    },
+    {
+      "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "content",
+      "type": "object"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "method",
+        "type": "string",
+        "required" : true,
+        "allowed" : ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      },
+      {
+        "name": "path",
+        "type": "string",
+        "required" : true
+      },
+      {
+        "name": "autoIdReply",
+        "type": "boolean"
+      },
+      {
+        "name": "useReplyHandler",
+        "type": "boolean"
+      },
+      {
+        "name": "Condition",
+        "type": "string"
+      }
+    ]
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "name": "EnvoyFlow",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "triggers": [
+    {
+      "name": "Receive HTTP Message",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+      "description": "Simple REST Trigger",
+      "settings": {
+        "port": "9096"
+      },
+      "id": "receive_http_message",
+      "handlers": [
+        {
+          "settings": {
+            "method": "GET",
+            "path": "/envoy/pets/:petId",
+            "autoIdReply": "false",
+            "useReplyHandler": "false"
+          },
+          "actionId": "ss"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "ss",
+      "data": {
+        "flow": {
+          "explicitReply": true,
+          "type": 1,
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "name": "Log Message",
+                "description": "Simple Log Activity",
+                "type": 1,
+                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                "attributes": [
+                  {
+                    "name": "message",
+                    "value": null,
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "flowInfo",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "addToFlow",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{T.pathParams}",
+                    "mapTo": "message"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Invoke REST Service",
+                "description": "Simple REST Activity",
+                "type": 1,
+                "activityType": "tibco-rest",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+                "attributes": [
+                  {
+                    "name": "method",
+                    "value": "GET",
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "uri",
+                    "value": "http://192.168.99.100:8000/pets/:petId",
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "pathParams",
+                    "value": null,
+                    "required": false,
+                    "type": "params"
+                  },
+                  {
+                    "name": "queryParams",
+                    "value": null,
+                    "required": false,
+                    "type": "params"
+                  },
+                  {
+                    "name": "content",
+                    "value": null,
+                    "required": false,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{T.pathParams}",
+                    "mapTo": "pathParams"
+                  }
+                ]
+              },
+              {
+                "id": 4,
+                "name": "Reply To Trigger",
+                "description": "Simple Reply Activity",
+                "type": 1,
+                "activityType": "tibco-reply",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                "attributes": [
+                  {
+                    "name": "code",
+                    "value": 200,
+                    "required": true,
+                    "type": "integer"
+                  },
+                  {
+                    "name": "data",
+                    "value": null,
+                    "required": false,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{A3.result}",
+                    "mapTo": "data"
+                  }
+                ]
+              }
+            ],
+            "links": [
+              {
+                "id": 1,
+                "from": 2,
+                "to": 3,
+                "type": 0
+              },
+              {
+                "id": 2,
+                "from": 3,
+                "to": 4,
+                "type": 0
+              }
+            ],
+            "attributes": []
+          }
+        }
+      },
+      "id": "ss",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+    }
+  ]
+}
