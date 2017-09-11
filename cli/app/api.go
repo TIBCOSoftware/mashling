@@ -11,7 +11,7 @@ import (
 	"bytes"
 
 	"strconv"
-
+	"errors"
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -398,6 +398,21 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 	return links, err
 }
 
+// PublishToMashery publishes to mashery
+func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
+	// Get HTTP triggers from JSON
+	_ = generate_swagger(gatewayJSON)
+
+	_, err := user.FetchOAuthToken()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to fetch the OAauth token\n\n")
+		return err
+	}
+	fmt.Println("Successfully published to mashery!")
+
+	return nil
+}
+
 // GetGatewayDetails returns gateway details i.e all Triggers, Handlers & Links
 func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 	gwInfoBuffer := bytes.NewBufferString("")
@@ -539,4 +554,8 @@ func ValidateGateway(gatewayJson string) error {
 
 	return err
 
+}
+
+func generate_swagger(gatewayJSON string) error {
+	return errors.New("Not implemented yet")
 }
