@@ -1,0 +1,150 @@
+{
+  "name": "myApp",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Tracing example",
+  "triggers": [
+    {
+      "id": "my_rest_trigger",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/triggerhttpnew",
+      "settings": {
+        "port": "9233",
+        "tracer": "zipkin",
+        "tracerEndpoint": "http://localhost:9411/api/v1/spans"
+      },
+      "handlers": [
+        {
+          "actionId": "my_simple_flow",
+          "settings": {
+            "method": "GET",
+            "path": "/test",
+            "autoIdReply": "false",
+            "useReplyHandler": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "my_simple_flow",
+      "name": "my simple flow",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
+      "data": {
+        "flow": {
+          "name": "my simple flow",
+          "explicitReply": true,
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "type": 1,
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer",
+                "name": "logging",
+                "attributes": [
+                  {
+                    "name": "tracing",
+                    "value": null
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{T.tracing}",
+                    "mapTo": "tracing"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "type": 1,
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                "name": "log",
+                "attributes": [
+                  {
+                    "name": "message",
+                    "value": "Simple Log",
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "id": 4,
+                "type": 1,
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer",
+                "name": "logging-done",
+                "attributes": [
+                  {
+                    "name": "span",
+                    "value": null
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{A2.span}",
+                    "mapTo": "span"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Invoke REST Service",
+                "description": "Simple REST Activity",
+                "type": 1,
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+                "attributes": [
+                  {
+                    "name": "method",
+                    "value": "GET",
+                    "type": "string"
+                  },
+                  {
+                    "name": "uri",
+                    "value": "http://petstore.swagger.io/v2/pet/1",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tracing",
+                    "value": null,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{A2.tracing}",
+                    "mapTo": "tracing"
+                  }
+                ]
+              }
+            ],
+            "links": [
+              {
+                "id": 1,
+                "from": 2,
+                "to": 3,
+                "type": 0
+              },
+              {
+                "id": 2,
+                "from": 3,
+                "to": 4,
+                "type": 0
+              },
+              {
+                "id": 3,
+                "from": 4,
+                "to": 5,
+                "type": 0
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

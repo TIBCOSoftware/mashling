@@ -3,19 +3,19 @@ package triggerhttpnew
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/types"
-	"io/ioutil"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
 var jsonMetadata = getJsonMetadata()
 
-func getJsonMetadata() string{
+func getJsonMetadata() string {
 	jsonMetadataBytes, err := ioutil.ReadFile("trigger.json")
-	if err != nil{
+	if err != nil {
 		panic("No Json Metadata found for trigger.json path")
 	}
 	return string(jsonMetadataBytes)
@@ -52,6 +52,7 @@ func TestInitOk(t *testing.T) {
 	// New  factory
 	f := &RestFactory{}
 	tgr := f.New("tibco-rest")
+	tgr.testing = true
 
 	runner := &TestRunner{}
 
@@ -65,6 +66,7 @@ func TestHandlerOk(t *testing.T) {
 	// New  factory
 	f := &RestFactory{}
 	tgr := f.New("tibco-rest")
+	tgr.testing = true
 
 	runner := &TestRunner{}
 
