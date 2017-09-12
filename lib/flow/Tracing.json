@@ -6,7 +6,7 @@
   "triggers": [
     {
       "id": "my_rest_trigger",
-      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/triggerhttpnew",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
       "settings": {
         "port": "9233",
         "tracer": "zipkin",

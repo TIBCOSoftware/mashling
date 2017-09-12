@@ -13,6 +13,36 @@
       "required": true
     },
     {
+      "name": "tracer",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerEndpoint",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerToken",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerDebug",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tracerSameSpan",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tracerID128Bit",
+      "type": "boolean",
+      "required": false
+    },
+    {
       "name": "enableTLS",
       "type": "boolean"
     },
@@ -41,6 +71,10 @@
     {
       "name": "content",
       "type": "object"
+    },
+    {
+      "name": "tracing",
+      "type": "any"
     }
   ],
   "handler": {

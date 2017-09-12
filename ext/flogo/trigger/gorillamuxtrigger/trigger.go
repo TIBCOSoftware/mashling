@@ -3,25 +3,45 @@ package gorillamuxtrigger
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
-	"os"
-
 	"github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors"
+	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/TIBCOSoftware/mashling/lib/util"
+
+	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/gorilla/mux"
+	lightstep "github.com/lightstep/lightstep-tracer-go"
+	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
+	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	"sourcegraph.com/sourcegraph/appdash"
+	appdashtracing "sourcegraph.com/sourcegraph/appdash/opentracing"
 )
 
 const (
 	REST_CORS_PREFIX = "REST_TRIGGER"
+
+	TracerNoOP      = "noop"
+	TracerZipKin    = "zipkin"
+	TracerAPPDash   = "appdash"
+	TracerLightStep = "lightstep"
+)
+
+var (
+	ErrorTracerEndpointRequired = errors.New("tracer endpoint required")
+	ErrorInvalidTracer          = errors.New("invalid tracer")
+	ErrorTracerTokenRequired    = errors.New("tracer token required")
 )
 
 // log is the default package logger
@@ -48,6 +68,7 @@ type RestTrigger struct {
 	runner   action.Runner
 	server   *Server
 	config   *trigger.Config
+	localIP  string
 }
 
 //NewFactory create a new Trigger factory
@@ -70,6 +91,22 @@ func (t *RestTrigger) Metadata() *trigger.Metadata {
 	return t.metadata
 }
 
+// getLocalIP gets the public ip address of the system
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "0.0.0.0"
+	}
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return "0.0.0.0"
+}
+
 //Init trigger initialization
 func (t *RestTrigger) Init(runner action.Runner) {
 
@@ -88,6 +125,9 @@ func (t *RestTrigger) Init(runner action.Runner) {
 
 	addr := ":" + t.config.GetSetting("port")
 	t.runner = runner
+	t.localIP = getLocalIP()
+
+	t.configureTracer()
 
 	//Check whether TLS (Transport Layer Security) is enabled for the trigger
 	enableTLS := false
@@ -175,18 +215,106 @@ func (t *RestTrigger) Init(runner action.Runner) {
 		if handlerIsValid(optHandler) {
 			method := strings.ToUpper(optHandler.settings["method"].(string))
 			path := optHandler.settings["path"].(string)
+			url := "http://"
+			if enableTLS {
+				url = "https://"
+			}
+			url += t.localIP + ":" + t.config.GetSetting("port") + path
+
 			log.Debugf("REST Trigger: Registering handler [%s: %s] with default Action Id: [%s]", method, path, optHandler.defaultActionId)
 			//Register Cross-Origin Resource Sharing (CORS) handler
 			router.HandleFunc(path, handleCorsPreflight).
 				Methods("OPTIONS")
 			//register action handler
-			router.HandleFunc(path, newActionHandler(t, optHandler)).
+			router.HandleFunc(path, newActionHandler(t, optHandler, method, url)).
 				Methods(method)
 		}
 	}
 
 	log.Debugf("REST Trigger: Configured on port %s", t.config.Settings["port"])
 	t.server = NewServer(addr, router, enableTLS, serverCert, serverKey)
+}
+
+// configureTracer configures the distributed tracer
+func (t *RestTrigger) configureTracer() {
+	provider := app.DefaultConfigProvider()
+	config, err := provider.GetApp()
+	if err != nil {
+		panic(err)
+	}
+
+	tracer := TracerNoOP
+	if setting, ok := t.config.Settings["tracer"]; ok {
+		tracer = setting.(string)
+	}
+	tracerEndpoint := ""
+	if setting, ok := t.config.Settings["tracerEndpoint"]; ok {
+		tracerEndpoint = setting.(string)
+	}
+	tracerToken := ""
+	if setting, ok := t.config.Settings["tracerToken"]; ok {
+		tracerToken = setting.(string)
+	}
+	tracerDebug := false
+	if setting, ok := t.config.Settings["tracerDebug"]; ok {
+		tracerDebug = setting.(bool)
+	}
+	tracerSameSpan := false
+	if setting, ok := t.config.Settings["tracerSameSpan"]; ok {
+		tracerSameSpan = setting.(bool)
+	}
+	tracerID128Bit := true
+	if setting, ok := t.config.Settings["tracerID128Bit"]; ok {
+		tracerID128Bit = setting.(bool)
+	}
+
+	switch tracer {
+	case TracerNoOP:
+		opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
+	case TracerZipKin:
+		if tracerEndpoint == "" {
+			panic(ErrorTracerEndpointRequired)
+		}
+
+		collector, err := zipkin.NewHTTPCollector(tracerEndpoint)
+		if err != nil {
+			panic(fmt.Sprintf("unable to create Zipkin HTTP collector: %+v\n", err))
+		}
+
+		recorder := zipkin.NewRecorder(collector, tracerDebug, t.localIP+":"+t.config.GetSetting("port"), config.Name)
+
+		tracer, err := zipkin.NewTracer(
+			recorder,
+			zipkin.ClientServerSameSpan(tracerSameSpan),
+			zipkin.TraceID128Bit(tracerID128Bit),
+		)
+		if err != nil {
+			panic(fmt.Sprintf("unable to create Zipkin tracer: %+v\n", err))
+		}
+
+		opentracing.SetGlobalTracer(tracer)
+	case TracerAPPDash:
+		if tracerEndpoint == "" {
+			panic(ErrorTracerEndpointRequired)
+		}
+
+		collector := appdash.NewRemoteCollector(tracerEndpoint)
+		chunkedCollector := appdash.NewChunkedCollector(collector)
+		tracer := appdashtracing.NewTracer(chunkedCollector)
+		opentracing.SetGlobalTracer(tracer)
+	case TracerLightStep:
+		if tracerToken == "" {
+			panic(ErrorTracerTokenRequired)
+		}
+
+		lightstepTracer := lightstep.NewTracer(lightstep.Options{
+			AccessToken: tracerToken,
+		})
+
+		opentracing.SetGlobalTracer(lightstepTracer)
+	default:
+		panic(ErrorInvalidTracer)
+	}
 }
 
 func (t *RestTrigger) Start() error {
@@ -212,11 +340,29 @@ type IDResponse struct {
 	ID string `json:"id"`
 }
 
-func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFunc {
+func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url string) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		log.Infof("REST Trigger: Received request for id '%s'", rt.config.Id)
+
+		wireContext, err := opentracing.GlobalTracer().Extract(
+			opentracing.HTTPHeaders,
+			opentracing.HTTPHeadersCarrier(r.Header))
+
+		var serverSpan opentracing.Span
+		if err == nil {
+			serverSpan = opentracing.StartSpan(
+				r.URL.String(), ext.RPCServerOption(wireContext))
+		} else {
+			serverSpan = opentracing.StartSpan(r.URL.String())
+		}
+		defer serverSpan.Finish()
+
+		serverSpan.SetTag("http.method", method)
+		serverSpan.SetTag("http.url", url)
+
+		ctx := opentracing.ContextWithSpan(context.Background(), serverSpan)
 
 		c := cors.New(REST_CORS_PREFIX, log)
 		c.WriteCorsActualRequestHeaders(w)
@@ -229,13 +375,14 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 		}
 
 		var content interface{}
-		err := json.NewDecoder(r.Body).Decode(&content)
+		err = json.NewDecoder(r.Body).Decode(&content)
 		if err != nil {
 			switch {
 			case err == io.EOF:
 			// empty body
 			//todo should handler say if content is expected?
 			case err != nil:
+				serverSpan.SetTag("error", err.Error())
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
@@ -253,6 +400,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 			"pathParams":  pathParams,
 			"queryParams": queryParams,
 			"content":     content,
+			"tracing":     ctx,
 		}
 
 		//pick action based on dispatch condition
@@ -266,7 +414,9 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 			conditionOperation, exprType, err := condition.GetConditionOperationAndExpressionType(expressionStr)
 
 			if err != nil || exprType == condition.EXPR_TYPE_NOT_VALID {
-				log.Errorf("not able parse the condition '%v' mentioned for content based handler. skipping the handler.", expressionStr)
+				str := fmt.Sprintf("not able parse the condition '%v' mentioned for content based handler. skipping the handler.", expressionStr)
+				serverSpan.SetTag("error", str)
+				log.Error(str)
 				continue
 			}
 
@@ -280,7 +430,9 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 			if exprType == condition.EXPR_TYPE_CONTENT {
 				exprResult, err := condition.EvaluateCondition(*conditionOperation, contentStr)
 				if err != nil {
-					log.Errorf("not able evaluate expression - %v with error - %v. skipping the handler.", expressionStr, err)
+					str := fmt.Sprintf("not able evaluate expression - %v with error - %v. skipping the handler.", expressionStr, err)
+					serverSpan.SetTag("error", str)
+					log.Error(str)
 				}
 				if exprResult {
 					actionId = dispatch.actionId
@@ -332,6 +484,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 		replyCode, replyData, err := rt.runner.Run(context, action, actionId, nil)
 
 		if err != nil {
+			serverSpan.SetTag("error", err.Error())
 			log.Debugf("REST Trigger Error: %s", err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -341,11 +494,13 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler) http.HandlerFu
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 			w.WriteHeader(replyCode)
 			if err := json.NewEncoder(w).Encode(replyData); err != nil {
+				serverSpan.SetTag("error", err.Error())
 				log.Error(err)
 			}
 		}
 
 		if replyCode > 0 {
+			serverSpan.SetTag("http.status_code", replyCode)
 			w.WriteHeader(replyCode)
 		} else {
 			w.WriteHeader(http.StatusOK)
