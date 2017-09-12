@@ -57,7 +57,6 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 
 // Exec implementation of cli.Command.Exec
 func (c *cmdPublish) Exec(args []string) error {
-
 	if c.apiKey == "" || c.apiSecret == "" {
 		fmt.Fprint(os.Stderr, "Error: api key and api secret keys are required\n\n")
 		os.Exit(2)

@@ -64,17 +64,16 @@ func (user *ApiUser) CreateAPI(tfSwaggerDoc string, oauthToken string) (string, 
 }
 
 func (user *ApiUser) TransformSwagger(swaggerDoc string, oauthToken string) (string, error) {
-
 	v := url.Values{}
 	v.Set("sourceFormat", "swagger2")
 	v.Add("targetFormat", "masheryapi")
 	v.Add("publicDomain", user.portal)
 
 	client := &http.Client{}
-	r, _ := http.NewRequest("POST", masheryUri+transformUri+"?"+v.Encode(), bytes.NewReader([]byte(swaggerDoc)))
+	r, _ := http.NewRequest("POST", masheryUri + transformUri + "?" + v.Encode(), bytes.NewReader([]byte(swaggerDoc)))
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Add("Accept", "*/*")
-	r.Header.Add("Authorization", "Bearer "+oauthToken)
+	r.Header.Add("Authorization", "Bearer " + oauthToken)
 
 	resp, err := client.Do(r)
 	if err != nil {
@@ -103,7 +102,7 @@ func (user *ApiUser) FetchOAuthToken() (string, error) {
 	data.Set("scope", user.uuid)
 
 	client := &http.Client{}
-	r, _ := http.NewRequest("POST", masheryUri+"/v3/token", strings.NewReader(data.Encode()))
+	r, _ := http.NewRequest("POST", masheryUri + "/v3/token", strings.NewReader(data.Encode()))
 	r.SetBasicAuth(user.apiKey, user.apiSecretKey)
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	r.Header.Add("Accept", "*/*")
