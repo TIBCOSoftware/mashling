@@ -11,18 +11,18 @@ import (
 	"bytes"
 
 	"strconv"
-	"errors"
+
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	assets "github.com/TIBCOSoftware/mashling/cli/assets"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
 	"github.com/xeipuuv/gojsonschema"
-	assets "github.com/TIBCOSoftware/mashling/cli/assets"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
@@ -401,9 +401,9 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 // PublishToMashery publishes to mashery
 func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
 	// Get HTTP triggers from JSON
-	_ = generate_swagger(gatewayJSON)
+	_, err := generate_swagger("localhost", gatewayJSON)
 
-	_, err := user.FetchOAuthToken()
+	_, err = user.FetchOAuthToken()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to fetch the OAauth token\n\n")
 		return err
@@ -554,8 +554,4 @@ func ValidateGateway(gatewayJson string) error {
 
 	return err
 
-}
-
-func generate_swagger(gatewayJSON string) error {
-	return errors.New("Not implemented yet")
 }
