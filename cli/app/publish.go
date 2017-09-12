@@ -3,8 +3,8 @@ package app
 import (
 	"flag"
 	"fmt"
-	"os"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
+	"os"
 )
 
 var optPublish = &cli.OptionInfo{
@@ -19,6 +19,7 @@ Options:
     -s       the api secret key
     -u       username
     -p       password
+    -portal  the portal
     -uuid    the proxy uuid
  `,
 }
@@ -35,6 +36,7 @@ type cmdPublish struct {
 	username  string
 	password  string
 	uuid      string
+	portal    string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -49,6 +51,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.username), "u", "", "username")
 	fs.StringVar(&(c.password), "p", "", "password")
 	fs.StringVar(&(c.uuid), "uuid", "", "uuid")
+	fs.StringVar(&(c.portal), "portal", "", "portal")
 	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
 }
 
@@ -68,6 +71,6 @@ func (c *cmdPublish) Exec(args []string) error {
 
 	gatewayJSON, _, err := GetGatewayJSON(c.fileName)
 
-	user := ApiUser{c.username, c.password, c.apiKey, c.apiSecret, c.uuid}
+	user := ApiUser{c.username, c.password, c.apiKey, c.apiSecret, c.uuid, c.portal}
 	return PublishToMashery(&user, currentDir, gatewayJSON)
 }

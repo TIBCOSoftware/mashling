@@ -401,13 +401,30 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 // PublishToMashery publishes to mashery
 func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
 	// Get HTTP triggers from JSON
-	_, err := generate_swagger("localhost", gatewayJSON)
+	swaggerDoc, err := generate_swagger(gatewayJSON)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to generate swagger doc\n\n")
+		return err
+	}
 
-	_, err = user.FetchOAuthToken()
+	token, err := user.FetchOAuthToken()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to fetch the OAauth token\n\n")
 		return err
 	}
+
+	tfSwaggerDoc, err := user.TransformSwagger(swaggerDoc, token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger doc\n\n")
+		return err
+	}
+
+	_, err = user.CreateAPI(tfSwaggerDoc, token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to create the api\n\n")
+		return err
+	}
+
 	fmt.Println("Successfully published to mashery!")
 
 	return nil
