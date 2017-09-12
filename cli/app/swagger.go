@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -20,8 +21,10 @@ var optSwagger = &cli.OptionInfo{
 	Long: `Generate a Swagger doc representation of HTTP triggers.
 
 Options:
-    -f       specify the mashling json
-    -h       the hostname where this mashling will be deployed
+-f	specify the mashling json
+-h	the hostname where this mashling will be deployed (default is localhost)
+-t	the trigger name to target (default is all)
+-o 	the output file to write the swagger.json to (default is stdout)
  `,
 }
 
@@ -30,9 +33,11 @@ func init() {
 }
 
 type cmdSwagger struct {
-	option   *cli.OptionInfo
-	fileName string
-	host     string
+	option     *cli.OptionInfo
+	fileName   string
+	host       string
+	trigger    string
+	outputFile string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -42,15 +47,16 @@ func (c *cmdSwagger) OptionInfo() *cli.OptionInfo {
 
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdSwagger) AddFlags(fs *flag.FlagSet) {
-	fs.StringVar(&(c.fileName), "f", "", "filename")
-	fs.StringVar(&(c.host), "h", "", "host")
+	fs.StringVar(&(c.fileName), "f", "mashling.json", "filename")
+	fs.StringVar(&(c.host), "h", "localhost", "host")
+	fs.StringVar(&(c.trigger), "t", "", "trigger")
+	fs.StringVar(&(c.outputFile), "o", "", "output file")
 }
 
 // Exec implementation of cli.Command.Exec
 func (c *cmdSwagger) Exec(args []string) error {
-
 	if c.host == "" {
-		fmt.Fprint(os.Stderr, "Error: host is required\n\n")
+		fmt.Fprint(os.Stderr, "Error: host is required. \n\n")
 		os.Exit(2)
 	}
 
@@ -62,11 +68,20 @@ func (c *cmdSwagger) Exec(args []string) error {
 
 	gatewayJSON, _, err := GetGatewayJSON(c.fileName)
 
-	docs, err := generate_swagger(c.host, gatewayJSON)
+	docs, err := generateSwagger(c.host, c.trigger, gatewayJSON)
 	if err != nil {
+		fmt.Fprint(os.Stderr, "Error: Unable to generate Swagger representation. \n\n")
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "%s\n", string(docs))
+	if c.outputFile == "" {
+		fmt.Fprintf(os.Stdout, "%s\n", string(docs))
+	} else {
+		err := ioutil.WriteFile(c.outputFile, docs, 0644)
+		if err != nil {
+			fmt.Fprint(os.Stderr, "Error: Not able write Swagger to output file. \n\n")
+			return err
+		}
+	}
 	return nil
 }
 
@@ -77,7 +92,7 @@ type swaggerEndpoint struct {
 	Method      string `json:"method"`
 }
 
-func generate_swagger(host string, gatewayJSON string) ([]byte, error) {
+func generateSwagger(host string, triggerName string, gatewayJSON string) ([]byte, error) {
 	var docs []byte = nil
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
 	if err != nil {
@@ -97,44 +112,46 @@ func generate_swagger(host string, gatewayJSON string) ([]byte, error) {
 		}
 
 		for _, trigger := range descriptor.Gateway.Triggers {
-			if trigger.Type == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Type == "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger" {
-				var endpoint swaggerEndpoint
-				endpoint.Name = trigger.Name
-				endpoint.Description = trigger.Description
-				err := json.Unmarshal(trigger.Settings, &endpoint)
-				if err != nil {
-					return nil, err
-				}
-				path := map[string]interface{}{}
-				var begin_delim, end_delim rune
-				switch trigger.Type {
-				case "github.com/TIBCOSoftware/flogo-contrib/trigger/rest":
-					begin_delim = ':'
-					end_delim = '/'
-				case "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger":
-					begin_delim = '{'
-					end_delim = '}'
-				default:
-					begin_delim = '{'
-					end_delim = '}'
-				}
-				parameters := swagger_parameters(endpoint.Path, begin_delim, end_delim)
-				ok := map[string]interface{}{
-					"description": endpoint.Description,
-				}
+			if triggerName == "" || triggerName == trigger.Name {
+				if trigger.Type == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Type == "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger" {
+					var endpoint swaggerEndpoint
+					endpoint.Name = trigger.Name
+					endpoint.Description = trigger.Description
+					err := json.Unmarshal(trigger.Settings, &endpoint)
+					if err != nil {
+						return nil, err
+					}
+					path := map[string]interface{}{}
+					var begin_delim, end_delim rune
+					switch trigger.Type {
+					case "github.com/TIBCOSoftware/flogo-contrib/trigger/rest":
+						begin_delim = ':'
+						end_delim = '/'
+					case "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger":
+						begin_delim = '{'
+						end_delim = '}'
+					default:
+						begin_delim = '{'
+						end_delim = '}'
+					}
+					parameters, scrubbedPath := swaggerParametersExtractor(endpoint.Path, begin_delim, end_delim)
+					ok := map[string]interface{}{
+						"description": endpoint.Description,
+					}
 
-				path[strings.ToLower(endpoint.Method)] = map[string]interface{}{
-					"description": endpoint.Description,
-					"tags":        []interface{}{endpoint.Name},
-					"parameters":  parameters,
-					"responses": map[string]interface{}{
-						"200": ok,
-						"default": map[string]interface{}{
-							"description": "error",
+					path[strings.ToLower(endpoint.Method)] = map[string]interface{}{
+						"description": endpoint.Description,
+						"tags":        []interface{}{endpoint.Name},
+						"parameters":  parameters,
+						"responses": map[string]interface{}{
+							"200": ok,
+							"default": map[string]interface{}{
+								"description": "error",
+							},
 						},
-					},
+					}
+					paths[scrubbedPath] = path
 				}
-				paths[endpoint.Path] = path
 			}
 		}
 		docs, err = json.MarshalIndent(&swagger, "", "    ")
@@ -148,7 +165,7 @@ func generate_swagger(host string, gatewayJSON string) ([]byte, error) {
 	return docs, err
 }
 
-func swagger_parameters(path string, begin_delim rune, end_delim rune) []interface{} {
+func swaggerParametersExtractor(path string, begin_delim rune, end_delim rune) ([]interface{}, string) {
 	parameters := []interface{}{}
 	routePath := []rune(path)
 	for i := 0; i < len(routePath); i++ {
@@ -159,6 +176,9 @@ func swagger_parameters(path string, begin_delim rune, end_delim rune) []interfa
 					key.WriteRune(routePath[i])
 				}
 			}
+			if begin_delim == ':' {
+				path = strings.Replace(path, fmt.Sprintf(":%s", key.String()), fmt.Sprintf("{%s}", key.String()), 1)
+			}
 			parameter := map[string]interface{}{
 				"name":     key.String(),
 				"in":       "path",
@@ -168,5 +188,5 @@ func swagger_parameters(path string, begin_delim rune, end_delim rune) []interfa
 			parameters = append(parameters, parameter)
 		}
 	}
-	return parameters
+	return parameters, path
 }

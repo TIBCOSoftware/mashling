@@ -401,7 +401,7 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 // PublishToMashery publishes to mashery
 func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
 	// Get HTTP triggers from JSON
-	swaggerDoc, err := generate_swagger("localhost", gatewayJSON)
+	swaggerDoc, err := generateSwagger("localhost", "", gatewayJSON)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to generate swagger doc\n\n")
 		return err
