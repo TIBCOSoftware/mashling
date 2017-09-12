@@ -41,7 +41,6 @@
 				"triggers": ["kafka_trigger1"],
 				"dispatches": [
 					{
-						"if": "trigger.content != undefined",
 						"handler": "kafka_handler1"
 					}
 				]

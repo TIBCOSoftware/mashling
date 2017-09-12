@@ -6,7 +6,7 @@
     "configurations": [
       {
         "name": "kafkaConfig",
-        "type": "github.com/aambhaik/kafkasubv2",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
         "description": "Configuration for kafka cluster",
         "settings": {
           "BrokerUrl": "localhost:9092"
@@ -17,7 +17,7 @@
       {
         "name": "users_trigger",
         "description": "The trigger on kafka 'users' topic",
-        "type": "github.com/aambhaik/kafkasubv2",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
         "settings": {
           "Topic": "users",
           "config": "${configurations.kafkaConfig}"

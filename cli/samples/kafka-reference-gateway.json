@@ -6,7 +6,7 @@
 		"configurations": [
 			{
 				"name": "kafkaConfig",
-				"type": "github.com/wnichols/kafkasub",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
 				"description": "Configuration for kafka cluster",
 				"settings": {
 					"BrokerUrl": "localhost:9092"
@@ -17,7 +17,7 @@
 			{
 				"name": "kafka_trigger",
 				"description": "The trigger on kafka 'users' topic",
-				"type": "github.com/wnichols/kafkasub",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
 				"settings": {
 					"Topic": "users",
 					"config": "${configurations.kafkaConfig}"
@@ -38,7 +38,6 @@
 				"triggers": ["kafka_trigger"],
 				"dispatches": [
 					{
-						"if": "trigger.content != undefined",
 						"handler": "user_topic_handler"
 					}
 				]

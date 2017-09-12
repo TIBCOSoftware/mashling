@@ -44,7 +44,6 @@
 				],
 				"dispatches": [
 					{
-						"if": "trigger.content != undefined",
 						"handler": "get_pet_success_handler4"
 					}
 				]

@@ -17,7 +17,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 			Configurations: []types.Config{
 				{
 					Name:        "kafkaConfig",
-					Type:        "github.com/wnichols/kafkasub",
+					Type:        "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
 					Description: "Configuration for kafka cluster",
 					Settings: json.RawMessage(`{
 										"BrokerUrl": "localhost:9092"
