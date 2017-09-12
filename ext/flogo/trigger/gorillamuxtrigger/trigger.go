@@ -111,6 +111,21 @@ func (t *RestTrigger) Init(runner action.Runner) {
 		}
 	}
 
+	//Check whether client auth is enabled
+	enableClientAuth := false
+	trustStore := ""
+	if _, ok := t.config.Settings["enableClientAuth"]; ok {
+		enableClientAuthSetting, err := strconv.ParseBool(t.config.GetSetting("enableClientAuth"))
+		if err == nil && enableClientAuthSetting {
+			//Client auth is enabled. get client trust store (i.e. client CAs)
+			enableClientAuth = true
+			if _, ok := t.config.Settings["trustStore"]; !ok {
+				panic(fmt.Sprintf("Client auth is enabled but client trust store is not provided for trigger '%s' in settings", t.config.Id))
+			}
+			trustStore = t.config.GetSetting("trustStore")
+		}
+	}
+
 	//optimize flog-handlers i.e merge handlers having same settings
 	optHandlers := []*OptimizedHandler{}
 	for _, handler := range t.config.Handlers {
@@ -186,7 +201,7 @@ func (t *RestTrigger) Init(runner action.Runner) {
 	}
 
 	log.Debugf("REST Trigger: Configured on port %s", t.config.Settings["port"])
-	t.server = NewServer(addr, router, enableTLS, serverCert, serverKey)
+	t.server = NewServer(addr, router, enableTLS, serverCert, serverKey, enableClientAuth, trustStore)
 }
 
 func (t *RestTrigger) Start() error {

@@ -83,7 +83,7 @@ This example flow subscribes to the syslog subject of bilbo's kafka server using
   "triggers": [
     {
       "id": "my_kafka_trigger",
-      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
       "settings": {
         "BrokerUrl": "bilbo:9092"
       },
@@ -144,7 +144,7 @@ To connect to a TLS port on a kafka cluster member:
   "triggers": [
     {
       "id": "my_kafka_trigger",
-      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
       "settings": {
         "BrokerUrl": "bilbo:9093",
         "truststore": "/opt/kafka/kafka_2.11-0.10.2.0/keys/trust"
@@ -168,7 +168,7 @@ To connect to a port on a kafka cluster where SASL authorization is enabled
   "triggers": [
     {
       "id": "my_kafka_trigger",
-      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
       "settings": {
         "BrokerUrl": "bilbo:9094",
         "user": "foo",
