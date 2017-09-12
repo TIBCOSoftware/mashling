@@ -3,8 +3,10 @@ package gorillamuxtrigger
 import (
 	"crypto/md5"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -17,12 +19,14 @@ import (
 
 // NewServer create a new server instance
 //param server - is a instance of http.Server, can be nil and a default one will be created
-func NewServer(addr string, handler http.Handler, enableTLS bool, serverCert string, serverKey string) *Server {
+func NewServer(addr string, handler http.Handler, enableTLS bool, serverCert string, serverKey string, enableClientAuth bool, trustStore string) *Server {
 	srv := &Server{}
 	srv.Server = &http.Server{Addr: addr, Handler: handler}
 	srv.enableTLS = enableTLS
 	srv.serverCert = serverCert
 	srv.serverKey = serverKey
+	srv.enableClientAuth = enableClientAuth
+	srv.trustStore = trustStore
 
 	return srv
 }
@@ -39,6 +43,8 @@ type Server struct {
 	enableTLS        bool
 	serverCert       string
 	serverKey        string
+	enableClientAuth bool
+	trustStore       string
 }
 
 // InstanceID the server instance id
@@ -66,14 +72,31 @@ func (s *Server) Start() error {
 	s.serverInstanceID = fmt.Sprintf("%x", md5.Sum([]byte(hostname+addr)))
 
 	if s.enableTLS {
-		log.Debugf("TLS is enabled for the trigger instance - %v%v", s.serverInstanceID, addr)
+		// log.Debugf("TLS is enabled for the trigger instance - %v%v", s.serverInstanceID, addr)
 		//TLS is enabled, load server certificate & key files
 		cer, err := tls.LoadX509KeyPair(s.serverCert, s.serverKey)
 		if err != nil {
 			fmt.Printf("Error while loading certificates - %v", err)
 			return err
 		}
-		config := &tls.Config{Certificates: []tls.Certificate{cer}}
+
+		var config *tls.Config
+		if s.enableClientAuth {
+			log.Debugf("TLS with client AUTH is enabled for the trigger instance - %v%v", s.serverInstanceID, addr)
+			caCertPool, err := getCerts(s.trustStore)
+			if err != nil {
+				fmt.Printf("Error while loading client trust store - %v", err)
+				return err
+			}
+
+			config = &tls.Config{Certificates: []tls.Certificate{cer},
+				ClientAuth: tls.RequireAndVerifyClientCert,
+				ClientCAs:  caCertPool}
+			config.BuildNameToCertificate()
+		} else {
+			log.Debugf("TLS is enabled for the trigger instance - %v%v", s.serverInstanceID, addr)
+			config = &tls.Config{Certificates: []tls.Certificate{cer}}
+		}
 
 		// bind secure listener
 		listener, err := tls.Listen("tcp", addr, config)
@@ -185,4 +208,36 @@ func (sh *serverHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("X-Server-Instance-Id", sh.serverInstanceID)
 
 	sh.handler.ServeHTTP(w, r)
+}
+
+func getCerts(trustStore string) (*x509.CertPool, error) {
+	certPool := x509.NewCertPool()
+	fileInfo, err := os.Stat(trustStore)
+	if err != nil {
+		return certPool, fmt.Errorf("Truststore [%s] does not exist", trustStore)
+	}
+	switch mode := fileInfo.Mode(); {
+	case mode.IsDir():
+		break
+	case mode.IsRegular():
+		return certPool, fmt.Errorf("Truststore [%s] is not a directory.  Must be a directory containing trusted certificates in PEM format",
+			trustStore)
+	}
+	trustedCertFiles, err := ioutil.ReadDir(trustStore)
+	if err != nil || len(trustedCertFiles) == 0 {
+		return certPool, fmt.Errorf("Failed to read trusted certificates from [%s]  Must be a directory containing trusted certificates in PEM format", trustStore)
+	}
+	for _, trustCertFile := range trustedCertFiles {
+		fqfName := fmt.Sprintf("%s%c%s", trustStore, os.PathSeparator, trustCertFile.Name())
+		trustCertBytes, err := ioutil.ReadFile(fqfName)
+		if err != nil {
+			log.Warnf("Failed to read trusted certificate [%s] ... continueing", trustCertFile.Name())
+		}
+		log.Debugf("Loading cert file - %v", fqfName)
+		certPool.AppendCertsFromPEM(trustCertBytes)
+	}
+	if len(certPool.Subjects()) < 1 {
+		return certPool, fmt.Errorf("Failed to read trusted certificates from [%s]  After processing all files in the directory no valid trusted certs were found", trustStore)
+	}
+	return certPool, nil
 }

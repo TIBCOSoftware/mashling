@@ -28,6 +28,13 @@ settings, outputs and handler:
     {
       "name": "serverKey",
       "type": "string"
+    },{
+      "name": "enableClientAuth",
+      "type": "string"
+    },
+    {
+      "name": "trustStore",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -84,6 +91,8 @@ settings, outputs and handler:
 | enableTLS | true - To enable TLS (Transport Layer Security), false - No TLS security  |
 | serverCert | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 | serverKey | Server private key file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
+| enableClientAuth | true - To enable client AUTH, false - Client AUTH is not enabled |
+| trustStore | Trust dir containing clinet CAs |
 
 ### Outputs
 | Key    | Description   |

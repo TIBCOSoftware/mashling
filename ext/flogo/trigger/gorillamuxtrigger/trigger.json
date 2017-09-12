@@ -23,6 +23,14 @@
     {
       "name": "serverKey",
       "type": "string"
+    },
+    {
+      "name": "enableClientAuth",
+      "type": "string"
+    },
+    {
+      "name": "trustStore",
+      "type": "string"
     }
   ],
   "outputs": [
