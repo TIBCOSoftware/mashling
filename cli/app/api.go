@@ -10,7 +10,6 @@ import (
 
 	"bytes"
 
-	"strconv"
 	"errors"
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/env"
@@ -18,11 +17,12 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	assets "github.com/TIBCOSoftware/mashling/cli/assets"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
 	"github.com/xeipuuv/gojsonschema"
-	assets "github.com/TIBCOSoftware/mashling/cli/assets"
+	"strconv"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
@@ -401,13 +401,30 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 // PublishToMashery publishes to mashery
 func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
 	// Get HTTP triggers from JSON
-	_ = generate_swagger(gatewayJSON)
+	swaggerDoc, err := generate_swagger(gatewayJSON)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to generate swagger doc\n\n")
+		return err
+	}
 
-	_, err := user.FetchOAuthToken()
+	token, err := user.FetchOAuthToken()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to fetch the OAauth token\n\n")
 		return err
 	}
+
+	tfSwaggerDoc, err := user.TransformSwagger(swaggerDoc, token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger doc\n\n")
+		return err
+	}
+
+	_, err = user.CreateAPI(tfSwaggerDoc, token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to create the api\n\n")
+		return err
+	}
+
 	fmt.Println("Successfully published to mashery!")
 
 	return nil
@@ -556,6 +573,6 @@ func ValidateGateway(gatewayJson string) error {
 
 }
 
-func generate_swagger(gatewayJSON string) error {
-	return errors.New("Not implemented yet")
+func generate_swagger(gatewayJSON string) (string, error) {
+	return "", errors.New("Not implemented yet")
 }
