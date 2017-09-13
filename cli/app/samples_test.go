@@ -2,14 +2,15 @@ package app
 
 import (
 	"fmt"
-	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/TIBCOSoftware/flogo-cli/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSampleGateways(t *testing.T) {
