@@ -2,6 +2,7 @@
 	"gateway": {
 		"name": "3recipe",
 		"version": "1.0.0",
+		"display_name":"KafkaTrigger to RestActivity Mashling",
 		"description": "This is the first microgateway app",
 		"configurations": [
 			{

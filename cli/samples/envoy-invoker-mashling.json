@@ -2,6 +2,7 @@
 	"gateway": {
 		"name": "envoy",
 		"version": "1.0.0",
+		"display_name":"Envoy Invoker Mashling",
 		"description": "This is the microgateway app that invokes envoy front-proxy",
 		"configurations": [],
 		"triggers": [

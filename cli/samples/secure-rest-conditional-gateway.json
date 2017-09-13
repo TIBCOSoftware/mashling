@@ -2,6 +2,7 @@
   "gateway": {
     "name": "clientAuthGw",
     "version": "1.0.0",
+    "display_name":"Secure Rest Conditional Gateway",
     "description": "This is the rest based microgateway app with TLS enabled",
     "configurations": [
       {

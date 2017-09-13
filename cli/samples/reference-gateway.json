@@ -2,6 +2,7 @@
 	"gateway": {
 		"name": "demo",
 		"version": "1.0.0",
+		"display_name":"Reference Gateway",
 		"description": "This is the first microgateway app",
 		"configurations": [],
 		"triggers": [
