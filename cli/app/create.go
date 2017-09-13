@@ -6,10 +6,11 @@ import (
 	"os"
 
 	"encoding/json"
+	"path"
+
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/lib/model"
-	"path"
 )
 
 var optCreate = &cli.OptionInfo{

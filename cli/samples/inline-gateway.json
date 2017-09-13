@@ -50,7 +50,7 @@
 										"attributes": [
 											{
 												"name": "message",
-												"value": "${message}",
+												"value": "",
 												"required": false,
 												"type": "string"
 											},
@@ -66,7 +66,14 @@
 												"required": false,
 												"type": "boolean"
 											}
-										]
+										],
+                                "inputMappings": [
+                                    {
+                                        "type": 1,
+                                        "value": "{T.message}",
+                                        "mapTo": "message"
+                                    }
+                                ]
 									}
 								],
 								"links": [],

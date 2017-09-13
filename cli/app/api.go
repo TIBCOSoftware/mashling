@@ -10,7 +10,8 @@ import (
 
 	"bytes"
 
-	"errors"
+	"strconv"
+
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -22,7 +23,6 @@ import (
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
 	"github.com/xeipuuv/gojsonschema"
-	"strconv"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
@@ -401,7 +401,7 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 // PublishToMashery publishes to mashery
 func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
 	// Get HTTP triggers from JSON
-	swaggerDoc, err := generate_swagger(gatewayJSON)
+	swaggerDoc, err := generateSwagger("localhost", "", gatewayJSON)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to generate swagger doc\n\n")
 		return err
@@ -413,7 +413,7 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
 		return err
 	}
 
-	tfSwaggerDoc, err := user.TransformSwagger(swaggerDoc, token)
+	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), token)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger doc\n\n")
 		return err
@@ -571,8 +571,4 @@ func ValidateGateway(gatewayJson string) error {
 
 	return err
 
-}
-
-func generate_swagger(gatewayJSON string) (string, error) {
-	return "", errors.New("Not implemented yet")
 }
