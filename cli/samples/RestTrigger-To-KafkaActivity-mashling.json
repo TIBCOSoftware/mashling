@@ -29,7 +29,7 @@
 		],
 		"event_handlers": [
             {
-				"name": "get_pet_success_handler4",
+				"name": "get_pet_handler4",
 				"description": "Handle the user access",
 				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToKafkaActivity.json",
 				"params": {
@@ -44,7 +44,7 @@
 				],
 				"dispatches": [
 					{
-						"handler": "get_pet_success_handler4"
+						"handler": "get_pet_handler4"
 					}
 				]
 			}

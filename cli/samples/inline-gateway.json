@@ -26,7 +26,7 @@
 		],
 		"event_handlers": [
 			{
-				"name": "OrderSuccessHandler",
+				"name": "OrderHandler",
 				"description": "Handle the order processing",
 				"params": {
 					"message": "${(trigger).content}"
@@ -81,7 +81,7 @@
 							}
 						}
 					},
-					"id": "order_success_handler",
+					"id": "order_handler",
 					"ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
 				}
 			}
@@ -93,7 +93,7 @@
 				],
 				"dispatches": [
 					{
-						"handler": "OrderSuccessHandler"
+						"handler": "OrderHandler"
 					}
 				]
 			}

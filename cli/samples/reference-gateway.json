@@ -18,7 +18,7 @@
 		],
 		"event_handlers": [
 			{
-				"name": "get_pet_success_handler",
+				"name": "get_pet_handler",
 				"description": "Handle the user access",
 				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
 				"params": {
@@ -33,7 +33,7 @@
 				],
 				"dispatches": [
 					{
-						"handler": "get_pet_success_handler"
+						"handler": "get_pet_handler"
 					}
 				]
 			}

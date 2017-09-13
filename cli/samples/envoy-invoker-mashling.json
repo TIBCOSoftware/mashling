@@ -18,7 +18,7 @@
 		],
 		"event_handlers": [
 			{
-				"name": "get_envoy_success_handler",
+				"name": "get_envoy_handler",
 				"description": "Handle the envoy service access",
 				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/envoyInvokerFlow.json"
 			}
@@ -30,7 +30,7 @@
 				],
 				"dispatches": [
 					{
-						"handler": "get_envoy_success_handler"
+						"handler": "get_envoy_handler"
 					}
 				]
 			}
