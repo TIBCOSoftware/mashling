@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -101,6 +102,10 @@ func isValidVersion(s string) bool {
 func isNumeric(s string) bool {
 	_, err := strconv.Atoi(s)
 	return err == nil
+}
+
+func delayMilli(amount int) {
+	time.Sleep(time.Duration(amount) * time.Millisecond)
 }
 
 func Usage() {
