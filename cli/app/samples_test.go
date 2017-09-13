@@ -14,14 +14,17 @@ import (
 )
 
 func TestSampleGateways(t *testing.T) {
+	resetDir, err := os.Getwd()
+	defer os.Chdir(resetDir)
+	assert.NoError(t, err, "Unable to access the current directory %v", err)
 	now := time.Now()
 	testDir := os.Getenv("GOPATH") + "/sample_mashling_gateways_" + now.Format(time.RFC3339)
 
-	err := os.Mkdir(testDir, 0755)
+	err = os.Mkdir(testDir, 0755)
 	assert.NoError(t, err, "Unable to create the tests directory under $GOPATH %v", err)
 
 	samplesDir, err := filepath.Abs("../samples")
-	assert.NoError(t, err, "Unable to access the sampels directory %v", samplesDir)
+	assert.NoError(t, err, "Unable to access the samples directory %v", samplesDir)
 
 	//change into the test directory
 	os.Chdir(testDir)
