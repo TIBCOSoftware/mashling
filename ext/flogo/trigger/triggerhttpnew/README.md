@@ -18,6 +18,36 @@ settings, outputs and handler:
       "required": true
     },
     {
+      "name": "tracer",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerEndpoint",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerToken",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerDebug",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tracerSameSpan",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tracerID128Bit",
+      "type": "boolean",
+      "required": false
+    },
+    {
       "name": "enableTLS",
       "type": "boolean"
     },
@@ -46,6 +76,10 @@ settings, outputs and handler:
     {
       "name": "content",
       "type": "object"
+    },
+    {
+      "name": "tracing",
+      "type": "any"
     }
   ],
   "handler": {
@@ -81,6 +115,12 @@ settings, outputs and handler:
 | Key    | Description   |
 |:-----------|:--------------|
 | port | The port to listen on |
+| tracer | The tracer to use: noop, zipkin, appdash, or lightstep |
+| tracerEndpoint | The url or address of the tracer (ZipKin, APPDash)|
+| tracerToken | The token for tracing access (LightStep) |
+| tracerDebug | Debug mode for the tracer (ZipKin) |
+| tracerSameSpan | Put client side and server side annotations in same span (ZipKin) |
+| tracerID128Bit | Use 128 bit ids (ZipKin) |
 | enableTLS | true - To enable TLS (Transport Layer Security), false - No TLS security  |
 | serverCert | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 | serverKey | Server private key file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
@@ -92,6 +132,7 @@ settings, outputs and handler:
 | pathParams | HTTP request path params |
 | queryParams | HTTP request query params |
 | content | HTTP request paylod |
+| tracing | Tracing context |
 
 ### Handler settings
 | Key    | Description   |
