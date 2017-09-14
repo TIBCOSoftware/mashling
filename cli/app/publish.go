@@ -56,7 +56,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.password), "p", "", "password")
 	fs.StringVar(&(c.uuid), "uuid", "", "uuid")
 	fs.StringVar(&(c.portal), "portal", "", "portal")
-	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
+	fs.StringVar(&(c.fileName), "f", "mashling.json", "gateway app file")
 	fs.StringVar(&(c.mock), "mock", "false", "mock")
 	fs.StringVar(&(c.host), "h", "localhost", "the hostname where this mashling will be deployed (default is localhost)")
 

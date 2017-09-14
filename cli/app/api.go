@@ -446,7 +446,14 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host str
 
 		fmt.Println("Successfully published to mashery!")
 	} else {
-		fmt.Println("Mocked! Did not attempt to publish.")
+		var prettyJSON bytes.Buffer
+		err := json.Indent(&prettyJSON, cleanedTfSwaggerDoc, "", "\t")
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s", prettyJSON.Bytes())
+		fmt.Println("\nMocked! Did not attempt to publish.\n")
 	}
 
 	return nil
