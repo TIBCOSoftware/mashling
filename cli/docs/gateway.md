@@ -191,6 +191,33 @@ For more details please use:
 
 	mashling help swagger
 
+### publish
+This command is used to publish HTTP triggers in your mashling.json file
+to Mashery.
+
+Usage:
+
+    mashling publish -k key -s secret_key  -u username -p password -uuid  uuid -portal mashery_portal -h petstore.swagger.io
+
+**options**
+
+- *-mock* : true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false).
+- *-f* : specify the mashling json (default is mashling.json).
+
+Example (display transformed swagger doc only):
+
+    mashling publish -k 12345  -s 6789  -u foo -p bar -uuid  xxxyyy -portal "tibcobanqio.api.mashery.com" -mock true  -h petstore.swagger.io
+
+Example (publish to Mashery):
+
+    mashling publish -k 12345  -s 6789  -u foo -p bar -uuid  xxxyyy -portal "tibcobanqio.api.mashery.com"  -h petstore.swagger.io
+
+For more details please use:
+
+    mashling help publish
+
+#####
+
 ## Gateway Project
 
 ### Structure
