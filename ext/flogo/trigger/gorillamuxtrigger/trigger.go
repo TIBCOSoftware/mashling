@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors"
-	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
@@ -252,12 +251,6 @@ func (t *RestTrigger) Init(runner action.Runner) {
 
 // configureTracer configures the distributed tracer
 func (t *RestTrigger) configureTracer() {
-	provider := app.DefaultConfigProvider()
-	config, err := provider.GetApp()
-	if err != nil {
-		panic(err)
-	}
-
 	tracer := TracerNoOP
 	if setting, ok := t.config.Settings["tracer"]; ok {
 		tracer = setting.(string)
@@ -296,7 +289,8 @@ func (t *RestTrigger) configureTracer() {
 			panic(fmt.Sprintf("unable to create Zipkin HTTP collector: %+v\n", err))
 		}
 
-		recorder := zipkin.NewRecorder(collector, tracerDebug, t.localIP+":"+t.config.GetSetting("port"), config.Name)
+		recorder := zipkin.NewRecorder(collector, tracerDebug,
+			t.localIP+":"+t.config.GetSetting("port"), t.config.Name)
 
 		tracer, err := zipkin.NewTracer(
 			recorder,
