@@ -1,4 +1,5 @@
 {
+	"mashling_version": "0.2",
 	"gateway": {
 		"name": "microgateway",
 		"version": "1.0.0",

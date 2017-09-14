@@ -1,7 +1,14 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": [
+        "mashling_version",
+        "gateway"
+    ],
     "properties": {
+        "mashling_version": {
+            "type": "string"
+        },
         "gateway": {
             "type": "object",
             "required": [
