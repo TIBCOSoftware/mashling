@@ -6,10 +6,11 @@ import (
 	"os"
 
 	"encoding/json"
+	"path"
+
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/lib/model"
-	"path"
 )
 
 var optCreate = &cli.OptionInfo{
@@ -100,6 +101,15 @@ func (c *cmdCreate) Exec(args []string) error {
 	}
 
 	appDir := path.Join(currentDir, gatewayName)
+
+	isValidJson := false
+
+	isValidJson, err = IsValidateGateway(gatewayJson)
+
+	if !isValidJson {
+		fmt.Print("mashling creation aborted \n")
+		return err
+	}
 
 	return CreateMashling(SetupNewProjectEnv(), gatewayJson, appDir, gatewayName, c.vendorDir)
 }
