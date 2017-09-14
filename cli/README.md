@@ -45,7 +45,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 		"configurations": [
 			{
 				"name": "kafkaConfig",
-				"type": "github.com/wnichols/kafkasub",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
 				"description": "Configuration for kafka cluster",
 				"settings": {
 					"BrokerUrl": "localhost:9092"
@@ -81,7 +81,6 @@ The built in sample gateway is based of the following mashling.json.  This file 
 				],
 				"dispatches": [
 					{
-						"if": "trigger.content != undefined",
 						"handler": "get_pet_success_handler"
 					}
 				]

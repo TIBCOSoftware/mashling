@@ -2,6 +2,7 @@
 	"gateway": {
 		"name": "3recipe",
 		"version": "1.0.0",
+		"display_name":"RestTrigger to KafkaActivity Mashling",
 		"description": "This is the first microgateway app",
 		"configurations": [
 			{
@@ -29,7 +30,7 @@
 		],
 		"event_handlers": [
             {
-				"name": "get_pet_success_handler4",
+				"name": "get_pet_handler4",
 				"description": "Handle the user access",
 				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToKafkaActivity.json",
 				"params": {
@@ -44,7 +45,7 @@
 				],
 				"dispatches": [
 					{
-						"handler": "get_pet_success_handler4"
+						"handler": "get_pet_handler4"
 					}
 				]
 			}

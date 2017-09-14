@@ -19,6 +19,12 @@
                 "version": {
                     "type": "string"
                 },
+                "display_name": {
+                    "type": "string"
+                },
+                "display_image": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },

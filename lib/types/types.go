@@ -10,6 +10,8 @@ type Microgateway struct {
 type Gateway struct {
 	Name           string         `json:"name"`
 	Version        string         `json:"version"`
+	DisplayName    string         `json:"display_name"`
+	DisplayImage   string         `json:"display_image"`
 	Description    string         `json:"description,omitempty"`
 	Configurations []Config       `json:"configurations"`
 	Triggers       []Trigger      `json:"triggers"`

@@ -10,9 +10,11 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 
 	microGateway := types.Microgateway{
 		Gateway: types.Gateway{
-			Name:        "Test",
-			Version:     "1.0.0",
-			Description: "This is the first microgateway app",
+			Name:         "GatewayApp",
+			Version:      "1.0.0",
+			DisplayName:  "Gateway Application",
+			DisplayImage: "GatewayIcon.jpg",
+			Description:  "This is the first microgateway app",
 			//Configurations: []types.Config{},
 			Configurations: []types.Config{
 				{

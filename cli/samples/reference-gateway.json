@@ -2,6 +2,7 @@
 	"gateway": {
 		"name": "demo",
 		"version": "1.0.0",
+		"display_name":"Reference Gateway",
 		"description": "This is the first microgateway app",
 		"configurations": [],
 		"triggers": [
@@ -18,7 +19,7 @@
 		],
 		"event_handlers": [
 			{
-				"name": "get_pet_success_handler",
+				"name": "get_pet_handler",
 				"description": "Handle the user access",
 				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
 				"params": {
@@ -33,7 +34,7 @@
 				],
 				"dispatches": [
 					{
-						"handler": "get_pet_success_handler"
+						"handler": "get_pet_handler"
 					}
 				]
 			}
