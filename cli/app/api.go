@@ -399,13 +399,16 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 }
 
 // PublishToMashery publishes to mashery
-func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
+func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host string, mock bool) error {
 	// Get HTTP triggers from JSON
-	swaggerDoc, err := generateSwagger("localhost", "", gatewayJSON)
+	swaggerDoc, err := generateSwagger(host, "", gatewayJSON)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to generate swagger doc\n\n")
 		return err
 	}
+
+	// Delay to avoid hitting QPS limit
+	delayMilli(500)
 
 	token, err := user.FetchOAuthToken()
 	if err != nil {
@@ -413,19 +416,45 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string) error {
 		return err
 	}
 
+	delayMilli(500)
+
 	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), token)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger doc\n\n")
 		return err
 	}
 
-	_, err = user.CreateAPI(tfSwaggerDoc, token)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Unable to create the api\n\n")
-		return err
+	// Only need the value of 'document'. Including the rest will cause errors
+	m := map[string]interface{}{}
+	if err = json.Unmarshal([]byte(tfSwaggerDoc), &m); err != nil {
+		panic(err)
 	}
 
-	fmt.Println("Successfully published to mashery!")
+	var cleanedTfSwaggerDoc []byte
+
+	if cleanedTfSwaggerDoc, err = json.Marshal(m["document"]); err != nil {
+		panic(err)
+	}
+
+	if mock == false {
+		s, err := user.CreateAPI(string(cleanedTfSwaggerDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to create the api %s\n\n", s)
+			fmt.Errorf("%v", err)
+			return err
+		}
+
+		fmt.Println("Successfully published to mashery!")
+	} else {
+		var prettyJSON bytes.Buffer
+		err := json.Indent(&prettyJSON, cleanedTfSwaggerDoc, "", "\t")
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s", prettyJSON.Bytes())
+		fmt.Println("\nMocked! Did not attempt to publish.\n")
+	}
 
 	return nil
 }

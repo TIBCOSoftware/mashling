@@ -36,6 +36,7 @@ func debug(data []byte, err error) {
 	}
 }
 
+// CreateAPI sends the transformed swagger doc to the Mashery API.
 func (user *ApiUser) CreateAPI(tfSwaggerDoc string, oauthToken string) (string, error) {
 
 	client := &http.Client{}
@@ -56,15 +57,17 @@ func (user *ApiUser) CreateAPI(tfSwaggerDoc string, oauthToken string) (string, 
 		return "", err
 	}
 
+	s := string(bodyText)
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("Unable to create the api: status code %g", resp.StatusCode)
+		return s, fmt.Errorf("Unable to create the api: status code %g", resp.StatusCode)
 	}
 
-	return string(bodyText), err
+	return s, err
 }
 
+// TransformSwagger sends the swagger doc to Mashery API to be
+// transformed into the masheryapi format.
 func (user *ApiUser) TransformSwagger(swaggerDoc string, oauthToken string) (string, error) {
-
 	v := url.Values{}
 	v.Set("sourceFormat", "swagger2")
 	v.Add("targetFormat", "masheryapi")
@@ -95,6 +98,7 @@ func (user *ApiUser) TransformSwagger(swaggerDoc string, oauthToken string) (str
 	return string(bodyText), err
 }
 
+// FetchOAuthToken exchanges the creds for an OAuth token
 func (user *ApiUser) FetchOAuthToken() (string, error) {
 	data := url.Values{}
 	data.Set("grant_type", "password")
