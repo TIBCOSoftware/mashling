@@ -1,5 +1,5 @@
 {
-  "mashling_version": "0.2",
+  "mashling_schema": "0.2",
   "gateway": {
     "name": "kafka",
     "version": "1.0.0",

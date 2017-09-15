@@ -2,11 +2,11 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [
-        "mashling_version",
+        "mashling_schema",
         "gateway"
     ],
     "properties": {
-        "mashling_version": {
+        "mashling_schema": {
             "type": "string"
         },
         "gateway": {
