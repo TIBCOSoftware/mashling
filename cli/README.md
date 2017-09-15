@@ -38,7 +38,7 @@ The built in sample gateway is based of the following mashling.json.  This file 
 
 ```json
 {
-	"mashling_version": "0.2",
+	"mashling_schema": "0.2",
 	"gateway": {
 		"name": "demo",
 		"version": "1.0.0",

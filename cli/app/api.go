@@ -516,7 +516,7 @@ func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 func IsValidateGateway(gatewayJson string) (bool, error) {
 
 	isValidJson := false
-	schema, err := assets.Asset("schema/gateway_schema.json")
+	schema, err := assets.Asset("schema/mashling_schema.json")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -545,7 +545,7 @@ func IsValidateGateway(gatewayJson string) (bool, error) {
 //ValidateGateway validates the gateway schema instance
 func ValidateGateway(gatewayJson string) error {
 
-	schema, err := assets.Asset("schema/gateway_schema.json")
+	schema, err := assets.Asset("schema/mashling_schema.json")
 	if err != nil {
 		panic(err.Error())
 	}
