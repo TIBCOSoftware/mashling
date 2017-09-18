@@ -1,7 +1,9 @@
 {
+	"mashling_version": "0.2",
 	"gateway": {
 		"name": "kafka",
 		"version": "1.0.0",
+		"display_name":"Kafka Reference Gateway",
 		"description": "This is the kafka based microgateway app",
 		"configurations": [
 			{

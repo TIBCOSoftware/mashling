@@ -63,5 +63,14 @@ func (c *cmdBuild) Exec(args []string) error {
 		return err
 	}
 
+	isValidJson := false
+
+	isValidJson, err = IsValidateGateway(gatewayJSON)
+
+	if !isValidJson {
+		fmt.Print("mashling build aborted \n")
+		return err
+	}
+
 	return BuildMashling(currentDir, gatewayJSON)
 }

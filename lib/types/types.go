@@ -4,12 +4,15 @@ import "encoding/json"
 import "github.com/TIBCOSoftware/flogo-lib/core/action"
 
 type Microgateway struct {
-	Gateway Gateway `json:"gateway"`
+	MashlingVersion string  `json:"mashling_version"`
+	Gateway         Gateway `json:"gateway"`
 }
 
 type Gateway struct {
 	Name           string         `json:"name"`
 	Version        string         `json:"version"`
+	DisplayName    string         `json:"display_name"`
+	DisplayImage   string         `json:"display_image"`
 	Description    string         `json:"description,omitempty"`
 	Configurations []Config       `json:"configurations"`
 	Triggers       []Trigger      `json:"triggers"`

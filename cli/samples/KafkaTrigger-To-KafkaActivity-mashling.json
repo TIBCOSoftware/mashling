@@ -1,7 +1,9 @@
 {
+	"mashling_version": "0.2",
 	"gateway": {
 		"name": "allRecipe",
 		"version": "1.0.0",
+		"display_name":"KafkaTrigger to KafkaActivity Mashling",
 		"description": "This is the first microgateway app",
 		"configurations": [
 			{

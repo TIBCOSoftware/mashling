@@ -1,7 +1,9 @@
 {
+	"mashling_version": "0.2",
 	"gateway": {
 		"name": "microgateway",
 		"version": "1.0.0",
+		"display_name":"Inline Gateway",
 		"description": "This is the first microgateway app",
 		"configurations": [
 			{
@@ -26,7 +28,7 @@
 		],
 		"event_handlers": [
 			{
-				"name": "OrderSuccessHandler",
+				"name": "OrderHandler",
 				"description": "Handle the order processing",
 				"params": {
 					"message": "${(trigger).content}"
@@ -81,7 +83,7 @@
 							}
 						}
 					},
-					"id": "order_success_handler",
+					"id": "order_handler",
 					"ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
 				}
 			}
@@ -93,7 +95,7 @@
 				],
 				"dispatches": [
 					{
-						"handler": "OrderSuccessHandler"
+						"handler": "OrderHandler"
 					}
 				]
 			}

@@ -573,7 +573,37 @@ func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 	return gwInfoBuffer.String(), nil
 }
 
-//ValidateGateway validates the gatewway schema instance
+//IsValidateGateway validates the gateway schema instance returns bool and error
+func IsValidateGateway(gatewayJson string) (bool, error) {
+
+	isValidJson := false
+	schema, err := assets.Asset("schema/gateway_schema.json")
+	if err != nil {
+		panic(err.Error())
+	}
+	schemaString := string(schema)
+	schemaLoader := gojsonschema.NewStringLoader(schemaString)
+	documentLoader := gojsonschema.NewStringLoader(gatewayJson)
+
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if result.Valid() {
+		isValidJson = true
+	} else {
+		fmt.Printf("The gateway json not valid. see errors :\n")
+		for _, desc := range result.Errors() {
+			fmt.Printf("- %s\n", desc)
+		}
+	}
+
+	return isValidJson, err
+
+}
+
+//ValidateGateway validates the gateway schema instance
 func ValidateGateway(gatewayJson string) error {
 
 	schema, err := assets.Asset("schema/gateway_schema.json")
