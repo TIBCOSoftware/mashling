@@ -33,7 +33,7 @@ mashling create myApp
 - Mashling will start a REST server
 - Send GET request to run the flow. eg: http://localhost:9096/pets/1
 
-The built in sample gateway is based of the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be generated using the mashling-web UI.
+The built in sample gateway is based of the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be edited and downloaded via mashling.io
 
 ```json
 {
