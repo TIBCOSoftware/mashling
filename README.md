@@ -99,6 +99,7 @@ Additional documentation on mashling and the CLI tool
   - **mashling tool**
   
   Create a mashling microgateway from a recipe.json
+  
       mashling create -f recipe.json <mashlingappname>
 
 
