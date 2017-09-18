@@ -1720,7 +1720,7 @@ func TestTranslateGatewayJSON2FlogoJSON(t *testing.T) {
 	}
 
 	if expectedFlogoJSON != flogoJSON {
-		t.Error("Generated flogoJSON and expected flgoJSON are not same")
+		t.Error("Generated flogoJSON and expected flogoJSON are not same")
 	}
 }
 
@@ -1729,6 +1729,6 @@ func TestBuildMashling(t *testing.T) {
 
 	err := BuildMashling("", gatewayJSON)
 	if err == nil {
-		t.Error("BuildMashling not handled empty gateway JSON")
+		t.Error("BuildMashling should not handle an empty gateway JSON")
 	}
 }

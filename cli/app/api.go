@@ -532,7 +532,7 @@ func IsValidateGateway(gatewayJson string) (bool, error) {
 	if result.Valid() {
 		isValidJson = true
 	} else {
-		fmt.Printf("The gateway json not valid. see errors :\n")
+		fmt.Printf("The gateway json is not valid. See errors:\n")
 		for _, desc := range result.Errors() {
 			fmt.Printf("- %s\n", desc)
 		}
@@ -561,7 +561,7 @@ func ValidateGateway(gatewayJson string) error {
 	if result.Valid() {
 		fmt.Printf("The gateway json is valid\n")
 	} else {
-		fmt.Printf("The gateway json not valid. see errors :\n")
+		fmt.Printf("The gateway json not valid. See errors:\n")
 		for _, desc := range result.Errors() {
 			fmt.Printf("- %s\n", desc)
 		}
