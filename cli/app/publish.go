@@ -1,11 +1,11 @@
 package app
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"os"
-
 	"strconv"
 )
 
@@ -64,9 +64,9 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 
 // Exec implementation of cli.Command.Exec
 func (c *cmdPublish) Exec(args []string) error {
-	if c.apiKey == "" || c.apiSecret == "" {
-		fmt.Fprint(os.Stderr, "Error: api key and api secret keys are required\n\n")
-		os.Exit(2)
+	if c.apiKey == "" || c.apiSecret == "" || c.username == "" || c.password == "" ||
+		c.uuid == "" || c.portal == "" {
+		return errors.New("Error: api key and api secret keys are required")
 	}
 
 	currentDir, err := os.Getwd()
