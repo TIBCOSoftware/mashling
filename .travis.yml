@@ -27,14 +27,15 @@ before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
 install:
   - go get -u github.com/constabulary/gb/...
-  - go get -u github.com/tools/godep/...
+#  - go get -u github.com/tools/godep/...
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd ;
-  - cp -r $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/dependency-config/* $GOPATH/src/github.com/TIBCOSoftware/mashling
+#  - cp -r $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/dependency-config/* $GOPATH/src/github.com/TIBCOSoftware/mashling
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
-  - godep restore
-  - go install ./...
+#  - godep restore
+#  - go install ./...
+  - go get -u github.com/TIBCOSoftware/mashling/...
   - mashling help
   
   
