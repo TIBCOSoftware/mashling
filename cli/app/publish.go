@@ -4,9 +4,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"os"
 	"strconv"
+
+	"github.com/TIBCOSoftware/mashling/cli/cli"
 )
 
 var optPublish = &cli.OptionInfo{
@@ -23,6 +24,8 @@ Options:
     -p       password (required)
     -portal  the portal (required)
     -uuid    the proxy uuid (required)
+    -h       the publicly available hostname where this mashling will be deployed (required)
+    -mock    true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
  `,
 }
 
@@ -58,7 +61,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.portal), "portal", "", "portal")
 	fs.StringVar(&(c.fileName), "f", "mashling.json", "gateway app file")
 	fs.StringVar(&(c.mock), "mock", "false", "mock")
-	fs.StringVar(&(c.host), "h", "localhost", "the hostname where this mashling will be deployed (default is localhost)")
+	fs.StringVar(&(c.host), "h", "", "the publicly available hostname where this mashling will be deployed")
 
 }
 
@@ -67,6 +70,10 @@ func (c *cmdPublish) Exec(args []string) error {
 	if c.apiKey == "" || c.apiSecret == "" || c.username == "" || c.password == "" ||
 		c.uuid == "" || c.portal == "" {
 		return errors.New("Error: api key and api secret keys are required")
+	}
+
+	if c.host == "" {
+		return errors.New("Error: host is required")
 	}
 
 	currentDir, err := os.Getwd()
