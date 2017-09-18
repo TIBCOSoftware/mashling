@@ -58,8 +58,8 @@ func (user *ApiUser) CreateAPI(tfSwaggerDoc string, oauthToken string) (string, 
 	}
 
 	s := string(bodyText)
-	if resp.StatusCode != 200 {
-		return s, fmt.Errorf("Unable to create the api: status code %g", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		return s, fmt.Errorf("Unable to create the api: status code %v", resp.StatusCode)
 	}
 
 	return s, err
@@ -91,8 +91,8 @@ func (user *ApiUser) TransformSwagger(swaggerDoc string, oauthToken string) (str
 		return "", err
 	}
 
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("Unable to transform the swagger doc: status code %g", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("Unable to transform the swagger doc: status code %v", resp.StatusCode)
 	}
 
 	return string(bodyText), err
@@ -124,12 +124,11 @@ func (user *ApiUser) FetchOAuthToken() (string, error) {
 		return "", err
 	}
 
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("Unable to get the OAuth token: status code %g", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("Unable to get the OAuth token: status code %v", resp.StatusCode)
 	}
 
 	var dat map[string]interface{}
-
 	if err := json.Unmarshal([]byte(string(bodyText)), &dat); err != nil {
 		return "", errors.New("Unable to unmarshal JSON")
 	}
