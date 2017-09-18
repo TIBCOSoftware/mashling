@@ -54,12 +54,14 @@ script:
     pushd mashling-cicd/docker/mashling;
     chmod ugo+x ./build-mashling.sh ;
     ./build-mashling.sh ;
-    popd ;    
-    # pushd mashling-cicd/docker/mashling-sample;
-    # chmod ugo+x ./build-mashling-sample.sh ;
-    # ./build-mashling-sample.sh ;
-    # popd ;
+    popd ;
     fi
+  #- if [ "$TRAVIS_OS_NAME" == "linux" ]; then      
+   # pushd mashling-cicd/docker/mashling-sample;
+   # chmod ugo+x ./build-mashling-sample.sh ;
+   # ./build-mashling-sample.sh ;
+   # popd ;
+   # fi
     
 after_script:
   - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
