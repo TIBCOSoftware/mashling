@@ -12,7 +12,6 @@ os:
 branches:
   only:
     - master
-    - testing-buildscript
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
     
 cache:
@@ -33,7 +32,7 @@ install:
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
   - go get ./...
   - go install ./...
-  - mashling help
+  - mashling version
   
   
 script:
