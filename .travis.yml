@@ -12,7 +12,7 @@ os:
 branches:
   only:
     - master
-    - testing-buildscript
+#    - testing-buildscript
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
     
 cache:
