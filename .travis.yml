@@ -12,7 +12,7 @@ os:
 branches:
   only:
     - master
-#    - testing-buildscript
+    - testing-buildscript
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
     
 cache:
@@ -27,13 +27,10 @@ before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
 install:
   - go get -u github.com/constabulary/gb/...
-#  - go get -u github.com/tools/godep/...
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd ;
-#  - cp -r $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/dependency-config/* $GOPATH/src/github.com/TIBCOSoftware/mashling
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
-#  - godep restore
   - go get ./...
   - go install ./...
   - mashling help
