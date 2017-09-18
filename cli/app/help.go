@@ -67,7 +67,7 @@ func (c *cmdHelp) Exec(args []string) error {
 		return nil
 	}
 
-	fmt.Fprintf(os.Stderr, "Unknown help command %#q. Run 'gateway help'.\n", arg)
+	fmt1.Fprintf(os.Stderr, "Unknown help command %#q. Run 'gateway help'.\n", arg)
 	os.Exit(2)
 
 	return nil
