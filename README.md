@@ -97,7 +97,10 @@ For more details about the REST Trigger configuration go [here](https://github.c
 Additional documentation on mashling and the CLI tool
 
   - **mashling tool**
-    - creating a [gateway](docs/gateway.md)
+  
+  Create a mashling microgateway from a recipe.json
+      mashling create -f recipe.json <mashlingappname>
+
 
 ## Contributing and support
 
