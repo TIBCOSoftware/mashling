@@ -16,7 +16,7 @@ var optVersion = &cli.OptionInfo{
 }
 
 //Mashling version
-const version = "1.0.2"
+const version = "0.1.5"
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
