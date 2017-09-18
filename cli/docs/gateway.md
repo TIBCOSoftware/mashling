@@ -201,8 +201,17 @@ Usage:
 
 **options**
 
-- *-mock* : true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false).
-- *-f* : specify the mashling json (default is mashling.json).
+- *-f*      : specify the mashling json (default is mashling.json).
+- *-k*      : the api key (required)
+- *-s*      : the api secret key (required)
+- *-u*      : username (required)
+- *-p*      : password (required)
+- *-portal* : the portal (required)
+- *-uuid*   : the proxy uuid (required)
+- *-h*			: the publicly available hostname where this mashling will be deployed (required)
+- *-mock*		: true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false).
+
+
 
 Example (display transformed swagger doc only):
 
