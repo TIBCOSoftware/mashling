@@ -42,25 +42,16 @@ The built in sample gateway is based of the following mashling.json.  This file 
 		"name": "demo",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
-		"configurations": [
-			{
-				"name": "kafkaConfig",
-				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
-				"description": "Configuration for kafka cluster",
-				"settings": {
-					"BrokerUrl": "localhost:9092"
-				}
-			}
-		],
+		"configurations": [],
 		"triggers": [
 			{
 				"name": "rest_trigger",
 				"description": "The trigger on 'pets' endpoint",
-				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+				"type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 				"settings": {
 					"port": "9096",
 					"method": "GET",
-					"path": "/pets/:petId"
+					"path": "/pets/{petId}"
 				}
 			}
 		],
