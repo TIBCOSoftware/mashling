@@ -10,7 +10,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var (
@@ -36,29 +35,6 @@ func SetupExistingProjectEnv(appDir string) env.Project {
 	}
 
 	return env
-}
-
-func GetGatewayJSON(fileName string) (string, string, error) {
-		var gatewayJson string
-		var gatewayName string
-		var err error
-
-		if fgutil.IsRemote(fileName) {
-
-			gatewayJson, err = fgutil.LoadRemoteFile(fileName)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
-				os.Exit(2)
-			}
-		} else {
-			gatewayJson, err = fgutil.LoadLocalFile(fileName)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
-				os.Exit(2)
-			}
-		}
-
-		return gatewayJson, gatewayName, err
 }
 
 func splitVersion(t string) (path string, version string) {
@@ -102,10 +78,6 @@ func isValidVersion(s string) bool {
 func isNumeric(s string) bool {
 	_, err := strconv.Atoi(s)
 	return err == nil
-}
-
-func delayMilli(amount int) {
-	time.Sleep(time.Duration(amount) * time.Millisecond)
 }
 
 func Usage() {
