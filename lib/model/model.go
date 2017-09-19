@@ -9,7 +9,7 @@ import (
 func CreateMashlingSampleModel() (types.Microgateway, error) {
 
 	microGateway := types.Microgateway{
-		MashlingVersion: "0.2",
+		MashlingSchema: "0.2",
 		Gateway: types.Gateway{
 			Name:         "GatewayApp",
 			Version:      "1.0.0",
