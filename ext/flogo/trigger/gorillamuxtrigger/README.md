@@ -1,11 +1,6 @@
 # gorillamuxtrigger
-gorillamuxtrigger
 
-## Installation
-
-```bash
-flogo add trigger github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger
-```
+Gorillamux based http trigger for mashling gateway. It supports header/content based conditional routing.
 
 ## Schema
 settings, outputs and handler:
