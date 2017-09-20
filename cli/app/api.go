@@ -327,7 +327,14 @@ func BuildMashling(appDir string, gatewayJSON string) error {
 	}
 	//END of workaround https://github.com/TIBCOSoftware/flogo-cli/issues/56
 
-	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
+	embed := util.Flogo_App_Embed_Config_Property_Default
+
+	envFlogoEmbed := os.Getenv(util.Flogo_App_Embed_Config_Property)
+	if len(envFlogoEmbed) > 0 {
+		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
+	}
+
+	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 
 	//delete flogo.json file from the app dir
