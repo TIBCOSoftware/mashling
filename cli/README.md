@@ -30,9 +30,9 @@ mashling create myApp
 ```
 
 - Cd myApp/bin folder
-- Start mashling engine by running ./myApp
+- Start mashling engine by running ./myapp
 - Mashling will start a REST server
-- Send GET request to run the flow. eg: http://localhost:9096/pets/1
+- Send GET request to run the flow. eg: http://localhost:9096/pets/2
 
 The built in sample gateway is based of the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be generated using the mashling-web UI.
 
