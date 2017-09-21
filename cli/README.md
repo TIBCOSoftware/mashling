@@ -192,11 +192,11 @@ In the above example the condition is content based. The below formats can be us
 | trigger.content | Trigger content / payload based condition | trigger.content.name == CAT |
 | trigger.header | HTTP trigger's header based condition | trigger.header.Accept == text/plain |
 
-###Preconditions:
+### Preconditions:
 
 For content based routing the content of the trigger should be a valid json.
 
-###Example conditions:
+### Example conditions:
 
 When the json is {"name": "CAT"} the following condition can be used trigger.content.name == CAT.
 
