@@ -6,16 +6,17 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/types"
 	"io/ioutil"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
 var jsonMetadata = getJsonMetadata()
 
-func getJsonMetadata() string{
+func getJsonMetadata() string {
 	jsonMetadataBytes, err := ioutil.ReadFile("trigger.json")
-	if err != nil{
+	if err != nil {
 		panic("No Json Metadata found for trigger.json path")
 	}
 	return string(jsonMetadataBytes)

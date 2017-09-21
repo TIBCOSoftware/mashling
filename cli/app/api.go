@@ -327,7 +327,14 @@ func BuildMashling(appDir string, gatewayJSON string) error {
 	}
 	//END of workaround https://github.com/TIBCOSoftware/flogo-cli/issues/56
 
-	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: false}}
+	embed := util.Flogo_App_Embed_Config_Property_Default
+
+	envFlogoEmbed := os.Getenv(util.Flogo_App_Embed_Config_Property)
+	if len(envFlogoEmbed) > 0 {
+		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
+	}
+
+	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 
 	//delete flogo.json file from the app dir
@@ -516,7 +523,7 @@ func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 func IsValidateGateway(gatewayJson string) (bool, error) {
 
 	isValidJson := false
-	schema, err := assets.Asset("schema/gateway_schema.json")
+	schema, err := assets.Asset("schema/mashling_schema.json")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -545,7 +552,7 @@ func IsValidateGateway(gatewayJson string) (bool, error) {
 //ValidateGateway validates the gateway schema instance
 func ValidateGateway(gatewayJson string) error {
 
-	schema, err := assets.Asset("schema/gateway_schema.json")
+	schema, err := assets.Asset("schema/mashling_schema.json")
 	if err != nil {
 		panic(err.Error())
 	}

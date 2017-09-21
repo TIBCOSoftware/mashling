@@ -30,38 +30,29 @@ mashling create myApp
 ```
 
 - Cd myApp/bin folder
-- Start mashling engine by running ./myApp
+- Start mashling engine by running ./myapp
 - Mashling will start a REST server
-- Send GET request to run the flow. eg: http://localhost:9096/pets/1
+- Send GET request to run the flow. eg: http://localhost:9096/pets/2
 
 The built in sample gateway is based of the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be generated using the mashling-web UI.
 
 ```json
 {
-	"mashling_version": "0.2",
+	"mashling_schema": "0.2",
 	"gateway": {
 		"name": "demo",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
-		"configurations": [
-			{
-				"name": "kafkaConfig",
-				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
-				"description": "Configuration for kafka cluster",
-				"settings": {
-					"BrokerUrl": "localhost:9092"
-				}
-			}
-		],
+		"configurations": [],
 		"triggers": [
 			{
 				"name": "rest_trigger",
 				"description": "The trigger on 'pets' endpoint",
-				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+				"type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 				"settings": {
 					"port": "9096",
 					"method": "GET",
-					"path": "/pets/:petId"
+					"path": "/pets/{petId}"
 				}
 			}
 		],
