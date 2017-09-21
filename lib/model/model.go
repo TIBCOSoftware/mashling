@@ -20,7 +20,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 			Configurations: []types.Config{
 				{
 					Name:        "kafkaConfig",
-					Type:        "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
 					Description: "Configuration for kafka cluster",
 					Settings: json.RawMessage(`{
 										"BrokerUrl": "localhost:9092"
@@ -31,11 +31,11 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 				{
 					Name:        "rest_trigger",
 					Description: "The trigger on 'pets' endpoint",
-					Type:        "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 					Settings: json.RawMessage(`{
 					  "port": "9096",
 					  "method": "GET",
-					  "path": "/pets/:petId"
+"path": "/pets/{petId}"
 					}`),
 				},
 			},
