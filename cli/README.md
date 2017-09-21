@@ -202,7 +202,7 @@ When the json is {"name": "CAT"} the following condition can be used trigger.con
 
 When the json is {"name": "CAT","details":{"color":"white"}} the following condition can be used trigger.content.details.color == white.
 
-When the json is {"name":["doggie","blackie"]} the following condition can be used trigger.content.name(0) == doggie
+When the json is {"names":[{"nickname":"blackie"},{"nickname":"doggie"}]} the following condition can be used trigger.content.names[1].nickname == doggie
 
 For Header based routing the condition will always be trigger.header.headername == headervalue
 
