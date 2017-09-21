@@ -34,7 +34,7 @@ mashling create myApp
 - Mashling will start a REST server
 - Send GET request to run the flow. eg: http://localhost:9096/pets/2
 
-The built in sample gateway is based of the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be generated using the mashling-web UI.
+The built in sample gateway is based on the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be generated using the mashling-web UI.
 
 ```json
 {
@@ -43,7 +43,16 @@ The built in sample gateway is based of the following mashling.json.  This file 
 		"name": "demo",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
-		"configurations": [],
+		"configurations": [
+			{
+				"name": "kafkaConfig",
+				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
+				"description": "Configuration for kafka cluster",
+				"settings": {
+					"BrokerUrl": "localhost:9092"
+				}
+			}
+		],
 		"triggers": [
 			{
 				"name": "rest_trigger",
@@ -89,7 +98,116 @@ For more details about the REST Trigger configuration go [here](https://github.c
 Additional documentation on mashling and the CLI tool
 
   - **mashling tool**
-    - creating a [gateway](docs/gateway.md)
+  - creating a [gateway](docs/gateway.md)
+
+* Steps to create and run a mashling app using mashling.json:
+
+The mashling.json can be modified accordingly and new app can be created using the below command.
+
+mashling create -f mashlingname.json gatewayname
+
+Using command : "mashling create -f mashling.json mygateway" , mygateway will be created.
+
+cd mygateway/bin
+
+Run the App mygateway.exe
+
+The below is the sample mashling.json:
+
+```
+{
+  "mashling_schema": "0.2",
+  "gateway": {
+    "name": "demoRestGw",
+    "version": "1.0.0",
+    "display_name":"Rest Conditional Gateway",
+    "description": "This is the rest based microgateway app",
+    "configurations": [
+      {
+        "name": "restConfig",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "description": "Configuration for rest trigger",
+        "settings": {
+          "port": "9096"
+        }
+      }
+    ],
+    "triggers": [
+      {
+        "name": "animals_rest_trigger",
+        "description": "Animals rest trigger - PUT animal details",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "config": "${configurations.restConfig}",
+          "method": "PUT",
+		      "path": "/pets",
+          "optimize":"true"
+        }
+      }
+    ],
+    "event_handlers": [
+      {
+        "name": "mammals_handler",
+        "description": "Handle mammals",
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+      },
+      {
+        "name": "birds_handler",
+        "description": "Handle birds",
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+      },
+      {
+        "name": "animals_handler",
+        "description": "Handle other animals",
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+      }
+    ],
+    "event_links": [
+      {
+        "triggers": ["animals_rest_trigger"],
+        "dispatches": [
+          {
+            "if": "${trigger.content.name in (ELEPHANT,CAT)}",
+            "handler": "mammals_handler"
+          },
+          {
+            "if": "${trigger.content.name == SPARROW}",
+            "handler": "birds_handler"
+          },
+          {
+            "handler": "animals_handler"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+## Dispatch Conditions
+
+In the above example the condition is content based. The below formats can be used for content and header based routing.
+
+| Condition Prefix | Description | Example |
+|:----------|:-----------|:-------|
+| trigger.content | Trigger content / payload based condition | trigger.content.name == CAT |
+| trigger.header | HTTP trigger's header based condition | trigger.header.Accept == text/plain |
+
+###Preconditions:
+
+For content based routing the content of the trigger should be a valid json.
+
+###Example conditions:
+
+When the json is {"name": "CAT"} the following condition can be used trigger.content.name == CAT.
+
+When the json is {"name": "CAT","details":{"color":"white"}} the following condition can be used trigger.content.details.color == white.
+
+When the json is {"name":["doggie","blackie"]} the following condition can be used trigger.content.name(0) == doggie
+
+For Header based routing the condition will always be trigger.header.headername == headervalue
+
+Also the following operators are supported and can be used in conditions:
+==(equals),>(greater than),in,<(less than),!=(notequals) and notin.
 
 ## Contributing and support
 
