@@ -107,7 +107,7 @@ func (c *cmdCreate) Exec(args []string) error {
 	isValidJson, err = IsValidateGateway(gatewayJson)
 
 	if !isValidJson {
-		fmt.Print("mashling creation aborted \n")
+		fmt.Print("Mashling creation aborted \n")
 		return err
 	}
 
