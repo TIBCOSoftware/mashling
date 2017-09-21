@@ -227,9 +227,9 @@ Please submit a github issue if you would like to propose a significant change o
 
 ### Build mashling from source
 ```
-$go get github.com/TIBCOSoftware/mashling/cli/...
+$go get github.com/TIBCOSoftware/mashling/...
 
-$cd $GOPATH/src/github.com/TIBCOSoftware/mashling/cli
+$cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 
 [optional, only if building from branch] 
 $git checkout my_branch
