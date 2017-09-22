@@ -4,6 +4,7 @@
 		"name": "microgateway",
 		"version": "1.0.0",
 		"display_name":"Inline Gateway",
+		"display_image":"displayImage.svg",
 		"description": "This is the first microgateway app",
 		"configurations": [
 			{

@@ -4,6 +4,7 @@
     "name": "kafka",
     "version": "1.0.0",
     "display_name":"Kafka Conditional Gateway",
+    "display_image":"displayImage.svg",
     "description": "This is the kafka based microgateway app",
     "configurations": [
       {

@@ -4,6 +4,7 @@
     "name": "demoRestGw",
     "version": "1.0.0",
     "display_name":"Rest Conditional Gateway",
+    "display_image":"displayImage.svg",
     "description": "This is the rest based microgateway app",
     "configurations": [
       {
