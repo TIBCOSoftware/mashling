@@ -1,4 +1,4 @@
-# gateways
+# Mashling CLI
 > Details on mashling gateway projects and associated CLI commands.
 
 ## Commands
