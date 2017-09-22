@@ -21,7 +21,7 @@
 ## Getting Started
 A mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base gateway.
 
-To create the base gateway, which consists of a REST trigger and a simple event handler flow with a log activity, you use the following commands.
+To create the base gateway, which consists of a REST trigger and a simple event handler flow with a log activity, use the following command:
 
 
 ```bash
@@ -29,7 +29,7 @@ mashling create myApp
 
 ```
 
-Start base gateway by
+Start the base gateway by performing the following commands:
 
 ```bash
 cd myApp/bin
@@ -39,7 +39,7 @@ cd myApp/bin
 - Mashling will start a REST server
 - Send GET request to run the flow. eg: http://localhost:9096/pets/2
 
-The base gateway built with the following mashling.json. It can be edited to add additional triggers and event handlers. A variation of base gateway is called a mashling recipe. Mashling recipes can be download from mashling.io.
+The base gateway is built with the following mashling.json. It can be edited to add additional triggers and event handlers. A variation of base gateway is called a mashling recipe. Mashling recipes can be download from mashling.io.
 
 
 ```json
@@ -104,15 +104,15 @@ For more details about the REST Trigger configuration go [here](https://github.c
 Additional documentation on mashling and the CLI tool
 
 ### mashling cli tool ###
-Details about mashling cli commands are [here](docs/gateway.md)
+Details about the mashling cli commands are [here](docs/gateway.md)
 
 ### mashling json configuration ###
-Details about mashling json configuration are [here](docs/gateway.md)
+Details about the mashling json configuration are [here](docs/gateway.md)
 
 ### mashling triggers ###
 For more details about the mashling REST Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
 
-For more details about the mashling KAFKA Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/kafkasubrouter)
+For more details about the mashling Kafka Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/kafkasubrouter)
 
 ## Contributing and support
 
@@ -146,8 +146,8 @@ $go install ./...
 ```
 mashling CLI is built and installed in $GOPATH/bin
 
-##License
-mashling/cli is licensed under a BSD-type license. See TIBCO LICENSE.txt for license text.
+## License
+mashling/cli is licensed under a BSD-type license. See license text [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/TIBCO%20LICENSE.txt).
 
 
 ### Support
