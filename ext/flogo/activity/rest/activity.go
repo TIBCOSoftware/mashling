@@ -2,11 +2,15 @@ package rest
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
@@ -32,6 +36,9 @@ const (
 	ivContent     = "content"
 	ivParams      = "params"
 	ivTracing     = "tracing"
+	ivServerCert  = "serverCert"
+	ivServerKey   = "serverKey"
+	ivTrustStore  = "trustStore"
 
 	ovResult  = "result"
 	ovTracing = "tracing"
@@ -144,7 +151,47 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 			opentracing.HTTPHeadersCarrier(req.Header))
 	}
 
-	client := &http.Client{}
+	//Enable transport layaer security
+	log.SetLogLevel(logger.DebugLevel)
+
+	serverCert, _ := context.GetInput(ivServerCert).(string)
+	serverKey, _ := context.GetInput(ivServerKey).(string)
+	trustStore, _ := context.GetInput(ivTrustStore).(string)
+
+	tlsConfig := &tls.Config{}
+
+	if serverCert != "" && serverKey != "" {
+		//gateway certificates are available
+		//load gateway certificate-key pair
+		log.Debug("Loading gateway certificate - key pair...")
+		cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
+		if err != nil {
+			log.Errorf("Unable to load cert - %v", err)
+		} else {
+			tlsConfig.Certificates = []tls.Certificate{cert}
+			log.Debug("Loading gateway certificate - key pair DONE")
+		}
+	}
+
+	if trustStore != "" {
+		//trust store directory is available
+		//load trusted certificates present inside the dir
+		log.Debug("Loading truststore...")
+		trustRootCAPool, err := getCerts(trustStore)
+		if err != nil {
+			log.Errorf("Error while loading trust store - %v", err)
+		} else {
+			tlsConfig.RootCAs = trustRootCAPool
+			log.Debug("Loading truststore DONE")
+		}
+	}
+
+	tlsConfig.BuildNameToCertificate()
+
+	client := &http.Client{
+		Transport: &http.Transport{TLSClientConfig: tlsConfig},
+	}
+
 	resp, err := client.Do(req)
 	if err != nil {
 		if span != nil {
@@ -262,4 +309,36 @@ func BuildURI(uri string, values map[string]string) string {
 	}
 
 	return buffer.String()
+}
+
+func getCerts(trustStore string) (*x509.CertPool, error) {
+	certPool := x509.NewCertPool()
+	fileInfo, err := os.Stat(trustStore)
+	if err != nil {
+		return certPool, fmt.Errorf("Truststore [%s] does not exist", trustStore)
+	}
+	switch mode := fileInfo.Mode(); {
+	case mode.IsDir():
+		break
+	case mode.IsRegular():
+		return certPool, fmt.Errorf("Truststore [%s] is not a directory.  Must be a directory containing trusted certificates in PEM format",
+			trustStore)
+	}
+	trustedCertFiles, err := ioutil.ReadDir(trustStore)
+	if err != nil || len(trustedCertFiles) == 0 {
+		return certPool, fmt.Errorf("Failed to read trusted certificates from [%s]  Must be a directory containing trusted certificates in PEM format", trustStore)
+	}
+	for _, trustCertFile := range trustedCertFiles {
+		fqfName := fmt.Sprintf("%s%c%s", trustStore, os.PathSeparator, trustCertFile.Name())
+		trustCertBytes, err := ioutil.ReadFile(fqfName)
+		if err != nil {
+			log.Warnf("Failed to read trusted certificate [%s] ... continueing", trustCertFile.Name())
+		}
+		log.Debugf("Loading cert file - %v", fqfName)
+		certPool.AppendCertsFromPEM(trustCertBytes)
+	}
+	if len(certPool.Subjects()) < 1 {
+		return certPool, fmt.Errorf("Failed to read trusted certificates from [%s]  After processing all files in the directory no valid trusted certs were found", trustStore)
+	}
+	return certPool, nil
 }

@@ -1,7 +1,7 @@
 {
   "mashling_schema": "0.2",
   "gateway": {
-    "name": "clientAuthGw",
+    "name": "secureGwApp",
     "version": "1.0.0",
     "display_name":"Secure Rest Conditional Gateway",
     "display_image":"displayImage.svg",
@@ -22,8 +22,8 @@
         "settings": {
           "port": "9097",
           "enableTLS": "true",
-          "serverCert":"${ENV.SERVER_CERT}",
-          "serverKey":"${ENV.SERVER_KEY}"
+          "serverCert":"gateway.crt",
+          "serverKey":"gateway.key"
         }
       },
       {
@@ -33,10 +33,10 @@
         "settings": {
           "port": "9098",
           "enableTLS": "true",
-          "serverCert":"/Users/rpolishe/sslcerts/domain.crt",
-          "serverKey":"/Users/rpolishe/sslcerts/domain.key",
+          "serverCert":"gateway.crt",
+          "serverKey":"gateway.key",
           "enableClientAuth": "true",
-          "trustStore": "${ENV.TRUST_STORE}"
+          "trustStore": "truststore"
         }
       }
     ],
@@ -106,6 +106,11 @@
         "name": "animals_get_handler",
         "description": "Handle other animals",
         "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestGetActivity.json"
+      },
+      {
+        "name": "animals_get_handler_mutual_ssl",
+        "description": "Handle other animals",
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/SecureRestInvoker.json"
       }
     ],
     "event_links": [
@@ -145,7 +150,7 @@
         "triggers": ["get_animals_rest_secure_client_auth_trigger"],
         "dispatches": [
           {
-            "handler": "animals_get_handler"
+            "handler": "animals_get_handler_mutual_ssl"
           }
         ]
       }
