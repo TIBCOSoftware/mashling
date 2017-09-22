@@ -6,13 +6,14 @@ services:
   - docker
 os:
   - linux
-  - osx
-  - windows
+#  - osx
+#  - windows
 
 branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
+    - feature-gotest
     
 cache:
   bundler: false
@@ -35,6 +36,7 @@ script:
   - cp -r $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/dependency-config/* $GOPATH/src/github.com/TIBCOSoftware/mashling
   - cd mashling
   - godep restore
+  - go test ./...
   - go install ./...
   - mashling version
   - cd $GOPATH/src/github.com/TIBCOSoftware
