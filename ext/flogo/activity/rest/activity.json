@@ -33,6 +33,18 @@
     {
       "name": "tracing",
       "type": "any"
+    },
+    {
+      "name": "serverCert",
+      "type": "string"
+    },
+    {
+      "name": "serverKey",
+      "type": "string"
+    },
+    {
+      "name": "trustStore",
+      "type": "string"
     }
   ],
   "outputs": [

@@ -43,6 +43,18 @@ Inputs and Outputs:
     {
       "name": "tracing",
       "type": "any"
+    },
+    {
+      "name": "serverCert",
+      "type": "string"
+    },
+    {
+      "name": "serverKey",
+      "type": "string"
+    },
+    {
+      "name": "trustStore",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -63,6 +75,10 @@ Inputs and Outputs:
 | content     | The message content |
 | params      | The path parameters (Deprecated) |
 | tracing | The tracing context to forward |
+| serverCert | The server certificate file path |
+| serverKey | The server key file path |
+| trustStore | Folder path containing trusted certificates |
+
 Note:
 
 * **pathParams**: Is only required if you have params in your URI ( i.e. http://.../pet/:id )

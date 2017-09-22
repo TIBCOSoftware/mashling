@@ -1,0 +1,144 @@
+{
+    "name": "newapp",
+    "type": "flogo:app",
+    "version": "0.0.1",
+    "description": "",
+    "triggers": [
+        {
+            "name": "gorillamuxtrigger",
+            "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+            "description": "gorillamuxtrigger REST Trigger",
+            "settings": {
+                "port": "9096"
+            },
+            "id": "receive_http_message",
+            "handlers": [
+                {
+                    "settings": {
+                        "method": "GET",
+                        "path": "/users/:id",
+                        "autoIdReply": "false",
+                        "useReplyHandler": "false"
+                    },
+                    "actionId": "check"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "check",
+            "data": {
+                "flow": {
+                    "type": 1,
+                    "explicitReply": true,
+                    "attributes": [],
+                    "rootTask": {
+                        "id": 1,
+                        "type": 1,
+                        "tasks": [
+                            {
+                                "id": 2,
+                                "name": "Invoke REST Service",
+                                "description": "Simple REST Activity",
+                                "type": 1,
+                                "activityType": "github-com-tibco-software-flogo-contrib-activity-rest",
+                                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+                                "attributes": [
+                                    {
+                                        "name": "method",
+                                        "value": "GET",
+                                        "required": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "name": "uri",
+                                        "value": "https://localhost:8080/",
+                                        "required": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "name": "pathParams",
+                                        "value": null,
+                                        "required": false,
+                                        "type": "params"
+                                    },
+                                    {
+                                        "name": "queryParams",
+                                        "value": null,
+                                        "required": false,
+                                        "type": "params"
+                                    },
+                                    {
+                                        "name": "content",
+                                        "value": null,
+                                        "required": false,
+                                        "type": "any"
+                                    },
+                                    {
+                                        "name": "serverCert",
+                                        "value": "gateway.crt",
+                                        "required": false,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "name": "serverKey",
+                                        "value": "gateway.key",
+                                        "required": false,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "name": "trustStore",
+                                        "value": "truststore",
+                                        "required": false,
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "name": "Reply To Trigger",
+                                "description": "Simple Reply Activity",
+                                "type": 1,
+                                "activityType": "github-com-tibco-software-flogo-contrib-activity-reply",
+                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                                "attributes": [
+                                    {
+                                        "name": "code",
+                                        "value": "200",
+                                        "required": true,
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "name": "data",
+                                        "value": "success",
+                                        "required": false,
+                                        "type": "any"
+                                    }
+                                ],
+                                "inputMappings": [
+                                    {
+                                        "type": 1,
+                                        "value": "{A2.result}",
+                                        "mapTo": "data"
+                                    }
+                                ]
+                            }
+                        ],
+                        "links": [
+                            {
+                                "id": 1,
+                                "from": 2,
+                                "to": 3,
+                                "type": 0
+                            }
+                        ],
+                        "attributes": []
+                    }
+                }
+            },
+            "id": "check",
+            "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+        }
+    ]
+}
