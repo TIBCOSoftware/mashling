@@ -114,9 +114,9 @@ func TestSwaggerGeneration(t *testing.T) {
 	assert.NoError(t, err, "Error: Error getting absolute path for samples directory '%s' %v", "../samples/", err)
 	samples := make(map[string]string)
 	// Map sample file names to expected Swagger 2.0 JSON output.
-	samples["reference-gateway.json"] = referenceGatewaySwaggerJSON
-	samples["rest-conditional-gateway.json"] = conditionatlGatewaySwaggerJSON
-	samples["kafka-reference-gateway.json"] = emptySwaggerJSON
+	samples["reference-gateway/reference-gateway.json"] = referenceGatewaySwaggerJSON
+	samples["rest-conditional-gateway/rest-conditional-gateway.json"] = conditionatlGatewaySwaggerJSON
+	samples["kafka-reference-gateway/kafka-reference-gateway.json"] = emptySwaggerJSON
 
 	// Compare generated Swagger JSON to expected constants.
 	for filename, expected := range samples {
