@@ -19,7 +19,7 @@
     go get -u github.com/TIBCOSoftware/mashling/...
 
 ## Getting Started
-A mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
+A mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base gateway.
 
 To create the base gateway, which consists of a REST trigger and a simple event handler flow with a log activity, you use the following commands.
 
@@ -29,12 +29,18 @@ mashling create myApp
 
 ```
 
-- Cd myApp/bin folder
-- Start mashling engine by running ./myapp
+Start base gateway by
+
+```bash
+cd myApp/bin
+./myapp
+```
+
 - Mashling will start a REST server
 - Send GET request to run the flow. eg: http://localhost:9096/pets/2
 
-The built in sample gateway is based on the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be generated using the mashling-web UI.
+The base gateway built with the following mashling.json. It can be edited to add additional triggers and event handlers. A variation of base gateway is called a mashling recipe. Mashling recipes can be download from mashling.io.
+
 
 ```json
 {
@@ -97,10 +103,16 @@ For more details about the REST Trigger configuration go [here](https://github.c
 ## Documentation
 Additional documentation on mashling and the CLI tool
 
-  - **mashling tool**
-  - creating a [gateway](docs/gateway.md)
+### mashling tool ###
+  - details about mashling CLI commands are [here](docs/gateway.md)
 
-* Steps to create and run a mashling app using mashling.json:
+### mashling triggers ###
+
+For more details about the mashling REST Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
+
+For more details about the mashling KAFKA Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/kafkasubrouter)
+
+## Steps to create and run a mashling app using mashling.json: ##
 
 The mashling.json can be modified accordingly and new app can be created using the below command.
 
@@ -183,7 +195,7 @@ The below is the sample mashling.json:
   }
 }
 ```
-## Dispatch Conditions
+### Dispatch Conditions
 
 In the above example the condition is content based. The below formats can be used for content and header based routing.
 
@@ -192,11 +204,11 @@ In the above example the condition is content based. The below formats can be us
 | trigger.content | Trigger content / payload based condition | trigger.content.name == CAT |
 | trigger.header | HTTP trigger's header based condition | trigger.header.Accept == text/plain |
 
-### Preconditions:
+#### Preconditions:
 
 For content based routing the content of the trigger should be a valid json.
 
-### Example conditions:
+#### Example conditions:
 
 When the json is {"name": "CAT"} the following condition can be used trigger.content.name == CAT.
 
@@ -225,7 +237,7 @@ Pull requests are also welcome. If you would like to submit one, please follow t
 
 Please submit a github issue if you would like to propose a significant change or request a new feature.
 
-### Build mashling from source
+### Build mashling CLI from source
 ```
 $go get github.com/TIBCOSoftware/mashling/...
 
@@ -239,6 +251,7 @@ $go get github.com/xeipuuv/gojsonschema
 
 $go install ./... 
 ```
+mashling CLI is built and installed in $GOPATH/bin
 
 ##License
 mashling/cli is licensed under a BSD-type license. See TIBCO LICENSE.txt for license text.
