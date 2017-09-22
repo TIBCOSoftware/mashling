@@ -40,7 +40,7 @@ func (c *cmdBuild) Exec(args []string) error {
 
 	//Return, if any additanal arguments are passed
 	if len(args) != 0 {
-		fmt.Fprint(os.Stderr, "Error: Too many arguments fiven. \n\n")
+		fmt.Fprint(os.Stderr, "Error: Too many arguments given. \n\n")
 		cmdUsage(c)
 	}
 
@@ -52,7 +52,7 @@ func (c *cmdBuild) Exec(args []string) error {
 	}
 	var gatewayFile = path.Join(currentDir, util.Gateway_Definition_File_Name)
 	if !fgutil.FileExists(gatewayFile) {
-		fmt.Fprintf(os.Stderr, "Error: Invalid gateway project, doesn't find "+gatewayFile+"\n\n")
+		fmt.Fprintf(os.Stderr, "Error: Invalid gateway project, didn't find "+gatewayFile+"\n\n")
 		return err
 	}
 
@@ -68,7 +68,7 @@ func (c *cmdBuild) Exec(args []string) error {
 	isValidJson, err = IsValidateGateway(gatewayJSON)
 
 	if !isValidJson {
-		fmt.Print("mashling build aborted \n")
+		fmt.Print("Mashling build aborted \n")
 		return err
 	}
 
