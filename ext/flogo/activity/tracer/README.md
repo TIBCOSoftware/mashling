@@ -1,12 +1,5 @@
-# tibco-rest
-This activity provides your flogo application the ability to trace.
-
-
-## Installation
-
-```bash
-flogo add activity github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer
-```
+# tracer
+This activity provides your mashling application the ability to trace.
 
 ## Schema
 Inputs and Outputs:
