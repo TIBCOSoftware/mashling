@@ -1,12 +1,5 @@
 # tibco-rest
-This activity provides your flogo application the ability to invoke a REST service.
-
-
-## Installation
-
-```bash
-flogo add activity github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest
-```
+This activity provides your mashling application the ability to invoke a REST service.
 
 ## Schema
 Inputs and Outputs:
