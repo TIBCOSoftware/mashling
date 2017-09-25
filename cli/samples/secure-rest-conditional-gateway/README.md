@@ -24,6 +24,7 @@ openssl req \
        -newkey rsa:2048 -nodes -keyout server.key \
        -x509 -days 365 -out server.crt
 ```
+Note: Create all the certificates with "localhost" as name.
 
 Navigate to gateway bin folder and run the binary. Now the gateway should be running & listening on 3 ports.<br>
 9096 -> No security enabled <br>
@@ -38,7 +39,10 @@ curl http://localhost:9096/pets/25
 
 ## If you would like to verify client authentication, use 3rd party go based client - go-mutual-tls
 
-Generate client.crt & client.key for the client, copy them into folder go-mutual-tls/client folder. And update client.go to refer newly generated certificate and key.
+Clone go-mutual-tls:
+git clone https://github.com/levigross/go-mutual-tls
+
+Generate client.crt & client.key for the client, copy them into folder go-mutual-tls/client folder. And update client.go as given below to refer newly generated certificate and key.
 
 Find the line that reads:
 ```
@@ -60,10 +64,17 @@ Change this to
 clientCACert, err := ioutil.ReadFile("server.crt")
 ```
 
+Find the line that reads:
+```
+resp, err := grequests.Get("https://localhost:8080", ro)
+```
+Change this to
+```
+resp, err := grequests.Get("https://localhost:9098/pets/25", ro)
+```
 Now run the client.
 
 ```bash
-git clone https://github.com/levigross/go-mutual-tls
-cd client
+cd go-mutual-tls/client
 go run client.go
 ```
