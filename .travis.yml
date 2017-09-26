@@ -6,8 +6,7 @@ services:
   - docker
 os:
   - linux
-  - osx
-  - windows
+
 
 branches:
   only:
@@ -35,6 +34,7 @@ script:
   - cp -r $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/dependency-config/* $GOPATH/src/github.com/TIBCOSoftware/mashling
   - cd mashling
   - godep restore
+  - go test ./...
   - go install ./...
   - mashling version
   - cd $GOPATH/src/github.com/TIBCOSoftware
