@@ -1,13 +1,10 @@
 sudo: required
 language : 
   - go  
-
-services:
-  - docker
 os:
   - linux
-  - osx
-  - windows
+services:
+  - docker
 
 branches:
   only:
@@ -35,6 +32,7 @@ script:
   - cp -r $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/dependency-config/* $GOPATH/src/github.com/TIBCOSoftware/mashling
   - cd mashling
   - godep restore
+  - go test ./...
   - go install ./...
   - mashling version
   - cd $GOPATH/src/github.com/TIBCOSoftware
@@ -57,10 +55,8 @@ after_script:
 
 after_success:
   - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
-  - "if [ \"${TRAVIS_BRANCH}\" == \"master\" ]; then
-    source $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh ;
-    mashling::module::postbuild mashling mashling ;
-    fi" 
+  - source $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh
+  - mashling::module::postbuild mashling mashling
 
 
 notifications: 
