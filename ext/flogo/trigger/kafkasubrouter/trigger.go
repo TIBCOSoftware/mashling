@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package kafkasubrouter
 
 import (
@@ -209,6 +209,13 @@ func getTopics(t *KafkaSubTrigger) []string {
 }
 
 func initKafkaParms(t *KafkaSubTrigger) error {
+	//Substitute for any environment variables referenced in the settings.
+	//Expressions will be in the format ${env.BROKER_URL} where BROKER_URL is the env variable
+	err := util.ResolveEnvironmentProperties(t.config.Settings)
+	if err != nil {
+		panic(fmt.Sprint(err))
+	}
+
 	brokersString := t.config.Settings["BrokerUrl"]
 	if brokersString == nil || brokersString.(string) == "" {
 		return fmt.Errorf("BrokerUrl not provided")

@@ -53,7 +53,7 @@
                                     },
                                     {
                                         "name": "uri",
-                                        "value": "https://localhost:8080/",
+                                        "value": null,
                                         "required": true,
                                         "type": "string"
                                     },
@@ -109,6 +109,11 @@
                                         "type":1,
                                         "value":"${env.SERVER_CERT}",
                                         "mapTo":"serverCert"
+                                    },
+                                    {
+                                        "type":1,
+                                        "value":"${env.ENDPOINT_URL}",
+                                        "mapTo":"uri"
                                     }
 				                ]
                             },
