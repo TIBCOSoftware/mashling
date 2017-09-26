@@ -2,17 +2,19 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package util
 
 import (
 	"encoding/json"
-	"github.com/TIBCOSoftware/flogo-cli/env"
-	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/TIBCOSoftware/flogo-cli/env"
+	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
 func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
@@ -110,7 +112,7 @@ func CheckTriggerOptimization(triggerSettings map[string]interface{}) bool {
 	}
 }
 
-func ValidateEnvPropertySettingExpr(expression *string) (bool, *string) {
+func validateEnvPropertySettingExpr(expression *string) (bool, *string) {
 	if expression == nil {
 		return false, nil
 	}
@@ -120,7 +122,25 @@ func ValidateEnvPropertySettingExpr(expression *string) (bool, *string) {
 		//get name of the property
 		str := exprValue[len(Gateway_Trigger_Setting_Env_Prefix) : len(exprValue)-1]
 		return true, &str
-	} else {
-		return false, &exprValue
 	}
+	return false, &exprValue
+}
+
+// ResolveEnvironmentProperties resolves environment properties mentioned in the settings map.
+func ResolveEnvironmentProperties(settings map[string]interface{}) error {
+	for k, v := range settings {
+		value := v.(string)
+		valid, propertyName := validateEnvPropertySettingExpr(&value)
+		if !valid {
+			continue
+		}
+		//lets get the env property value
+		propertyNameStr := *propertyName
+		propertyValue, found := os.LookupEnv(propertyNameStr)
+		if !found {
+			return fmt.Errorf("environment property [%v] is not set", propertyNameStr)
+		}
+		settings[k] = propertyValue
+	}
+	return nil
 }

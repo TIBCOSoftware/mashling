@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package util
 
 /**
@@ -21,7 +21,7 @@ const Gateway_Trigger_Handler_If = "if"
 const Gateway_Trigger_Metadata_JSON_Name = "trigger.json"
 const Gateway_Trigger_Optimize_Property = "optimize"
 const Gateway_Trigger_Optimize_Property_Default = false
-const Gateway_Trigger_Setting_Env_Prefix = "${ENV."
+const Gateway_Trigger_Setting_Env_Prefix = "${env."
 const Gateway_Trigger_Setting_Env_Suffix = "}"
 
 const Gateway_Link_Condition_LHS_Start_Expr = "${"
