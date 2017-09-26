@@ -12,7 +12,6 @@ branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - feature-enablegotests
     
 cache:
   bundler: false
