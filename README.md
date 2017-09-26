@@ -1,6 +1,23 @@
 
+# Project Mashling
 
-**Mashling** is the open source framework for event-driven microservices. 
+Project Mashling is an open source event-driven microgateway.
+
+Project Mashling highlights include:
+* Ultra lightweight: 10-50x times less compute resource intensive 
+* Event-driven by design
+* Complements Service Meshes
+* Co-exists with API management platforms in a federated API Gateway model
+
+Project Mashling consists of the following open source repos:
+* [mashling](http://github.com/TIBCOSoftware/mashling): This is the main repo that includes the below components
+	- CLI to build Mashling apps
+	- Mashling specific triggers and activities
+	- Library to build Mashling extensions
+* [mashling-recipes](http://github.com/TIBCOSoftware/mashling-recipes): This is the repo that includes recipes that illustrate configuration of common microgateway patterns. These recipes are curated and are searchable via [mashling.io](http://mashling.io)
+
+Additional developer tooling is included in below open source repo that contains the VSCode plugin for Mashling:
+* [VSCode Plugin for Mashling](https://github.com/TIBCOSoftware/vscode-extension-mashling)
 
 ## Installation
 
@@ -33,7 +50,7 @@ mashling create myApp
 - Mashling will start a REST server
 - Send GET request to run the flow. eg: http://localhost:9096/pets/2
 
-The built in sample gateway is based of the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be edited and downloaded via mashling.io
+The built in sample gateway is based off the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be edited and downloaded via mashling.io
 
 ```json
 {
