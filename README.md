@@ -105,7 +105,7 @@ The built in sample microgateway is based off the following mashling.json.  This
 For more details about the REST Trigger go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
 
 ## Documentation
-For additional documentation on mashling CLI tool and how , go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
+For additional documentation on mashling CLI tool, go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
 
  
 
