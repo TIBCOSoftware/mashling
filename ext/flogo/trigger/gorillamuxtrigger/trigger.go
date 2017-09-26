@@ -114,8 +114,6 @@ func getLocalIP() string {
 //Init trigger initialization
 func (t *RestTrigger) Init(runner action.Runner) {
 
-	log.SetLogLevel(logger.DebugLevel)
-
 	// router := httprouter.New()
 	router := mux.NewRouter()
 

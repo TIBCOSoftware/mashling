@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package rest
 
 import (
@@ -157,8 +157,6 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 	}
 
 	//Enable transport layaer security
-	log.SetLogLevel(logger.DebugLevel)
-
 	serverCert, _ := context.GetInput(ivServerCert).(string)
 	serverKey, _ := context.GetInput(ivServerKey).(string)
 	trustStore, _ := context.GetInput(ivTrustStore).(string)
