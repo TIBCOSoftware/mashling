@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package model
 
 import (
@@ -61,12 +61,6 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 		if err != nil {
 			return nil, nil, err
 		}
-	}
-
-	//substitute for any ENV variable values referenced in the settings. the expressions will be in the format ${ENV.HOST_NAME} where HOST_NAME is the env property
-	err := resolveEnvironmentProperties(mashTriggerSettingsUsable)
-	if err != nil {
-		return nil, nil, err
 	}
 
 	//check if the trigger has valid settings required
@@ -174,20 +168,20 @@ func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) 
 	gatewayAction := faction.Config{}
 
 	// handle param name-values provided as part of the handler
-	if handler.Params != nil {
-		var handlerParams interface{}
-		if err := json.Unmarshal([]byte(handler.Params), &handlerParams); err != nil {
-			return nil, err
-		}
-		if handlerParams != nil {
-			handlerParamsMap := handlerParams.(map[string]interface{})
-			//substitute for any ENV variable values referenced in the params. the expressions will be in the format ${ENV.HOST_NAME} where HOST_NAME is the env property
-			err := resolveEnvironmentProperties(handlerParamsMap)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
+	// if handler.Params != nil {
+	// 	var handlerParams interface{}
+	// 	if err := json.Unmarshal([]byte(handler.Params), &handlerParams); err != nil {
+	// 		return nil, err
+	// 	}
+	// 	if handlerParams != nil {
+	// 		handlerParamsMap := handlerParams.(map[string]interface{})
+	// 		//substitute for any ENV variable values referenced in the params. the expressions will be in the format ${ENV.HOST_NAME} where HOST_NAME is the env property
+	// 		err := resolveEnvironmentProperties(handlerParamsMap)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 	}
+	// }
 
 	//TODO use the params as inputs to the flow action. flogo tunables can be used to validate the params and, if valid, the values can be injected into the flow
 
@@ -282,24 +276,6 @@ func resolveConfigurationReference(configDefinitions map[string]types.Config, tr
 				}
 			}
 		}
-	}
-	return nil
-}
-
-func resolveEnvironmentProperties(settings map[string]interface{}) error {
-	for k, v := range settings {
-		value := v.(string)
-		valid, propertyName := util.ValidateEnvPropertySettingExpr(&value)
-		if !valid {
-			continue
-		}
-		//lets get the env property value
-		propertyNameStr := *propertyName
-		propertyValue, found := os.LookupEnv(propertyNameStr)
-		if !found {
-			return errors.New(fmt.Sprintf("ENV property [%v] referenced by the gateway is not set.", propertyNameStr))
-		}
-		settings[k] = propertyValue
 	}
 	return nil
 }
