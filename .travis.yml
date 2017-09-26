@@ -1,7 +1,8 @@
 sudo: required
 language : 
   - go  
-
+os:
+  - linux
 services:
   - docker
 
@@ -9,7 +10,6 @@ branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - develop
     
 cache:
   bundler: false
