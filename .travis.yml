@@ -9,7 +9,7 @@ branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - feature-gotestenabling
+    - develop
     
 cache:
   bundler: false
