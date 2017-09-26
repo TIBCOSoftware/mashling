@@ -1,6 +1,22 @@
+# Project Mashling
 
+Project Mashling is an open source event-driven microgateway.
 
-**Mashling** is the open source framework for event-driven microservices. 
+Project Mashling highlights include:
+* Ultra lightweight: 10-50x times less compute resource intensive 
+* Event-driven by design
+* Complements Service Meshes
+* Co-exists with API management platforms in a federated API Gateway model
+
+Project Mashling consists of the following open source repos:
+* [mashling](http://github.com/TIBCOSoftware/mashling): This is the main repo that includes the below components
+	- CLI to build Mashling apps 
+	- Mashling triggers and activities
+	- Library to build Mashling extensions
+* [mashling-recipes](http://github.com/TIBCOSoftware/mashling-recipes): This is the repo that includes recipes that illustrate configuration of common microgateway patterns. These recipes are curated and searchable via [mashling.io](http://mashling.io)
+
+Additional developer tooling is included in below open source repo that contains the VSCode plugin for Mashling configuration:
+* [VSCode Plugin for Mashling](https://github.com/TIBCOSoftware/vscode-extension-mashling)
 
 ## Installation
 
@@ -18,7 +34,7 @@
     go get -u github.com/TIBCOSoftware/mashling/...
 
 ## Getting Started
-A mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
+A Mashling microgateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
 
 To create the base gateway, which consists of a REST trigger and a simple event handler flow with a log activity, you use the following commands.
 
@@ -28,12 +44,15 @@ mashling create myApp
 
 ```
 
-- Cd myApp/bin folder
-- Start mashling engine by running ./myapp
-- Mashling will start a REST server
-- Send GET request to run the flow. eg: http://localhost:9096/pets/2
+```bash
+cd myApp/bin folder
+./myapp
+```
 
-The built in sample gateway is based of the following mashling.json.  This file can be manually modified to add additional triggers and event handlers.  This file can also be edited and downloaded via mashling.io
+- Mashling will start a REST server
+- Test it by sending sample HTTP events eg: http://localhost:9096/pets/2
+
+The built in sample microgateway is based off the following mashling.json.  This file can be modified to add additional triggers and event handlers.  
 
 ```json
 {
@@ -82,17 +101,12 @@ The built in sample gateway is based of the following mashling.json.  This file 
 ```
 
 
-For more details about the REST Trigger configuration go [here](https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/rest#example-configurations)
+For more details about the REST Trigger go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
 
 ## Documentation
-Additional documentation on mashling and the CLI tool
+For additional documentation on mashling CLI tool, go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
 
-  - **mashling tool**
-  
-  Create a mashling microgateway from a recipe.json
-  
-      mashling create -f recipe.json <mashlingappname>
-
+ 
 
 ## Contributing and support
 
@@ -131,3 +145,5 @@ mashling/cli is licensed under a BSD-type license. See TIBCO LICENSE.txt for lic
 
 ### Support
 You can post your questions via [GitHub issues](https://github.com/TIBCOSoftware/mashling/issues)
+
+
