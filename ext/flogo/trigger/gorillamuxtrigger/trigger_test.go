@@ -2,19 +2,15 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package gorillamuxtrigger
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"testing"
 
 	"io/ioutil"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
 var jsonMetadata = getJsonMetadata()
@@ -54,47 +50,47 @@ func (tr *TestRunner) Run(context context.Context, action action.Action, uri str
 	return 0, nil, nil
 }
 
-func TestInitOk(t *testing.T) {
-	// New  factory
-	f := &RestFactory{}
-	tgr := f.New("tibco-rest")
+// func TestInitOk(t *testing.T) {
+// 	// New  factory
+// 	f := &RestFactory{}
+// 	tgr := f.New("tibco-rest")
 
-	runner := &TestRunner{}
+// 	runner := &TestRunner{}
 
-	config := trigger.Config{}
-	json.Unmarshal([]byte(testConfig), &config)
-	tgr.Init(config, runner)
-}
+// 	config := trigger.Config{}
+// 	json.Unmarshal([]byte(testConfig), &config)
+// 	tgr.Init(config, runner)
+// }
 
-func TestHandlerOk(t *testing.T) {
+// func TestHandlerOk(t *testing.T) {
 
-	// New  factory
-	f := &RestFactory{}
-	tgr := f.New("tibco-rest")
+// 	// New  factory
+// 	f := &RestFactory{}
+// 	tgr := f.New("tibco-rest")
 
-	runner := &TestRunner{}
+// 	runner := &TestRunner{}
 
-	config := trigger.Config{}
-	json.Unmarshal([]byte(testConfig), &config)
-	tgr.Init(config, runner)
+// 	config := trigger.Config{}
+// 	json.Unmarshal([]byte(testConfig), &config)
+// 	tgr.Init(config, runner)
 
-	tgr.Start()
-	defer tgr.Stop()
+// 	tgr.Start()
+// 	defer tgr.Stop()
 
-	uri := "http://127.0.0.1:8091/device/12345/reset"
+// 	uri := "http://127.0.0.1:8091/device/12345/reset"
 
-	req, err := http.NewRequest("POST", uri, nil)
+// 	req, err := http.NewRequest("POST", uri, nil)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
+// 	client := &http.Client{}
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer resp.Body.Close()
 
-	log.Debug("response Status:", resp.Status)
+// 	log.Debug("response Status:", resp.Status)
 
-	if resp.StatusCode >= 300 {
-		t.Fail()
-	}
-}
+// 	if resp.StatusCode >= 300 {
+// 		t.Fail()
+// 	}
+// }
