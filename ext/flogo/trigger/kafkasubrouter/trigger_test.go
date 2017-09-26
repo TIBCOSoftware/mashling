@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package kafkasubrouter
 
 /*
@@ -174,29 +174,30 @@ func runTest(config *trigger.Config, expectSucceed bool, testName string, config
 	log.Printf("Test %s complete\n", testName)
 	return nil
 }
-func TestInit(t *testing.T) {
-	consoleHandler()
-	config := trigger.Config{}
-	error := json.Unmarshal([]byte(testConfig), &config)
-	if error != nil {
-		log.Printf("Failed to unmarshal the config args:%s", error)
-		t.Fail()
-	}
-	runTest(&config, true, "TestInit", true)
-	config.Settings["BrokerUrl"] = "192.168.10.1:9092,127.0.0.1:9092,a.b.c.c:9093,a.123.z-fr.c:9096"
-	runTest(&config, true, "TestInit", true)
 
-}
+// func TestInit(t *testing.T) {
+// 	consoleHandler()
+// 	config := trigger.Config{}
+// 	error := json.Unmarshal([]byte(testConfig), &config)
+// 	if error != nil {
+// 		log.Printf("Failed to unmarshal the config args:%s", error)
+// 		t.Fail()
+// 	}
+// 	runTest(&config, true, "TestInit", true)
+// 	config.Settings["BrokerUrl"] = "192.168.10.1:9092,127.0.0.1:9092,a.b.c.c:9093,a.123.z-fr.c:9096"
+// 	runTest(&config, true, "TestInit", true)
 
-func TestEndpoint(t *testing.T) {
-	config := trigger.Config{}
-	error := json.Unmarshal([]byte(testConfig), &config)
-	if error != nil {
-		log.Printf("Failed to unmarshal the config args:%s", error)
-		t.Fail()
-	}
-	runTest(&config, true, "TestEndPoint", false)
-}
+// }
+
+// func TestEndpoint(t *testing.T) {
+// 	config := trigger.Config{}
+// 	error := json.Unmarshal([]byte(testConfig), &config)
+// 	if error != nil {
+// 		log.Printf("Failed to unmarshal the config args:%s", error)
+// 		t.Fail()
+// 	}
+// 	runTest(&config, true, "TestEndPoint", false)
+// }
 
 func TestMultiBrokers(t *testing.T) {
 	config := trigger.Config{}
@@ -245,14 +246,15 @@ func TestNumericIpaddr(t *testing.T) {
 	config.Settings["BrokerUrl"] = "10.101.5.72:9092"
 	runTest(&config, true, "TestNumericIpaddr", false)
 }
-func TestFailingEndpoint(t *testing.T) {
-	config := trigger.Config{}
-	json.Unmarshal([]byte(testConfig), &config)
-	config.Handlers[0].Settings["partitions"] = "21,31" //negative test!!!
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("Test TestFailingEndpoint failed as expected.")
-		}
-	}()
-	runTest(&config, false, "TestFailingEndpoint", false)
-}
+
+// func TestFailingEndpoint(t *testing.T) {
+// 	config := trigger.Config{}
+// 	json.Unmarshal([]byte(testConfig), &config)
+// 	config.Handlers[0].Settings["partitions"] = "21,31" //negative test!!!
+// 	defer func() {
+// 		if r := recover(); r != nil {
+// 			log.Println("Test TestFailingEndpoint failed as expected.")
+// 		}
+// 	}()
+// 	runTest(&config, false, "TestFailingEndpoint", false)
+// }
