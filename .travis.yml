@@ -12,6 +12,7 @@ branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
+    - develop
     
 cache:
   bundler: false
