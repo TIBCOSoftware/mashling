@@ -1,0 +1,55 @@
+{
+  "mashling_schema": "0.2",
+  "gateway": {
+    "name": "mutualTLSGatewayApp",
+    "version": "1.0.0",
+    "display_name":"Secure Rest Conditional Gateway",
+    "display_image":"displayImage.svg",
+    "description": "This is the rest based microgateway app with TLS enabled",
+    "configurations": [
+      {
+        "name": "secureConfig",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "description": "Configuration for rest secure trigger with client auth",
+        "settings": {
+          "port": "9098",
+          "enableTLS": "true",
+          "serverCert":"${env.SERVER_CERT}",
+          "serverKey":"${env.SERVER_KEY}",
+          "enableClientAuth": "true",
+          "trustStore": "${env.TRUST_STORE}"
+        }
+      }
+    ],
+    "triggers": [
+      {
+        "name": "get_animals_rest_secure_trigger",
+        "description": "Animals rest secure trigger - get animal details",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "config": "${configurations.secureConfig}",
+          "method": "GET",
+		      "path": "/pets/{petId}",
+          "optimize":"true"
+        }
+      }
+    ],
+    "event_handlers": [
+      {
+        "name": "animals_get_handler",
+        "description": "Handle animals",
+        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/SecureRestInvoker.json"
+      }
+    ],
+    "event_links": [
+      {
+        "triggers": ["get_animals_rest_secure_trigger"],
+        "dispatches": [
+          {
+            "handler": "animals_get_handler"
+          }
+        ]
+      }
+    ]
+  }
+}
