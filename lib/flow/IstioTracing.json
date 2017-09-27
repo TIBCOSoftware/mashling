@@ -11,7 +11,7 @@
       "settings": {
         "port": "9233",
         "tracer": "zipkin",
-        "tracerEndpoint": "http://localhost:9411/api/v1/spans"
+        "tracerEndpoint": "http://zipkin:9411/api/v1/spans"
       },
       "handlers": [
         {
@@ -105,7 +105,7 @@
                   },
                   {
                     "name": "uri",
-                    "value": "http://petstore.swagger.io/v2/pet/:petId",
+                    "value": "http://petstore/v2/pet/:petId",
                     "type": "string"
                   },
                   {
