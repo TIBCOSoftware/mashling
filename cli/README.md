@@ -146,9 +146,5 @@ $go install ./...
 ```
 mashling CLI is built and installed in $GOPATH/bin
 
-## License
-mashling/cli is licensed under a BSD-type license. See license text [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/TIBCO%20LICENSE.txt).
-
-
 ### Support
 You can post your questions via [GitHub issues](https://github.com/TIBCOSoftware/mashling/issues)
