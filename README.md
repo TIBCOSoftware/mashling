@@ -34,7 +34,7 @@ Additional developer tooling is included in below open source repo that contains
     go get -u github.com/TIBCOSoftware/mashling/...
 
 ## Getting Started
-A Mashling microgateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
+A Mashling microgateway is created using the **Mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
 
 To create the base gateway, which consists of a REST trigger and a simple event handler flow with a log activity, you use the following commands.
 
@@ -104,7 +104,7 @@ The built in sample microgateway is based off the following mashling.json.  This
 For more details about the REST Trigger go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
 
 ## Documentation
-For additional documentation on **mashling** CLI tool, go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
+For additional documentation on **Mashling** CLI tool, go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
 
  
 
@@ -139,8 +139,8 @@ $go get github.com/xeipuuv/gojsonschema
 $go install ./... 
 ```
 
-##License
-mashling/cli is licensed under a BSD-type license. See TIBCO LICENSE.txt for license text.
+## License
+Mashling is licensed under a BSD-type license. See license text [here](https://github.com/TIBCOSoftware/mashling/blob/master/TIBCO%20LICENSE.txt).
 
 
 ### Support
