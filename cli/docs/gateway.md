@@ -9,7 +9,7 @@ This command is used to create a Mashling gateway project.
 
 	mashling create my_app
 
-*Create a mashling gateway project from an existing Mashling gateway descriptor.*
+*Create a Mashling gateway project from an existing Mashling gateway descriptor.*
 
 	mashling create -f myapp.json
 
@@ -412,4 +412,3 @@ For Header based routing the condition will always be trigger.header.headername 
 
 Also the following operators are supported and can be used in conditions:
 ==(equals),>(greater than),in,<(less than),!=(notequals) and notin.
-

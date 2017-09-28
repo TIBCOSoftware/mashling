@@ -1,5 +1,5 @@
 # tibco-rest
-This activity provides your mashling application the ability to invoke a REST service.
+This activity provides your Mashling application the ability to invoke a REST service.
 
 ## Schema
 Inputs and Outputs:
@@ -61,7 +61,7 @@ Inputs and Outputs:
 ## Settings
 | Setting     | Description    |
 |:------------|:---------------|
-| method      | The HTTP method to invoke |         
+| method      | The HTTP method to invoke |
 | uri         | The uri of the resource   |
 | pathParams  | The path parameters |
 | queryParams | The query parameters |

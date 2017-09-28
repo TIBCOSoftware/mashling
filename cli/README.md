@@ -8,8 +8,8 @@
 ### Prerequisites
 * The Go programming language 1.7 or later should be [installed](https://golang.org/doc/install).
 * Set GOPATH environment variable on your system
-* In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).  
-* For a private repo, set up ssh interaction with github. Follow the instruction [here](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account) and run the following command  
+* In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).
+* For a private repo, set up ssh interaction with github. Follow the instruction [here](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account) and run the following command
     git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 ### Install Mashling
@@ -104,10 +104,10 @@ For more details about the REST Trigger configuration go [here](https://github.c
 Additional documentation on Mashling and the CLI tool
 
 ### Mashling cli tool ###
-Details about the mashling cli commands are [here](docs/gateway.md)
+Details about the Mashling cli commands are [here](docs/gateway.md)
 
 ### Mashling json configuration ###
-Details about the mashling json configuration are [here](docs/gateway.md)
+Details about the Mashling json configuration are [here](docs/gateway.md)
 
 ### Mashling triggers ###
 For more details about the Mashling REST Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
@@ -136,13 +136,13 @@ $go get github.com/TIBCOSoftware/mashling/...
 
 $cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 
-[optional, only if building from branch] 
+[optional, only if building from branch]
 $git checkout my_branch
 
-[need to manually go get all dependencies for example:] 
+[need to manually go get all dependencies for example:]
 $go get github.com/xeipuuv/gojsonschema
 
-$go install ./... 
+$go install ./...
 ```
 Mashling CLI is built and installed in $GOPATH/bin
 

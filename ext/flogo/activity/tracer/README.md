@@ -1,5 +1,5 @@
 # tracer
-This activity provides your mashling application the ability to trace.
+This activity provides your Mashling application the ability to trace.
 
 ## Schema
 Inputs and Outputs:
