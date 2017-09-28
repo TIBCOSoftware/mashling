@@ -1,15 +1,15 @@
 # Mashling CLI
-> Details on mashling gateway projects and associated CLI commands.
+> Details on Mashling gateway projects and associated CLI commands.
 
 ## Commands
 #### create
-This command is used to create a mashling gateway project.
+This command is used to create a Mashling gateway project.
 
 *Create the base sample project with a specific name.*
 
 	mashling create my_app
 
-*Create a mashling gateway project from an existing mashling gateway descriptor.*
+*Create a mashling gateway project from an existing Mashling gateway descriptor.*
 
 	mashling create -f myapp.json
 
@@ -19,7 +19,7 @@ This command is used to display help on a particular command
 	mashling help create
 
 ### list
-This command is used to display components of a mashling gateway
+This command is used to display components of a Mashling gateway
 
 	mashling help list
 
@@ -32,8 +32,8 @@ Usage:
 
 **options**
 
-- *-f* : specify the mashling json (default is mashling.json).
-- *-h* : the hostname where this mashling will be deployed (default is localhost).
+- *-f* : specify the Mashling json (default is mashling.json).
+- *-h* : the hostname where this Mashling will be deployed (default is localhost).
 - *-t* : the trigger name to target (default is all).
 - *-o* : the output file to write the swagger.json to (default is stdout).
 
@@ -201,14 +201,14 @@ Usage:
 
 **options**
 
-- *-f*      : specify the mashling json (default is mashling.json).
+- *-f*      : specify the Mashling json (default is mashling.json).
 - *-k*      : the api key (required)
 - *-s*      : the api secret key (required)
 - *-u*      : username (required)
 - *-p*      : password (required)
 - *-portal* : the portal (required)
 - *-uuid*   : the proxy uuid (required)
-- *-h*			: the publicly available hostname where this mashling will be deployed (required)
+- *-h*			: the publicly available hostname where this Mashling will be deployed (required)
 - *-mock*		: true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false).
 
 
@@ -244,7 +244,7 @@ The create command creates a basic structure and files for a gateway.
 
 **files**
 
-- *mashling.json* : mashling gateway configuration descriptor file
+- *mashling.json* : Mashling gateway configuration descriptor file
 - *imports.go* : contains go imports for contributions (activities, triggers and models) used by the gateway
 - *main.go* : main file for the engine.
 
@@ -304,11 +304,11 @@ The *mashling.json* file is the metadata describing the gateway project.
 	}
 }
 ```
-### Steps to create and run a mashling app using mashling.json: ###
+### Steps to create and run a Mashling app using mashling.json: ###
 
 The mashling.json can be modified accordingly and new app can be created using the below command.
 
-mashling create -f mashlingname.json gatewayname
+mashling create -f mashling.json gatewayname
 
 Using command : "mashling create -f mashling.json mygateway" , mygateway will be created.
 
