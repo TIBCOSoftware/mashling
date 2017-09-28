@@ -3,14 +3,14 @@
 Project Mashling is an open source event-driven microgateway.
 
 Project Mashling highlights include:
-* Ultra lightweight: 10-50x times less compute resource intensive 
+* Ultra lightweight: 10-50x times less compute resource intensive
 * Event-driven by design
 * Complements Service Meshes
 * Co-exists with API management platforms in a federated API Gateway model
 
 Project Mashling consists of the following open source repos:
 * [mashling](http://github.com/TIBCOSoftware/mashling): This is the main repo that includes the below components
-	- CLI to build Mashling apps 
+	- CLI to build Mashling apps
 	- Mashling triggers and activities
 	- Library to build Mashling extensions
 * [mashling-recipes](http://github.com/TIBCOSoftware/mashling-recipes): This is the repo that includes recipes that illustrate configuration of common microgateway patterns. These recipes are curated and searchable via [mashling.io](http://mashling.io)
@@ -23,8 +23,8 @@ Additional developer tooling is included in below open source repo that contains
 ### Prerequisites
 * The Go programming language 1.7 or later should be [installed](https://golang.org/doc/install).
 * Set GOPATH environment variable on your system
-* In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).  
-* For a private repo, set up ssh interaction with github. Follow the instruction [here](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account) and run the following command  
+* In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).
+* For a private repo, set up ssh interaction with github. Follow the instruction [here](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account) and run the following command
     git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 ### Install Mashling
@@ -52,7 +52,7 @@ cd myApp/bin folder
 - Mashling will start a REST server
 - Test it by sending sample HTTP events eg: http://localhost:9096/pets/2
 
-The built in sample microgateway is based off the following mashling.json.  This file can be modified to add additional triggers and event handlers.  
+The built in sample microgateway is based off the following mashling.json.  This file can be modified to add additional triggers and event handlers.
 
 ```json
 {
@@ -106,7 +106,7 @@ For more details about the REST Trigger go [here](https://github.com/TIBCOSoftwa
 ## Documentation
 For additional documentation on **Mashling** CLI tool, go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
 
- 
+
 
 ## Contributing and support
 
@@ -124,19 +124,19 @@ Pull requests are also welcome. If you would like to submit one, please follow t
 
 Please submit a github issue if you would like to propose a significant change or request a new feature.
 
-### Build mashling from source
+### Build Mashling from source
 ```
 $go get github.com/TIBCOSoftware/mashling/cli/...
 
 $cd $GOPATH/src/github.com/TIBCOSoftware/mashling/cli
 
-[optional, only if building from branch] 
+[optional, only if building from branch]
 $git checkout my_branch
 
-[need to manually go get all dependencies for example:] 
+[need to manually go get all dependencies for example:]
 $go get github.com/xeipuuv/gojsonschema
 
-$go install ./... 
+$go install ./...
 ```
 
 ## License
@@ -145,5 +145,3 @@ Mashling is licensed under a BSD-type license. See license text [here](https://g
 
 ### Support
 You can post your questions via [GitHub issues](https://github.com/TIBCOSoftware/mashling/issues)
-
-

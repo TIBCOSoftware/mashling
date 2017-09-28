@@ -1,9 +1,9 @@
 # tibco-kafkasub
-This trigger provides your mashling application with the ability to subscribe to messages from a kafka cluster and start a flow with the contents of the message. If condition setting is provided with the handler,
+This trigger provides your Mashling application with the ability to subscribe to messages from a kafka cluster and start a flow with the contents of the message. If condition setting is provided with the handler,
 then the trigger evaluates the condition and dispatches the message to the handler if the condition evaluates to true. The condition evaluation with this trigger implementation uses the framework available
 as part of mashling/lib.
 
-It is assumed that the messages plain text.  The trigger supports TLS and SASL.  
+It is assumed that the messages plain text.  The trigger supports TLS and SASL.
 
 To make a TLS connection specifiy a trust dir containing the caroots for your kafka server and a broker URL which points to an SSL port.
 To use SASL simply provide the username and password in the settings config.
@@ -178,4 +178,3 @@ To connect to a port on a kafka cluster where SASL authorization is enabled
     }
   ],
 In this scenario the kafka server on bilbo is running SASL enabled port 9094. The user and password will be used to authenticate the user.
-

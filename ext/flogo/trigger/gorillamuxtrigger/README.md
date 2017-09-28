@@ -1,6 +1,6 @@
 # gorillamuxtrigger
 
-Gorillamux based http trigger for mashling gateway. It supports header/content based conditional routing.
+Gorillamux based http trigger for Mashling gateway. It supports header/content based conditional routing.
 
 ## Schema
 settings, outputs and handler:
