@@ -3,7 +3,7 @@
 
 ### Getting started with the UI 
 
-Project Mashling comes with a collection of curated recipes for common microgateway patterns searchable on http://mashling.io
+Project Mashling comes with a collection of curated recipes for common microgateway patterns searchable on [http://mashling.io](http://mashling.io)
 
 To get started : 
 
