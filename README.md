@@ -1,6 +1,6 @@
 # Project Mashling
 
-Project Mashling is an open source event-driven microgateway.
+Project Mashling<sup>TM</sup> is an open source event-driven microgateway.
 
 Project Mashling highlights include:
 * Ultra lightweight: 10-50x times less compute resource intensive
