@@ -7,15 +7,15 @@ Project Mashling comes with a collection of curated recipes for common microgate
 
 To get started : 
 
-- Find a recipe that is of interest to you
+* Find a recipe that is of interest to you
 
-- Browse the details on the recipe
+* Browse the details on the recipe
 
-- Use the "Try it now" button to download the corresponding pre-created Mashling application
+* Use the "Try it now" button to download the corresponding pre-created Mashling application
 
-- Each recipe comes with detailed usage instruction. A recipe README file, as an example [here](https://github.com/TIBCOSoftware/mashling-recipes/blob/master/recipes/event-dispatcher-router-mashling/README.md) 
+* Each recipe comes with detailed usage instruction. A recipe README file, as an example [here](https://github.com/TIBCOSoftware/mashling-recipes/blob/master/recipes/event-dispatcher-router-mashling/README.md) 
 
-- You can also customize each recipe and download the corresponding recipe file directly
+* You can also customize each recipe and download the corresponding recipe file directly
 
 
 ### Getting started with CLI
