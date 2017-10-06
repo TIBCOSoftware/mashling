@@ -436,6 +436,7 @@ func (t *MqttTrigger) constructStartRequest(message string, span Span) *StartReq
 				pathParams[k] = param
 			}
 		}
+		delete(content, "pathParams")
 	}
 
 	queryParams := make(map[string]string)
@@ -445,6 +446,7 @@ func (t *MqttTrigger) constructStartRequest(message string, span Span) *StartReq
 				queryParams[k] = param
 			}
 		}
+		delete(content, "queryParams")
 	}
 
 	ctx := opentracing.ContextWithSpan(context.Background(), span)
