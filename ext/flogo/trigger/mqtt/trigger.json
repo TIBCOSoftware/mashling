@@ -1,0 +1,108 @@
+{
+  "name": "tibco-mqtt",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt",
+  "version": "0.0.1",
+  "title": "Receive MQTT Message",
+  "author": "Michael Register <mregiste@tibco.com>",
+  "description": "MQTT Trigger",
+  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/mqtt",
+  "settings":[
+    {
+      "name": "broker",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "user",
+      "type": "string"
+    },
+    {
+      "name": "password",
+      "type": "string"
+    },
+    {
+      "name": "store",
+      "type": "string"
+    },
+    {
+      "name": "qos",
+      "type": "number"
+    },
+    {
+      "name": "cleansess",
+      "type": "boolean"
+    },
+    {
+      "name": "tracer",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerEndpoint",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerToken",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracerDebug",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tracerSameSpan",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tracerID128Bit",
+      "type": "boolean",
+      "required": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "params",
+      "type": "params"
+    },
+    {
+      "name": "pathParams",
+      "type": "params"
+    },
+    {
+      "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "content",
+      "type": "object"
+    },
+    {
+      "name": "message",
+      "type": "string"
+    },
+    {
+      "name": "tracing",
+      "type": "any"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "topic",
+        "type": "string"
+      },
+      {
+        "name": "Condition",
+        "type": "string"
+      }
+    ]
+  }
+}
