@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -37,7 +37,7 @@ func (c *cmdValidate) AddFlags(fs *flag.FlagSet) {
 }
 
 func (c *cmdValidate) Exec(args []string) error {
-	var gatewayJson string
+	var gatewayJSON string
 	var err error
 	var fileName string
 
@@ -50,13 +50,13 @@ func (c *cmdValidate) Exec(args []string) error {
 	if fileName != "" {
 		if fgutil.IsRemote(fileName) {
 
-			gatewayJson, err = fgutil.LoadRemoteFile(fileName)
+			gatewayJSON, err = fgutil.LoadRemoteFile(fileName)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
 				os.Exit(2)
 			}
 		} else {
-			gatewayJson, err = fgutil.LoadLocalFile(fileName)
+			gatewayJSON, err = fgutil.LoadLocalFile(fileName)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
 				os.Exit(2)
@@ -74,5 +74,15 @@ func (c *cmdValidate) Exec(args []string) error {
 		return err
 	}
 
-	return ValidateGateway(gatewayJson)
+	isValidation, err := IsValidGateway(gatewayJSON)
+
+	if err != nil {
+		return err
+	}
+
+	if isValidation {
+		fmt.Printf("The gateway json is valid\n")
+	}
+
+	return nil
 }

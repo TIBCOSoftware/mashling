@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -52,7 +52,7 @@ func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 // Exec implementation of cli.Command.Exec
 func (c *cmdCreate) Exec(args []string) error {
 
-	var gatewayJson string
+	var gatewayJSON string
 	var gatewayName string
 	var err error
 
@@ -60,13 +60,13 @@ func (c *cmdCreate) Exec(args []string) error {
 
 		if fgutil.IsRemote(c.fileName) {
 
-			gatewayJson, err = fgutil.LoadRemoteFile(c.fileName)
+			gatewayJSON, err = fgutil.LoadRemoteFile(c.fileName)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", c.fileName, err.Error())
 				os.Exit(2)
 			}
 		} else {
-			gatewayJson, err = fgutil.LoadLocalFile(c.fileName)
+			gatewayJSON, err = fgutil.LoadLocalFile(c.fileName)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", c.fileName, err.Error())
 				os.Exit(2)
@@ -96,7 +96,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		if err != nil {
 			return err
 		}
-		gatewayJson = string(bytes)
+		gatewayJSON = string(bytes)
 	}
 
 	currentDir, err := os.Getwd()
@@ -107,14 +107,12 @@ func (c *cmdCreate) Exec(args []string) error {
 
 	appDir := path.Join(currentDir, gatewayName)
 
-	isValidJson := false
+	isValidJSON, err := IsValidGateway(gatewayJSON)
 
-	isValidJson, err = IsValidateGateway(gatewayJson)
-
-	if !isValidJson {
+	if !isValidJSON {
 		fmt.Print("Mashling creation aborted \n")
 		return err
 	}
 
-	return CreateMashling(SetupNewProjectEnv(), gatewayJson, appDir, gatewayName, c.vendorDir)
+	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, appDir, gatewayName, c.vendorDir)
 }
