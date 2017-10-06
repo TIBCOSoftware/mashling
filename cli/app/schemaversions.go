@@ -6,8 +6,7 @@
 package app
 
 var schemaMap = map[string]string{
-	"0.1": "schema/mashling_schema.json",
-	"0.2": "schema/mashling_schema.json",
+	"0.2": "schema/mashling_schema-0.2.json",
 }
 
 //GetSupportedSchema returns supported schema
