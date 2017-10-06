@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -585,61 +585,64 @@ func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 	return gwInfoBuffer.String(), nil
 }
 
-//IsValidateGateway validates the gateway schema instance returns bool and error
-func IsValidateGateway(gatewayJson string) (bool, error) {
+//IsValidGateway validates the gateway schema instance returns bool and error
+func IsValidGateway(gatewayJSON string) (bool, error) {
 
-	isValidJson := false
-	schema, err := assets.Asset("schema/mashling_schema.json")
+	isValidSchema := false
+
+	suplliedSchemaVersion, err := getSchemaVersion(gatewayJSON)
+
+	if err != nil {
+		return isValidSchema, err
+	}
+
+	schemaPath, isValidSchema := GetSupportedSchema(suplliedSchemaVersion)
+
+	//check whether CLI supports this schema version
+	if !isValidSchema {
+		fmt.Printf("Schema version [%v] not supported. Please upgrade mashling cli \n", suplliedSchemaVersion)
+		return isValidSchema, nil
+	}
+
+	schema, err := assets.Asset(schemaPath)
 	if err != nil {
 		panic(err.Error())
 	}
 	schemaString := string(schema)
 	schemaLoader := gojsonschema.NewStringLoader(schemaString)
-	documentLoader := gojsonschema.NewStringLoader(gatewayJson)
+	documentLoader := gojsonschema.NewStringLoader(gatewayJSON)
 
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		panic(err.Error())
+		return false, err
 	}
 
 	if result.Valid() {
-		isValidJson = true
+		isValidSchema = true
 	} else {
 		fmt.Printf("The gateway json is not valid. See errors:\n")
 		for _, desc := range result.Errors() {
 			fmt.Printf("- %s\n", desc)
 		}
+		isValidSchema = false
 	}
 
-	return isValidJson, err
+	return isValidSchema, err
 
 }
 
-//ValidateGateway validates the gateway schema instance
-func ValidateGateway(gatewayJson string) error {
+func getSchemaVersion(gatewayJSON string) (string, error) {
 
-	schema, err := assets.Asset("schema/mashling_schema.json")
+	suplliedSchema := ""
+	gatewayDescriptor := &struct {
+		MashlingSchema string `json:"mashling_schema"`
+	}{}
+	err := json.Unmarshal([]byte(gatewayJSON), gatewayDescriptor)
+
 	if err != nil {
-		panic(err.Error())
+		return suplliedSchema, err
 	}
-	schemaString := string(schema)
-	schemaLoader := gojsonschema.NewStringLoader(schemaString)
-	documentLoader := gojsonschema.NewStringLoader(gatewayJson)
+	suplliedSchema = gatewayDescriptor.MashlingSchema
 
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	if result.Valid() {
-		fmt.Printf("The gateway json is valid\n")
-	} else {
-		fmt.Printf("The gateway json not valid. See errors:\n")
-		for _, desc := range result.Errors() {
-			fmt.Printf("- %s\n", desc)
-		}
-	}
-
-	return err
-
+	return suplliedSchema, err
 }
