@@ -11,7 +11,7 @@ This command is used to create a Mashling gateway project.
 
 *Create a Mashling gateway project from an existing Mashling gateway descriptor.*
 
-	mashling create -f myapp.json
+	mashling create -f myapp.json my_app
 
 ### help
 This command is used to display help on a particular command
