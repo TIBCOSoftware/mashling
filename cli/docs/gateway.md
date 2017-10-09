@@ -12,6 +12,23 @@ This command is used to create a Mashling gateway project.
 *Create a Mashling gateway project from an existing Mashling gateway descriptor.*
 
 	mashling create -f myapp.json my_app
+	
+Usage:
+
+	mashling create
+
+**options**
+
+- *-f* : specify the Mashling json (default is mashling.json).
+
+Example using default mashling.json :
+
+	mashling create my_gw_app
+	
+
+Example using recipe rest-gateway-with-tracing.json:
+
+	mashling create -f rest-gateway-with-tracing.json  my_rest_gw_app
 
 ### help
 This command is used to display help on a particular command
