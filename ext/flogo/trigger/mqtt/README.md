@@ -148,6 +148,16 @@ Settings, Outputs and Endpoint:
 | trigger.content | Trigger content / payload based condition | trigger.content.region == APAC |
 | env | Environment flag / variable based condition | env.APP_ENVIRONMENT == UAT |
 
+### MQTT Payload Options
+
+The below keys are reserved in the MQTT payload.
+
+| Key | Description | Example |
+|:----------|:-----------|:-------|
+| replyTo | Which topic to send the reply to | {"replyTo": "atopic"} |
+| pathParams | The parameters that would be found in the HTTP URL path | {"pathParams": {"id": "1"}} |
+| queryParams | The query that would be found in the HTTP URL query | {"queryParams": {"names": "NameA,NameB,NameC"}} |
+
 ### Sample Mashling Gateway Recipe
 
 See [this recipe](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes/mqtt-gateway)
