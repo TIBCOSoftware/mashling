@@ -61,6 +61,14 @@
     {
       "name": "trustStore",
       "type": "string"
+    },
+    {
+      "name": "basic_auth_username",
+      "type": "string"
+    },
+    {
+      "name": "basic_auth_passwordx",
+      "type": "string"
     }
   ],
   "outputs": [

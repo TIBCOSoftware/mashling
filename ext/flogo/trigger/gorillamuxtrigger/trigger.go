@@ -500,6 +500,15 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		log.Debugf("Found action' %+x'", action)
 
 		context := trigger.NewContext(context.Background(), startAttrs)
+
+		if isAuthEnabled(rt.config.Settings) {
+			log.Debugf("Authenticating the request.")
+			if !authenticate(r, rt.config.Settings) {
+				w.WriteHeader(403)
+				return
+			}
+		}
+
 		replyCode, replyData, err := rt.runner.Run(context, action, actionId, nil)
 
 		if err != nil {
