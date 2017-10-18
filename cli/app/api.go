@@ -18,12 +18,12 @@ import (
 	"strconv"
 
 	api "github.com/TIBCOSoftware/flogo-cli/app"
-	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	assets "github.com/TIBCOSoftware/mashling/cli/assets"
+	"github.com/TIBCOSoftware/mashling/cli/env"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
@@ -164,7 +164,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 	flogoJson := string(bytes)
 
-	err = api.CreateApp(SetupNewProjectEnv(), flogoJson, appDir, appName, vendorDir)
+	err = CreateApp(SetupNewProjectEnv(), flogoJson, appDir, appName, vendorDir)
 	if err != nil {
 		return err
 	}
@@ -645,4 +645,84 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 	suplliedSchema = gatewayDescriptor.MashlingSchema
 
 	return suplliedSchema, err
+}
+
+// CreateApp creates an application from the specified json application descriptor
+func CreateApp(env env.Project, appJson string, appDir string, appName string, vendorDir string) error {
+
+	descriptor, err := api.ParseAppDescriptor(appJson)
+	if err != nil {
+		return err
+	}
+
+	if appName != "" {
+		// override the application name
+
+		altJson := strings.Replace(appJson, `"`+descriptor.Name+`"`, `"`+appName+`"`, 1)
+		altDescriptor, err := api.ParseAppDescriptor(altJson)
+
+		//see if we can get away with simple replace so we don't reorder the existing json
+		if err == nil && altDescriptor.Name == appName {
+			appJson = altJson
+		} else {
+			//simple replace didn't work so we have to unmarshal & re-marshal the supplied json
+			var appObj map[string]interface{}
+			err := json.Unmarshal([]byte(appJson), &appObj)
+			if err != nil {
+				return err
+			}
+
+			appObj["name"] = appName
+
+			updApp, err := json.MarshalIndent(appObj, "", "  ")
+			if err != nil {
+				return err
+			}
+			appJson = string(updApp)
+		}
+
+		descriptor.Name = appName
+	}
+
+	env.Init(appDir)
+	err = env.Create(false, vendorDir)
+	if err != nil {
+		return err
+	}
+
+	err = fgutil.CreateFileFromString(path.Join(appDir, "flogo.json"), appJson)
+	if err != nil {
+		return err
+	}
+
+	//if manifest exists in the parent folder, use it to set up the dependecies
+	err = env.RestoreDependency()
+	var deps []*api.Dependency
+	//if restore didn't occur, install dependencies
+	if err != nil {
+
+		//todo allow ability to specify flogo-lib version
+		env.InstallDependency("github.com/TIBCOSoftware/flogo-lib", "")
+
+		deps := api.ExtractDependencies(descriptor)
+
+		for _, dep := range deps {
+			path, version := splitVersion(dep.Ref)
+			err = env.InstallDependency(path, version)
+			/*
+				if err != nil {
+					return err
+				}
+			*/
+		}
+	}
+
+	// create source files
+	cmdPath := path.Join(env.GetSourceDir(), strings.ToLower(descriptor.Name))
+	os.MkdirAll(cmdPath, 0777)
+
+	CreateMainGoFile(cmdPath, "")
+	CreateImportsGoFile(cmdPath, deps)
+
+	return nil
 }
