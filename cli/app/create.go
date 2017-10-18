@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
+	"github.com/TIBCOSoftware/mashling/cli/assets"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 )
@@ -158,6 +159,14 @@ func (c *cmdCreate) Exec(args []string) error {
 		fileContent := ""
 		// Create src payload.
 		var extraSrc bytes.Buffer
+		// Add the ASCII banner.
+		banner, err := assets.Asset("assets/banner.txt")
+		if err != nil {
+			// Asset was not found.
+			return err
+		}
+		bannerOutput := fmt.Sprintf("\tbannerTxt := `%s`\n\tfmt.Printf(\"%%s\\n\", bannerTxt)\n", banner)
+		extraSrc.WriteString(string(bannerOutput))
 		// Append file version output.
 		versionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Version: %%s\\n\", app.Version)\n")
 		extraSrc.WriteString(versionOutput)
