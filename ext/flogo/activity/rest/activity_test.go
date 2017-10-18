@@ -2,17 +2,20 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
 
+	"io/ioutil"
+
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/test"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
-	"io/ioutil"
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
 const reqPostStr string = `{
@@ -50,18 +53,23 @@ func TestCreate(t *testing.T) {
 var petID string
 
 func TestSimplePost(t *testing.T) {
+	opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
 
 	act := NewActivity(getActivityMetadata())
 	tc := test.NewTestActivityContext(getActivityMetadata())
 
 	//setup attrs
-	tc.SetInput("method", "POST")
-	tc.SetInput("uri", "http://petstore.swagger.io/v2/pet")
-	tc.SetInput("content", reqPostStr)
+	tc.SetInput(ivMethod, "POST")
+	tc.SetInput(ivURI, "http://petstore.swagger.io/v2/pet")
+	tc.SetInput(ivContent, reqPostStr)
+
+	span := opentracing.StartSpan("test")
+	ctx := opentracing.ContextWithSpan(context.Background(), span)
+	tc.SetInput(ivTracing, ctx)
 
 	//eval
 	act.Eval(tc)
-	val := tc.GetOutput("result")
+	val := tc.GetOutput(ovResult)
 
 	fmt.Printf("result: %v\n", val)
 
@@ -69,6 +77,11 @@ func TestSimplePost(t *testing.T) {
 
 	petID = res["id"].(json.Number).String()
 	fmt.Println("petID:", petID)
+
+	tracing := tc.GetOutput(ovTracing)
+	if tracing == nil {
+		t.Error("tracing is nil")
+	}
 }
 
 func TestSimpleGet(t *testing.T) {
@@ -77,40 +90,36 @@ func TestSimpleGet(t *testing.T) {
 	tc := test.NewTestActivityContext(getActivityMetadata())
 
 	//setup attrs
-	tc.SetInput("method", "GET")
-	tc.SetInput("uri", "http://petstore.swagger.io/v2/pet/"+petID)
+	tc.SetInput(ivMethod, "GET")
+	tc.SetInput(ivURI, "http://petstore.swagger.io/v2/pet/"+petID)
 
 	//eval
 	act.Eval(tc)
 
-	val := tc.GetOutput("result")
+	val := tc.GetOutput(ovResult)
 	fmt.Printf("result: %v\n", val)
 }
 
-/*
-// TODO fix this test
-
 func TestParamGet(t *testing.T) {
 
-	act := activity.Get("github.com/TIBCOSoftware/flogo-contrib/activity/rest")
+	act := NewActivity(getActivityMetadata())
 	tc := test.NewTestActivityContext(act.Metadata())
 
 	//setup attrs
-	tc.SetInput("method", "GET")
-	tc.SetInput("uri", "http://petstore.swagger.io/v2/pet/:id")
+	tc.SetInput(ivMethod, "GET")
+	tc.SetInput(ivURI, "http://petstore.swagger.io/v2/pet/:id")
 
 	pathParams := map[string]string{
 		"id": petID,
 	}
-	tc.SetInput("pathParams", pathParams)
+	tc.SetInput(ivPathParams, pathParams)
 
 	//eval
 	act.Eval(tc)
 
-	val := tc.GetOutput("result")
+	val := tc.GetOutput(ovResult)
 	fmt.Printf("result: %v\n", val)
 }
-*/
 
 func TestSimpleGetQP(t *testing.T) {
 
@@ -118,18 +127,18 @@ func TestSimpleGetQP(t *testing.T) {
 	tc := test.NewTestActivityContext(getActivityMetadata())
 
 	//setup attrs
-	tc.SetInput("method", "GET")
-	tc.SetInput("uri", "http://petstore.swagger.io/v2/pet/findByStatus")
+	tc.SetInput(ivMethod, "GET")
+	tc.SetInput(ivURI, "http://petstore.swagger.io/v2/pet/findByStatus")
 
 	queryParams := map[string]string{
 		"status": "ava",
 	}
-	tc.SetInput("queryParams", queryParams)
+	tc.SetInput(ivQueryParams, queryParams)
 
 	//eval
 	act.Eval(tc)
 
-	val := tc.GetOutput("result")
+	val := tc.GetOutput(ovResult)
 	fmt.Printf("result: %v\n", val)
 }
 
