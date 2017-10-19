@@ -243,3 +243,73 @@ func TestCreateHandlers(t *testing.T) {
 		t.Error("there should be 0 dispatches for topic_2")
 	}
 }
+
+const testMessage = `{
+	"replyTo": "abc123",
+	"pathParms": {
+		"param": "a"
+	},
+	"queryParams": {
+		"param": "b"
+	}
+}`
+
+func TestConstructStartRequest(t *testing.T) {
+	tracer := &opentracing.NoopTracer{}
+	span := Span{
+		Span: tracer.StartSpan("topic"),
+	}
+	defer span.Finish()
+
+	// New  factory
+	md := trigger.NewMetadata(jsonMetadata)
+	f := NewFactory(md)
+
+	// New Trigger
+	config := &trigger.Config{}
+	err := json.Unmarshal([]byte(testConfig), config)
+	if err != nil {
+		t.Error(err)
+	}
+	tgr := f.New(config)
+
+	runner := &TestRunner{t: t}
+
+	tgr.Init(runner)
+
+	request := tgr.(*MqttTrigger).constructStartRequest(testMessage, span)
+	params := request.Data["params"]
+	if params == nil {
+		t.Fatal("params is nil")
+	}
+	pathParams := request.Data["pathParams"]
+	if pathParams == nil {
+		t.Fatal("pathParams is nil")
+	}
+	queryParams := request.Data["queryParams"]
+	if queryParams == nil {
+		t.Fatal("queryParams is nil")
+	}
+	content := request.Data["content"]
+	if content == nil {
+		t.Fatal("content is nil")
+	}
+	message := request.Data["message"]
+	if message == nil {
+		t.Fatal("message is nil")
+	}
+	tracing := request.Data["tracing"]
+	if tracing == nil {
+		t.Fatal("tracing is nil")
+	}
+
+	if content.(map[string]interface{})["replyTo"] != nil {
+		t.Fatal("replyTo should be nil in content")
+	}
+	if content.(map[string]interface{})["pathParams"] != nil {
+		t.Fatal("pathParams should be nil in content")
+	}
+	if content.(map[string]interface{})["queryParams"] != nil {
+		t.Fatal("queryParams should be nil in content")
+	}
+}
