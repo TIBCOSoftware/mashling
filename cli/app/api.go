@@ -31,7 +31,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, appDir string, appName string, vendorDir string) error {
+func CreateMashling(env env.Project, gatewayJson string, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
 	if err != nil {
@@ -179,6 +179,12 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
 	}
 
+	if customizeFunc != nil {
+		err = customizeFunc()
+		if err != nil {
+			return err
+		}
+	}
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 	//delete flogo.json file from the app dir
