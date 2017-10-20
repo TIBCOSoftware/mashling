@@ -132,7 +132,6 @@ type MqttTrigger struct {
 	client   mqtt.Client
 	config   *trigger.Config
 	handlers map[string]*OptimizedHandler
-	tracer   opentracing.Tracer
 }
 
 //NewFactory create a new Trigger factory
@@ -236,7 +235,7 @@ func (t *MqttTrigger) configureTracer() {
 
 	switch tracer {
 	case TracerNoOP:
-		t.tracer = &opentracing.NoopTracer{}
+		opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
 	case TracerZipKin:
 		if tracerEndpoint == "" {
 			panic(ErrorTracerEndpointRequired)
@@ -259,7 +258,7 @@ func (t *MqttTrigger) configureTracer() {
 			panic(fmt.Sprintf("unable to create Zipkin tracer: %+v\n", err))
 		}
 
-		t.tracer = tracer
+		opentracing.SetGlobalTracer(tracer)
 	case TracerAPPDash:
 		if tracerEndpoint == "" {
 			panic(ErrorTracerEndpointRequired)
@@ -268,7 +267,7 @@ func (t *MqttTrigger) configureTracer() {
 		collector := appdash.NewRemoteCollector(tracerEndpoint)
 		chunkedCollector := appdash.NewChunkedCollector(collector)
 		tracer := appdashtracing.NewTracer(chunkedCollector)
-		t.tracer = tracer
+		opentracing.SetGlobalTracer(tracer)
 	case TracerLightStep:
 		if tracerToken == "" {
 			panic(ErrorTracerTokenRequired)
@@ -278,7 +277,7 @@ func (t *MqttTrigger) configureTracer() {
 			AccessToken: tracerToken,
 		})
 
-		t.tracer = lightstepTracer
+		opentracing.SetGlobalTracer(lightstepTracer)
 	default:
 		panic(ErrorInvalidTracer)
 	}
@@ -309,7 +308,7 @@ func (t *MqttTrigger) Start() error {
 		topic := msg.Topic()
 
 		span := Span{
-			Span: t.tracer.StartSpan(topic),
+			Span: opentracing.StartSpan(topic),
 		}
 		defer span.Finish()
 
