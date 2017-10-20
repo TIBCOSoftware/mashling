@@ -715,6 +715,8 @@ func CreateApp(env env.Project, appJson string, appDir string, appName string, v
 				}
 			*/
 		}
+	} else {
+		fmt.Println("Dependent libraries are restored.")
 	}
 
 	// create source files
