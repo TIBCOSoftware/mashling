@@ -51,6 +51,10 @@
     {
       "name": "result",
       "type": "any"
+    },
+    {
+      "name": "tracing",
+      "type": "any"
     }
   ]
 }

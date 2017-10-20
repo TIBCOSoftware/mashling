@@ -54,6 +54,10 @@ Inputs and Outputs:
     {
       "name": "result",
       "type": "object"
+    },
+    {
+      "name": "tracing",
+      "type": "any"
     }
   ]
 }
