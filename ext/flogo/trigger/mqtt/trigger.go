@@ -365,6 +365,7 @@ func (t *MqttTrigger) Stop() error {
 
 // RunAction starts a new Process Instance
 func (t *MqttTrigger) RunAction(actionURI string, payload string, span Span) {
+	span.SetTag("broker", t.config.GetSetting("broker"))
 
 	req := t.constructStartRequest(payload, span)
 
@@ -392,6 +393,8 @@ func (t *MqttTrigger) RunAction(actionURI string, payload string, span Span) {
 }
 
 func (t *MqttTrigger) publishMessage(topic string, message string, span Span) {
+	span.SetTag("replyTo", topic)
+	span.SetTag("reply", message)
 
 	log.Debug("ReplyTo topic: ", topic)
 	log.Debug("Publishing message: ", message)
@@ -415,6 +418,8 @@ func (t *MqttTrigger) publishMessage(topic string, message string, span Span) {
 }
 
 func (t *MqttTrigger) constructStartRequest(message string, span Span) *StartRequest {
+	span.SetTag("message", message)
+
 	req := &StartRequest{}
 
 	var content map[string]interface{}
