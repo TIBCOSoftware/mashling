@@ -248,6 +248,29 @@ func TestSimpleGetQP(t *testing.T) {
 	}
 }
 
+func TestGetContentType(t *testing.T) {
+	contentType := getContentType("test")
+	if contentType != contentTypeTextPlain {
+		t.Error("content type should be ", contentTypeTextPlain)
+	}
+
+	contentType = getContentType(1)
+	if contentType != contentTypeTextPlain {
+		t.Error("content type should be ", contentTypeTextPlain)
+	}
+
+	contentType = getContentType(make([]int, 1))
+	if contentType != contentTypeApplicationJSON {
+		t.Error("content type should be ", contentTypeApplicationJSON)
+	}
+}
+
+func TestMethodIsValid(t *testing.T) {
+	if !methodIsValid(methodDELETE) {
+		t.Error("method should be valid")
+	}
+}
+
 func TestBuildURI(t *testing.T) {
 
 	uri := "http://localhost:7070/flow/:id"
@@ -311,5 +334,12 @@ func TestBuildURI4(t *testing.T) {
 	t.Log(newURI)
 	if newURI != "https://127.0.0.1/flow/1234/test" {
 		t.Fatal("invalid uri")
+	}
+}
+
+func TestGetCerts(t *testing.T) {
+	_, err := getCerts("./certs")
+	if err != nil {
+		t.Error(err)
 	}
 }

@@ -34,6 +34,9 @@ const (
 	methodPATCH  = "PATCH"
 	methodDELETE = "DELETE"
 
+	contentTypeTextPlain       = "text/plain; charset=UTF-8"
+	contentTypeApplicationJSON = "application/json; charset=UTF-8"
+
 	ivMethod      = "method"
 	ivURI         = "uri"
 	ivPathParams  = "pathParams"
@@ -132,7 +135,7 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 
 	var reqBody io.Reader
 
-	contentType := "application/json; charset=UTF-8"
+	contentType := contentTypeApplicationJSON
 
 	if method == methodPOST || method == methodPUT || method == methodPATCH {
 
@@ -240,17 +243,17 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 //todo just make contentType a setting
 func getContentType(replyData interface{}) string {
 
-	contentType := "application/json; charset=UTF-8"
+	contentType := contentTypeApplicationJSON
 
 	switch v := replyData.(type) {
 	case string:
 		if !strings.HasPrefix(v, "{") && !strings.HasPrefix(v, "[") {
-			contentType = "text/plain; charset=UTF-8"
+			contentType = contentTypeTextPlain
 		}
 	case int, int64, float64, bool, json.Number:
-		contentType = "text/plain; charset=UTF-8"
+		contentType = contentTypeTextPlain
 	default:
-		contentType = "application/json; charset=UTF-8"
+		contentType = contentTypeApplicationJSON
 	}
 
 	return contentType
