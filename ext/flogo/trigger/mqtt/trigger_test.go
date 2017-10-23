@@ -11,6 +11,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	opentracing "github.com/opentracing/opentracing-go"
 )
@@ -82,6 +83,43 @@ func TestInit(t *testing.T) {
 	runner := &TestRunner{t: t}
 
 	tgr.Init(runner)
+}
+
+func TestGetLocalIP(t *testing.T) {
+	ip := getLocalIP()
+	if ip == "" {
+		t.Error("failed to get local ip")
+	}
+}
+
+func TestConfigureTracer(t *testing.T) {
+	// New  factory
+	md := trigger.NewMetadata(jsonMetadata)
+	f := NewFactory(md)
+
+	// New Trigger
+	config := &trigger.Config{}
+	err := json.Unmarshal([]byte(testConfig), config)
+	if err != nil {
+		t.Error(err)
+	}
+	tgr := f.New(config)
+
+	runner := &TestRunner{t: t}
+
+	tgr.Init(runner)
+
+	mqtt := tgr.(*MqttTrigger)
+	mqtt.config.Settings["tracer"] = TracerZipKin
+	mqtt.config.Settings["tracerEndpoint"] = "http://localhost:9411/api/v1/spans"
+	mqtt.config.Settings["tracerDebug"] = true
+	mqtt.config.Settings["tracerSameSpan"] = true
+	mqtt.config.Settings["tracerID128Bit"] = true
+	mqtt.configureTracer()
+
+	mqtt.config.Settings["tracer"] = TracerAPPDash
+	mqtt.config.Settings["tracerEndpoint"] = "localhost:7701"
+	mqtt.configureTracer()
 }
 
 func TestEndpoint(t *testing.T) {
@@ -160,6 +198,14 @@ func TestHandler(t *testing.T) {
 			{
 				actionId:  "action_3",
 				condition: "${env.value == A}",
+			},
+			{
+				actionId:  "action_4",
+				condition: "${#}",
+			},
+			{
+				actionId:  "action_5",
+				condition: "${trigger.header.stuff == A}",
 			},
 		},
 	}
