@@ -1,5 +1,7 @@
 # Project Mashling
 
+[![Build Status](https://travis-ci.org/TIBCOSoftware/mashling.svg?branch=master)](https://travis-ci.org/TIBCOSoftware/mashling)
+
 Project Mashling<sup>TM</sup> is an open source event-driven microgateway.
 
 Project Mashling highlights include:

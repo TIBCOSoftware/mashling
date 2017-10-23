@@ -55,6 +55,10 @@
     {
       "name": "tracing",
       "type": "any"
+    },
+    {
+      "name": "status",
+      "type": "integer"
     }
   ]
 }

@@ -47,6 +47,7 @@ const (
 
 	ovResult  = "result"
 	ovTracing = "tracing"
+	ovStatus  = "status"
 )
 
 var validMethods = []string{methodGET, methodPOST, methodPUT, methodPATCH, methodDELETE}
@@ -83,6 +84,12 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 		defer span.Finish()
 	}
 
+	setTag := func(key string, value interface{}) {
+		if span != nil {
+			span.SetTag(key, value)
+		}
+	}
+
 	method := strings.ToUpper(context.GetInput(ivMethod).(string))
 	uri := context.GetInput(ivURI).(string)
 
@@ -97,9 +104,7 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 
 			if val == nil {
 				err := activity.NewError("Path Params not specified, required for URI: "+uri, "", nil)
-				if span != nil {
-					span.SetTag("error", err.Error())
-				}
+				setTag("error", err.Error())
 				return false, err
 			}
 		}
@@ -120,6 +125,9 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 		uri = uri + "?" + qp.Encode()
 	}
 
+	setTag("method", method)
+	setTag("uri", uri)
+
 	log.Debugf("REST Call: [%s] %s\n", method, uri)
 
 	var reqBody io.Reader
@@ -135,14 +143,18 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 		if content != nil {
 			if str, ok := content.(string); ok {
 				reqBody = bytes.NewBuffer([]byte(str))
+				setTag("payload", str)
 			} else {
 				b, _ := json.Marshal(content) //todo handle error
 				reqBody = bytes.NewBuffer([]byte(b))
+				setTag("payload", str)
 			}
 		}
 	} else {
 		reqBody = nil
 	}
+
+	setTag("contentType", contentType)
 
 	req, err := http.NewRequest(method, uri, reqBody)
 	if reqBody != nil {
@@ -197,10 +209,8 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		if span != nil {
-			span.SetTag("error", err.Error())
-		}
-		panic(err)
+		setTag("error", err.Error())
+		return false, err
 	}
 	defer resp.Body.Close()
 
@@ -216,8 +226,10 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 	//json.Unmarshal(respBody, &result)
 
 	log.Debug("response Body:", result)
-
+	setTag("response", string(respBody))
+	setTag("responseStatus", resp.Status)
 	context.SetOutput(ovResult, result)
+	context.SetOutput(ovStatus, resp.Status)
 
 	return true, nil
 }
