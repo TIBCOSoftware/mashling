@@ -110,15 +110,15 @@ func TestConfigureTracer(t *testing.T) {
 	tgr.Init(runner)
 
 	mqtt := tgr.(*MqttTrigger)
-	mqtt.config.Settings["tracer"] = TracerZipKin
-	mqtt.config.Settings["tracerEndpoint"] = "http://localhost:9411/api/v1/spans"
-	mqtt.config.Settings["tracerDebug"] = true
-	mqtt.config.Settings["tracerSameSpan"] = true
-	mqtt.config.Settings["tracerID128Bit"] = true
+	mqtt.config.Settings[settingTracer] = TracerZipKin
+	mqtt.config.Settings[settingTracerEndpoint] = "http://localhost:9411/api/v1/spans"
+	mqtt.config.Settings[settingTracerDebug] = true
+	mqtt.config.Settings[settingTracerSameSpan] = true
+	mqtt.config.Settings[settingTracerID128Bit] = true
 	mqtt.configureTracer()
 
-	mqtt.config.Settings["tracer"] = TracerAPPDash
-	mqtt.config.Settings["tracerEndpoint"] = "localhost:7701"
+	mqtt.config.Settings[settingTracer] = TracerAPPDash
+	mqtt.config.Settings[settingTracerEndpoint] = "localhost:7701"
 	mqtt.configureTracer()
 }
 

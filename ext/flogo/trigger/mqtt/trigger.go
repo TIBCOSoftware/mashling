@@ -30,6 +30,21 @@ const (
 	TracerZipKin    = "zipkin"
 	TracerAPPDash   = "appdash"
 	TracerLightStep = "lightstep"
+
+	settingTopic          = "topic"
+	settingTracer         = "tracer"
+	settingTracerEndpoint = "tracerEndpoint"
+	settingTracerToken    = "tracerToken"
+	settingTracerDebug    = "tracerDebug"
+	settingTracerSameSpan = "tracerSameSpan"
+	settingTracerID128Bit = "tracerID128Bit"
+	settingBroker         = "broker"
+	settingID             = "id"
+	settingUser           = "user"
+	settingPassword       = "password"
+	settingCleansess      = "cleansess"
+	settingStore          = "store"
+	settingQOS            = "qos"
 )
 
 var (
@@ -164,7 +179,7 @@ func (t *MqttTrigger) CreateHandlers() map[string]*OptimizedHandler {
 	handlers := make(map[string]*OptimizedHandler)
 
 	for _, h := range t.config.Handlers {
-		t := h.Settings["topic"]
+		t := h.Settings[settingTopic]
 		if t == nil {
 			continue
 		}
@@ -209,27 +224,27 @@ func getLocalIP() string {
 // configureTracer configures the distributed tracer
 func (t *MqttTrigger) configureTracer() {
 	tracer := TracerNoOP
-	if setting, ok := t.config.Settings["tracer"]; ok {
+	if setting, ok := t.config.Settings[settingTracer]; ok {
 		tracer = setting.(string)
 	}
 	tracerEndpoint := ""
-	if setting, ok := t.config.Settings["tracerEndpoint"]; ok {
+	if setting, ok := t.config.Settings[settingTracerEndpoint]; ok {
 		tracerEndpoint = setting.(string)
 	}
 	tracerToken := ""
-	if setting, ok := t.config.Settings["tracerToken"]; ok {
+	if setting, ok := t.config.Settings[settingTracerToken]; ok {
 		tracerToken = setting.(string)
 	}
 	tracerDebug := false
-	if setting, ok := t.config.Settings["tracerDebug"]; ok {
+	if setting, ok := t.config.Settings[settingTracerDebug]; ok {
 		tracerDebug = setting.(bool)
 	}
 	tracerSameSpan := false
-	if setting, ok := t.config.Settings["tracerSameSpan"]; ok {
+	if setting, ok := t.config.Settings[settingTracerSameSpan]; ok {
 		tracerSameSpan = setting.(bool)
 	}
 	tracerID128Bit := true
-	if setting, ok := t.config.Settings["tracerID128Bit"]; ok {
+	if setting, ok := t.config.Settings[settingTracerID128Bit]; ok {
 		tracerID128Bit = setting.(bool)
 	}
 
@@ -287,18 +302,18 @@ func (t *MqttTrigger) configureTracer() {
 func (t *MqttTrigger) Start() error {
 
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(t.config.GetSetting("broker"))
-	opts.SetClientID(t.config.GetSetting("id"))
-	opts.SetUsername(t.config.GetSetting("user"))
-	opts.SetPassword(t.config.GetSetting("password"))
-	b, err := strconv.ParseBool(t.config.GetSetting("cleansess"))
+	opts.AddBroker(t.config.GetSetting(settingBroker))
+	opts.SetClientID(t.config.GetSetting(settingID))
+	opts.SetUsername(t.config.GetSetting(settingUser))
+	opts.SetPassword(t.config.GetSetting(settingPassword))
+	b, err := strconv.ParseBool(t.config.GetSetting(settingCleansess))
 	if err != nil {
 		log.Error("Error converting \"cleansess\" to a boolean ", err.Error())
 		return err
 	}
 	opts.SetCleanSession(b)
-	if storeType := t.config.Settings["store"]; storeType != ":memory:" {
-		opts.SetStore(mqtt.NewFileStore(t.config.GetSetting("store")))
+	if storeType := t.config.Settings[settingStore]; storeType != ":memory:" {
+		opts.SetStore(mqtt.NewFileStore(t.config.GetSetting(settingStore)))
 	}
 
 	t.configureTracer()
@@ -329,7 +344,7 @@ func (t *MqttTrigger) Start() error {
 		panic(token.Error())
 	}
 
-	i, err := strconv.Atoi(t.config.GetSetting("qos"))
+	i, err := strconv.Atoi(t.config.GetSetting(settingQOS))
 	if err != nil {
 		log.Error("Error converting \"qos\" to an integer ", err.Error())
 		return err
@@ -365,7 +380,7 @@ func (t *MqttTrigger) Stop() error {
 
 // RunAction starts a new Process Instance
 func (t *MqttTrigger) RunAction(actionURI string, payload string, span Span) {
-	span.SetTag("broker", t.config.GetSetting("broker"))
+	span.SetTag("broker", t.config.GetSetting(settingBroker))
 
 	req := t.constructStartRequest(payload, span)
 
@@ -399,7 +414,7 @@ func (t *MqttTrigger) publishMessage(topic string, message string, span Span) {
 	log.Debug("ReplyTo topic: ", topic)
 	log.Debug("Publishing message: ", message)
 
-	qos, err := strconv.Atoi(t.config.GetSetting("qos"))
+	qos, err := strconv.Atoi(t.config.GetSetting(settingQOS))
 	if err != nil {
 		span.Error("Error converting \"qos\" to an integer %v", err)
 		return
