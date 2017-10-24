@@ -160,6 +160,11 @@ func TestSimplePost(t *testing.T) {
 		t.Fatal("invalid pet id")
 	}
 
+	status := tc.GetOutput(ovStatus)
+	if status == nil {
+		t.Error("status is nil")
+	}
+
 	tracing := tc.GetOutput(ovTracing)
 	if tracing == nil {
 		t.Error("tracing is nil")
