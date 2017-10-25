@@ -2,17 +2,16 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"os"
 	"strconv"
-
-	"github.com/TIBCOSoftware/mashling/cli/cli"
 )
 
 var optPublish = &cli.OptionInfo{
@@ -74,7 +73,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 func (c *cmdPublish) Exec(args []string) error {
 	if c.apiKey == "" || c.apiSecret == "" || c.username == "" || c.password == "" ||
 		c.uuid == "" || c.portal == "" {
-		return errors.New("Error: api key and api secret keys are required")
+		return errors.New("Error: required parameters are missing.")
 	}
 
 	if c.host == "" {
@@ -89,7 +88,7 @@ func (c *cmdPublish) Exec(args []string) error {
 
 	gatewayJSON, _, err := GetGatewayJSON(c.fileName)
 
-	user := ApiUser{c.username, c.password, c.apiKey, c.apiSecret, c.uuid, c.portal}
+	user := ApiUser{c.username, c.password, c.apiKey, c.apiSecret, c.uuid, c.portal, false}
 	b, err := strconv.ParseBool(c.mock)
 	if err != nil {
 		panic("Invalid option for -mock")
