@@ -14,8 +14,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	condition "github.com/jpollock/mashling/lib/conditions"
+	"github.com/jpollock/mashling/lib/util"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	lightstep "github.com/lightstep/lightstep-tracer-go"

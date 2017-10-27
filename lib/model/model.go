@@ -2,13 +2,13 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package model
 
 import (
 	"encoding/json"
 
-	"github.com/TIBCOSoftware/mashling/lib/types"
+	"github.com/jpollock/mashling/lib/types"
 )
 
 func CreateMashlingSampleModel() (types.Microgateway, error) {
@@ -25,7 +25,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 			Configurations: []types.Config{
 				{
 					Name:        "kafkaConfig",
-					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
+					Type:        "github.com/jpollock/mashling/ext/flogo/trigger/kafkasubrouter",
 					Description: "Configuration for kafka cluster",
 					Settings: json.RawMessage(`{
 										"BrokerUrl": "localhost:9092"
@@ -36,7 +36,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 				{
 					Name:        "rest_trigger",
 					Description: "The trigger on 'pets' endpoint",
-					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+					Type:        "github.com/jpollock/mashling/ext/flogo/trigger/gorillamuxtrigger",
 					Settings: json.RawMessage(`{
 					  "port": "9096",
 					  "method": "GET",
@@ -51,7 +51,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 					Params: json.RawMessage(`{
                     				"uri": "petstore.swagger.io/v2/pet/3"
 					}`),
-					Reference: "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
+					Reference: "github.com/jpollock/mashling/lib/flow/flogo.json",
 				},
 			},
 			EventLinks: []types.EventLink{

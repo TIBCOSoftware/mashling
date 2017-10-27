@@ -20,6 +20,6 @@ To get started :
 
 ### Getting started with CLI
 
-To create a mashling application via the CLI, refer to the detailed [README](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md) on the Project Mashling repo in the cli folder
+To create a mashling application via the CLI, refer to the detailed [README](https://github.com/jpollock/mashling/blob/master/cli/README.md) on the Project Mashling repo in the cli folder
 
 

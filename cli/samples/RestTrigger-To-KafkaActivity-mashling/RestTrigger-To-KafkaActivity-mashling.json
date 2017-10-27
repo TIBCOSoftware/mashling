@@ -34,7 +34,7 @@
             {
 				"name": "get_pet_handler4",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToKafkaActivity.json",
+				"reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToKafkaActivity.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}

@@ -43,7 +43,7 @@
                                 "description": "Simple REST Activity",
                                 "type": 1,
                                 "activityType": "github-com-tibco-software-flogo-contrib-activity-rest",
-                                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+                                "activityRef": "github.com/jpollock/mashling/ext/flogo/activity/rest",
                                 "attributes": [
                                     {
                                         "name": "method",

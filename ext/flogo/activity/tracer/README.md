@@ -49,7 +49,7 @@ Configure an activity to start a span:
 {
   "id": 2,
   "type": 1,
-  "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer",
+  "activityRef": "github.com/jpollock/mashling/ext/flogo/activity/tracer",
   "name": "name-of-span",
   "attributes": [
     {
@@ -74,7 +74,7 @@ Configure an activity to stop a span:
 {
   "id": 4,
   "type": 1,
-  "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer",
+  "activityRef": "github.com/jpollock/mashling/ext/flogo/activity/tracer",
   "name": "stop-span",
   "attributes": [
     {

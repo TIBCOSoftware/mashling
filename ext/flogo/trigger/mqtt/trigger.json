@@ -1,12 +1,12 @@
 {
   "name": "tibco-mqtt",
   "type": "flogo:trigger",
-  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt",
+  "ref": "github.com/jpollock/mashling/ext/flogo/trigger/mqtt",
   "version": "0.0.1",
   "title": "Receive MQTT Message",
   "author": "Michael Register <mregiste@tibco.com>",
   "description": "MQTT Trigger",
-  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/mqtt",
+  "homepage": "https://github.com/jpollock/mashling/tree/master/ext/flogo/trigger/mqtt",
   "settings":[
     {
       "name": "broker",

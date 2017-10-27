@@ -43,7 +43,7 @@
               {
                 "id": 2,
                 "type": 1,
-                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer",
+                "activityRef": "github.com/jpollock/mashling/ext/flogo/activity/tracer",
                 "name": "logging",
                 "attributes": [
                   {
@@ -75,7 +75,7 @@
               {
                 "id": 4,
                 "type": 1,
-                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer",
+                "activityRef": "github.com/jpollock/mashling/ext/flogo/activity/tracer",
                 "name": "logging-done",
                 "attributes": [
                   {
@@ -96,7 +96,7 @@
                 "name": "Invoke REST Service",
                 "description": "Simple REST Activity",
                 "type": 1,
-                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+                "activityRef": "github.com/jpollock/mashling/ext/flogo/activity/rest",
                 "attributes": [
                   {
                     "name": "method",

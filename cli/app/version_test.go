@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"github.com/TIBCOSoftware/mashling/cli/cli"
+	"github.com/jpollock/mashling/cli/cli"
 )
 
 func Test_cmdVersion_Exec(t *testing.T) {

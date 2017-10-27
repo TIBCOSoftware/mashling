@@ -31,7 +31,7 @@
 			{
 				"name": "user_topic_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/kafkaFlow.json",
+				"reference": "github.com/jpollock/mashling/lib/flow/kafkaFlow.json",
 				"params": {
 				}
 			}

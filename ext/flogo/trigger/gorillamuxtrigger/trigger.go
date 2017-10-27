@@ -21,10 +21,10 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/jpollock/mashling/lib/util"
 
-	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/gorilla/mux"
+	condition "github.com/jpollock/mashling/lib/conditions"
 	lightstep "github.com/lightstep/lightstep-tracer-go"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"

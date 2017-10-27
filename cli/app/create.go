@@ -18,9 +18,9 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/TIBCOSoftware/mashling/cli/assets"
-	"github.com/TIBCOSoftware/mashling/cli/cli"
-	"github.com/TIBCOSoftware/mashling/lib/model"
+	"github.com/jpollock/mashling/cli/assets"
+	"github.com/jpollock/mashling/cli/cli"
+	"github.com/jpollock/mashling/lib/model"
 )
 
 var optCreate = &cli.OptionInfo{
@@ -133,10 +133,12 @@ func (c *cmdCreate) Exec(args []string) error {
 
 	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, appDir, gatewayName, c.vendorDir, func() error {
 		// Load GB manifest file to extract flogo-lib and mashling repository revisions.
+
 		manifestFile, err := ioutil.ReadFile(filepath.Join(appDir, "vendor", "manifest"))
 		if err != nil {
 			return err
 		}
+
 		var manifestContents GbManifest
 		json.Unmarshal(manifestFile, &manifestContents)
 		// Extract dependency revisions.
@@ -150,6 +152,7 @@ func (c *cmdCreate) Exec(args []string) error {
 				mashlingRev = dep.Revision
 			}
 		}
+
 		// Load the main.go file so we can inject extract meta data output.
 		gatewayMain, err := ioutil.ReadFile(filepath.Join(appDir, "src", strings.ToLower(gatewayName), "main.go"))
 		if err != nil {

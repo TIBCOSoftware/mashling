@@ -25,8 +25,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling/lib/conditions"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/jpollock/mashling/lib/conditions"
+	"github.com/jpollock/mashling/lib/util"
 )
 
 // log is the default package logger

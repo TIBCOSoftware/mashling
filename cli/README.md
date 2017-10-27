@@ -11,10 +11,10 @@
 * In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).
 
 ### Install Mashling
-    go get github.com/TIBCOSoftware/mashling/...
+    go get github.com/jpollock/mashling/...
 
 ### Update Mashling
-    go get -u github.com/TIBCOSoftware/mashling/...
+    go get -u github.com/jpollock/mashling/...
 
 ## Getting Started
 A Mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base gateway.
@@ -73,7 +73,7 @@ The base gateway is built with the following mashling.json. It can be edited to 
 			{
 				"name": "get_pet_success_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
+				"reference": "github.com/jpollock/mashling/lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}
@@ -108,9 +108,9 @@ Details about the Mashling cli commands are [here](docs/gateway.md)
 Details about the Mashling json configuration are [here](docs/gateway.md)
 
 ### Mashling triggers ###
-For more details about the Mashling REST Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
+For more details about the Mashling REST Trigger, go [here](https://github.com/jpollock/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
 
-For more details about the Mashling Kafka Trigger, go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/kafkasubrouter)
+For more details about the Mashling Kafka Trigger, go [here](https://github.com/jpollock/mashling/tree/master/ext/flogo/trigger/kafkasubrouter)
 
 ## Contributing and support
 
@@ -130,7 +130,7 @@ Please submit a github issue if you would like to propose a significant change o
 
 ### Build Mashling CLI from source
 ```
-$go get github.com/TIBCOSoftware/mashling/...
+$go get github.com/jpollock/mashling/...
 
 $cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 
@@ -145,4 +145,4 @@ $go install ./...
 Mashling CLI is built and installed in $GOPATH/bin
 
 ### Support
-You can post your questions via [GitHub issues](https://github.com/TIBCOSoftware/mashling/issues)
+You can post your questions via [GitHub issues](https://github.com/jpollock/mashling/issues)
