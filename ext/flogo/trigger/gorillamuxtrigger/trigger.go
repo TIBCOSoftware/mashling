@@ -407,6 +407,9 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			}
 		}
 
+		headers := r.Header
+		remoteIpAddress := r.RemoteAddr
+		host := r.Host
 		queryValues := r.URL.Query()
 		queryParams := make(map[string]string, len(queryValues))
 
@@ -415,11 +418,14 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		}
 
 		data := map[string]interface{}{
-			"params":      pathParams,
-			"pathParams":  pathParams,
-			"queryParams": queryParams,
-			"content":     content,
-			"tracing":     ctx,
+			"params":          pathParams,
+			"pathParams":      pathParams,
+			"queryParams":     queryParams,
+			"content":         content,
+			"tracing":         ctx,
+			"headers":         headers,
+			"remoteIpAddress": remoteIpAddress,
+			"host":            host,
 		}
 
 		//pick action based on dispatch condition
