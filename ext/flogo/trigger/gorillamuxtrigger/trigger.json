@@ -83,7 +83,20 @@
     {
       "name": "tracing",
       "type": "any"
-    }
+    },
+    {
+      "name": "headers",
+      "type": "params"
+    },
+    {
+      "name": "remoteIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "host",
+      "type": "string"
+    },
+
   ],
   "handler": {
     "settings": [
