@@ -154,10 +154,8 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 	flogoTrigger.Handlers = append(flogoTrigger.Handlers, handlers...)
 
-	if isNew {
-		fmt.Sprintf("Adding a new trigger with settings %v %v ", flogoTrigger.Name, triggerSettings)
-		createdTriggersMap[flogoTrigger.Name] = &flogoTrigger
-	}
+	fmt.Sprintf("Adding a new trigger, or updating an existing one, with settings %v %v ", flogoTrigger.Name, triggerSettings)
+	createdTriggersMap[flogoTrigger.Name] = &flogoTrigger
 
 	return &flogoTrigger, &isNew, nil
 }
