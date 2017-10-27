@@ -33,7 +33,7 @@
 			{
 				"name": "kafka_handler1",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/KafkaTriggerToKafkaActivity.json",
+				"reference": "github.com/jpollock/mashling/lib/flow/KafkaTriggerToKafkaActivity.json",
 				"params": {
 				}
 			}

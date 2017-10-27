@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -15,8 +15,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TIBCOSoftware/mashling/cli/cli"
-	"github.com/TIBCOSoftware/mashling/lib/model"
+	"github.com/jpollock/mashling/cli/cli"
+	"github.com/jpollock/mashling/lib/model"
 )
 
 var optSwagger = &cli.OptionInfo{
@@ -118,7 +118,7 @@ func generateSwagger(host string, triggerName string, gatewayJSON string) ([]byt
 
 		for _, trigger := range descriptor.Gateway.Triggers {
 			if triggerName == "" || triggerName == trigger.Name {
-				if trigger.Type == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Type == "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger" {
+				if trigger.Type == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Type == "github.com/jpollock/mashling/ext/flogo/trigger/gorillamuxtrigger" {
 					var endpoint swaggerEndpoint
 					endpoint.Name = trigger.Name
 					endpoint.Description = trigger.Description
@@ -132,7 +132,7 @@ func generateSwagger(host string, triggerName string, gatewayJSON string) ([]byt
 					case "github.com/TIBCOSoftware/flogo-contrib/trigger/rest":
 						begin_delim = ':'
 						end_delim = '/'
-					case "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger":
+					case "github.com/jpollock/mashling/ext/flogo/trigger/gorillamuxtrigger":
 						begin_delim = '{'
 						end_delim = '}'
 					default:

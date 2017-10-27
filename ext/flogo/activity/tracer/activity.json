@@ -2,7 +2,7 @@
   "name": "tracer",
   "version": "0.0.1",
   "type": "flogo:activity",
-  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer",
+  "ref": "github.com/jpollock/mashling/ext/flogo/activity/tracer",
   "description": "distrbiuted tracer",
   "author": "Andrew Snodgrass <asnodgra@tibco.com>",
   "inputs":[

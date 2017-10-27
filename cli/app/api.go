@@ -23,21 +23,20 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	assets "github.com/TIBCOSoftware/mashling/cli/assets"
-	"github.com/TIBCOSoftware/mashling/lib/model"
-	"github.com/TIBCOSoftware/mashling/lib/types"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	assets "github.com/jpollock/mashling/cli/assets"
+	"github.com/jpollock/mashling/lib/model"
+	"github.com/jpollock/mashling/lib/types"
+	"github.com/jpollock/mashling/lib/util"
+	"github.com/peterbourgon/mergemap"
 	"github.com/xeipuuv/gojsonschema"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
 func CreateMashling(env env.Project, gatewayJson string, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
-
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
 	if err != nil {
 		return err
 	}
-
 	if appName != "" {
 		altJson := strings.Replace(gatewayJson, `"`+descriptor.Gateway.Name+`"`, `"`+appName+`"`, 1)
 		altDescriptor, err := model.ParseGatewayDescriptor(altJson)
@@ -66,7 +65,6 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	} else {
 		appName = descriptor.Gateway.Name
 	}
-
 	flogoAppTriggers := []*ftrigger.Config{}
 	flogoAppActions := []*faction.Config{}
 
@@ -75,17 +73,14 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 	for _, config := range descriptor.Gateway.Configurations {
 		configNamedMap[config.Name] = config
 	}
-
 	triggerNamedMap := make(map[string]types.Trigger)
 	for _, trigger := range descriptor.Gateway.Triggers {
 		triggerNamedMap[trigger.Name] = trigger
 	}
-
 	handlerNamedMap := make(map[string]types.EventHandler)
 	for _, evtHandler := range descriptor.Gateway.EventHandlers {
 		handlerNamedMap[evtHandler.Name] = evtHandler
 	}
-
 	createdHandlers := make(map[string]bool)
 
 	//new map to maintain existing trigger and its settings, to be used in comparing one trigger definition with another
@@ -98,7 +93,6 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 		for _, triggerName := range triggerNames {
 			dispatches := link.Dispatches
-
 			//create trigger sections for flogo
 			/**
 			TODO handle condition parsing and setting the condition in the trigger.
@@ -111,7 +105,6 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 			if err != nil {
 				return err
 			}
-
 			if *isNew {
 				//looks like a new trigger has been added
 				flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
@@ -127,7 +120,6 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 					}
 				}
 			}
-
 			//create unique handler actions
 			for _, dispatch := range dispatches {
 				handlerName := dispatch.Handler
@@ -312,6 +304,7 @@ func BuildMashling(appDir string, gatewayJSON string) error {
 
 	//create flogo.json from gateway descriptor
 	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON)
+
 	if err != nil {
 		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
 		return err
@@ -436,14 +429,111 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host str
 
 	delayMilli(500)
 
-	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), token)
+	cleanedTfApiSwaggerDoc, mApi := TransformSwagger(user, string(swaggerDoc), "swagger2", "masheryapi", token)
+
+	cleanedTfIodocSwaggerDoc, mIodoc := TransformSwagger(user, string(swaggerDoc), "swagger2", "iodocsv1", token)
+
+	if mock == false {
+		fmt.Printf("%s\n", mApi["document"].(map[string]interface{})["name"].(string))
+		fmt.Printf("%s\n", mIodoc["document"].(map[string]interface{})["title"].(string))
+		api, err := user.Read("services", "name:rest-conditional-gateway", "id,name,endpoints.id,endpoints.name,endpoints.inboundSslRequired,endpoints.outboundRequestTargetPath,endpoints.outboundTransportProtocol,endpoints.publicDomains,endpoints.requestAuthenticationType,endpoints.requestPathAlias,endpoints.requestProtocol,endpoints.supportedHttpMethods,endoints.systemDomains,endpoints.trafficManagerDomain", token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to fetch api\n\n")
+			panic(err)
+		}
+		fmt.Printf("\n\n")
+		fmt.Printf(string(cleanedTfApiSwaggerDoc))
+		fmt.Printf("\n\n")
+		fmt.Printf("\n\n")
+		fmt.Printf(api)
+		fmt.Printf("\n\n")
+		var m [1](map[string]interface{})
+		if err = json.Unmarshal([]byte(api), &m); err != nil {
+			panic(err)
+		}
+
+		var m1, m2 map[string]interface{}
+		json.Unmarshal(cleanedTfApiSwaggerDoc, &m1)
+		json.Unmarshal([]byte(api), &m2)
+		merged := mergemap.Merge(m[0], m1)
+		var mergedDoc []byte
+		if mergedDoc, err = json.Marshal(merged); err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("%s", string(mergedDoc))
+		// Only need the value of 'document'. Including the rest will cause errors
+		/*var m map[string]interface{}
+		if err = json.Unmarshal([]byte(api), &m); err != nil {
+			panic(err)
+		}*/
+
+		//fmt.Printf("%s", mIodoc["document"].(map[string]interface{})["serviceId"].(string))
+		//s, err := user.Read("services", string(cleanedTfApiSwaggerDoc), token)
+		/*
+			s, err := user.Create("services", string(cleanedTfApiSwaggerDoc), token)
+			fmt.Printf("%s", s)
+			m := map[string]interface{}{}
+			if err = json.Unmarshal([]byte(s), &m); err != nil {
+				panic(err)
+			}
+			apiId := m["id"].(string)
+			fmt.Printf("API ID=%s", apiId)
+
+			m1 := map[string]interface{}{}
+			if err = json.Unmarshal([]byte(string(cleanedTfIodocSwaggerDoc)), &m1); err != nil {
+				panic(err)
+			}
+
+			m = map[string]interface{}{}
+			m["definition"] = m1
+			m["serviceId"] = apiId
+			if cleanedTfIodocSwaggerDoc, err = json.Marshal(m); err != nil {
+				panic(err)
+			}
+			fmt.Printf("%s", string(cleanedTfIodocSwaggerDoc))
+
+			s, err = user.Create("iodocs/services", string(cleanedTfIodocSwaggerDoc), token)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: Unable to create the api %s\n\n", s)
+				fmt.Errorf("%v", err)
+				return err
+			}
+		*/
+		fmt.Println("Successfully published to mashery!")
+
+	} else {
+		var prettyApiJSON bytes.Buffer
+		err := json.Indent(&prettyApiJSON, cleanedTfApiSwaggerDoc, "", "\t")
+		if err != nil {
+			return err
+		}
+
+		var prettyIodocsJSON bytes.Buffer
+		err = json.Indent(&prettyIodocsJSON, cleanedTfIodocSwaggerDoc, "", "\t")
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("\nAPI Definition:\n")
+		fmt.Printf("%s", prettyApiJSON.Bytes())
+		fmt.Println("\nIO Docs Definition:\n")
+		fmt.Printf("%s", prettyIodocsJSON.Bytes())
+		fmt.Println("\nMocked! Did not attempt to publish.\n")
+	}
+
+	return nil
+}
+
+func TransformSwagger(user *ApiUser, swaggerDoc string, sourceFormat string, targetFormat string, oauthToken string) ([]byte, map[string]interface{}) {
+	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), sourceFormat, targetFormat, oauthToken)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger doc\n\n")
-		return err
+		panic(err)
 	}
 
 	// Only need the value of 'document'. Including the rest will cause errors
-	m := map[string]interface{}{}
+	var m map[string]interface{}
 	if err = json.Unmarshal([]byte(tfSwaggerDoc), &m); err != nil {
 		panic(err)
 	}
@@ -453,28 +543,8 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host str
 	if cleanedTfSwaggerDoc, err = json.Marshal(m["document"]); err != nil {
 		panic(err)
 	}
-
-	if mock == false {
-		s, err := user.CreateAPI(string(cleanedTfSwaggerDoc), token)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Unable to create the api %s\n\n", s)
-			fmt.Errorf("%v", err)
-			return err
-		}
-
-		fmt.Println("Successfully published to mashery!")
-	} else {
-		var prettyJSON bytes.Buffer
-		err := json.Indent(&prettyJSON, cleanedTfSwaggerDoc, "", "\t")
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s", prettyJSON.Bytes())
-		fmt.Println("\nMocked! Did not attempt to publish.\n")
-	}
-
-	return nil
+	//fmt.Println(m)
+	return cleanedTfSwaggerDoc, m
 }
 
 // GetGatewayDetails returns gateway details i.e all Triggers, Handlers & Links
@@ -614,6 +684,7 @@ func IsValidGateway(gatewayJSON string) (bool, error) {
 	if err != nil {
 		panic(err.Error())
 	}
+
 	schemaString := string(schema)
 	schemaLoader := gojsonschema.NewStringLoader(schemaString)
 	documentLoader := gojsonschema.NewStringLoader(gatewayJSON)

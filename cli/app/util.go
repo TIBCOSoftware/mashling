@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/TIBCOSoftware/mashling/cli/cli"
+	"github.com/jpollock/mashling/cli/cli"
 	"io"
 	"os"
 	"strconv"
@@ -44,26 +44,26 @@ func SetupExistingProjectEnv(appDir string) env.Project {
 }
 
 func GetGatewayJSON(fileName string) (string, string, error) {
-		var gatewayJson string
-		var gatewayName string
-		var err error
+	var gatewayJson string
+	var gatewayName string
+	var err error
 
-		if fgutil.IsRemote(fileName) {
+	if fgutil.IsRemote(fileName) {
 
-			gatewayJson, err = fgutil.LoadRemoteFile(fileName)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
-				os.Exit(2)
-			}
-		} else {
-			gatewayJson, err = fgutil.LoadLocalFile(fileName)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
-				os.Exit(2)
-			}
+		gatewayJson, err = fgutil.LoadRemoteFile(fileName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
+			os.Exit(2)
 		}
+	} else {
+		gatewayJson, err = fgutil.LoadLocalFile(fileName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", fileName, err.Error())
+			os.Exit(2)
+		}
+	}
 
-		return gatewayJson, gatewayName, err
+	return gatewayJson, gatewayName, err
 }
 
 func splitVersion(t string) (path string, version string) {

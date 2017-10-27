@@ -11,7 +11,7 @@ import (
 	"os"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/TIBCOSoftware/mashling/cli/cli"
+	"github.com/jpollock/mashling/cli/cli"
 )
 
 var optValidate = &cli.OptionInfo{

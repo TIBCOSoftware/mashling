@@ -18,9 +18,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
-	"github.com/TIBCOSoftware/mashling/lib/types"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	condition "github.com/jpollock/mashling/lib/conditions"
+	"github.com/jpollock/mashling/lib/types"
+	"github.com/jpollock/mashling/lib/util"
 )
 
 // ParseGatewayDescriptor parse the application descriptor
@@ -47,14 +47,12 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	if err := json.Unmarshal([]byte(trigger.Settings), &mtSettings); err != nil {
 		return nil, nil, err
 	}
-
 	//resolve any configuration references if the "config" param is set in the settings
 	mashTriggerSettings := mtSettings.(map[string]interface{})
 	mashTriggerSettingsUsable := mtSettings.(map[string]interface{})
 	for k, v := range mashTriggerSettings {
 		mashTriggerSettingsUsable[k] = v
 	}
-
 	if configDefinitions != nil && len(configDefinitions) > 0 {
 		//inherit the configuration settings if the trigger uses configuration reference
 		err := resolveConfigurationReference(configDefinitions, trigger, mashTriggerSettingsUsable)
@@ -154,10 +152,10 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 	flogoTrigger.Handlers = append(flogoTrigger.Handlers, handlers...)
 
-	if isNew {
-		fmt.Sprintf("Adding a new trigger with settings %v %v ", flogoTrigger.Name, triggerSettings)
-		createdTriggersMap[flogoTrigger.Name] = &flogoTrigger
-	}
+	//if isNew { // commenting out because multiple triggers aren't added
+	fmt.Sprintf("Adding a new trigger with settings %v %v ", flogoTrigger.Name, triggerSettings)
+	createdTriggersMap[flogoTrigger.Name] = &flogoTrigger
+	//}
 
 	return &flogoTrigger, &isNew, nil
 }

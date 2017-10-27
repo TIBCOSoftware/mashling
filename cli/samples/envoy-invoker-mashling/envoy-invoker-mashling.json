@@ -23,7 +23,7 @@
 			{
 				"name": "get_envoy_handler",
 				"description": "Handle the envoy service access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/envoyInvokerFlow.json"
+				"reference": "github.com/jpollock/mashling/lib/flow/envoyInvokerFlow.json"
 			}
 		],
 		"event_links": [

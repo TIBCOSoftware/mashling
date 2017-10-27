@@ -300,7 +300,7 @@ The *mashling.json* file is the metadata describing the gateway project.
 			{
 				"name": "get_pet_success_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
+				"reference": "github.com/jpollock/mashling/lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}
@@ -370,17 +370,17 @@ The below is the sample mashling.json:
       {
         "name": "mammals_handler",
         "description": "Handle mammals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "birds_handler",
         "description": "Handle birds",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "animals_handler",
         "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       }
     ],
     "event_links": [

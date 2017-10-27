@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package condition
 
 import (
@@ -12,7 +12,7 @@ import (
 	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/jpollock/mashling/lib/util"
 )
 
 var fLogger = logger.GetLogger("event-link-operator")

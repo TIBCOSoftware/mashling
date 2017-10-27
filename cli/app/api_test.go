@@ -58,22 +58,22 @@ const gatewayJSON string = `{
       {
         "name": "mammals_handler",
         "description": "Handle mammals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "birds_handler",
         "description": "Handle birds",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "animals_handler",
         "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToRestPutActivity.json"
       },
       {
         "name": "animals_get_handler",
         "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestGetActivity.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/RestTriggerToRestGetActivity.json"
       }
     ],
     "event_links": [

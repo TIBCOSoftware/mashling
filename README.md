@@ -28,10 +28,10 @@ Additional developer tooling is included in below open source repo that contains
 * In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).
 
 ### Install Mashling
-    go get github.com/TIBCOSoftware/mashling/...
+    go get github.com/jpollock/mashling/...
 
 ### Update Mashling
-    go get -u github.com/TIBCOSoftware/mashling/...
+    go get -u github.com/jpollock/mashling/...
 
 ## Getting Started
 A Mashling microgateway is created using the **Mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
@@ -78,7 +78,7 @@ The built in sample microgateway is based off the following mashling.json.  This
 			{
 				"name": "get_pet_success_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
+				"reference": "github.com/jpollock/mashling/lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}
@@ -101,10 +101,10 @@ The built in sample microgateway is based off the following mashling.json.  This
 ```
 
 
-For more details about the REST Trigger go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
+For more details about the REST Trigger go [here](https://github.com/jpollock/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
 
 ## Documentation
-For additional documentation on **Mashling** CLI tool, go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
+For additional documentation on **Mashling** CLI tool, go [here](https://github.com/jpollock/mashling/blob/master/cli/README.md)
 
 
 
@@ -126,9 +126,9 @@ Please submit a github issue if you would like to propose a significant change o
 
 ### Build Mashling from source
 ```
-$go get github.com/TIBCOSoftware/mashling/cli/...
+$go get github.com/jpollock/mashling/cli/...
 
-$cd $GOPATH/src/github.com/TIBCOSoftware/mashling/cli
+$cd $GOPATH/src/github.com/jpollock/mashling/cli
 
 [optional, only if building from branch]
 $git checkout my_branch
@@ -140,8 +140,8 @@ $go install ./...
 ```
 
 ## License
-Mashling is licensed under a BSD-type license. See license text [here](https://github.com/TIBCOSoftware/mashling/blob/master/TIBCO%20LICENSE.txt).
+Mashling is licensed under a BSD-type license. See license text [here](https://github.com/jpollock/mashling/blob/master/TIBCO%20LICENSE.txt).
 
 
 ### Support
-You can post your questions via [GitHub issues](https://github.com/TIBCOSoftware/mashling/issues)
+You can post your questions via [GitHub issues](https://github.com/jpollock/mashling/issues)

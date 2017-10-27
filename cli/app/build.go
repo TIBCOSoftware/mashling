@@ -12,8 +12,8 @@ import (
 	"path"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/TIBCOSoftware/mashling/cli/cli"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/jpollock/mashling/cli/cli"
+	"github.com/jpollock/mashling/lib/util"
 )
 
 var optBuild = &cli.OptionInfo{

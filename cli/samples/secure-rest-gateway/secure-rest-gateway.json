@@ -38,7 +38,7 @@
       {
         "name": "animals_get_handler",
         "description": "Handle animals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/SecureRestInvoker.json"
+        "reference": "github.com/jpollock/mashling/lib/flow/SecureRestInvoker.json"
       }
     ],
     "event_links": [

@@ -23,7 +23,7 @@
 			{
 				"name": "get_pet_handler",
 				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
+				"reference": "github.com/jpollock/mashling/lib/flow/flogo.json",
 				"params": {
 					"uri": "petstore.swagger.io/v2/pet/3"
 				}

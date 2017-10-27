@@ -1,7 +1,7 @@
 {
   "name": "tibco-rest",
   "type": "flogo:activity",
-  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+  "ref": "github.com/jpollock/mashling/ext/flogo/activity/rest",
   "version": "0.0.1",
   "title": "Invoke REST Service",
   "description": "Simple REST Activity",
