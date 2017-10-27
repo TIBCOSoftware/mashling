@@ -516,6 +516,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 				serverSpan.SetTag("error", err.Error())
 				log.Error(err)
 			}
+			return
 		}
 
 		if replyCode > 0 {
