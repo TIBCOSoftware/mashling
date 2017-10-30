@@ -73,6 +73,6 @@ The output is
 | Setting     | Description                                    |
 |:------------|:-----------------------------------------------|
 | value       | A struct containing the Status and response Payload from the function. |
-| result      | The reponse payload     |
+| result      | The response payload     |
 | status      | The status               |
 | tracing     | The tracing context to forward                 |
