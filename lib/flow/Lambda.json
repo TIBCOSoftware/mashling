@@ -1,184 +1,197 @@
 {
-    "name": "Lambda",
-    "type": "flogo:app",
-    "version": "0.0.1",
-    "description": "",
-    "triggers": [
+  "name": "Lambda",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "triggers": [
+    {
+      "name": "Receive HTTP Message",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+      "description": "Simple REST Trigger",
+      "settings": {
+        "port": "9096",
+        "tracer": "zipkin",
+        "tracerEndpoint": "http://localhost:9411/api/v1/spans"
+      },
+      "id": "receive_http_message",
+      "handlers": [
         {
-            "name": "Receive HTTP Message",
-            "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
-            "description": "Simple REST Trigger",
-            "settings": {
-                "port": "9096"
-            },
-            "id": "receive_http_message",
-            "handlers": [
-                {
-                    "settings": {
-                        "method": "POST",
-                        "path": "/now",
-                        "autoIdReply": "false",
-                        "useReplyHandler": "false"
-                    },
-                    "actionId": "flow"
-                }
-            ]
+          "settings": {
+            "method": "POST",
+            "path": "/now",
+            "autoIdReply": "false",
+            "useReplyHandler": "false"
+          },
+          "actionId": "flow"
         }
-    ],
-    "actions": [
-        {
-            "name": "flow",
-            "data": {
-                "flow": {
-                    "explicitReply": true,
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "flow",
+      "data": {
+        "flow": {
+          "explicitReply": true,
+          "type": 1,
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "name": "Invoke Lambda Service",
+                "description": "Simple Lambda Activity",
+                "type": 1,
+                "activityType": "github-com-tibco-software-mashling-ext-flogo-activity-lambda",
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/lambda",
+                "attributes": [
+                  {
+                    "name": "arn",
+                    "value": "test",
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "region",
+                    "value": "us-west-2",
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "accessKey",
+                    "value": "",
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "secretKey",
+                    "value": "",
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "payload",
+                    "value": null,
+                    "required": true,
+                    "type": "any"
+                  },
+                  {
+                    "name": "tracing",
+                    "value": null,
+                    "required" : false,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
                     "type": 1,
-                    "attributes": [],
-                    "rootTask": {
-                        "id": 1,
-                        "type": 1,
-                        "tasks": [
-                            {
-                                "id": 2,
-                                "name": "Invoke REST Service",
-                                "description": "Simple REST Activity",
-                                "type": 1,
-                                "activityType": "github-com-tibco-software-mashling-ext-flogo-activity-lambda",
-                                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/lambda",
-                                "attributes": [
-                                    {
-                                        "name": "arn",
-                                        "value": "test",
-                                        "required": true,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "region",
-                                        "value": "us-west-2",
-                                        "required": true,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "accessKey",
-                                        "value": "",
-                                        "required": false,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "secretKey",
-                                        "value": "",
-                                        "required": false,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "payload",
-                                        "value": null,
-                                        "required": true,
-                                        "type": "any"
-                                    }
-                                ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "${trigger.content}",
-                                        "mapTo": "payload"
-                                    },
-                                    {
-                                        "type": 1,
-                                        "value": "${env.access}",
-                                        "mapTo": "accessKey"
-                                    },
-                                    {
-                                        "type": 1,
-                                        "value": "${env.secret}",
-                                        "mapTo": "secretKey"
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 3,
-                                "name": "Reply To Trigger",
-                                "description": "Simple Reply Activity",
-                                "type": 1,
-                                "activityType": "tibco-reply",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
-                                "attributes": [
-                                    {
-                                        "name": "code",
-                                        "value": 200,
-                                        "required": true,
-                                        "type": "integer"
-                                    },
-                                    {
-                                        "name": "data",
-                                        "value": null,
-                                        "required": true,
-                                        "type": "any"
-                                    }
-                                ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "${activity.2.result}",
-                                        "mapTo": "data"
-                                    },
-                                    {
-                                        "type": 1,
-                                        "value": "${activity.2.status}",
-                                        "mapTo": "code"
-                                    }
-                                ]
-                            }
-                        ],
-                        "links": [
-                          {
-                              "id": 1,
-                              "from": 2,
-                              "to": 3,
-                              "type": 0
-                          }
-                        ],
-                        "attributes": []
-                    },
-                    "errorHandlerTask": {
-                        "id": 2,
-                        "type": 1,
-                        "tasks": [
-                            {
-                                "id": 10,
-                                "name": "Log Message",
-                                "description": "Simple Log Activity",
-                                "type": 1,
-                                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
-                                "attributes": [
-                                    {
-                                        "name": "message",
-                                        "value": "Error processing request in gateway",
-                                        "required": false,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "flowInfo",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    },
-                                    {
-                                        "name": "addToFlow",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    }
-                                ]
-                            }
-                        ],
-                        "links": [],
-                        "attributes": []
-                    }
-                }
-            },
-            "id": "flow",
-            "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+                    "value": "${trigger.content}",
+                    "mapTo": "payload"
+                  },
+                  {
+                    "type": 1,
+                    "value": "${env.access}",
+                    "mapTo": "accessKey"
+                  },
+                  {
+                    "type": 1,
+                    "value": "${env.secret}",
+                    "mapTo": "secretKey"
+                  },
+                  {
+                    "type": 1,
+                    "value": "${trigger.tracing}",
+                    "mapTo": "tracing"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Reply To Trigger",
+                "description": "Simple Reply Activity",
+                "type": 1,
+                "activityType": "tibco-reply",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                "attributes": [
+                  {
+                    "name": "code",
+                    "value": 200,
+                    "required": true,
+                    "type": "integer"
+                  },
+                  {
+                    "name": "data",
+                    "value": null,
+                    "required": true,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "${activity.2.result}",
+                    "mapTo": "data"
+                  },
+                  {
+                    "type": 1,
+                    "value": "${activity.2.status}",
+                    "mapTo": "code"
+                  }
+                ]
+              }
+            ],
+            "links": [
+              {
+                "id": 1,
+                "from": 2,
+                "to": 3,
+                "type": 0
+              }
+            ],
+            "attributes": []
+          },
+          "errorHandlerTask": {
+            "id": 2,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 10,
+                "name": "Log Message",
+                "description": "Simple Log Activity",
+                "type": 1,
+                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                "attributes": [
+                  {
+                    "name": "message",
+                    "value": "Error processing request in gateway",
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "flowInfo",
+                    "value": "true",
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "addToFlow",
+                    "value": "true",
+                    "required": false,
+                    "type": "boolean"
+                  }
+                ]
+              }
+            ],
+            "links": [],
+            "attributes": []
+          }
         }
-    ]
+      },
+      "id": "flow",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+    }
+  ]
 }
