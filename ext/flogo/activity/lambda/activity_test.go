@@ -1,12 +1,10 @@
 package lambda
 
 import (
-	"encoding/json"
 	"testing"
 
 	"io/ioutil"
 
-	"github.com/TIBCOSoftware/flogo-contrib/action/flow/test"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 )
 
@@ -41,7 +39,7 @@ type Hello struct {
 	Name string `json:"name"`
 }
 
-func TestLambdaInvokeWithSecurity(t *testing.T) {
+/*func TestLambdaInvokeWithSecurity(t *testing.T) {
 
 	act := NewActivity(getActivityMetadata())
 	tc := test.NewTestActivityContext(getActivityMetadata())
@@ -64,4 +62,4 @@ func TestLambdaInvokeWithSecurity(t *testing.T) {
 	if err == nil {
 		t.Fail()
 	}
-}
+}*/
