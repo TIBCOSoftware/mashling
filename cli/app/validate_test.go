@@ -102,7 +102,7 @@ const validGatewayJSON string = `{
 	}
 }`
 
-func Test_validate(t *testing.T) {
+func TestValidate(t *testing.T) {
 	isValid, _ := IsValidGateway(validGatewayJSON)
 
 	if !isValid {
