@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package model
 
 import (
@@ -16,22 +16,12 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 	microGateway := types.Microgateway{
 		MashlingSchema: "0.2",
 		Gateway: types.Gateway{
-			Name:         "GatewayApp",
-			Version:      "1.0.0",
-			DisplayName:  "Gateway Application",
-			DisplayImage: "GatewayIcon.jpg",
-			Description:  "This is the first microgateway app",
-			//Configurations: []types.Config{},
-			Configurations: []types.Config{
-				{
-					Name:        "kafkaConfig",
-					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter",
-					Description: "Configuration for kafka cluster",
-					Settings: json.RawMessage(`{
-										"BrokerUrl": "localhost:9092"
-									}`),
-				},
-			},
+			Name:           "GatewayApp",
+			Version:        "1.0.0",
+			DisplayName:    "Gateway Application",
+			DisplayImage:   "GatewayIcon.jpg",
+			Description:    "This is the first microgateway app",
+			Configurations: []types.Config{},
 			Triggers: []types.Trigger{
 				{
 					Name:        "rest_trigger",
