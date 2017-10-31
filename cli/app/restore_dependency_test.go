@@ -149,7 +149,7 @@ const restoreDepTestGatewayJSON string = `{
 }
 `
 
-func Test_restore_dependency(t *testing.T) {
+func TestRestoreDependency(t *testing.T) {
 	cmd, _ := CommandRegistry.Command("create")
 
 	mf, err := os.Create("manifest")
