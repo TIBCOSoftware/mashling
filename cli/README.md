@@ -47,16 +47,7 @@ The base gateway is built with the following mashling.json. It can be edited to 
 		"name": "demo",
 		"version": "1.0.0",
 		"description": "This is the first microgateway app",
-		"configurations": [
-			{
-				"name": "kafkaConfig",
-				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
-				"description": "Configuration for kafka cluster",
-				"settings": {
-					"BrokerUrl": "localhost:9092"
-				}
-			}
-		],
+		"configurations": [],
 		"triggers": [
 			{
 				"name": "rest_trigger",
