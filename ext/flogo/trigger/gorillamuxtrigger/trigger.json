@@ -61,6 +61,10 @@
     {
       "name": "trustStore",
       "type": "string"
+    },
+    {
+      "name": "basicAuthFile",
+      "type": "string",
     }
   ],
   "outputs": [

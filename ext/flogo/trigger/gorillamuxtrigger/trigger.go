@@ -138,6 +138,10 @@ func (t *RestTrigger) Init(runner action.Runner) {
 
 	t.configureTracer()
 
+	if isAuthEnabled(t.config.Settings) {
+		setupAuth(t.config.Settings)
+	}
+
 	//Check whether TLS (Transport Layer Security) is enabled for the trigger
 	enableTLS := false
 	serverCert := ""
@@ -500,7 +504,22 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		log.Debugf("Found action' %+x'", action)
 
 		context := trigger.NewContext(context.Background(), startAttrs)
-		replyCode, replyData, err := rt.runner.Run(context, action, actionId, nil)
+
+		var replyCode int
+		var replyData interface{}
+
+		allowed := true
+		if isAuthEnabled(rt.config.Settings) {
+			log.Debugf("Authenticating the request.")
+			if !authenticate(r, rt.config.Settings) {
+				replyCode = http.StatusForbidden
+				allowed = false
+			}
+		}
+
+		if allowed {
+			replyCode, replyData, err = rt.runner.Run(context, action, actionId, nil)
+		}
 
 		if err != nil {
 			serverSpan.SetTag("error", err.Error())
