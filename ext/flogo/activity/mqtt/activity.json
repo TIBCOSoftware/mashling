@@ -10,7 +10,8 @@
   "inputs":[
     {
       "name": "content",
-      "type": "any"
+      "type": "any",
+      "required": false
     },
     {
       "name": "topic",
