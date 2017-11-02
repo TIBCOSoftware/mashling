@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -119,7 +119,7 @@ const expectedFlogoJSON string = `{
 			"settings": {
 				"port": "9096"
 			},
-			"outputs": null,
+			"output": null,
 			"handlers": [
 				{
 					"actionId": "mammals_handler",
@@ -130,6 +130,7 @@ const expectedFlogoJSON string = `{
 						"path": "/pets",
 						"useReplyHandler": "false"
 					},
+					"output": null,
 					"outputs": null
 				},
 				{
@@ -141,6 +142,7 @@ const expectedFlogoJSON string = `{
 						"path": "/pets",
 						"useReplyHandler": "false"
 					},
+					"output": null,
 					"outputs": null
 				},
 				{
@@ -151,6 +153,7 @@ const expectedFlogoJSON string = `{
 						"path": "/pets",
 						"useReplyHandler": "false"
 					},
+					"output": null,
 					"outputs": null
 				},
 				{
@@ -161,10 +164,11 @@ const expectedFlogoJSON string = `{
 						"path": "/pets/{petId}",
 						"useReplyHandler": "false"
 					},
+					"output": null,
 					"outputs": null
 				}
 			],
-			"endpoints": null
+			"outputs": null
 		}
 	],
 	"actions": [
@@ -574,7 +578,8 @@ const expectedFlogoJSON string = `{
 						"attributes": []
 					}
 				}
-			}
+			},
+			"metadata": null
 		},
 		{
 			"id": "birds_handler",
@@ -982,7 +987,8 @@ const expectedFlogoJSON string = `{
 						"attributes": []
 					}
 				}
-			}
+			},
+			"metadata": null
 		},
 		{
 			"id": "animals_handler",
@@ -1390,7 +1396,8 @@ const expectedFlogoJSON string = `{
 						"attributes": []
 					}
 				}
-			}
+			},
+			"metadata": null
 		},
 		{
 			"id": "animals_get_handler",
@@ -1798,7 +1805,8 @@ const expectedFlogoJSON string = `{
 						"attributes": []
 					}
 				}
-			}
+			},
+			"metadata": null
 		}
 	]
 }`

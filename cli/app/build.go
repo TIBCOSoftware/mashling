@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -68,11 +68,9 @@ func (c *cmdBuild) Exec(args []string) error {
 		return err
 	}
 
-	isValidJson := false
+	isValidJSON, err := IsValidGateway(gatewayJSON)
 
-	isValidJson, err = IsValidateGateway(gatewayJSON)
-
-	if !isValidJson {
+	if !isValidJSON {
 		fmt.Print("Mashling build aborted \n")
 		return err
 	}

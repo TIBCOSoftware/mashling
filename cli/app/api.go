@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -18,12 +18,12 @@ import (
 	"strconv"
 
 	api "github.com/TIBCOSoftware/flogo-cli/app"
-	"github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	assets "github.com/TIBCOSoftware/mashling/cli/assets"
+	"github.com/TIBCOSoftware/mashling/cli/env"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
@@ -31,7 +31,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, appDir string, appName string, vendorDir string) error {
+func CreateMashling(env env.Project, gatewayJson string, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
 	if err != nil {
@@ -164,7 +164,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 	flogoJson := string(bytes)
 
-	err = api.CreateApp(SetupNewProjectEnv(), flogoJson, appDir, appName, vendorDir)
+	err = CreateApp(SetupNewProjectEnv(), flogoJson, appDir, appName, vendorDir)
 	if err != nil {
 		return err
 	}
@@ -179,6 +179,12 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
 	}
 
+	if customizeFunc != nil {
+		err = customizeFunc()
+		if err != nil {
+			return err
+		}
+	}
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
 	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 	//delete flogo.json file from the app dir
@@ -318,18 +324,24 @@ func BuildMashling(appDir string, gatewayJSON string) error {
 
 	//Install dependencies explicitly, as api.BuildApp() doesn't install newly added dependencies.
 	//Workaround for https://github.com/TIBCOSoftware/flogo-cli/issues/56
-	fmt.Println("Installing dependencies...")
-	env := SetupExistingProjectEnv(appDir)
-	flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
-	deps := api.ExtractDependencies(flogoAppDescriptor)
+	/*
+		//This creates an issue of pulling down the latest flogo packages on every build.
+		//User can run 'create' instead of 'build' if there is an additional packages required
+		//for the recipe. Thus, commenting out to make sure the build command executes only with
+		//the local vendor folder.
+		fmt.Println("Installing dependencies...")
+		env := SetupExistingProjectEnv(appDir)
+		flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
+		deps := api.ExtractDependencies(flogoAppDescriptor)
 
-	for _, dep := range deps {
-		path, version := splitVersion(dep.Ref)
-		err = env.InstallDependency(path, version)
-		if err != nil {
-			return err
+		for _, dep := range deps {
+			path, version := splitVersion(dep.Ref)
+			err = env.InstallDependency(path, version)
+			if err != nil {
+				return err
+			}
 		}
-	}
+	*/
 	//END of workaround https://github.com/TIBCOSoftware/flogo-cli/issues/56
 
 	embed := util.Flogo_App_Embed_Config_Property_Default
@@ -583,61 +595,146 @@ func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 	return gwInfoBuffer.String(), nil
 }
 
-//IsValidateGateway validates the gateway schema instance returns bool and error
-func IsValidateGateway(gatewayJson string) (bool, error) {
+//IsValidGateway validates the gateway schema instance returns bool and error
+func IsValidGateway(gatewayJSON string) (bool, error) {
 
-	isValidJson := false
-	schema, err := assets.Asset("schema/mashling_schema.json")
+	isValidSchema := false
+
+	suplliedSchemaVersion, err := getSchemaVersion(gatewayJSON)
+
+	if err != nil {
+		return isValidSchema, err
+	}
+
+	schemaPath, isValidSchema := GetSupportedSchema(suplliedSchemaVersion)
+
+	//check whether CLI supports this schema version
+	if !isValidSchema {
+		fmt.Printf("Schema version [%v] not supported. Please upgrade mashling cli \n", suplliedSchemaVersion)
+		return isValidSchema, nil
+	}
+
+	schema, err := assets.Asset(schemaPath)
 	if err != nil {
 		panic(err.Error())
 	}
 	schemaString := string(schema)
 	schemaLoader := gojsonschema.NewStringLoader(schemaString)
-	documentLoader := gojsonschema.NewStringLoader(gatewayJson)
+	documentLoader := gojsonschema.NewStringLoader(gatewayJSON)
 
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		panic(err.Error())
+		return false, err
 	}
 
 	if result.Valid() {
-		isValidJson = true
+		isValidSchema = true
 	} else {
 		fmt.Printf("The gateway json is not valid. See errors:\n")
 		for _, desc := range result.Errors() {
 			fmt.Printf("- %s\n", desc)
 		}
+		isValidSchema = false
 	}
 
-	return isValidJson, err
+	return isValidSchema, err
 
 }
 
-//ValidateGateway validates the gateway schema instance
-func ValidateGateway(gatewayJson string) error {
+func getSchemaVersion(gatewayJSON string) (string, error) {
 
-	schema, err := assets.Asset("schema/mashling_schema.json")
+	suplliedSchema := ""
+	gatewayDescriptor := &struct {
+		MashlingSchema string `json:"mashling_schema"`
+	}{}
+	err := json.Unmarshal([]byte(gatewayJSON), gatewayDescriptor)
+
 	if err != nil {
-		panic(err.Error())
+		return suplliedSchema, err
 	}
-	schemaString := string(schema)
-	schemaLoader := gojsonschema.NewStringLoader(schemaString)
-	documentLoader := gojsonschema.NewStringLoader(gatewayJson)
+	suplliedSchema = gatewayDescriptor.MashlingSchema
 
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	return suplliedSchema, err
+}
+
+// CreateApp creates an application from the specified json application descriptor
+func CreateApp(env env.Project, appJson string, appDir string, appName string, vendorDir string) error {
+
+	descriptor, err := api.ParseAppDescriptor(appJson)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 
-	if result.Valid() {
-		fmt.Printf("The gateway json is valid\n")
-	} else {
-		fmt.Printf("The gateway json not valid. See errors:\n")
-		for _, desc := range result.Errors() {
-			fmt.Printf("- %s\n", desc)
+	if appName != "" {
+		// override the application name
+
+		altJson := strings.Replace(appJson, `"`+descriptor.Name+`"`, `"`+appName+`"`, 1)
+		altDescriptor, err := api.ParseAppDescriptor(altJson)
+
+		//see if we can get away with simple replace so we don't reorder the existing json
+		if err == nil && altDescriptor.Name == appName {
+			appJson = altJson
+		} else {
+			//simple replace didn't work so we have to unmarshal & re-marshal the supplied json
+			var appObj map[string]interface{}
+			err := json.Unmarshal([]byte(appJson), &appObj)
+			if err != nil {
+				return err
+			}
+
+			appObj["name"] = appName
+
+			updApp, err := json.MarshalIndent(appObj, "", "  ")
+			if err != nil {
+				return err
+			}
+			appJson = string(updApp)
 		}
+
+		descriptor.Name = appName
 	}
 
-	return err
+	env.Init(appDir)
+	err = env.Create(false, vendorDir)
+	if err != nil {
+		return err
+	}
 
+	err = fgutil.CreateFileFromString(path.Join(appDir, "flogo.json"), appJson)
+	if err != nil {
+		return err
+	}
+
+	//if manifest exists in the parent folder, use it to set up the dependecies
+	err = env.RestoreDependency()
+	var deps []*api.Dependency
+	//if restore didn't occur, install dependencies
+	if err != nil {
+
+		//todo allow ability to specify flogo-lib version
+		env.InstallDependency("github.com/TIBCOSoftware/flogo-lib", "")
+
+		deps := api.ExtractDependencies(descriptor)
+
+		for _, dep := range deps {
+			path, version := splitVersion(dep.Ref)
+			err = env.InstallDependency(path, version)
+			/*
+				if err != nil {
+					return err
+				}
+			*/
+		}
+	} else {
+		fmt.Println("Dependent libraries are restored.")
+	}
+
+	// create source files
+	cmdPath := path.Join(env.GetSourceDir(), strings.ToLower(descriptor.Name))
+	os.MkdirAll(cmdPath, 0777)
+
+	CreateMainGoFile(cmdPath, "")
+	CreateImportsGoFile(cmdPath, deps)
+
+	return nil
 }

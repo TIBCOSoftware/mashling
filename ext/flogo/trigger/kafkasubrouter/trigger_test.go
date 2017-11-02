@@ -123,9 +123,16 @@ type TestRunner struct {
 }
 
 // Run implements action.Runner.Run
+
 func (tr *TestRunner) Run(context context.Context, action action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 	log.Printf("Ran Action: %v", uri)
 	return 0, nil, nil
+}
+
+//Run the specified Action
+func (tr *TestRunner) RunAction(context context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
+	log.Printf("RuAction called with actionID: %s", actionID)
+	return nil, nil
 }
 
 func consoleHandler() {
@@ -175,20 +182,20 @@ func runTest(config *trigger.Config, expectSucceed bool, testName string, config
 	return nil
 }
 
-// func TestInit(t *testing.T) {
-// 	consoleHandler()
-// 	config := trigger.Config{}
-// 	error := json.Unmarshal([]byte(testConfig), &config)
-// 	if error != nil {
-// 		log.Printf("Failed to unmarshal the config args:%s", error)
-// 		t.Fail()
-// 	}
-// 	runTest(&config, true, "TestInit", true)
-// 	config.Settings["BrokerUrl"] = "192.168.10.1:9092,127.0.0.1:9092,a.b.c.c:9093,a.123.z-fr.c:9096"
-// 	runTest(&config, true, "TestInit", true)
-
-// }
-
+/*
+func TestInit(t *testing.T) {
+	consoleHandler()
+	config := trigger.Config{}
+	error := json.Unmarshal([]byte(testConfig), &config)
+	if error != nil {
+		log.Printf("Failed to unmarshal the config args:%s", error)
+		t.Fail()
+	}
+	runTest(&config, true, "TestInit", true)
+	config.Settings["BrokerUrl"] = "192.168.10.1:9092,127.0.0.1:9092,a.b.c.c:9093,a.123.z-fr.c:9096"
+	runTest(&config, true, "TestInit", true)
+}
+*/
 // func TestEndpoint(t *testing.T) {
 // 	config := trigger.Config{}
 // 	error := json.Unmarshal([]byte(testConfig), &config)
@@ -213,6 +220,7 @@ func TestMultiHandlers(t *testing.T) {
 	runTest(&config, true, "TestMultiHandlers", false)
 }
 
+/*
 func TestTLS(t *testing.T) {
 	config := trigger.Config{}
 	json.Unmarshal([]byte(testConfig), &config)
@@ -220,8 +228,10 @@ func TestTLS(t *testing.T) {
 	config.Settings["BrokerUrl"] = "cheetah:9093"
 	runTest(&config, true, "TestTLS", false)
 }
+*/
 
-func TestSASL(t *testing.T) {
+/*
+	func TestSASL(t *testing.T) {
 	config := trigger.Config{}
 	json.Unmarshal([]byte(testConfig), &config)
 	config.Handlers[0].Settings["user"] = "wcn00"
@@ -246,6 +256,7 @@ func TestNumericIpaddr(t *testing.T) {
 	config.Settings["BrokerUrl"] = "10.101.5.72:9092"
 	runTest(&config, true, "TestNumericIpaddr", false)
 }
+*/
 
 // func TestFailingEndpoint(t *testing.T) {
 // 	config := trigger.Config{}

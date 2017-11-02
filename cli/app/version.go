@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -21,7 +21,7 @@ var optVersion = &cli.OptionInfo{
 }
 
 //Mashling version
-const version = "0.1.5"
+const version = "0.2.0"
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})

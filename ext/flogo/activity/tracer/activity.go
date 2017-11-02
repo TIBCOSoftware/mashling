@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package tracer
 
 import (
@@ -11,6 +11,14 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	opentracing "github.com/opentracing/opentracing-go"
 	ctx "golang.org/x/net/context"
+)
+
+const (
+	ivTracing = "tracing"
+	ivSpan    = "span"
+
+	ovTracing = "tracing"
+	ovSpan    = "span"
 )
 
 var (
@@ -34,7 +42,7 @@ func (a *MyActivity) Metadata() *activity.Metadata {
 
 // Eval implements activity.Activity.Eval
 func (a *MyActivity) Eval(context activity.Context) (done bool, err error) {
-	tracing, span := context.GetInput("tracing"), context.GetInput("span")
+	tracing, span := context.GetInput(ivTracing), context.GetInput(ivSpan)
 	if span == nil && tracing == nil {
 		return false, ErrorTracingSpanRequired
 	}
@@ -48,8 +56,8 @@ func (a *MyActivity) Eval(context activity.Context) (done bool, err error) {
 			span = opentracing.StartSpan(
 				context.TaskName(),
 				opentracing.ChildOf(span.Context()))
-			context.SetOutput("span", span)
-			context.SetOutput("tracing", opentracing.ContextWithSpan(ctx.Background(), span))
+			context.SetOutput(ovSpan, span)
+			context.SetOutput(ovTracing, opentracing.ContextWithSpan(ctx.Background(), span))
 		}
 	}
 
