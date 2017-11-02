@@ -431,15 +431,13 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host str
 		return err
 	}
 
-	// Delay to avoid hitting QPS limit
-	delayMilli(500)
-
 	token, err := user.FetchOAuthToken()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to fetch the OAauth token\n\n")
 		return err
 	}
 
+	// Delay to avoid hitting QPS limit
 	delayMilli(500)
 
 	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), token)
