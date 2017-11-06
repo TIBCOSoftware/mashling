@@ -13,6 +13,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-cli/util"
 )
 
+// ErrorNoManifest is generated when there is no manifest
+var ErrorNoManifest = errors.New("no manifest")
+
 type GbProject struct {
 	BinDir         string
 	RootDir        string
@@ -192,26 +195,18 @@ func (e *GbProject) InstallDependency(depPath string, version string) error {
 }
 
 //Restores dependecies using a manifest in the current working directory.
-func (e *GbProject) RestoreDependency() error {
+func (e *GbProject) RestoreDependency(manifest io.Reader) error {
 	var cmd *exec.Cmd
 
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 
-	//if manifest doesn't exists in cwd, no need to restore. return wihtout error
-	var manifest = path.Join(cwd, "manifest")
-	if _, err := os.Stat(manifest); err != nil {
-		return err
+	//if manifest doesn't exists, no need to restore. return with error
+	if manifest == nil {
+		return ErrorNoManifest
 	}
 
 	var manifestcopy = path.Join(e.VendorDir, "manifest")
-
-	// Open manifest in the workding dir
-	mfSrc, err := os.Open(manifest)
-	defer mfSrc.Close()
-	if err != nil {
-		return err
-	}
 
 	// Create a manifest copy to the gb vendor dir
 	mfTrg, err := os.Create(manifestcopy)
@@ -221,7 +216,7 @@ func (e *GbProject) RestoreDependency() error {
 	}
 
 	// Copy the bytes to destination from source
-	_, err = io.Copy(mfTrg, mfSrc)
+	_, err = io.Copy(mfTrg, manifest)
 	if err != nil {
 		return err
 	}

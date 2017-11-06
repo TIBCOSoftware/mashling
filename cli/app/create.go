@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -51,9 +52,10 @@ func init() {
 }
 
 type cmdCreate struct {
-	option    *cli.OptionInfo
-	fileName  string
-	vendorDir string
+	option           *cli.OptionInfo
+	fileName         string
+	manifestFileName string
+	vendorDir        string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -64,14 +66,35 @@ func (c *cmdCreate) OptionInfo() *cli.OptionInfo {
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
+	fs.StringVar(&(c.manifestFileName), "m", "", "manifest file")
 }
 
 // Exec implementation of cli.Command.Exec
 func (c *cmdCreate) Exec(args []string) error {
 
-	var gatewayJSON string
-	var gatewayName string
-	var err error
+	var (
+		gatewayJSON string
+		gatewayName string
+		manifest    io.Reader
+	)
+
+	_, err := os.Stat("manifest")
+	if err == nil {
+		c.manifestFileName = "manifest"
+	}
+	if c.manifestFileName != "" {
+		_, err = os.Stat(c.manifestFileName)
+		if err != nil {
+			return err
+		}
+		var file *os.File
+		file, err = os.Open(c.manifestFileName)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		manifest = file
+	}
 
 	if c.fileName != "" {
 
@@ -109,11 +132,15 @@ func (c *cmdCreate) Exec(args []string) error {
 		if err != nil {
 			return err
 		}
-		bytes, err := json.MarshalIndent(mashling, "", "\t")
+		data, err := json.MarshalIndent(mashling, "", "\t")
 		if err != nil {
 			return err
 		}
-		gatewayJSON = string(bytes)
+		gatewayJSON = string(data)
+
+		if manifest == nil {
+			manifest = bytes.NewBuffer(model.MustAsset("lib/model/data/manifest"))
+		}
 	}
 
 	currentDir, err := os.Getwd()
@@ -131,7 +158,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, appDir, gatewayName, c.vendorDir, func() error {
+	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, manifest, appDir, gatewayName, c.vendorDir, func() error {
 		// Load GB manifest file to extract flogo-lib and mashling repository revisions.
 		manifestFile, err := ioutil.ReadFile(filepath.Join(appDir, "vendor", "manifest"))
 		if err != nil {

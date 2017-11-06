@@ -1,0 +1,376 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/NodePrime/jsonpath",
+			"repository": "https://github.com/NodePrime/jsonpath",
+			"revision": "84403ded544328c99be3472727667179eef23a91",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/Shopify/sarama",
+			"repository": "https://github.com/Shopify/sarama",
+			"revision": "b305748200a6396c34b89fe5dacc768cb1a7ea69",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/Sirupsen/logrus",
+			"repository": "https://github.com/Sirupsen/logrus",
+			"revision": "89742aefa4b206dcf400792f3bd35b542998eb3b",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-cli/env",
+			"repository": "https://github.com/TIBCOSoftware/flogo-cli",
+			"revision": "034384db0f5ccfb6ec31b4143cfa2e15baa47cad",
+			"branch": "master",
+			"path": "/env"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-cli/util",
+			"repository": "https://github.com/TIBCOSoftware/flogo-cli",
+			"revision": "034384db0f5ccfb6ec31b4143cfa2e15baa47cad",
+			"branch": "master",
+			"path": "/util"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
+			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
+			"revision": "25de619324ef7cc9f5037f5dbf3d06cbe9e73fb6",
+			"branch": "master",
+			"path": "/action/flow"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
+			"revision": "25de619324ef7cc9f5037f5dbf3d06cbe9e73fb6",
+			"branch": "master",
+			"path": "/activity/log"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
+			"revision": "25de619324ef7cc9f5037f5dbf3d06cbe9e73fb6",
+			"branch": "master",
+			"path": "/activity/reply"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
+			"revision": "25de619324ef7cc9f5037f5dbf3d06cbe9e73fb6",
+			"branch": "master",
+			"path": "/activity/rest"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-contrib/model/simple",
+			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
+			"revision": "25de619324ef7cc9f5037f5dbf3d06cbe9e73fb6",
+			"branch": "master",
+			"path": "/model/simple"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors",
+			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
+			"revision": "25de619324ef7cc9f5037f5dbf3d06cbe9e73fb6",
+			"branch": "master",
+			"path": "/trigger/rest/cors"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/flogo-lib",
+			"repository": "https://github.com/TIBCOSoftware/flogo-lib",
+			"revision": "d362720d613d16f63f6e2fb6e7fa85a44acc894b",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+			"repository": "https://github.com/TIBCOSoftware/mashling",
+			"revision": "572a80645683719c8645f9fe0a08e2ca9ba57564",
+			"branch": "master",
+			"path": "/ext/flogo/trigger/gorillamuxtrigger"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/mashling/lib/conditions",
+			"repository": "https://github.com/TIBCOSoftware/mashling",
+			"revision": "572a80645683719c8645f9fe0a08e2ca9ba57564",
+			"branch": "master",
+			"path": "/lib/conditions"
+		},
+		{
+			"importpath": "github.com/TIBCOSoftware/mashling/lib/util",
+			"repository": "https://github.com/TIBCOSoftware/mashling",
+			"revision": "572a80645683719c8645f9fe0a08e2ca9ba57564",
+			"branch": "master",
+			"path": "/lib/util"
+		},
+		{
+			"importpath": "github.com/apache/thrift/lib/go/thrift",
+			"repository": "https://github.com/apache/thrift",
+			"revision": "39310dad793ca69b4b7217a3b54430e682e5e2a4",
+			"branch": "master",
+			"path": "/lib/go/thrift"
+		},
+		{
+			"importpath": "github.com/davecgh/go-spew/spew",
+			"repository": "https://github.com/davecgh/go-spew",
+			"revision": "ecdeabc65495df2dec95d7c4a4c3e021903035e5",
+			"branch": "master",
+			"path": "/spew"
+		},
+		{
+			"importpath": "github.com/eapache/go-resiliency/breaker",
+			"repository": "https://github.com/eapache/go-resiliency",
+			"revision": "b1fe83b5b03f624450823b751b662259ffc6af70",
+			"branch": "master",
+			"path": "/breaker"
+		},
+		{
+			"importpath": "github.com/eapache/go-xerial-snappy",
+			"repository": "https://github.com/eapache/go-xerial-snappy",
+			"revision": "bb955e01b9346ac19dc29eb16586c90ded99a98c",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/eapache/queue",
+			"repository": "https://github.com/eapache/queue",
+			"revision": "44cc805cf13205b55f69e14bcb69867d1ae92f98",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-logfmt/logfmt",
+			"repository": "https://github.com/go-logfmt/logfmt",
+			"revision": "390ab7935ee28ec6b286364bba9b4dd6410cb3d5",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gogo/protobuf/io",
+			"repository": "https://github.com/gogo/protobuf",
+			"revision": "117892bf1866fbaa2318c03e50e40564c8845457",
+			"branch": "master",
+			"path": "/io"
+		},
+		{
+			"importpath": "github.com/gogo/protobuf/proto",
+			"repository": "https://github.com/gogo/protobuf",
+			"revision": "117892bf1866fbaa2318c03e50e40564c8845457",
+			"branch": "master",
+			"path": "/proto"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/proto",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9",
+			"branch": "master",
+			"path": "/proto"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/protoc-gen-go/descriptor",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9",
+			"branch": "master",
+			"path": "/protoc-gen-go/descriptor"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/ptypes",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9",
+			"branch": "master",
+			"path": "/ptypes"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/ptypes/timestamp",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9",
+			"branch": "master",
+			"path": "/ptypes/timestamp"
+		},
+		{
+			"importpath": "github.com/golang/snappy",
+			"repository": "https://github.com/golang/snappy",
+			"revision": "553a641470496b2327abcac10b36396bd98e45c9",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gorilla/mux",
+			"repository": "https://github.com/gorilla/mux",
+			"revision": "7f08801859139f86dfafd1c296e2cba9a80d292e",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/japm/goScript",
+			"repository": "https://github.com/japm/goScript",
+			"revision": "caab90145b05376536bbab332312f4812123e197",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/julienschmidt/httprouter",
+			"repository": "https://github.com/julienschmidt/httprouter",
+			"revision": "e1b9828bc9e5904baec057a154c09ca40fe7fae0",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/lightstep/lightstep-tracer-go",
+			"repository": "https://github.com/lightstep/lightstep-tracer-go",
+			"revision": "0b1008d189003437ec6a614f8acdc2b058bae07f",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/opentracing-contrib/go-observer",
+			"repository": "https://github.com/opentracing-contrib/go-observer",
+			"revision": "a52f2342449246d5bcc273e65cbdcfa5f7d6c63c",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/opentracing/basictracer-go",
+			"repository": "https://github.com/opentracing/basictracer-go",
+			"revision": "1b32af207119a14b1b231d451df3ed04a72efebf",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/opentracing/opentracing-go",
+			"repository": "https://github.com/opentracing/opentracing-go",
+			"revision": "1361b9cd60be79c4c3a7fa9841b3c132e40066a7",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/openzipkin/zipkin-go-opentracing",
+			"repository": "https://github.com/openzipkin/zipkin-go-opentracing",
+			"revision": "a527e1898100679e84de74ad476ce81dfa6dc2b0",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/pierrec/lz4",
+			"repository": "https://github.com/pierrec/lz4",
+			"revision": "08c27939df1bd95e881e2c2367a749964ad1fceb",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/pierrec/xxHash/xxHash32",
+			"repository": "https://github.com/pierrec/xxHash",
+			"revision": "a0006b13c722f7f12368c00a3d3c2ae8a999a0c6",
+			"branch": "master",
+			"path": "/xxHash32"
+		},
+		{
+			"importpath": "github.com/pkg/errors",
+			"repository": "https://github.com/pkg/errors",
+			"revision": "f15c970de5b76fac0b59abb32d62c17cc7bed265",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/rcrowley/go-metrics",
+			"repository": "https://github.com/rcrowley/go-metrics",
+			"revision": "1f30fe9094a513ce4c700b9a54458bbb0c96996c",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/crypto/ssh/terminal",
+			"repository": "https://go.googlesource.com/crypto",
+			"revision": "687d4b818545e443c8ba223cbef20b1721afd4db",
+			"branch": "master",
+			"path": "/ssh/terminal"
+		},
+		{
+			"importpath": "golang.org/x/net/context",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "01c190206fbdffa42f334f4b2bf2220f50e64920",
+			"branch": "master",
+			"path": "/context"
+		},
+		{
+			"importpath": "golang.org/x/net/http2",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "01c190206fbdffa42f334f4b2bf2220f50e64920",
+			"branch": "master",
+			"path": "/http2"
+		},
+		{
+			"importpath": "golang.org/x/net/idna",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "01c190206fbdffa42f334f4b2bf2220f50e64920",
+			"branch": "master",
+			"path": "/idna"
+		},
+		{
+			"importpath": "golang.org/x/net/internal/timeseries",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "01c190206fbdffa42f334f4b2bf2220f50e64920",
+			"branch": "master",
+			"path": "/internal/timeseries"
+		},
+		{
+			"importpath": "golang.org/x/net/lex/httplex",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "01c190206fbdffa42f334f4b2bf2220f50e64920",
+			"branch": "master",
+			"path": "/lex/httplex"
+		},
+		{
+			"importpath": "golang.org/x/net/trace",
+			"repository": "https://go.googlesource.com/net",
+			"revision": "01c190206fbdffa42f334f4b2bf2220f50e64920",
+			"branch": "master",
+			"path": "/trace"
+		},
+		{
+			"importpath": "golang.org/x/sys/unix",
+			"repository": "https://go.googlesource.com/sys",
+			"revision": "d4266bc12aae0b4128952c889b769442fce5d2f1",
+			"branch": "master",
+			"path": "/unix"
+		},
+		{
+			"importpath": "golang.org/x/text/secure/bidirule",
+			"repository": "https://go.googlesource.com/text",
+			"revision": "88f656faf3f37f690df1a32515b479415e1a6769",
+			"branch": "master",
+			"path": "/secure/bidirule"
+		},
+		{
+			"importpath": "golang.org/x/text/transform",
+			"repository": "https://go.googlesource.com/text",
+			"revision": "88f656faf3f37f690df1a32515b479415e1a6769",
+			"branch": "master",
+			"path": "/transform"
+		},
+		{
+			"importpath": "golang.org/x/text/unicode/bidi",
+			"repository": "https://go.googlesource.com/text",
+			"revision": "88f656faf3f37f690df1a32515b479415e1a6769",
+			"branch": "master",
+			"path": "/unicode/bidi"
+		},
+		{
+			"importpath": "golang.org/x/text/unicode/norm",
+			"repository": "https://go.googlesource.com/text",
+			"revision": "88f656faf3f37f690df1a32515b479415e1a6769",
+			"branch": "master",
+			"path": "/unicode/norm"
+		},
+		{
+			"importpath": "google.golang.org/genproto/googleapis/api/annotations",
+			"repository": "https://github.com/google/go-genproto",
+			"revision": "11c7f9e547da6db876260ce49ea7536985904c9b",
+			"branch": "master",
+			"path": "/googleapis/api/annotations"
+		},
+		{
+			"importpath": "google.golang.org/genproto/googleapis/rpc/status",
+			"repository": "https://github.com/google/go-genproto",
+			"revision": "11c7f9e547da6db876260ce49ea7536985904c9b",
+			"branch": "master",
+			"path": "/googleapis/rpc/status"
+		},
+		{
+			"importpath": "google.golang.org/grpc",
+			"repository": "https://github.com/grpc/grpc-go",
+			"revision": "865013bc17b75f16815954217b2cc87d0ef3a720",
+			"branch": "master"
+		},
+		{
+			"importpath": "sourcegraph.com/sourcegraph/appdash",
+			"repository": "https://github.com/sourcegraph/appdash",
+			"revision": "f9a4336c02542ebbfa01c37949bd7152fb0f659c",
+			"branch": "master"
+		}
+	]
+}
