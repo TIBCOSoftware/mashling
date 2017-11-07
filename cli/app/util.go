@@ -114,6 +114,10 @@ func delayMilli(amount int) {
 	time.Sleep(time.Duration(amount) * time.Millisecond)
 }
 
+func shortDelay() {
+	delayMilli(500)
+}
+
 func Usage() {
 	printUsage(os.Stderr)
 	os.Exit(2)
