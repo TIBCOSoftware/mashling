@@ -8,4 +8,7 @@ all:
 ifndef HAS_BINDATA
 	go get github.com/jteeuwen/go-bindata/...
 endif
-	go-bindata -o lib/model/bindata.go -pkg model lib/model/data/
+	cd cli && go-bindata -o assets/assets.go -pkg assets \
+	assets/banner.txt \
+	assets/default_manifest \
+	schema/mashling_schema-0.2.json

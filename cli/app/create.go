@@ -7,15 +7,14 @@ package app
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-
-	"encoding/json"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -139,7 +138,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		gatewayJSON = string(data)
 
 		if manifest == nil {
-			manifest = bytes.NewBuffer(model.MustAsset("lib/model/data/manifest"))
+			manifest = bytes.NewBuffer(assets.MustAsset("assets/default_manifest"))
 		}
 	}
 
