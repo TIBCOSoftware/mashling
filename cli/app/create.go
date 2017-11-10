@@ -51,10 +51,9 @@ func init() {
 }
 
 type cmdCreate struct {
-	option           *cli.OptionInfo
-	fileName         string
-	manifestFileName string
-	vendorDir        string
+	option    *cli.OptionInfo
+	fileName  string
+	vendorDir string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -65,7 +64,6 @@ func (c *cmdCreate) OptionInfo() *cli.OptionInfo {
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
-	fs.StringVar(&(c.manifestFileName), "m", "", "manifest file")
 }
 
 // Exec implementation of cli.Command.Exec
@@ -79,15 +77,8 @@ func (c *cmdCreate) Exec(args []string) error {
 
 	_, err := os.Stat("manifest")
 	if err == nil {
-		c.manifestFileName = "manifest"
-	}
-	if c.manifestFileName != "" {
-		_, err = os.Stat(c.manifestFileName)
-		if err != nil {
-			return err
-		}
 		var file *os.File
-		file, err = os.Open(c.manifestFileName)
+		file, err = os.Open("manifest")
 		if err != nil {
 			return err
 		}
