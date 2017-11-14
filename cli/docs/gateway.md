@@ -12,7 +12,7 @@ This command is used to create a Mashling gateway project.
 *Create a Mashling gateway project from an existing Mashling gateway descriptor.*
 
 	mashling create -f myapp.json my_app
-	
+
 Usage:
 
 	mashling create
@@ -24,16 +24,17 @@ Usage:
 Example using default mashling.json :
 
 	mashling create my_gw_app
-	
+
 
 Example using recipe rest-gateway-with-tracing.json:
 
 	mashling create -f rest-gateway-with-tracing.json  my_rest_gw_app
-	
+
 **dependencies versioning**
 
-By default a new GB based dependecy manifest is created in the vendor folder of the gateway project.
-If the manifest file exists in the current working directory, that is used to restore the vendor folder. 
+By default a new GB based dependency manifest is created in the vendor folder of the gateway project.
+If the manifest file exists in the current working directory, that is used to restore the vendor folder.
+The default mashling created by 'mashling create app' uses a default manifest built into the mashling binary.
 
 ### help
 This command is used to display help on a particular command

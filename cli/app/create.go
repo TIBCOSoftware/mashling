@@ -7,14 +7,14 @@ package app
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-
-	"encoding/json"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -69,9 +69,22 @@ func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 // Exec implementation of cli.Command.Exec
 func (c *cmdCreate) Exec(args []string) error {
 
-	var gatewayJSON string
-	var gatewayName string
-	var err error
+	var (
+		gatewayJSON string
+		gatewayName string
+		manifest    io.Reader
+	)
+
+	_, err := os.Stat("manifest")
+	if err == nil {
+		var file *os.File
+		file, err = os.Open("manifest")
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		manifest = file
+	}
 
 	if c.fileName != "" {
 
@@ -109,11 +122,15 @@ func (c *cmdCreate) Exec(args []string) error {
 		if err != nil {
 			return err
 		}
-		bytes, err := json.MarshalIndent(mashling, "", "\t")
+		data, err := json.MarshalIndent(mashling, "", "\t")
 		if err != nil {
 			return err
 		}
-		gatewayJSON = string(bytes)
+		gatewayJSON = string(data)
+
+		if manifest == nil {
+			manifest = bytes.NewBuffer(assets.MustAsset("assets/default_manifest"))
+		}
 	}
 
 	currentDir, err := os.Getwd()
@@ -131,7 +148,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, appDir, gatewayName, c.vendorDir, func() error {
+	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, manifest, appDir, gatewayName, c.vendorDir, func() error {
 		// Load GB manifest file to extract flogo-lib and mashling repository revisions.
 		manifestFile, err := ioutil.ReadFile(filepath.Join(appDir, "vendor", "manifest"))
 		if err != nil {
