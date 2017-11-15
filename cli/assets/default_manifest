@@ -319,6 +319,13 @@
 			"path": "/unix"
 		},
 		{
+			"importpath": "golang.org/x/sys/windows",
+			"repository": "https://go.googlesource.com/sys",
+			"revision": "1e2299c37cc91a509f1b12369872d27be0ce98a6",
+			"branch": "master",
+			"path": "/windows"
+		},
+		{
 			"importpath": "golang.org/x/text/secure/bidirule",
 			"repository": "https://go.googlesource.com/text",
 			"revision": "88f656faf3f37f690df1a32515b479415e1a6769",
