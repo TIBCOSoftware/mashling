@@ -1,0 +1,58 @@
+{
+  "name": "mqtt",
+  "version": "0.0.1",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/mqtt",
+  "title": "A MQTT message producer",
+  "description": "A MQTT message producer",
+  "author": "Andrew Snodgrass <asnodgra@tibco.com>",
+  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/activity/mqtt",
+  "inputs":[
+    {
+      "name": "content",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "topic",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "broker",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "user",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "qos",
+      "type": "number",
+      "required": true
+    },
+    {
+      "name": "tracing",
+      "type": "any",
+      "required": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "tracing",
+      "type": "any"
+    }
+  ]
+}
