@@ -20,16 +20,28 @@ var optVersion = &cli.OptionInfo{
 	Long:      "Displays the version of mashling",
 }
 
-//Mashling version
-const version = "0.2.0"
+//Version is Mashling Version
+var Version = "0.2.0"
+
+//MashlingGitTag is mashling git tag
+var MashlingGitTag = "not set"
+
+//FlogoGitTag is flogo-lib git tag
+var FlogoGitTag = "not set"
+
+//ShemaVersion is mashling schema version
+var ShemaVersion = "0.2"
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
 }
 
 type cmdVersion struct {
-	option        *cli.OptionInfo
-	versionNumber string
+	option         *cli.OptionInfo
+	versionNumber  string
+	mashlingGitTag string
+	shemaVersion   string
+	flogoGitTag    string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -49,8 +61,11 @@ func (c *cmdVersion) Exec(args []string) error {
 		fmt.Fprintf(os.Stderr, "usage: mashling version \n\nToo many arguments given.\n")
 		os.Exit(2)
 	} else {
-		c.versionNumber = version
-		fmt.Printf("mashling version %s\n", c.versionNumber)
+		c.versionNumber = Version
+		c.mashlingGitTag = MashlingGitTag
+		c.shemaVersion = ShemaVersion
+		c.flogoGitTag = FlogoGitTag
+		fmt.Printf(" mashling version %s\n schema version %s\n mashling revision %s\n flogo-lib revision %s\n", c.versionNumber, c.shemaVersion, c.mashlingGitTag, c.flogoGitTag)
 	}
 
 	return nil
