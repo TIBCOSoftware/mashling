@@ -8,6 +8,9 @@ package app
 import (
 	"encoding/json"
 	"io"
+	"io/ioutil"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"fmt"
@@ -19,6 +22,7 @@ import (
 	"strconv"
 
 	api "github.com/TIBCOSoftware/flogo-cli/app"
+	config "github.com/TIBCOSoftware/flogo-cli/config"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
@@ -187,7 +191,7 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 		}
 	}
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
-	api.BuildApp(SetupExistingProjectEnv(appDir), options)
+	BuildApp(SetupExistingProjectEnv(appDir), options)
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
 	//create the mashling json descriptor file
@@ -353,7 +357,7 @@ func BuildMashling(appDir string, gatewayJSON string) error {
 	}
 
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
-	api.BuildApp(SetupExistingProjectEnv(appDir), options)
+	BuildApp(SetupExistingProjectEnv(appDir), options)
 
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
@@ -706,7 +710,7 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 		return err
 	}
 
-	deps := api.ExtractDependencies(descriptor)
+	deps := config.ExtractDependencies(descriptor)
 
 	//if manifest exists, use it to set up the dependecies
 	err = env.RestoreDependency(manifest)
@@ -735,4 +739,341 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 	CreateImportsGoFile(cmdPath, deps)
 
 	return nil
+}
+
+func BuildApp(env env.Project, options *api.BuildOptions) (err error) {
+
+	if options == nil {
+		options = &api.BuildOptions{}
+	}
+
+	if !options.SkipPrepare {
+		err = PrepareApp(env, options.PrepareOptions)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err = env.Build()
+	if err != nil {
+		return err
+	}
+
+	if !options.EmbedConfig {
+		fgutil.CopyFile(path.Join(env.GetRootDir(), fileDescriptor), path.Join(env.GetBinDir(), fileDescriptor))
+		if err != nil {
+			return err
+		}
+	} else {
+		os.Remove(path.Join(env.GetBinDir(), fileDescriptor))
+	}
+
+	return
+}
+
+// PrepareApp do all pre-build setup and pre-processing
+func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
+
+	if options == nil {
+		options = &api.PrepareOptions{}
+	}
+
+	if options.PreProcessor != nil {
+		err = options.PreProcessor.PrepareForBuild(env)
+		if err != nil {
+			return err
+		}
+	}
+
+	//generate metadata
+	err = generateGoMetadata(env)
+	if err != nil {
+		return err
+	}
+
+	//load descriptor
+	appJson, err := fgutil.LoadLocalFile(path.Join(env.GetRootDir(), "flogo.json"))
+
+	if err != nil {
+		return err
+	}
+	descriptor, err := api.ParseAppDescriptor(appJson)
+	if err != nil {
+		return err
+	}
+
+	//generate imports file
+	var deps []*config.Dependency
+
+	if options.OptimizeImports {
+
+		deps = config.ExtractDependencies(descriptor)
+
+	} else {
+		deps, err = ListDependencies(env, 0)
+	}
+
+	cmdPath := path.Join(env.GetSourceDir(), strings.ToLower(descriptor.Name))
+	CreateImportsGoFile(cmdPath, deps)
+
+	removeEmbeddedAppGoFile(cmdPath)
+	removeShimGoFiles(cmdPath)
+
+	if options.Shim != "" {
+
+		removeMainGoFile(cmdPath) //todo maybe rename if it exists
+		createShimSupportGoFile(cmdPath, appJson, options.EmbedConfig)
+
+		fmt.Println("Shim:", options.Shim)
+
+		for _, value := range descriptor.Triggers {
+
+			fmt.Println("Id:", value.ID)
+			if value.ID == options.Shim {
+				triggerPath := path.Join(env.GetVendorSrcDir(), value.Ref, "trigger.json")
+
+				mdJson, err := fgutil.LoadLocalFile(triggerPath)
+				if err != nil {
+					return err
+				}
+				metadata, err := api.ParseTriggerMetadata(mdJson)
+				if err != nil {
+					return err
+				}
+
+				if metadata.Shim != "" {
+
+					//todo blow up if shim file not found
+					shimFilePath := path.Join(env.GetVendorSrcDir(), value.Ref, dirShim, fileShimGo)
+					fmt.Println("Shim File:", shimFilePath)
+					fgutil.CopyFile(shimFilePath, path.Join(cmdPath, fileShimGo))
+
+					if metadata.Shim == "plugin" {
+						//look for Makefile and execute it
+						makeFilePath := path.Join(env.GetVendorSrcDir(), value.Ref, dirShim, makeFile)
+						fmt.Println("Make File:", makeFilePath)
+						fgutil.CopyFile(makeFilePath, path.Join(cmdPath, makeFile))
+
+						// Copy the vendor folder (Ugly workaround, this will go once our app is golang structure compliant)
+						vendorDestDir := path.Join(cmdPath, "vendor")
+						_, err = os.Stat(vendorDestDir)
+						if err == nil {
+							// We don't support existing vendor folders yet
+							return fmt.Errorf("Unsupported vendor folder found for function build, please create an issue on https://github.com/TIBCOSoftware/flogo")
+						}
+						// Create vendor folder
+						err = api.CopyDir(env.GetVendorSrcDir(), vendorDestDir)
+						if err != nil {
+							return err
+						}
+						defer os.RemoveAll(vendorDestDir)
+
+						// Execute make
+						cmd := exec.Command("make", "-C", cmdPath)
+						cmd.Stdout = os.Stdout
+						cmd.Stderr = os.Stderr
+						cmd.Env = append(os.Environ(),
+							fmt.Sprintf("GOPATH=%s", env.GetRootDir()),
+						)
+
+						err = cmd.Run()
+						if err != nil {
+							return err
+						}
+					}
+				}
+
+				break
+			}
+		}
+
+	} else if options.EmbedConfig {
+		createEmbeddedAppGoFile(cmdPath, appJson)
+	}
+
+	return
+}
+
+func generateGoMetadata(env env.Project) error {
+	//todo optimize metadata recreation to minimize compile times
+	dependencies, err := ListDependencies(env, 0)
+
+	if err != nil {
+		return err
+	}
+
+	for _, dependency := range dependencies {
+		createMetadata(env, dependency)
+	}
+
+	return nil
+}
+
+func createMetadata(env env.Project, dependency *config.Dependency) error {
+
+	vendorSrc := env.GetVendorSrcDir()
+	mdFilePath := path.Join(vendorSrc, dependency.Ref)
+	mdGoFilePath := path.Join(vendorSrc, dependency.Ref)
+	pkg := path.Base(mdFilePath)
+
+	tplMetadata := tplMetadataGoFile
+
+	switch dependency.ContribType {
+	case config.ACTION:
+		mdFilePath = path.Join(mdFilePath, "action.json")
+		mdGoFilePath = path.Join(mdGoFilePath, "action_metadata.go")
+	case config.TRIGGER:
+		mdFilePath = path.Join(mdFilePath, "trigger.json")
+		mdGoFilePath = path.Join(mdGoFilePath, "trigger_metadata.go")
+		tplMetadata = tplTriggerMetadataGoFile
+	case config.ACTIVITY:
+		mdFilePath = path.Join(mdFilePath, "activity.json")
+		mdGoFilePath = path.Join(mdGoFilePath, "activity_metadata.go")
+		tplMetadata = tplActivityMetadataGoFile
+	default:
+		return nil
+	}
+
+	raw, err := ioutil.ReadFile(mdFilePath)
+	if err != nil {
+		return err
+	}
+
+	info := &struct {
+		Package      string
+		MetadataJSON string
+	}{
+		Package:      pkg,
+		MetadataJSON: string(raw),
+	}
+
+	f, _ := os.Create(mdGoFilePath)
+	fgutil.RenderTemplate(f, tplMetadata, info)
+	f.Close()
+
+	return nil
+}
+
+var tplMetadataGoFile = `package {{.Package}}
+
+var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+
+func getJsonMetadata() string {
+	return jsonMetadata
+}
+`
+
+var tplActivityMetadataGoFile = `package {{.Package}}
+
+import (
+	"github.com/TIBCOSoftware/flogo-lib/core/activity"
+)
+
+var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+
+// init create & register activity
+func init() {
+	md := activity.NewMetadata(jsonMetadata)
+	activity.Register(NewActivity(md))
+}
+`
+
+var tplTriggerMetadataGoFile = `package {{.Package}}
+
+import (
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+)
+
+var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+
+// init create & register trigger factory
+func init() {
+	md := trigger.NewMetadata(jsonMetadata)
+	trigger.RegisterFactory(md.ID, NewFactory(md))
+}
+`
+
+// ListDependencies lists all installed dependencies
+func ListDependencies(env env.Project, cType config.ContribType) ([]*config.Dependency, error) {
+
+	vendorSrc := env.GetVendorSrcDir()
+	var deps []*config.Dependency
+
+	err := filepath.Walk(vendorSrc, func(filePath string, info os.FileInfo, _ error) error {
+
+		if !info.IsDir() {
+
+			switch info.Name() {
+			case "action.json":
+				if cType == 0 || cType == config.ACTION {
+					ref := refPath(vendorSrc, filePath)
+					desc, err := readDescriptor(filePath, info)
+					if err == nil && desc.Type == "flogo:action" {
+						deps = append(deps, &config.Dependency{ContribType: config.ACTION, Ref: ref})
+					}
+				}
+			case "trigger.json":
+				//temporary hack to handle old contrib dir layout
+				dir := filePath[0 : len(filePath)-12]
+				if _, err := os.Stat(fmt.Sprintf("%s/../trigger.json", dir)); err == nil {
+					//old trigger.json, ignore
+					return nil
+				}
+				if cType == 0 || cType == config.TRIGGER {
+					ref := refPath(vendorSrc, filePath)
+					desc, err := readDescriptor(filePath, info)
+					if err == nil && desc.Type == "flogo:trigger" {
+						deps = append(deps, &config.Dependency{ContribType: config.TRIGGER, Ref: ref})
+					}
+				}
+			case "activity.json":
+				//temporary hack to handle old contrib dir layout
+				dir := filePath[0 : len(filePath)-13]
+				if _, err := os.Stat(fmt.Sprintf("%s/../activity.json", dir)); err == nil {
+					//old activity.json, ignore
+					return nil
+				}
+				if cType == 0 || cType == config.ACTIVITY {
+					ref := refPath(vendorSrc, filePath)
+					desc, err := readDescriptor(filePath, info)
+					if err == nil && desc.Type == "flogo:activity" {
+						deps = append(deps, &config.Dependency{ContribType: config.ACTIVITY, Ref: ref})
+					}
+				}
+			case "flow-model.json":
+				if cType == 0 || cType == config.FLOW_MODEL {
+					ref := refPath(vendorSrc, filePath)
+					desc, err := readDescriptor(filePath, info)
+					if err == nil && desc.Type == "flogo:flow-model" {
+						deps = append(deps, &config.Dependency{ContribType: config.FLOW_MODEL, Ref: ref})
+					}
+				}
+			}
+
+		}
+
+		return nil
+	})
+
+	return deps, err
+}
+
+func refPath(vendorSrc string, filePath string) string {
+
+	startIdx := len(vendorSrc) + 1
+	endIdx := strings.LastIndex(filePath, string(os.PathSeparator))
+
+	return strings.Replace(filePath[startIdx:endIdx], string(os.PathSeparator), "/", -1)
+}
+
+func readDescriptor(path string, info os.FileInfo) (*config.Descriptor, error) {
+
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Println("error: " + err.Error())
+		return nil, err
+	}
+
+	return api.ParseDescriptor(string(raw))
 }

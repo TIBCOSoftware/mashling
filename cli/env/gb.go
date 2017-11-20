@@ -387,3 +387,7 @@ func (e *Gb) Build() error {
 
 	return cmd.Run()
 }
+
+func (e *GbProject) GetAppDir() string {
+	return ""
+}

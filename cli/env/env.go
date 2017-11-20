@@ -39,4 +39,7 @@ type Project interface {
 
 	// Build the project
 	Build() error
+
+	// GetAppDir get the app directory of the project
+	GetAppDir() string
 }

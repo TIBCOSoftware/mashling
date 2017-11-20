@@ -5,7 +5,7 @@ import (
 
 	"path"
 
-	api "github.com/TIBCOSoftware/flogo-cli/app"
+	config "github.com/TIBCOSoftware/flogo-cli/config"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 )
 
@@ -123,7 +123,7 @@ func setupSignalHandling() chan int {
 }
 `
 
-func CreateImportsGoFile(codeSourcePath string, deps []*api.Dependency) error {
+func CreateImportsGoFile(codeSourcePath string, deps []*config.Dependency) error {
 	f, err := os.Create(path.Join(codeSourcePath, fileImportsGo))
 
 	if err != nil {
