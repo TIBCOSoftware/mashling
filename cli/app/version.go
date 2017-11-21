@@ -21,7 +21,7 @@ var optVersion = &cli.OptionInfo{
 }
 
 //Version is Mashling Version
-var Version = "0.2.0"
+var Version = "not set"
 
 //MashlingGitTag is mashling git tag
 var MashlingGitTag = "not set"
@@ -29,8 +29,8 @@ var MashlingGitTag = "not set"
 //FlogoGitTag is flogo-lib git tag
 var FlogoGitTag = "not set"
 
-//ShemaVersion is mashling schema version
-var SchemaVersion = "0.2"
+//SchemaVersion is mashling schema version
+var SchemaVersion = GetAllSupportedSchemas()
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
@@ -65,7 +65,11 @@ func (c *cmdVersion) Exec(args []string) error {
 		c.mashlingGitTag = MashlingGitTag
 		c.schemaVersion = SchemaVersion
 		c.flogoGitTag = FlogoGitTag
-		fmt.Printf(" mashling version %s\n schema version %s\n mashling revision %s\n flogo-lib revision %s\n", c.versionNumber, c.schemaVersion, c.mashlingGitTag, c.flogoGitTag)
+
+		fmt.Printf(" mashling version %s\n", c.versionNumber)
+		fmt.Printf(" schema version %s\n", c.schemaVersion)
+		fmt.Printf(" mashling revision %s\n", c.mashlingGitTag)
+		fmt.Printf(" flogo-lib revision %s\n", c.flogoGitTag)
 	}
 
 	return nil
