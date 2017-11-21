@@ -7,8 +7,8 @@ HAS_BINDATA := $(shell go-bindata -version 2>/dev/null)
 VERSION=`git tag | sort -n | tail -1`
 MASHLINGGITTAG=`git rev-parse HEAD`
 FLOGOGITTAG=`git --git-dir=../flogo-lib/.git rev-parse HEAD`
-GITDIFFCHECK=`git diff --dirstat`
-LDFLAGS= -ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.Version=${VERSION} -X github.com/TIBCOSoftware/mashling/cli/app.MashlingGitTag=${MASHLINGGITTAG} -X github.com/TIBCOSoftware/mashling/cli/app.FlogoGitTag=${FLOGOGITTAG} "
+GITDIFFCHECK=`git ls-files -m | tail -1`
+LDFLAGS= -ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.Version=${VERSION} -X github.com/TIBCOSoftware/mashling/cli/app.MashlingGitTag=${MASHLINGGITTAG} -X github.com/TIBCOSoftware/mashling/cli/app.FlogoGitTag=${FLOGOGITTAG} -X github.com/TIBCOSoftware/mashling/cli/app.GitDiffCheck=${GITDIFFCHECK}"
 
 
 .PHONY: all
