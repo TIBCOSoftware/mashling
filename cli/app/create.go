@@ -182,8 +182,21 @@ func (c *cmdCreate) Exec(args []string) error {
 			// Asset was not found.
 			return err
 		}
-		bannerOutput := fmt.Sprintf("\tbannerTxt := `%s`\n\tfmt.Printf(\"%%s\\n\", bannerTxt)\n", banner)
+		bannerOutput := fmt.Sprintf("\tbannerTxt := `%s`", banner)
 		extraSrc.WriteString(string(bannerOutput))
+
+		bannerOutput = fmt.Sprintf("\n\tbannerTxt = bannerTxt + \"\\n\\t\\t\\tMashling version %s\"", Version)
+		extraSrc.WriteString(string(bannerOutput))
+
+		bannerOutput = fmt.Sprintf("\n\tbannerTxt = bannerTxt + \"\\n\\t\\t\\tMashling revision %s\"", MashlingLocalGitTag)
+		extraSrc.WriteString(string(bannerOutput))
+
+		bannerOutput = fmt.Sprintf("\n\tbannerTxt = bannerTxt + \"\\n\\t\\t\\tflogo-lib revision %s\\n\"", FlogoGitTag)
+		extraSrc.WriteString(string(bannerOutput))
+
+		bannerOutput = fmt.Sprintf("\n\tfmt.Printf(\"%%s\\n\", bannerTxt)\n")
+		extraSrc.WriteString(string(bannerOutput))
+
 		// Append file version output.
 		versionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Version: %%s\\n\", app.Version)\n")
 		extraSrc.WriteString(versionOutput)
