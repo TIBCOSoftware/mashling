@@ -188,7 +188,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		bannerOutput = fmt.Sprintf("\n\tbannerTxt = bannerTxt + \"\\n\\t\\t\\tMashling version %s\"", Version)
 		extraSrc.WriteString(string(bannerOutput))
 
-		bannerOutput = fmt.Sprintf("\n\tbannerTxt = bannerTxt + \"\\n\\t\\t\\tMashling revision %s\"", MashlingLocalGitTag)
+		bannerOutput = fmt.Sprintf("\n\tbannerTxt = bannerTxt + \"\\n\\t\\t\\tMashling revision %s\"", MashlingGitTag)
 		extraSrc.WriteString(string(bannerOutput))
 
 		bannerOutput = fmt.Sprintf("\n\tbannerTxt = bannerTxt + \"\\n\\t\\t\\tflogo-lib revision %s\\n\"", FlogoGitTag)
