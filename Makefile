@@ -8,7 +8,7 @@ VERSION=0.2.0
 MASHLINGSCHEMA=0.2
 MASHLINGGITTAG=`git rev-parse HEAD`
 FLOGOGITTAG=`git --git-dir=../flogo-lib/.git rev-parse HEAD`
-LDFLAGS= -ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.Version=${VERSION} -X github.com/TIBCOSoftware/mashling/cli/app.MashlingGitTag=${MASHLINGGITTAG} -X github.com/TIBCOSoftware/mashling/cli/app.ShemaVersion=${MASHLINGSCHEMA} -X github.com/TIBCOSoftware/mashling/cli/app.FlogoGitTag=${FLOGOGITTAG}"
+LDFLAGS= -ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.Version=${VERSION} -X github.com/TIBCOSoftware/mashling/cli/app.MashlingGitTag=${MASHLINGGITTAG} -X github.com/TIBCOSoftware/mashling/cli/app.SchemaVersion=${MASHLINGSCHEMA} -X github.com/TIBCOSoftware/mashling/cli/app.FlogoGitTag=${FLOGOGITTAG}"
 
 .PHONY: all
 all: assets install

@@ -30,7 +30,7 @@ var MashlingGitTag = "not set"
 var FlogoGitTag = "not set"
 
 //ShemaVersion is mashling schema version
-var ShemaVersion = "0.2"
+var SchemaVersion = "0.2"
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
@@ -40,7 +40,7 @@ type cmdVersion struct {
 	option         *cli.OptionInfo
 	versionNumber  string
 	mashlingGitTag string
-	shemaVersion   string
+	schemaVersion  string
 	flogoGitTag    string
 }
 
@@ -63,9 +63,9 @@ func (c *cmdVersion) Exec(args []string) error {
 	} else {
 		c.versionNumber = Version
 		c.mashlingGitTag = MashlingGitTag
-		c.shemaVersion = ShemaVersion
+		c.schemaVersion = SchemaVersion
 		c.flogoGitTag = FlogoGitTag
-		fmt.Printf(" mashling version %s\n schema version %s\n mashling revision %s\n flogo-lib revision %s\n", c.versionNumber, c.shemaVersion, c.mashlingGitTag, c.flogoGitTag)
+		fmt.Printf(" mashling version %s\n schema version %s\n mashling revision %s\n flogo-lib revision %s\n", c.versionNumber, c.schemaVersion, c.mashlingGitTag, c.flogoGitTag)
 	}
 
 	return nil
