@@ -4,7 +4,7 @@
 
 HAS_BINDATA := $(shell go-bindata -version 2>/dev/null)
 
-VERSION=0.2.0
+VERSION=`git tag | sort -n | tail -1`
 MASHLINGGITTAG=`git rev-parse HEAD`
 FLOGOGITTAG=`git --git-dir=../flogo-lib/.git rev-parse HEAD`
 GITDIFFCHECK=`git diff --dirstat`

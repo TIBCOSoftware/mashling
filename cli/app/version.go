@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 )
@@ -37,6 +38,9 @@ var GitDiffCheck = ""
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
+	if len(Version) != 5 && strings.Compare(Version, "not set") != 0 {
+		Version = Version[1:6]
+	}
 }
 
 type cmdVersion struct {
