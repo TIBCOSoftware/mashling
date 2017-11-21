@@ -150,9 +150,15 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 			for k, v := range dispatchInputParamsMap {
 				var inputParam data.MappingDef
-				inputParam.Type = 2
-				inputParam.Value = v
 				inputParam.MapTo = k
+				valStr := v.(string)
+				if strings.HasPrefix(valStr, util.Gateway_Link_Condition_LHS_Start_Expr) && strings.HasSuffix(valStr, util.Gateway_Link_Condition_LHS_End_Expr) {
+					inputParam.Type = 1
+					inputParam.Value = valStr[len(util.Gateway_Link_Condition_LHS_Start_Expr) : len(valStr)-len(util.Gateway_Link_Condition_LHS_End_Expr)]
+				} else {
+					inputParam.Type = 2
+					inputParam.Value = v
+				}
 				inputParams = append(inputParams, &inputParam)
 			}
 		}
