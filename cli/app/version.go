@@ -24,14 +24,20 @@ var optVersion = &cli.OptionInfo{
 //Version is Mashling Version
 var Version = "not set"
 
-//MashlingGitTag is mashling git tag
-var MashlingGitTag = "not set"
+//MashlingMasterGitRev is mashling git tag
+var MashlingMasterGitRev = "not set"
 
-//FlogoGitTag is flogo-lib git tag
-var FlogoGitTag = "not set"
+//MashlingLocalGitRev is mashling git tag
+var MashlingLocalGitRev = "not set"
+
+//FlogoGitRev is flogo-lib git tag
+var FlogoGitRev = "not set"
 
 //SchemaVersion is mashling schema version
 var SchemaVersion = GetAllSupportedSchemas()
+
+//DisplayLocalChanges is to check local changes exist flag
+var DisplayLocalChanges = false
 
 //GitDiffCheck is to check any local changes made to build mashling cli
 var GitDiffCheck = ""
@@ -41,14 +47,23 @@ func init() {
 	if len(Version) != 5 && strings.Compare(Version, "not set") != 0 {
 		Version = Version[1:6]
 	}
+
+	if strings.Compare(MashlingMasterGitRev, MashlingLocalGitRev) != 0 {
+		DisplayLocalChanges = true
+	}
+	if len(GitDiffCheck) != 0 {
+		DisplayLocalChanges = true
+		MashlingLocalGitRev = MashlingLocalGitRev + "++"
+	}
 }
 
 type cmdVersion struct {
-	option         *cli.OptionInfo
-	versionNumber  string
-	mashlingGitTag string
-	schemaVersion  string
-	flogoGitTag    string
+	option               *cli.OptionInfo
+	versionNumber        string
+	mashlingMasterGitRev string
+	schemaVersion        string
+	flogoGitRev          string
+	mashlingLocalGitRev  string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -69,20 +84,18 @@ func (c *cmdVersion) Exec(args []string) error {
 		os.Exit(2)
 	} else {
 		c.versionNumber = Version
-		c.mashlingGitTag = MashlingGitTag
+		c.mashlingMasterGitRev = MashlingMasterGitRev
+		c.mashlingLocalGitRev = MashlingLocalGitRev
 		c.schemaVersion = SchemaVersion
-		c.flogoGitTag = FlogoGitTag
+		c.flogoGitRev = FlogoGitRev
 
-		fmt.Printf(" mashling version %s\n", c.versionNumber)
+		fmt.Printf(" mashling CLI version %s\n", c.versionNumber)
 		fmt.Printf(" supported schema version %s\n", c.schemaVersion)
-		fmt.Printf(" mashling revision %s", c.mashlingGitTag)
-		if len(GitDiffCheck) != 0 {
-			fmt.Print("++\n")
-		} else {
-			fmt.Println("")
+		fmt.Printf(" flogo-lib revision %s\n", c.flogoGitRev)
+		fmt.Printf(" mashling CLI revision %s\n", c.mashlingMasterGitRev)
+		if DisplayLocalChanges {
+			fmt.Printf(" mashling local revision %s\n", c.mashlingLocalGitRev)
 		}
-		fmt.Printf(" flogo-lib revision %s\n", c.flogoGitTag)
-
 	}
 
 	return nil
