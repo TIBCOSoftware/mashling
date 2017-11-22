@@ -39,21 +39,10 @@ var SchemaVersion = GetAllSupportedSchemas()
 //DisplayLocalChanges is to check local changes exist flag
 var DisplayLocalChanges = false
 
-//GitDiffCheck is to check any local changes made to build mashling cli
-var GitDiffCheck = ""
-
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
-	if len(Version) != 5 && strings.Compare(Version, "not set") != 0 {
-		Version = Version[1:6]
-	}
-
 	if strings.Compare(MashlingMasterGitRev, MashlingLocalGitRev) != 0 {
 		DisplayLocalChanges = true
-	}
-	if len(GitDiffCheck) != 0 {
-		DisplayLocalChanges = true
-		MashlingLocalGitRev = MashlingLocalGitRev + "++"
 	}
 }
 
@@ -91,11 +80,11 @@ func (c *cmdVersion) Exec(args []string) error {
 
 		fmt.Printf(" mashling CLI version %s\n", c.versionNumber)
 		fmt.Printf(" supported schema version %s\n", c.schemaVersion)
-		fmt.Printf(" flogo-lib revision %s\n", c.flogoGitRev)
 		fmt.Printf(" mashling CLI revision %s\n", c.mashlingMasterGitRev)
 		if DisplayLocalChanges {
 			fmt.Printf(" mashling local revision %s\n", c.mashlingLocalGitRev)
 		}
+		fmt.Printf(" flogo-lib revision %s\n", c.flogoGitRev)
 	}
 
 	return nil
