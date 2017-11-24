@@ -38,6 +38,7 @@ import (
 	"os"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
@@ -130,8 +131,8 @@ func (tr *TestRunner) Run(context context.Context, action action.Action, uri str
 }
 
 //Run the specified Action
-func (tr *TestRunner) RunAction(context context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
-	log.Printf("RuAction called with actionID: %s", actionID)
+func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
+	log.Printf("Ran Action: %v", act.Config().Id)
 	return nil, nil
 }
 

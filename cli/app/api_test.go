@@ -131,6 +131,7 @@ const expectedFlogoJSON string = `{
 						"useReplyHandler": "false"
 					},
 					"output": null,
+					"actionMappings": {},
 					"outputs": null
 				},
 				{
@@ -143,6 +144,7 @@ const expectedFlogoJSON string = `{
 						"useReplyHandler": "false"
 					},
 					"output": null,
+					"actionMappings": {},
 					"outputs": null
 				},
 				{
@@ -154,6 +156,7 @@ const expectedFlogoJSON string = `{
 						"useReplyHandler": "false"
 					},
 					"output": null,
+					"actionMappings": {},
 					"outputs": null
 				},
 				{
@@ -165,6 +168,7 @@ const expectedFlogoJSON string = `{
 						"useReplyHandler": "false"
 					},
 					"output": null,
+					"actionMappings": {},
 					"outputs": null
 				}
 			],
