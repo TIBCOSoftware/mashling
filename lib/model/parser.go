@@ -17,6 +17,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/TIBCOSoftware/mashling/lib/types"
@@ -135,10 +136,46 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 				fmt.Sprintf("The trigger [%v] does not support [%v] handler setting. skippng the condition logic.", trigger.Type, util.Flogo_Trigger_Handler_Setting_Condition)
 			}
 		}
+
+		//check if there are any handler's dispatch config parms provided
+		inputParams := []*data.MappingDef{}
+		outputParams := []*data.MappingDef{}
+
+		if dispatch.InputParams != nil {
+			var dispatchInputParams interface{}
+			if err := json.Unmarshal([]byte(dispatch.InputParams), &dispatchInputParams); err != nil {
+				return nil, nil, err
+			}
+			dispatchInputParamsMap := dispatchInputParams.(map[string]interface{})
+
+			for k, v := range dispatchInputParamsMap {
+				var inputParam data.MappingDef
+				inputParam.MapTo = k
+				valStr := v.(string)
+				if strings.HasPrefix(valStr, util.Gateway_Link_Dispatch_Param_Environment_Expr_Prifix) && strings.HasSuffix(valStr, util.Gateway_Link_Dispatch_Param_Expr_Sufix) {
+					inputParam.Type = 1
+					inputParam.Value = valStr
+				} else if strings.HasPrefix(valStr, util.Gateway_Link_Dispatch_Param_Expr_Prifix) && strings.HasSuffix(valStr, util.Gateway_Link_Dispatch_Param_Expr_Sufix) {
+					inputParam.Type = 1
+					inputParam.Value = valStr[len(util.Gateway_Link_Dispatch_Param_Expr_Prifix) : len(valStr)-len(util.Gateway_Link_Dispatch_Param_Expr_Sufix)]
+				} else {
+					inputParam.Type = 2
+					inputParam.Value = v
+				}
+				inputParams = append(inputParams, &inputParam)
+			}
+		}
+
+		actionMappings := &ftrigger.Mappings{
+			Input:  inputParams,
+			Output: outputParams,
+		}
+
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{
-			ActionId: handler.Name,
-			Settings: handlerSettings[handler.Name],
+			ActionId:       handler.Name,
+			Settings:       handlerSettings[handler.Name],
+			ActionMappings: actionMappings,
 		}
 
 		//Add autoIdReply & useReplyHandler settings only for valid trigger (i.e http trigger. For kafka these settings are invalid).
@@ -212,9 +249,10 @@ func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) 
 		action := actions[0]
 		action.Id = handler.Name
 		gatewayAction = faction.Config{
-			Id:   handler.Name,
-			Data: action.Data,
-			Ref:  action.Ref,
+			Id:       handler.Name,
+			Data:     action.Data,
+			Ref:      action.Ref,
+			Metadata: action.Metadata,
 		}
 
 	} else if handler.Definition != nil {
@@ -224,9 +262,10 @@ func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) 
 			return nil, err
 		}
 		gatewayAction = faction.Config{
-			Id:   handler.Name,
-			Data: flogoAction.Data,
-			Ref:  flogoAction.Ref,
+			Id:       handler.Name,
+			Data:     flogoAction.Data,
+			Ref:      flogoAction.Ref,
+			Metadata: flogoAction.Metadata,
 		}
 	}
 
