@@ -19,24 +19,23 @@ import (
 
 func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 	gbProject := env.NewGbProjectEnv()
-
-	gbProject.Init(os.Getenv("GOPATH"))
+	tmp, err := ioutil.TempDir("", "github_resource")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmp)
+	err = os.Mkdir(tmp+"/src", 0755)
+	if err != nil {
+		return nil, err
+	}
+	gbProject.Init(tmp)
 
 	resourceDir := gbProject.GetVendorSrcDir()
 	resourcePath := resourceDir + "/" + gitHubPath + "/" + resourceFile
 
 	gbProject.InstallDependency(gitHubPath, "")
 
-	data, err := ioutil.ReadFile(resourcePath)
-	if err != nil {
-		return nil, err
-	}
-
-	err = gbProject.UninstallDependency(gitHubPath)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return ioutil.ReadFile(resourcePath)
 }
 
 func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
