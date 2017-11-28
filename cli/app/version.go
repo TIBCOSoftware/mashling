@@ -22,7 +22,7 @@ var optVersion = &cli.OptionInfo{
 }
 
 //Version is Mashling Version
-var Version = "not set"
+var Version = "0.2.5"
 
 //MashlingMasterGitRev is mashling git tag
 var MashlingMasterGitRev = "not set"
@@ -35,6 +35,9 @@ var FlogoGitRev = "not set"
 
 //SchemaVersion is mashling schema version
 var SchemaVersion = GetAllSupportedSchemas()
+
+//GitRepoUsed is git repository checked in
+var GitRepoUsed = "not set"
 
 //DisplayLocalChanges is to check local changes exist flag
 var DisplayLocalChanges = false
@@ -53,6 +56,7 @@ type cmdVersion struct {
 	schemaVersion        string
 	flogoGitRev          string
 	mashlingLocalGitRev  string
+	gitRepoUsed          string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -77,9 +81,11 @@ func (c *cmdVersion) Exec(args []string) error {
 		c.mashlingLocalGitRev = MashlingLocalGitRev
 		c.schemaVersion = SchemaVersion
 		c.flogoGitRev = FlogoGitRev
+		c.gitRepoUsed = GitRepoUsed
 
 		fmt.Printf(" mashling CLI version %s\n", c.versionNumber)
 		fmt.Printf(" supported schema version %s\n", c.schemaVersion)
+		fmt.Printf(" git repository checked in %s \n", c.gitRepoUsed)
 		fmt.Printf(" mashling CLI revision %s\n", c.mashlingMasterGitRev)
 		if DisplayLocalChanges {
 			fmt.Printf(" mashling local revision %s\n", c.mashlingLocalGitRev)
