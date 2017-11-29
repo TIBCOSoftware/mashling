@@ -28,10 +28,10 @@ var optCreate = &cli.OptionInfo{
 	UsageLine: "create AppName",
 	Short:     "create a mashling gateway",
 	Long: `Creates a mashling gateway.
-
-Options:
-    -f       specify the mashling.json to create gateway project from
- `,
+ 
+ Options:
+	 -f       specify the mashling.json to create gateway project from
+  `,
 }
 
 type GbManifest struct {
@@ -182,8 +182,27 @@ func (c *cmdCreate) Exec(args []string) error {
 			// Asset was not found.
 			return err
 		}
+
+		mashlingCliOutput := fmt.Sprintf("\n\tmashlingTxt :=  \"\\n[mashling] mashling CLI version %s\"", Version)
+		extraSrc.WriteString(string(mashlingCliOutput))
+
+		mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling CLI revision %s\"", MashlingMasterGitRev)
+		extraSrc.WriteString(string(mashlingCliOutput))
+
+		if DisplayLocalChanges {
+			mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling local revision %s\"", MashlingLocalGitRev)
+			extraSrc.WriteString(string(mashlingCliOutput))
+		}
+
+		mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n\\n\"")
+		extraSrc.WriteString(string(mashlingCliOutput))
+
+		mashlingCliOutput = fmt.Sprintf("\n\tfmt.Printf(\"%%s\\n\", mashlingTxt)\n")
+		extraSrc.WriteString(string(mashlingCliOutput))
+
 		bannerOutput := fmt.Sprintf("\tbannerTxt := `%s`\n\tfmt.Printf(\"%%s\\n\", bannerTxt)\n", banner)
 		extraSrc.WriteString(string(bannerOutput))
+
 		// Append file version output.
 		versionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Version: %%s\\n\", app.Version)\n")
 		extraSrc.WriteString(versionOutput)
