@@ -22,7 +22,7 @@ var optVersion = &cli.OptionInfo{
 }
 
 //Version is Mashling Version
-var Version = "0.2.5"
+var Version = "3.0.0"
 
 //MashlingMasterGitRev is mashling git tag
 var MashlingMasterGitRev = "not set"
