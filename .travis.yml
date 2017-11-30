@@ -34,7 +34,8 @@ script:
   - godep restore
   - go test ./...
   - go install ./...
-  - mashling version
+  - make all
+  - mashling help
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - pushd mashling-cicd/sample-recipes
   - rm -rf builds
