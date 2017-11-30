@@ -12,7 +12,7 @@
 				"type": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
 				"description": "Configuration for kafka cluster",
 				"settings": {
-					"BrokerUrl": "localhost:9092"
+					"BrokerUrl": "localhost:9095"
 				}
 			}
 		],
