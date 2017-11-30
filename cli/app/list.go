@@ -16,7 +16,7 @@ import (
 var optList = &cli.OptionInfo{
 	Name:      "list",
 	UsageLine: "list [triggers|handlers|links|all]",
-	Short:     "list installed components in the mashling gateway recipe",
+	Short:     "List installed components in the mashling gateway recipe",
 	Long:      `List installed components in the mashling gateway recipe.`,
 }
 

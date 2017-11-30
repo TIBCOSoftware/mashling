@@ -26,7 +26,7 @@ import (
 var optCreate = &cli.OptionInfo{
 	Name:      "create",
 	UsageLine: "create AppName",
-	Short:     "create a mashling gateway",
+	Short:     "Create a mashling gateway",
 	Long: `Creates a mashling gateway.
  
  Options:
