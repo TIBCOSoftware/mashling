@@ -60,6 +60,10 @@ settings, outputs and handler:
     {
       "name": "trustStore",
       "type": "string"
+    },
+    {
+      "name": "basicAuthFile",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -128,6 +132,7 @@ settings, outputs and handler:
 | serverKey | Server private key file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 | enableClientAuth | true - To enable client AUTH, false - Client AUTH is not enabled |
 | trustStore | Trust dir containing clinet CAs |
+| basicAuthFile | Path to a password file with username/passwords. An environment variable can be used here. |
 
 ### Outputs
 | Key    | Description   |
@@ -293,3 +298,45 @@ Follwing is the sample payload. Try changing the value of name ("CAT" to some ot
     ]
 }
 ```
+
+#### Basic Authentication
+
+To use basic authentication, the necessary descriptors must be in place. For example:
+
+```json
+"configurations": [
+  {
+      "name": "restConfig",
+      "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+      "description": "Configuration for rest trigger",
+      "settings": {
+        "port": "9096",
+        "basicAuthFile": "${env.BASIC_AUTH_FILE}"
+      }
+  }
+],
+```
+
+This specifies that BASIC_AUTH_FILE is an environment variable whose value will be read into "basicAuthFile" when the gateway starts. This value should be a path to a password file.
+
+Plain username/password file: /home/test/password.txt
+```
+foo:bar
+moo:poo
+```
+
+Alternatively, you can also use a salted password file where the format is: username:salt:sha256(salt + password)
+```
+foo:5VvmQnTXZ10wGZu_Gkjb8umfUPIOQTQ3p1YFadAWTl8=:6267beb3f851b7fee14011f6aa236556f35b186a6791b80b48341e990c367643
+```
+
+Start the gateway:
+```
+BASIC_AUTH_FILE=/home/test/password.txt myApp
+```
+
+**NOTE**: It is important to limit access to the password.txt on your environment. 
+
+
+
+
