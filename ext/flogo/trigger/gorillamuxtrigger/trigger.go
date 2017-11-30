@@ -53,15 +53,17 @@ var log = logger.GetLogger("trigger-tibco-rest")
 
 //OptimizedHandler optimized handler
 type OptimizedHandler struct {
-	defaultActionId string
-	settings        map[string]interface{}
-	dispatches      []*Dispatch
+	defaultActionId   string
+	settings          map[string]interface{}
+	dispatches        []*Dispatch
+	defaultHandlerCfg *trigger.HandlerConfig
 }
 
 //Dispatch holds dispatch actionId and condition
 type Dispatch struct {
-	actionId  string
-	condition string
+	actionId   string
+	condition  string
+	handlerCfg *trigger.HandlerConfig
 }
 
 var validMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
@@ -197,13 +199,15 @@ func (t *RestTrigger) Init(runner action.Runner) {
 				//check for dispatch condition
 				if dispatchCondition := handler.Settings[util.Flogo_Trigger_Handler_Setting_Condition]; dispatchCondition != nil {
 					tmpDispatch := &Dispatch{
-						actionId:  handler.ActionId,
-						condition: dispatchCondition.(string),
+						actionId:   handler.ActionId,
+						condition:  dispatchCondition.(string),
+						handlerCfg: handler,
 					}
 					optHandler.dispatches = append(optHandler.dispatches, tmpDispatch)
 				} else {
 					//no dispatch condition, hence make it as default action
 					optHandler.defaultActionId = handler.ActionId
+					optHandler.defaultHandlerCfg = handler
 				}
 				handlerAdded = true
 				break
@@ -222,16 +226,18 @@ func (t *RestTrigger) Init(runner action.Runner) {
 			//check for dispatch condition
 			if dispatchCondition := handler.Settings[util.Flogo_Trigger_Handler_Setting_Condition]; dispatchCondition != nil {
 				tmpDispatch := &Dispatch{
-					actionId:  handler.ActionId,
-					condition: handler.Settings[util.Flogo_Trigger_Handler_Setting_Condition].(string),
+					actionId:   handler.ActionId,
+					condition:  handler.Settings[util.Flogo_Trigger_Handler_Setting_Condition].(string),
+					handlerCfg: handler,
 				}
 				tmpDispatches = append(tmpDispatches, tmpDispatch)
 			}
 
 			optHandler := OptimizedHandler{
-				defaultActionId: handler.ActionId,
-				settings:        tmpSettings,
-				dispatches:      tmpDispatches,
+				defaultActionId:   handler.ActionId,
+				settings:          tmpSettings,
+				dispatches:        tmpDispatches,
+				defaultHandlerCfg: handler,
 			}
 
 			optHandlers = append(optHandlers, &optHandler)
@@ -430,6 +436,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		contentBytes, err := json.Marshal(content)
 		contentStr := string(contentBytes)
 		actionId := ""
+		var handlerCfg *trigger.HandlerConfig
 
 		for _, dispatch := range handler.dispatches {
 			expressionStr := dispatch.condition
@@ -459,6 +466,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 				}
 				if exprResult {
 					actionId = dispatch.actionId
+					handlerCfg = dispatch.handlerCfg
 				}
 			} else if exprType == condition.EXPR_TYPE_HEADER {
 				//resolve LHS i.e header value from http request
@@ -470,6 +478,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 					exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
 					if exprResult {
 						actionId = dispatch.actionId
+						handlerCfg = dispatch.handlerCfg
 					}
 				}
 			} else if exprType == condition.EXPR_TYPE_ENV {
@@ -482,6 +491,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 					exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
 					if exprResult {
 						actionId = dispatch.actionId
+						handlerCfg = dispatch.handlerCfg
 					}
 				}
 			}
@@ -494,6 +504,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		//If no dispatch is found, use default action
 		if actionId == "" {
 			actionId = handler.defaultActionId
+			handlerCfg = handler.defaultHandlerCfg
 			log.Debugf("dispatch not resolved. Continue with default action - %v", actionId)
 		}
 
@@ -503,7 +514,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		action := action.Get(actionId)
 		log.Debugf("Found action' %+x'", action)
 
-		context := trigger.NewContext(context.Background(), startAttrs)
+		context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: handlerCfg})
 
 		var replyCode int
 		var replyData interface{}

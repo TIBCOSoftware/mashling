@@ -1,5 +1,7 @@
 package env
 
+import "io"
+
 type Project interface {
 
 	// Init initializes the project settings an validates it requirements
@@ -30,7 +32,7 @@ type Project interface {
 	InstallDependency(path string, version string) error
 
 	// Restore go dependencies
-	RestoreDependency() error
+	RestoreDependency(manifest io.Reader) error
 
 	// Uninstall a go dependency
 	UninstallDependency(path string) error

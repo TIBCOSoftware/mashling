@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 )
@@ -20,16 +21,42 @@ var optVersion = &cli.OptionInfo{
 	Long:      "Displays the version of mashling",
 }
 
-//Mashling version
-const version = "0.2.0"
+//Version is Mashling Version
+var Version = "0.3.0"
+
+//MashlingMasterGitRev is mashling git tag
+var MashlingMasterGitRev = "not set"
+
+//MashlingLocalGitRev is mashling git tag
+var MashlingLocalGitRev = "not set"
+
+//FlogoGitRev is flogo-lib git tag
+var FlogoGitRev = "not set"
+
+//SchemaVersion is mashling schema version
+var SchemaVersion = GetAllSupportedSchemas()
+
+//GitBranch is git repository checked in
+var GitBranch = "not set"
+
+//DisplayLocalChanges is to check local changes exist flag
+var DisplayLocalChanges = false
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
+	if strings.Compare(MashlingMasterGitRev, MashlingLocalGitRev) != 0 {
+		DisplayLocalChanges = true
+	}
 }
 
 type cmdVersion struct {
-	option        *cli.OptionInfo
-	versionNumber string
+	option               *cli.OptionInfo
+	versionNumber        string
+	mashlingMasterGitRev string
+	schemaVersion        string
+	flogoGitRev          string
+	mashlingLocalGitRev  string
+	gitBranch            string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -49,8 +76,21 @@ func (c *cmdVersion) Exec(args []string) error {
 		fmt.Fprintf(os.Stderr, "usage: mashling version \n\nToo many arguments given.\n")
 		os.Exit(2)
 	} else {
-		c.versionNumber = version
-		fmt.Printf("mashling version %s\n", c.versionNumber)
+		c.versionNumber = Version
+		c.mashlingMasterGitRev = MashlingMasterGitRev
+		c.mashlingLocalGitRev = MashlingLocalGitRev
+		c.schemaVersion = SchemaVersion
+		c.flogoGitRev = FlogoGitRev
+		c.gitBranch = GitBranch
+
+		fmt.Printf(" mashling CLI version %s\n", c.versionNumber)
+		fmt.Printf(" supported schema version %s\n", c.schemaVersion)
+		fmt.Printf(" git branch %s \n", c.gitBranch)
+		fmt.Printf(" mashling CLI revision %s\n", c.mashlingMasterGitRev)
+		if DisplayLocalChanges {
+			fmt.Printf(" mashling local revision %s\n", c.mashlingLocalGitRev)
+		}
+		fmt.Printf(" flogo-lib revision %s\n", c.flogoGitRev)
 	}
 
 	return nil

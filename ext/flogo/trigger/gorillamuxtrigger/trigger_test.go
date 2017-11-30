@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
@@ -110,9 +111,8 @@ func TestInitOk(t *testing.T) {
 }
 
 //Run the specified Action
-func (tr *TestRunner) RunAction(context context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
-	log.Debugf("RuAction called with actionID: %s", actionID)
-	fmt.Println("Test 2")
+func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
+	log.Debugf("Ran Action: %v", act.Config().Id)
 	return nil, nil
 }
 

@@ -7,14 +7,14 @@ package app
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-
-	"encoding/json"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -28,10 +28,10 @@ var optCreate = &cli.OptionInfo{
 	UsageLine: "create AppName",
 	Short:     "create a mashling gateway",
 	Long: `Creates a mashling gateway.
-
-Options:
-    -f       specify the mashling.json to create gateway project from
- `,
+ 
+ Options:
+	 -f       specify the mashling.json to create gateway project from
+  `,
 }
 
 type GbManifest struct {
@@ -69,9 +69,22 @@ func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 // Exec implementation of cli.Command.Exec
 func (c *cmdCreate) Exec(args []string) error {
 
-	var gatewayJSON string
-	var gatewayName string
-	var err error
+	var (
+		gatewayJSON string
+		gatewayName string
+		manifest    io.Reader
+	)
+
+	_, err := os.Stat("manifest")
+	if err == nil {
+		var file *os.File
+		file, err = os.Open("manifest")
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		manifest = file
+	}
 
 	if c.fileName != "" {
 
@@ -109,11 +122,15 @@ func (c *cmdCreate) Exec(args []string) error {
 		if err != nil {
 			return err
 		}
-		bytes, err := json.MarshalIndent(mashling, "", "\t")
+		data, err := json.MarshalIndent(mashling, "", "\t")
 		if err != nil {
 			return err
 		}
-		gatewayJSON = string(bytes)
+		gatewayJSON = string(data)
+
+		if manifest == nil {
+			manifest = bytes.NewBuffer(assets.MustAsset("assets/default_manifest"))
+		}
 	}
 
 	currentDir, err := os.Getwd()
@@ -131,7 +148,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, appDir, gatewayName, c.vendorDir, func() error {
+	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, manifest, appDir, gatewayName, c.vendorDir, func() error {
 		// Load GB manifest file to extract flogo-lib and mashling repository revisions.
 		manifestFile, err := ioutil.ReadFile(filepath.Join(appDir, "vendor", "manifest"))
 		if err != nil {
@@ -165,8 +182,27 @@ func (c *cmdCreate) Exec(args []string) error {
 			// Asset was not found.
 			return err
 		}
+
+		mashlingCliOutput := fmt.Sprintf("\n\tmashlingTxt :=  \"\\n[mashling] mashling CLI version %s\"", Version)
+		extraSrc.WriteString(string(mashlingCliOutput))
+
+		mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling CLI revision %s\"", MashlingMasterGitRev)
+		extraSrc.WriteString(string(mashlingCliOutput))
+
+		if DisplayLocalChanges {
+			mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling local revision %s\"", MashlingLocalGitRev)
+			extraSrc.WriteString(string(mashlingCliOutput))
+		}
+
+		mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n\\n\"")
+		extraSrc.WriteString(string(mashlingCliOutput))
+
+		mashlingCliOutput = fmt.Sprintf("\n\tfmt.Printf(\"%%s\\n\", mashlingTxt)\n")
+		extraSrc.WriteString(string(mashlingCliOutput))
+
 		bannerOutput := fmt.Sprintf("\tbannerTxt := `%s`\n\tfmt.Printf(\"%%s\\n\", bannerTxt)\n", banner)
 		extraSrc.WriteString(string(bannerOutput))
+
 		// Append file version output.
 		versionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Version: %%s\\n\", app.Version)\n")
 		extraSrc.WriteString(versionOutput)

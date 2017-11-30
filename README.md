@@ -33,6 +33,13 @@ Additional developer tooling is included in below open source repo that contains
 ### Update Mashling
     go get -u github.com/TIBCOSoftware/mashling/...
 
+Rub below commands to Build and Install:
+```bash
+cd $GOPATH/src/github.com/TIBCOSoftware/mashling
+make all
+```
+NOTE: Windows users has to install [gnuwin32](https://sourceforge.net/projects/gnuwin32/files/make/) in order to use make command.
+
 ## Getting Started
 A Mashling microgateway is created using the **Mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
 

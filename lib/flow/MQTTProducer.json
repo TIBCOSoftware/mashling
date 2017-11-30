@@ -1,0 +1,94 @@
+{
+  "name": "mqttProducer",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "My flogo application description",
+  "triggers": [
+    {
+      "id": "my_rest_trigger",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+      "settings": {
+        "port": "9233"
+      },
+      "handlers": [
+        {
+          "actionId": "my_simple_flow",
+          "settings": {
+            "method": "POST",
+            "path": "/test"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "my_simple_flow",
+      "name": "my simple flow",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
+      "data": {
+        "flow": {
+          "name": "my simple flow",
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "type": 1,
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/mqtt",
+                "name": "mqtt",
+                "attributes": [
+                  {
+                    "name": "content",
+                    "value": "test",
+                    "type": "string"
+                  },
+                  {
+                    "name": "topic",
+                    "value": "test",
+                    "type": "string"
+                  },
+                  {
+                    "name": "broker",
+                    "value": "tcp://localhost:1883",
+                    "type": "string"
+                  },
+                  {
+                    "name": "id",
+                    "value": "mashling",
+                    "type": "string"
+                  },
+                  {
+                    "name": "user",
+                    "value": "",
+                    "type": "string"
+                  },
+                  {
+                    "name": "password",
+                    "value": "",
+                    "type": "string"
+                  },
+                  {
+                    "name": "qos",
+                    "value": "0",
+                    "type": "number"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "${trigger.content}",
+                    "mapTo": "content"
+                  }
+                ]
+              }
+            ],
+            "links": []
+          }
+        }
+      }
+    }
+  ]
+}

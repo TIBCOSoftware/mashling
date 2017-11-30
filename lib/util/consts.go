@@ -32,6 +32,10 @@ const Gateway_Link_Condition_LHS_JSONPath_Root = "$"
 const Gateway_Link_Condition_LHS_Header_Prifix = "trigger.header."
 const Gateway_Link_Condition_LHS_Environment_Prifix = "env."
 
+const Gateway_Link_Dispatch_Param_Expr_Prifix = "${"
+const Gateway_Link_Dispatch_Param_Expr_Sufix = "}"
+const Gateway_Link_Dispatch_Param_Environment_Expr_Prifix = "${env."
+
 /**
 Flogo constants
 */

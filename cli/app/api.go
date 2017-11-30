@@ -7,6 +7,7 @@ package app
 
 import (
 	"encoding/json"
+	"io"
 	"strings"
 
 	"fmt"
@@ -31,7 +32,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
+func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
 	if err != nil {
@@ -164,7 +165,7 @@ func CreateMashling(env env.Project, gatewayJson string, appDir string, appName 
 
 	flogoJson := string(bytes)
 
-	err = CreateApp(SetupNewProjectEnv(), flogoJson, appDir, appName, vendorDir)
+	err = CreateApp(SetupNewProjectEnv(), flogoJson, manifest, appDir, appName, vendorDir)
 	if err != nil {
 		return err
 	}
@@ -431,15 +432,13 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host str
 		return err
 	}
 
-	// Delay to avoid hitting QPS limit
-	delayMilli(500)
-
 	token, err := user.FetchOAuthToken()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to fetch the OAauth token\n\n")
 		return err
 	}
 
+	// Delay to avoid hitting QPS limit
 	delayMilli(500)
 
 	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), token)
@@ -660,7 +659,7 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJson string, appDir string, appName string, vendorDir string) error {
+func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir string, appName string, vendorDir string) error {
 
 	descriptor, err := api.ParseAppDescriptor(appJson)
 	if err != nil {
@@ -707,16 +706,15 @@ func CreateApp(env env.Project, appJson string, appDir string, appName string, v
 		return err
 	}
 
-	//if manifest exists in the parent folder, use it to set up the dependecies
-	err = env.RestoreDependency()
-	var deps []*api.Dependency
-	//if restore didn't occur, install dependencies
-	if err != nil {
+	deps := api.ExtractDependencies(descriptor)
 
+	//if manifest exists, use it to set up the dependecies
+	err = env.RestoreDependency(manifest)
+	if err == nil {
+		fmt.Println("Dependent libraries are restored.")
+	} else {
 		//todo allow ability to specify flogo-lib version
 		env.InstallDependency("github.com/TIBCOSoftware/flogo-lib", "")
-
-		deps := api.ExtractDependencies(descriptor)
 
 		for _, dep := range deps {
 			path, version := splitVersion(dep.Ref)
@@ -727,8 +725,6 @@ func CreateApp(env env.Project, appJson string, appDir string, appName string, v
 				}
 			*/
 		}
-	} else {
-		fmt.Println("Dependent libraries are restored.")
 	}
 
 	// create source files
