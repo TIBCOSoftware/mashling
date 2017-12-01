@@ -17,8 +17,8 @@ import (
 var optValidate = &cli.OptionInfo{
 	Name:      "validate",
 	UsageLine: "validate gatewayJson",
-	Short:     "validate gateway JSON",
-	Long:      "validate gateway JSON",
+	Short:     "Validate gateway JSON",
+	Long:      "Validate gateway JSON",
 }
 
 type cmdValidate struct {

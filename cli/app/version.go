@@ -17,7 +17,7 @@ import (
 var optVersion = &cli.OptionInfo{
 	Name:      "version",
 	UsageLine: "version",
-	Short:     "version of mashling",
+	Short:     "Version of mashling",
 	Long:      "Displays the version of mashling",
 }
 
