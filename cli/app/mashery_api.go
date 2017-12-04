@@ -30,8 +30,8 @@ type ApiUser struct {
 
 const (
 	masheryUri   = "https://api.mashery.com"
-	servicesUri  = "/v3/rest/services"
-	transformUri = "/v3/rest/transform"
+	restUri      = "/v3/rest/"
+	transformUri = "transform"
 	accessToken  = "access_token"
 )
 
@@ -105,10 +105,22 @@ func readBody(body io.Reader) ([]byte, error) {
 
 // CreateAPI sends the transformed swagger doc to the Mashery API.
 func (user *ApiUser) CreateAPI(tfSwaggerDoc string, oauthToken string) (string, error) {
-	// New client
-	client := newHttp(user.noop)
+	return user.CreateUpdate("POST", "services", "", tfSwaggerDoc, oauthToken)
+}
 
-	r, _ := http.NewRequest("POST", masheryUri+servicesUri, bytes.NewReader([]byte(tfSwaggerDoc)))
+// CreateAPI sends the transformed swagger doc to the Mashery API.
+func (user *ApiUser) Create(resource string, fields string, content string, oauthToken string) (string, error) {
+	return user.CreateUpdate("POST", resource, fields, content, oauthToken)
+}
+
+// CreateAPI sends the transformed swagger doc to the Mashery API.
+func (user *ApiUser) CreateUpdate(method string, resource string, fields string, content string, oauthToken string) (string, error) {
+	fullUri := masheryUri + restUri + resource
+	if fields != "" {
+		fullUri = fullUri + "?fields=" + fields
+	}
+	client := newHttp(user.noop)
+	r, _ := http.NewRequest(method, fullUri, bytes.NewReader([]byte(content)))
 	setContentType(r)
 	setOauthToken(r, oauthToken)
 
@@ -119,30 +131,74 @@ func (user *ApiUser) CreateAPI(tfSwaggerDoc string, oauthToken string) (string, 
 		defer resp.Body.Close()
 	}
 
-	if bodyText, err := readBody(resp.Body); err == nil {
-		s := string(bodyText)
-		if resp.StatusCode != http.StatusOK {
-			return s, fmt.Errorf("Unable to create the api: status code %v", resp.StatusCode)
-		}
-
-		return string(bodyText), nil
-	} else {
-		return string(bodyText), err
+	bodyText, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
 	}
+
+	s := string(bodyText)
+	if resp.StatusCode != http.StatusOK {
+		return s, fmt.Errorf("Unable to create the api: status code %v", resp.StatusCode)
+	}
+
+	return s, err
+}
+
+// Read fetch data
+func (user *ApiUser) Read(resource string, filter string, fields string, oauthToken string) (string, error) {
+
+	fullUri := masheryUri + restUri + resource
+	if fields != "" && filter == "" {
+		fullUri = fullUri + "?fields=" + fields
+	} else if fields == "" && filter != "" {
+		fullUri = fullUri + "?filter=" + filter
+	} else {
+		fullUri = fullUri + "?fields=" + fields + "&filter=" + filter
+	}
+
+	client := newHttp(user.noop)
+
+	r, _ := http.NewRequest("GET", masheryUri+restUri+resource+"?filter="+filter+"&fields="+fields, nil)
+	setContentType(r)
+	setOauthToken(r, oauthToken)
+
+	resp, err := client.Do(r)
+	if err != nil {
+		return "", err
+	} else {
+		defer resp.Body.Close()
+	}
+
+	bodyText, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	s := string(bodyText)
+	if resp.StatusCode != http.StatusOK {
+		return s, fmt.Errorf("Unable to create the api: status code %v", resp.StatusCode)
+	}
+
+	return s, err
+}
+
+// CreateAPI sends the transformed swagger doc to the Mashery API.
+func (user *ApiUser) Update(resource string, fields string, content string, oauthToken string) (string, error) {
+	return user.CreateUpdate(http.MethodPut, resource, fields, content, oauthToken)
 }
 
 // TransformSwagger sends the swagger doc to Mashery API to be
-// transformed into the masheryapi format.
-func (user *ApiUser) TransformSwagger(swaggerDoc string, oauthToken string) (string, error) {
+// transformed into the target format.
+func (user *ApiUser) TransformSwagger(swaggerDoc string, sourceFormat string, targetFormat string, oauthToken string) (string, error) {
 	// New client
 	client := newHttp(user.noop)
 
 	v := url.Values{}
-	v.Set("sourceFormat", "swagger2")
-	v.Add("targetFormat", "masheryapi")
+	v.Set("sourceFormat", sourceFormat)
+	v.Add("targetFormat", targetFormat)
 	v.Add("publicDomain", user.portal)
 
-	r, _ := http.NewRequest("POST", masheryUri+transformUri+"?"+v.Encode(), bytes.NewReader([]byte(swaggerDoc)))
+	r, _ := http.NewRequest("POST", masheryUri+restUri+transformUri+"?"+v.Encode(), bytes.NewReader([]byte(swaggerDoc)))
 	setContentType(r)
 	setOauthToken(r, oauthToken)
 
