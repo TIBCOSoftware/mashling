@@ -19,7 +19,7 @@ func TestPublishCommand(t *testing.T) {
 		t.Error("Publish command should be registered.")
 	}
 
-	incompleteArgs := []string{"-u", "username", "-p", "password", "-areaId", "xxxyyy"}
+	incompleteArgs := []string{"-username", "username", "-password", "password", "-areaId", "xxxyyy"}
 
 	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	if err := cli.ExecCommand(fs, cmd, incompleteArgs); err == nil {
