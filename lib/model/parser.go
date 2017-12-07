@@ -256,8 +256,13 @@ func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) 
 			Metadata: action.Metadata,
 		}
 
-		if gatewayAction.Metadata != nil && len(gatewayAction.Metadata.Output) == 0 {
-			gatewayAction.Metadata.Output = nil
+		if gatewayAction.Metadata != nil {
+			if len(gatewayAction.Metadata.Output) == 0 {
+				gatewayAction.Metadata.Output = nil
+			}
+			if len(gatewayAction.Metadata.Input) == 0 {
+				gatewayAction.Metadata.Input = nil
+			}
 		}
 
 	} else if handler.Definition != nil {
