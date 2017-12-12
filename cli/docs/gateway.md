@@ -218,31 +218,38 @@ For more details please use:
 This command is used to publish HTTP triggers in your mashling.json file
 to Mashery.
 
+A mashery configuration file should contain the credentials used for mashery.
+<HOME>/.mashery.conf. 
+
+The file should contain:
+ApiKey=xxxyyyzzz
+ApiSecret=aaabbbccc
+Username=someuser
+Password=somepassword
+AreaDomain=somedomain.example.com
+AreaId=xxxyyyzzz
+PublicHost=somewhere.example.com
+IoDocs=false
+TestPlan=false
+
 Usage:
 
-    mashling publish -k key -s secret_key  -u username -p password -uuid  uuid -portal mashery_portal -h petstore.swagger.io
+    mashling publish -configFile mashery.conf 
 
 **options**
 
-- *-f*      : specify the Mashling json (default is mashling.json).
-- *-k*      : the api key (required)
-- *-s*      : the api secret key (required)
-- *-u*      : username (required)
-- *-p*      : password (required)
-- *-portal* : the portal (required)
-- *-uuid*   : the proxy uuid (required)
-- *-h*			: the publicly available hostname where this Mashling will be deployed (required)
-- *-mock*		: true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false).
+- *-configFile*      : specify the Mashling json (default is mashling.json).
+- *-mock*            : true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
+- *-apitemplate*     : json file that contains defaults for api/endpoint settings in mashery
 
 
+Example (display transformed swagger doc only; <HOME>/.mashery.conf will be used):
 
-Example (display transformed swagger doc only):
+    mashling publish -mock true
 
-    mashling publish -k 12345  -s 6789  -u foo -p bar -uuid  xxxyyy -portal "tibcobanqio.api.mashery.com" -mock true  -h petstore.swagger.io
+Example (publish to Mashery; <HOME>/.mashery.conf will be used):
 
-Example (publish to Mashery):
-
-    mashling publish -k 12345  -s 6789  -u foo -p bar -uuid  xxxyyy -portal "tibcobanqio.api.mashery.com"  -h petstore.swagger.io
+    mashling publish
 
 For more details please use:
 
