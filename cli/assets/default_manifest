@@ -84,21 +84,21 @@
 		{
 			"importpath": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 			"repository": "https://github.com/TIBCOSoftware/mashling",
-			"revision": "572a80645683719c8645f9fe0a08e2ca9ba57564",
+			"revision": "8cdbe03ba989100b5d30294d9f386ca62433a7b5",
 			"branch": "master",
 			"path": "/ext/flogo/trigger/gorillamuxtrigger"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/mashling/lib/conditions",
 			"repository": "https://github.com/TIBCOSoftware/mashling",
-			"revision": "572a80645683719c8645f9fe0a08e2ca9ba57564",
+			"revision": "8cdbe03ba989100b5d30294d9f386ca62433a7b5",
 			"branch": "master",
 			"path": "/lib/conditions"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/mashling/lib/util",
 			"repository": "https://github.com/TIBCOSoftware/mashling",
-			"revision": "572a80645683719c8645f9fe0a08e2ca9ba57564",
+			"revision": "8cdbe03ba989100b5d30294d9f386ca62433a7b5",
 			"branch": "master",
 			"path": "/lib/util"
 		},
