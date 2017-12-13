@@ -23,6 +23,7 @@ type GbProject struct {
 	VendorDir      string
 	VendorSrcDir   string
 	CodeSourcePath string
+	DockerBuild    bool
 }
 
 func NewGbProjectEnv() Project {
@@ -134,6 +135,14 @@ func (e *GbProject) Open() error {
 	}
 
 	return nil
+}
+
+func (e *GbProject) SetDockerBuild() {
+	e.DockerBuild = true
+}
+
+func (e *GbProject) GetDockerBuild() bool {
+	return e.DockerBuild
 }
 
 func (e *GbProject) GetBinDir() string {

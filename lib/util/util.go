@@ -71,7 +71,7 @@ func IsValidTriggerHandlerSetting(metadata *ftrigger.Metadata, property string) 
 	settings := metadata.Handler.Settings
 
 	for _, element := range settings {
-		if element.Name == property {
+		if element.Name() == property {
 			return true
 		}
 	}
