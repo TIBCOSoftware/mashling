@@ -57,13 +57,13 @@
                   "inputMappings": [
                     {
                       "type": 1,
-                      "value": "${flow.endPoint}",
+                      "value": "$flow.endPoint",
                       "mapTo": "uri"
                     },
                     {
-                      "type": 1,
-                      "value": "${flow.id}",
-                      "mapTo": "pathParams.id"
+                      "type": 4,
+                      "value": {"id":"{{$flow.id}}"},
+                      "mapTo": "pathParams"
                     }
                   ]
                 },
