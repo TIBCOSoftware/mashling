@@ -85,7 +85,7 @@ func assetsBannerTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/banner.txt", size: 2481, mode: os.FileMode(438), modTime: time.Unix(1513139893, 0)}
+	info := bindataFileInfo{name: "assets/banner.txt", size: 2481, mode: os.FileMode(438), modTime: time.Unix(1513272851, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -105,7 +105,7 @@ func assetsDefault_manifest() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default_manifest", size: 13022, mode: os.FileMode(438), modTime: time.Unix(1513156458, 0)}
+	info := bindataFileInfo{name: "assets/default_manifest", size: 13022, mode: os.FileMode(438), modTime: time.Unix(1513274470, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -125,7 +125,7 @@ func schemaMashling_schema02Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "schema/mashling_schema-0.2.json", size: 6300, mode: os.FileMode(438), modTime: time.Unix(1513139893, 0)}
+	info := bindataFileInfo{name: "schema/mashling_schema-0.2.json", size: 6300, mode: os.FileMode(438), modTime: time.Unix(1513272851, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

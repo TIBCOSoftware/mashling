@@ -9,8 +9,9 @@ MASHLINGLOCALGITREV=`git rev-parse HEAD`
 MASHLINGMASTERGITREV=`git rev-parse ${GITBRANCH}`
 FLOGOGITREV=`git --git-dir=../flogo-lib/.git rev-parse HEAD`
 GITINFO:=$(shell cat .git/HEAD | tail -l | tr -d '[:space:]')
+GITTAGNAME:=$(shell git tag --points-at HEAD)
 
-LDFLAGS= -ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.MashlingMasterGitRev=${MASHLINGMASTERGITREV} -X github.com/TIBCOSoftware/mashling/cli/app.FlogoGitRev=${FLOGOGITREV} -X github.com/TIBCOSoftware/mashling/cli/app.MashlingLocalGitRev=${MASHLINGLOCALGITREV}  -X github.com/TIBCOSoftware/mashling/cli/app.GitBranch=${GITBRANCH} -X github.com/TIBCOSoftware/mashling/cli/app.GITInfo=${GITINFO}"
+LDFLAGS= -ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.MashlingMasterGitRev=${MASHLINGMASTERGITREV} -X github.com/TIBCOSoftware/mashling/cli/app.FlogoGitRev=${FLOGOGITREV} -X github.com/TIBCOSoftware/mashling/cli/app.MashlingLocalGitRev=${MASHLINGLOCALGITREV}  -X github.com/TIBCOSoftware/mashling/cli/app.GitBranch=${GITBRANCH} -X github.com/TIBCOSoftware/mashling/cli/app.GITInfo=${GITINFO} -X github.com/TIBCOSoftware/mashling/cli/app.GitTagName=${GITTAGNAME}"
 
 
 .PHONY: all

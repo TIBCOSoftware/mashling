@@ -42,8 +42,11 @@ var SchemaVersion = GetAllSupportedSchemas()
 //GitBranch is git repository checked in
 var GitBranch = notset
 
-//GitBranch is git repository checked in
+//GITInfo is git repository information
 var GITInfo = notset
+
+//GitTagName is git repo tag name
+var GitTagName = notset
 
 //DisplayLocalChanges is to check local changes exist flag
 var DisplayLocalChanges = false
@@ -108,7 +111,11 @@ func (c *cmdVersion) Exec(args []string) error {
 		if len(c.gitBranch) != 0 {
 			fmt.Printf(" git branch %s \n", c.gitBranch)
 		} else if DetachedMode {
-			fmt.Println(" git is in detached state")
+			if strings.Compare(GitTagName, notset) != 0 && len(GitTagName) != 0 {
+				fmt.Printf(" git checked at tag  %s \n", GitTagName)
+			} else {
+				fmt.Println(" git is in detached state")
+			}
 		} else {
 			fmt.Printf(" git local branch %s \n", BranchName)
 		}
