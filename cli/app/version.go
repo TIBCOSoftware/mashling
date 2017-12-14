@@ -21,31 +21,50 @@ var optVersion = &cli.OptionInfo{
 	Long:      "Displays the version of mashling",
 }
 
+const notset = "not set"
+const refs = "ref:refs/heads/"
+
 //Version is Mashling Version
 var Version = "0.3.0"
 
 //MashlingMasterGitRev is mashling git tag
-var MashlingMasterGitRev = "not set"
+var MashlingMasterGitRev = notset
 
 //MashlingLocalGitRev is mashling git tag
-var MashlingLocalGitRev = "not set"
+var MashlingLocalGitRev = notset
 
 //FlogoGitRev is flogo-lib git tag
-var FlogoGitRev = "not set"
+var FlogoGitRev = notset
 
 //SchemaVersion is mashling schema version
 var SchemaVersion = GetAllSupportedSchemas()
 
 //GitBranch is git repository checked in
-var GitBranch = "not set"
+var GitBranch = notset
+
+//GitBranch is git repository checked in
+var GITInfo = notset
 
 //DisplayLocalChanges is to check local changes exist flag
 var DisplayLocalChanges = false
+
+//DetachedMode is to check git repo in detached or not
+var DetachedMode = false
+
+//BranchName to store branch name
+var BranchName = ""
 
 func init() {
 	CommandRegistry.RegisterCommand(&cmdVersion{option: optVersion})
 	if strings.Compare(MashlingMasterGitRev, MashlingLocalGitRev) != 0 {
 		DisplayLocalChanges = true
+	}
+	if strings.Compare(GITInfo, notset) != 0 {
+		if strings.Contains(GITInfo, refs) {
+			BranchName = GITInfo[len(refs):len(GITInfo)]
+		} else if len(GITInfo) == 40 {
+			DetachedMode = true
+		}
 	}
 }
 
@@ -85,8 +104,19 @@ func (c *cmdVersion) Exec(args []string) error {
 
 		fmt.Printf(" mashling CLI version %s\n", c.versionNumber)
 		fmt.Printf(" supported schema version %s\n", c.schemaVersion)
-		fmt.Printf(" git branch %s \n", c.gitBranch)
-		fmt.Printf(" mashling CLI revision %s\n", c.mashlingMasterGitRev)
+
+		if len(c.gitBranch) != 0 {
+			fmt.Printf(" git branch %s \n", c.gitBranch)
+		} else if DetachedMode {
+			fmt.Println(" git is in detached state")
+		} else {
+			fmt.Printf(" git local branch %s \n", BranchName)
+		}
+
+		if len(c.mashlingMasterGitRev) != 0 {
+			fmt.Printf(" mashling CLI revision %s\n", c.mashlingMasterGitRev)
+		}
+
 		if DisplayLocalChanges {
 			fmt.Printf(" mashling local revision %s\n", c.mashlingLocalGitRev)
 		}
