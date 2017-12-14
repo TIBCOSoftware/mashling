@@ -36,49 +36,49 @@
 		{
 			"importpath": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
 			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
-			"revision": "97616f43240249bf52cd2b15162db8201b1de104",
+			"revision": "e9da7e9214905220017a5b76a48ad3b7db949044",
 			"branch": "master",
 			"path": "/action/flow"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
 			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
-			"revision": "97616f43240249bf52cd2b15162db8201b1de104",
+			"revision": "e9da7e9214905220017a5b76a48ad3b7db949044",
 			"branch": "master",
 			"path": "/activity/log"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
 			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
-			"revision": "97616f43240249bf52cd2b15162db8201b1de104",
+			"revision": "e9da7e9214905220017a5b76a48ad3b7db949044",
 			"branch": "master",
 			"path": "/activity/reply"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
 			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
-			"revision": "97616f43240249bf52cd2b15162db8201b1de104",
+			"revision": "e9da7e9214905220017a5b76a48ad3b7db949044",
 			"branch": "master",
 			"path": "/activity/rest"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/flogo-contrib/model/simple",
 			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
-			"revision": "97616f43240249bf52cd2b15162db8201b1de104",
+			"revision": "e9da7e9214905220017a5b76a48ad3b7db949044",
 			"branch": "master",
 			"path": "/model/simple"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors",
 			"repository": "https://github.com/TIBCOSoftware/flogo-contrib",
-			"revision": "97616f43240249bf52cd2b15162db8201b1de104",
+			"revision": "e9da7e9214905220017a5b76a48ad3b7db949044",
 			"branch": "master",
 			"path": "/trigger/rest/cors"
 		},
 		{
 			"importpath": "github.com/TIBCOSoftware/flogo-lib",
 			"repository": "https://github.com/TIBCOSoftware/flogo-lib",
-			"revision": "ce3e309b0456f61b352f46c466c82413b5074eef",
+			"revision": "84f1352eb45dadeb2ed2558ff85114022b280be4",
 			"branch": "master"
 		},
 		{

@@ -248,11 +248,21 @@ func CreateFlogoFlowAction(handler types.EventHandler) (*faction.Config, error) 
 
 		action := actions[0]
 		action.Id = handler.Name
+
 		gatewayAction = faction.Config{
 			Id:       handler.Name,
 			Data:     action.Data,
 			Ref:      action.Ref,
 			Metadata: action.Metadata,
+		}
+
+		if gatewayAction.Metadata != nil {
+			if len(gatewayAction.Metadata.Output) == 0 {
+				gatewayAction.Metadata.Output = nil
+			}
+			if len(gatewayAction.Metadata.Input) == 0 {
+				gatewayAction.Metadata.Input = nil
+			}
 		}
 
 	} else if handler.Definition != nil {
