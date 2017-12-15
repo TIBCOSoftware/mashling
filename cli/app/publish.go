@@ -38,18 +38,23 @@ provided with a -creds switch; if it's not provided, mashling will look for
 <HOME>/.mashery.conf. 
 
 The file should contain:
-ApiKey=xxxyyyzzz
-ApiSecret=aaabbbccc
-Username=someuser
-Password=somepassword
-AreaDomain=somedomain.example.com
-AreaId=xxxyyyzzz
-PublicHost=somewhere.example.com
-IoDocs=false
-TestPlan=false
+	ApiKey=xxxyyyzzz
+	ApiSecret=aaabbbccc
+	Username=someuser
+	Password=somepassword
+	AreaDomain=somedomain.example.com
+	AreaId=xxxyyyzzz
+	PublicHost=somewhere.example.com
+	IoDocs=false
+	TestPlan=false
+
+AreaDomain: the public domain of the Mashery gateway
+AreaId:     the Mashery area id
+PublicHost: the publicly available hostname where this mashling will be deployed
 
 Options:
     -configFile  specify the mashling json
+    -creds       path to Mashery configuration file if the dot file is not used
     -mock        true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
     -apitemplate json file that contains defaults for api/endpoint settings in mashery
  `,
