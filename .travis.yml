@@ -10,7 +10,7 @@ branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - feature-gotestreport
+    - enhancement-gotestreport
     
 cache:
   bundler: false
