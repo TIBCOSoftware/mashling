@@ -111,7 +111,7 @@ func (c *cmdPublish) Exec(args []string) error {
 			return err
 		}
 
-		return IntegrateIntoConsul(gatewayJSON, c.consulAddress)
+		return IntegrateIntoConsul(gatewayJSON, c.consulAddress, c.registerFlag)
 
 	}
 
