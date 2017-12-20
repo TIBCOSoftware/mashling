@@ -8,7 +8,6 @@ package app
 import (
 	"encoding/json"
 	"io"
-	"net/http"
 	"strings"
 
 	"fmt"
@@ -1242,69 +1241,11 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 	return nil
 }
 
-//IntegrateIntoConsul integrates suplied gateway json into consul
-func IntegrateIntoConsul(gatewayJSON string, consulAddress string, addFlag bool) error {
-	//fmt.Printf("consulAddress [%s]\n", consulAddress)
-
+//PublishToConsul integrates suplied gateway json into consul
+func PublishToConsul(gatewayJSON string, consulAddress string, addFlag bool, consulToken string, consulDefDir string) error {
 	if !addFlag {
-		return DeregisterFromConsul(gatewayJSON, consulAddress)
-	}
-
-	content, err := generateRegisterPayload(gatewayJSON)
-
-	//fmt.Printf("content [%s]\n", content)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Unable to generate register payload \n\n")
-		return err
-	}
-
-	fullURI := consulAddress + "/v1/agent/service/register"
-
-	//fmt.Printf("fullURI [%s]\n", fullURI)
-
-	client := &http.Client{}
-	r, _ := http.NewRequest("PUT", fullURI, bytes.NewReader([]byte(content)))
-	r.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(r)
-	if err != nil {
-		return err
+		return DeregisterFromConsul(gatewayJSON, consulAddress, consulToken, consulDefDir)
 	} else {
-		defer resp.Body.Close()
+		return RegisterWithConsul(gatewayJSON, consulAddress, consulToken, consulDefDir)
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("consul integration failed : status code %v", resp.StatusCode)
-	}
-
-	return nil
-}
-
-//DeregisterFromConsul removes suplied gateway json from consul
-func DeregisterFromConsul(gatewayJSON string, consulAddress string) error {
-
-	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
-	if err != nil {
-		return err
-	}
-
-	fullURI := consulAddress + "/v1/agent/service/deregister/" + descriptor.Gateway.Name
-
-	client := &http.Client{}
-	r, _ := http.NewRequest("PUT", fullURI, bytes.NewReader([]byte("")))
-	r.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(r)
-	if err != nil {
-		return err
-	} else {
-		defer resp.Body.Close()
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("deregistration failed : status code %v", resp.StatusCode)
-	}
-
-	return nil
 }

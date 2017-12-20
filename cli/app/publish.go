@@ -57,11 +57,11 @@ type cmdPublish struct {
 	apiTemplate string
 
 	//consul variables
-	serviceDefDir  string
-	registerFlag   bool
-	deRegisterFlag bool
-	consulAddress  string
-	securityToken  string
+	consulToken      string
+	consulRegister   bool
+	consulDeRegister bool
+	consulAddress    string
+	consulDefDir     string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -84,25 +84,29 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.apiTemplate), "apitemplate", "", "api template file")
 	fs.StringVar(&(c.host), "h", "", "the publicly available hostname where this mashling will be deployed")
 
-	//consul variables or flags
-	fs.BoolVar(&(c.registerFlag), "a", false, "registers mashling services")
-	fs.BoolVar(&(c.deRegisterFlag), "r", false, "de-registers mashling services")
+	//consul variables
+	fs.BoolVar(&(c.consulRegister), "a", false, "registers mashling services")
+	fs.BoolVar(&(c.consulDeRegister), "r", false, "de-registers mashling services")
 	fs.StringVar(&(c.consulAddress), "consul", "", "host:port of consul agent")
-	fs.StringVar(&(c.securityToken), "st", "", "security token")
-	fs.StringVar(&(c.serviceDefDir), "d", "", "service definition folder")
+	fs.StringVar(&(c.consulToken), "t", "", "security token")
+	fs.StringVar(&(c.consulDefDir), "d", "", "service definition folder")
 }
 
 // Exec implementation of cli.Command.Exec
 func (c *cmdPublish) Exec(args []string) error {
 
-	if c.registerFlag || c.deRegisterFlag {
+	if c.consulAddress != "" {
 
-		if c.registerFlag && c.deRegisterFlag {
+		if !c.consulRegister && !c.consulDeRegister {
+			return errors.New("Error: use register or de-register flag")
+		}
+
+		if c.consulRegister && c.consulDeRegister {
 			return errors.New("Error: cannot use register and de-register together")
 		}
 
-		if (c.registerFlag || c.deRegisterFlag) && (c.fileName == "" || c.consulAddress == "") {
-			return errors.New("Error: arguments missing mashling gateway json(-f mashling.json) and consul address(-t host:port) is needed")
+		if c.fileName == "" || c.consulToken == "" {
+			return errors.New("Error: arguments missing mashling gateway json(-f mashling.json) and consul token(-t security token) is needed")
 		}
 
 		gatewayJSON, _, err := GetGatewayJSON(c.fileName)
@@ -111,7 +115,7 @@ func (c *cmdPublish) Exec(args []string) error {
 			return err
 		}
 
-		return IntegrateIntoConsul(gatewayJSON, c.consulAddress, c.registerFlag)
+		return PublishToConsul(gatewayJSON, c.consulAddress, c.consulRegister, c.consulToken, c.consulDefDir)
 
 	}
 
