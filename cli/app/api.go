@@ -8,6 +8,8 @@ package app
 import (
 	"encoding/json"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"fmt"
@@ -1237,6 +1239,49 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 
 	CreateMainGoFile(cmdPath, "")
 	CreateImportsGoFile(cmdPath, deps)
+
+	return nil
+}
+
+//IntegrateIntoConsul integrates suplied gateway json into consul
+func IntegrateIntoConsul(gatewayJSON string, consulAddress string) error {
+	fmt.Printf("consulAddress [%s]\n", consulAddress)
+
+	content, err := generateRegisterPayload(gatewayJSON)
+
+	fmt.Printf("content [%s]\n", content)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to generate register payload \n\n")
+		return err
+	}
+
+	fullURI := consulAddress + "/v1/agent/service/register"
+
+	fmt.Printf("fullURI [%s]\n", fullURI)
+
+	client := &http.Client{}
+	r, _ := http.NewRequest("PUT", fullURI, bytes.NewReader([]byte(content)))
+	r.Header.Add("Content-Type", "application/json")
+
+	resp, err := client.Do(r)
+	if err != nil {
+		return err
+	} else {
+		defer resp.Body.Close()
+	}
+
+	bodyText, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	s := string(bodyText)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("consul integration failed : status code %v", resp.StatusCode)
+	}
+
+	fmt.Printf("\nresult [%s]\n", s)
 
 	return nil
 }
