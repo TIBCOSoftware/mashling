@@ -33,7 +33,13 @@ Options:
     -iodocs      true to create iodocs,  (default is false)
     -testplan    true to create package, plan and test app/key,  (default is false)	
     -mock        true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
-    -apitemplate json file that contains defaults for api/endpoint settings in mashery
+	-apitemplate json file that contains defaults for api/endpoint settings in mashery
+	
+	-a			 registers mashling services with consul
+	-r			 de-registers mashling services with consul
+	-consul		 consul command info
+	-t			 security token
+	-d			 service definition folder
  `,
 }
 
@@ -60,7 +66,7 @@ type cmdPublish struct {
 	consulToken      string
 	consulRegister   bool
 	consulDeRegister bool
-	consulAddress    string
+	consulAddress    bool
 	consulDefDir     string
 }
 
@@ -87,7 +93,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	//consul variables
 	fs.BoolVar(&(c.consulRegister), "a", false, "registers mashling services")
 	fs.BoolVar(&(c.consulDeRegister), "r", false, "de-registers mashling services")
-	fs.StringVar(&(c.consulAddress), "consul", "", "host:port of consul agent")
+	fs.BoolVar(&(c.consulAddress), "consul", false, "consul command info")
 	fs.StringVar(&(c.consulToken), "t", "", "security token")
 	fs.StringVar(&(c.consulDefDir), "d", "", "service definition folder")
 }
@@ -95,7 +101,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 // Exec implementation of cli.Command.Exec
 func (c *cmdPublish) Exec(args []string) error {
 
-	if c.consulAddress != "" {
+	if c.consulAddress {
 
 		if !c.consulRegister && !c.consulDeRegister {
 			return errors.New("Error: use register or de-register flag")
@@ -115,7 +121,7 @@ func (c *cmdPublish) Exec(args []string) error {
 			return err
 		}
 
-		return PublishToConsul(gatewayJSON, c.consulAddress, c.consulRegister, c.consulToken, c.consulDefDir)
+		return PublishToConsul(gatewayJSON, c.consulRegister, c.consulToken, c.consulDefDir)
 
 	}
 

@@ -1242,10 +1242,11 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 }
 
 //PublishToConsul integrates suplied gateway json into consul
-func PublishToConsul(gatewayJSON string, consulAddress string, addFlag bool, consulToken string, consulDefDir string) error {
+func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consulDefDir string) error {
+
 	if !addFlag {
-		return DeregisterFromConsul(gatewayJSON, consulAddress, consulToken, consulDefDir)
+		return DeregisterFromConsul(gatewayJSON, consulToken, consulDefDir)
 	} else {
-		return RegisterWithConsul(gatewayJSON, consulAddress, consulToken, consulDefDir)
+		return RegisterWithConsul(gatewayJSON, consulToken, consulDefDir)
 	}
 }
