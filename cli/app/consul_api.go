@@ -24,114 +24,106 @@ const (
 	deRegisterURI = "http://localhost:8500/v1/agent/service/deregister/"
 )
 
-type trigrSettings struct {
-	Port string `json:"port"`
+type consulServiceDef struct {
+	Name    string `json:"Name"`
+	Port    string `json:"port"`
+	Address string `json:"address"`
 }
 
-type consulPayload struct {
-	Name string `json:"Name"`
-}
+func generateConsulDef(gatewayJSON string) ([]consulServiceDef, error) {
 
-func generateConsulDef(gatewayJSON string) ([]byte, error) {
-
-	var registerPayload []byte
-	triggers, _ := generateTriggers(gatewayJSON)
-
-	descriptor, err := ParseTriggers(triggers)
+	triggers, err := generateFlogoTriggers(gatewayJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	var port int
-	var name string
-	for _, trigger := range descriptor.Triggers {
+	var consulServices = make([]consulServiceDef, len(triggers))
+
+	for i, trigger := range triggers {
 
 		if trigger.Ref == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Ref == "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger" {
-			var tgrStngs trigrSettings
+			var consulDef consulServiceDef
 
 			settings, err := json.MarshalIndent(&trigger.Settings, "", "    ")
 			if err != nil {
 				return nil, err
 			}
 
-			err = json.Unmarshal(settings, &tgrStngs)
+			err = json.Unmarshal(settings, &consulDef)
 			if err != nil {
 				return nil, err
 			}
-			port, err = strconv.Atoi(tgrStngs.Port)
-			if err != nil {
-				return nil, err
-			}
-			name = trigger.Name
-			break
+			consulServices[i].Name = trigger.Name
+			consulServices[i].Port = consulDef.Port
+
 		}
 	}
 
-	content := map[string]interface{}{
-		"Name":    name,
-		"Address": "127.0.0.1",
-		"Port":    port,
-	}
-
-	registerPayload, err = json.MarshalIndent(&content, "", "    ")
-	if err != nil {
-		return nil, err
-	}
-	return registerPayload, nil
+	return consulServices, nil
 }
 
 //RegisterWithConsul registers suplied gateway json with consul
 func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir string) error {
 
-	consulPaylod, err := generateConsulDef(gatewayJSON)
+	consulServices, err := generateConsulDef(gatewayJSON)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to generate consul payload \n\n")
 		return err
 	}
 
-	statusCode, err := callConsulService(registerURI, []byte(consulPaylod))
+	for _, content := range consulServices {
 
-	if err != nil {
-		return err
+		port, _ := strconv.Atoi(content.Port)
+
+		contentMap := map[string]interface{}{
+			"Name":    content.Name,
+			"Address": "127.0.0.1",
+			"Port":    port,
+		}
+
+		contentPayload, err := json.MarshalIndent(&contentMap, "", "    ")
+		if err != nil {
+			return err
+		}
+
+		statusCode, err := callConsulService(registerURI, []byte(contentPayload))
+
+		if err != nil {
+			return err
+		}
+
+		if statusCode != http.StatusOK {
+			return fmt.Errorf("registration failed : status code %v", statusCode)
+		}
 	}
-
-	if statusCode != http.StatusOK {
-		return fmt.Errorf("registration failed : status code %v", statusCode)
-	}
-
 	return nil
 }
 
 //DeregisterFromConsul removes suplied gateway json from consul
 func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir string) error {
 
-	consulPaylod, err := generateConsulDef(gatewayJSON)
+	consulServices, err := generateConsulDef(gatewayJSON)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to generate consul payload \n\n")
 		return err
 	}
 
-	var cnslPaLd consulPayload
-	err = json.Unmarshal(consulPaylod, &cnslPaLd)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Unable to generate consul payload name\n\n")
-		return err
+	for _, content := range consulServices {
+
+		fullURI := deRegisterURI + content.Name
+
+		statusCode, err := callConsulService(fullURI, []byte(""))
+
+		if err != nil {
+			return err
+		}
+
+		if statusCode != http.StatusOK {
+			return fmt.Errorf("deregistration failed : status code %v", statusCode)
+		}
 	}
-
-	fullURI := deRegisterURI + cnslPaLd.Name
-
-	statusCode, err := callConsulService(fullURI, []byte(""))
-
-	if err != nil {
-		return err
-	}
-
-	if statusCode != http.StatusOK {
-		return fmt.Errorf("deregistration failed : status code %v", statusCode)
-	}
-
 	return nil
 }
 
@@ -150,11 +142,11 @@ func callConsulService(uri string, payload []byte) (int, error) {
 }
 
 //generateFlogoJson generates flogo json
-func generateTriggers(gatewayJSON string) (string, error) {
+func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	flogoAppTriggers := []*ftrigger.Config{}
@@ -188,7 +180,7 @@ func generateTriggers(gatewayJSON string) (string, error) {
 
 			flogoTrigger, isNew, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 
 			if *isNew {
@@ -218,20 +210,7 @@ func generateTriggers(gatewayJSON string) (string, error) {
 		}
 
 	}
-
-	flogoTrigger := app.Config{
-		Triggers: flogoAppTriggers,
-	}
-
-	//create flogo PP JSON
-	bytes, err := json.MarshalIndent(flogoTrigger, "", "\t")
-	if err != nil {
-		return "", nil
-	}
-
-	flogoTriggerJSON := string(bytes)
-
-	return flogoTriggerJSON, nil
+	return flogoAppTriggers, nil
 }
 
 // ParseTriggers parse the application descriptor
