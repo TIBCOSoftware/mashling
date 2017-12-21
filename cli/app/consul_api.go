@@ -13,7 +13,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/TIBCOSoftware/flogo-lib/app"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
@@ -211,17 +210,4 @@ func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 
 	}
 	return flogoAppTriggers, nil
-}
-
-// ParseTriggers parse the application descriptor
-func ParseTriggers(appJSON string) (*app.Config, error) {
-	descriptor := &app.Config{}
-
-	err := json.Unmarshal([]byte(appJSON), descriptor)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return descriptor, nil
 }
