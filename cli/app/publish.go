@@ -21,18 +21,18 @@ var optPublish = &cli.OptionInfo{
 	Long: `Publish http triggers to mashery.
 
 Options:
-    -f           specify the mashling json
-    -k           the api key (required)
-    -s           the api secret key (required)
-    -u           username (required)
-    -p           password (required)
-    -areaDomain  the public domain of the Mashery gateway (required)
-    -areaId      the Mashery area id  (required)
-    -h           the publicly available hostname where this mashling will be deployed (required)
-    -iodocs      true to create iodocs,  (default is false)
-    -testplan    true to create package, plan and test app/key,  (default is false)	
-    -mock        true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
-    -apitemplate json file that contains defaults for api/endpoint settings in mashery
+    -configFile      specify the mashling json
+    -apiKey          the api key (required)
+    -apiSecret       the api secret key (required)
+    -username        username (required)
+    -password        password (required)
+    -areaDomain      the public domain of the Mashery gateway (required)
+    -areaId          the Mashery area id  (required)
+    -publicHost      the publicly available hostname where this mashling will be deployed (required)
+    -iodocs          true to create iodocs,  (default is false)
+    -testplan        true to create package, plan and test app/key,  (default is false)
+    -mock            true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
+    -apitemplate     json file that contains defaults for api/endpoint settings in mashery
  `,
 }
 
@@ -63,18 +63,18 @@ func (c *cmdPublish) OptionInfo() *cli.OptionInfo {
 
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
-	fs.StringVar(&(c.apiKey), "k", "", "api key")
-	fs.StringVar(&(c.apiSecret), "s", "", "api secret")
-	fs.StringVar(&(c.username), "u", "", "username")
-	fs.StringVar(&(c.password), "p", "", "password")
+	fs.StringVar(&(c.apiKey), "apiKey", "", "api key")
+	fs.StringVar(&(c.apiSecret), "apiSecret", "", "api secret")
+	fs.StringVar(&(c.username), "username", "", "username")
+	fs.StringVar(&(c.password), "password", "", "password")
 	fs.StringVar(&(c.areaId), "areaId", "", "areaId")
 	fs.StringVar(&(c.areaDomain), "areaDomain", "", "areaDomain")
-	fs.StringVar(&(c.fileName), "f", "mashling.json", "gateway app file")
+	fs.StringVar(&(c.fileName), "configFile", "mashling.json", "gateway app file")
 	fs.StringVar(&(c.mock), "mock", "false", "mock")
 	fs.StringVar(&(c.iodocs), "iodocs", "false", "iodocs")
 	fs.StringVar(&(c.testplan), "testplan", "false", "testplan")
 	fs.StringVar(&(c.apiTemplate), "apitemplate", "", "api template file")
-	fs.StringVar(&(c.host), "h", "", "the publicly available hostname where this mashling will be deployed")
+	fs.StringVar(&(c.host), "publicHost", "", "the publicly available hostname where this mashling will be deployed")
 }
 
 // Exec implementation of cli.Command.Exec
