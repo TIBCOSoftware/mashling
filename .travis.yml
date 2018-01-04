@@ -21,6 +21,7 @@ git:
 # Do a github login using token
 before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
+  - pip install --user awscli
 install:
   - go get -u github.com/constabulary/gb/...
   - go get -u github.com/tools/godep/...
@@ -54,18 +55,14 @@ script:
     
 after_script:
   - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
+  - "[ -f \"${HOME}/.aws\" ] && rm -f ${HOME}/.aws"
 
 after_success:
   - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
   - source $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh
   - mashling::module::postbuild mashling mashling
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
-addons:
-  artifacts:
-    # ...
-    paths:
-    - $(git ls-files -o | tr "\n" ":")
-
+  
 notifications: 
   email: 
     on_failure: always
