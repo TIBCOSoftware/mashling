@@ -6,31 +6,55 @@
 package app
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
+	"github.com/go-ini/ini"
 	"os"
+	"os/user"
 	"strconv"
 )
+
+type masheryCredFileStruct struct {
+	ApiKey     string
+	ApiSecret  string
+	Username   string
+	Password   string
+	AreaDomain string
+	AreaId     string
+	PublicHost string
+	IoDocs     bool
+	TestPlan   bool
+}
+
+var masheryCredFile = ".mashery.conf"
 
 var optPublish = &cli.OptionInfo{
 	Name:      "publish",
 	UsageLine: "publish",
 	Short:     "Publish to mashery",
-	Long: `Publish http triggers to mashery.
+	Long: `Publish http triggers to mashery. The mashery creds file can be
+provided with a -creds switch; if it's not provided, mashling will look for 
+<HOME>/.mashery.conf. 
+
+The file should contain:
+	ApiKey=xxxyyyzzz
+	ApiSecret=aaabbbccc
+	Username=someuser
+	Password=somepassword
+	AreaDomain=somedomain.example.com
+	AreaId=xxxyyyzzz
+	PublicHost=somewhere.example.com
+	IoDocs=false
+	TestPlan=false
+
+AreaDomain: the public domain of the Mashery gateway
+AreaId:     the Mashery area id
+PublicHost: the publicly available hostname where this mashling will be deployed
 
 Options:
-    -f           specify the mashling json
-    -k           the api key (required)
-    -s           the api secret key (required)
-    -u           username (required)
-    -p           password (required)
-    -areaDomain  the public domain of the Mashery gateway (required)
-    -areaId      the Mashery area id  (required)
-    -h           the publicly available hostname where this mashling will be deployed (required)
-    -iodocs      true to create iodocs,  (default is false)
-    -testplan    true to create package, plan and test app/key,  (default is false)	
+    -configFile  specify the mashling json
+    -creds       path to Mashery configuration file if the dot file is not used
     -mock        true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
     -apitemplate json file that contains defaults for api/endpoint settings in mashery
  `,
@@ -41,19 +65,11 @@ func init() {
 }
 
 type cmdPublish struct {
-	option      *cli.OptionInfo
-	fileName    string
-	apiKey      string
-	apiSecret   string
-	username    string
-	password    string
-	areaId      string
-	areaDomain  string
-	mock        string
-	host        string
-	iodocs      string
-	testplan    string
-	apiTemplate string
+	option           *cli.OptionInfo
+	fileName         string
+	masheryCredsFile string
+	mock             string
+	apiTemplate      string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -63,30 +79,37 @@ func (c *cmdPublish) OptionInfo() *cli.OptionInfo {
 
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
-	fs.StringVar(&(c.apiKey), "k", "", "api key")
-	fs.StringVar(&(c.apiSecret), "s", "", "api secret")
-	fs.StringVar(&(c.username), "u", "", "username")
-	fs.StringVar(&(c.password), "p", "", "password")
-	fs.StringVar(&(c.areaId), "areaId", "", "areaId")
-	fs.StringVar(&(c.areaDomain), "areaDomain", "", "areaDomain")
-	fs.StringVar(&(c.fileName), "f", "mashling.json", "gateway app file")
+	fs.StringVar(&(c.fileName), "configFile", "mashling.json", "gateway app file")
+	fs.StringVar(&(c.masheryCredsFile), "creds", "", "mashery creds file")
 	fs.StringVar(&(c.mock), "mock", "false", "mock")
-	fs.StringVar(&(c.iodocs), "iodocs", "false", "iodocs")
-	fs.StringVar(&(c.testplan), "testplan", "false", "testplan")
 	fs.StringVar(&(c.apiTemplate), "apitemplate", "", "api template file")
-	fs.StringVar(&(c.host), "h", "", "the publicly available hostname where this mashling will be deployed")
+}
+
+// parseConfigFile parse file with mashery configuration
+func parseConfigFile(file string) (*ini.File, error) {
+	cfg, err := ini.InsensitiveLoad(file)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		panic("Not able load mashery configuration file " + file)
+	}
+
+	return cfg, err
 }
 
 // Exec implementation of cli.Command.Exec
 func (c *cmdPublish) Exec(args []string) error {
-	if c.apiKey == "" || c.apiSecret == "" || c.username == "" || c.password == "" ||
-		c.areaId == "" || c.areaDomain == "" {
-		return errors.New("Error: api key, api secret, username, password, areaId and areaDomain are required")
+	currentUser, _ := user.Current()
+
+	var cfg *ini.File
+	var err error
+	if c.masheryCredsFile == "" {
+		cfg, err = parseConfigFile(currentUser.HomeDir + "/" + masheryCredFile)
+	} else {
+		cfg, err = parseConfigFile(c.masheryCredsFile)
 	}
 
-	if c.host == "" {
-		return errors.New("Error: host is required")
-	}
+	mashery := new(masheryCredFileStruct)
+	err = cfg.MapTo(mashery)
 
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -96,7 +119,7 @@ func (c *cmdPublish) Exec(args []string) error {
 
 	gatewayJSON, _, err := GetGatewayJSON(c.fileName)
 
-	user := ApiUser{c.username, c.password, c.apiKey, c.apiSecret, c.areaId, c.areaDomain, false}
+	user := ApiUser{mashery.Username, mashery.Password, mashery.ApiKey, mashery.ApiSecret, mashery.AreaId, mashery.AreaDomain, false}
 
 	var apiTemplateJSON string
 	if c.apiTemplate != "" {
@@ -107,13 +130,6 @@ func (c *cmdPublish) Exec(args []string) error {
 	if err != nil {
 		panic("Invalid option for -mock")
 	}
-	d, err := strconv.ParseBool(c.iodocs)
-	if err != nil {
-		panic("Invalid option for -iodocs")
-	}
-	e, err := strconv.ParseBool(c.testplan)
-	if err != nil {
-		panic("Invalid option for -testplan")
-	}
-	return PublishToMashery(&user, currentDir, gatewayJSON, c.host, b, d, e, apiTemplateJSON)
+
+	return PublishToMashery(&user, currentDir, gatewayJSON, mashery.PublicHost, b, mashery.IoDocs, mashery.TestPlan, apiTemplateJSON)
 }
