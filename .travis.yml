@@ -61,7 +61,6 @@ after_success:
   - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
   - source $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh
   - mashling::module::postbuild mashling mashling
-  - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
   
 notifications: 
   email: 
