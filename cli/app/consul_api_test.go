@@ -85,6 +85,12 @@ func TestGenerateConsulDef(t *testing.T) {
 		t.Error("Consul definition array is empty")
 	}
 
+	for _, content := range testArr {
+		if len(content.Name) == 0 || len(content.Port) == 0 {
+			t.Error("Values parsing error")
+		}
+	}
+
 }
 
 func TestGenerateFlogoTriggers(t *testing.T) {
@@ -97,5 +103,11 @@ func TestGenerateFlogoTriggers(t *testing.T) {
 
 	if len(testTriggers) == 0 {
 		t.Error("Triggers array is empty")
+	}
+
+	for _, content := range testTriggers {
+		if len(content.Name) == 0 || len(content.Settings) == 0 {
+			t.Error("Values parsing error in triggers")
+		}
 	}
 }
