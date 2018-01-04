@@ -186,10 +186,12 @@ func (c *cmdCreate) Exec(args []string) error {
 		mashlingCliOutput := fmt.Sprintf("\n\tmashlingTxt :=  \"\\n[mashling] mashling CLI version %s\"", Version)
 		extraSrc.WriteString(string(mashlingCliOutput))
 
-		mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling CLI revision %s\"", MashlingMasterGitRev)
-		extraSrc.WriteString(string(mashlingCliOutput))
+		if len(MashlingMasterGitRev) != 0 {
+			mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling CLI revision %s\"", MashlingMasterGitRev)
+			extraSrc.WriteString(string(mashlingCliOutput))
+		}
 
-		if DisplayLocalChanges {
+		if DisplayLocalChanges && len(MashlingLocalGitRev) != 0 {
 			mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling local revision %s\"", MashlingLocalGitRev)
 			extraSrc.WriteString(string(mashlingCliOutput))
 		}
