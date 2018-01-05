@@ -78,10 +78,17 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 
 		port, _ := strconv.Atoi(content.Port)
 
+		checkMap := map[string]interface{}{
+			"tcp":      localIP + ":" + content.Port,
+			"interval": "10s",
+			"timeout":  "1s",
+		}
+
 		contentMap := map[string]interface{}{
 			"Name":    content.Name,
 			"Address": localIP,
 			"Port":    port,
+			"check":   checkMap,
 		}
 
 		contentPayload, err := json.MarshalIndent(&contentMap, "", "    ")
