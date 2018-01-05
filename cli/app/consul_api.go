@@ -96,6 +96,9 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 			return fmt.Errorf("registration failed : status code %v", statusCode)
 		}
 	}
+	fmt.Println("=====================================")
+	fmt.Println("Successfully registered with consul")
+	fmt.Println("=====================================")
 	return nil
 }
 
@@ -123,6 +126,9 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 			return fmt.Errorf("deregistration failed : status code %v", statusCode)
 		}
 	}
+	fmt.Println("=====================================")
+	fmt.Println("Successfully de-registered with consul")
+	fmt.Println("=====================================")
 	return nil
 }
 
