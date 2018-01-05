@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	registerURI   = "http://localhost:8500/v1/agent/service/register"
-	deRegisterURI = "http://localhost:8500/v1/agent/service/deregister/"
+	registerURI   = "/v1/agent/service/register"
+	deRegisterURI = "/v1/agent/service/deregister/"
 )
 
 type consulServiceDef struct {
@@ -62,7 +62,7 @@ func generateConsulDef(gatewayJSON string) ([]consulServiceDef, error) {
 }
 
 //RegisterWithConsul registers suplied gateway json with consul
-func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir string) error {
+func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir string, consulAddress string) error {
 
 	consulServices, err := generateConsulDef(gatewayJSON)
 
@@ -71,13 +71,16 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 		return err
 	}
 
+	var localIP = getLocalIP()
+	//fmt.Printf("localIP :%s\n", localIP)
+
 	for _, content := range consulServices {
 
 		port, _ := strconv.Atoi(content.Port)
 
 		contentMap := map[string]interface{}{
 			"Name":    content.Name,
-			"Address": "127.0.0.1",
+			"Address": localIP,
 			"Port":    port,
 		}
 
@@ -86,7 +89,9 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 			return err
 		}
 
-		statusCode, err := callConsulService(registerURI, []byte(contentPayload))
+		fullURI := "http://" + consulAddress + registerURI
+
+		statusCode, err := callConsulService(fullURI, []byte(contentPayload))
 
 		if err != nil {
 			return err
@@ -96,14 +101,14 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 			return fmt.Errorf("registration failed : status code %v", statusCode)
 		}
 	}
-	fmt.Println("=====================================")
+	fmt.Println("===================================")
 	fmt.Println("Successfully registered with consul")
-	fmt.Println("=====================================")
+	fmt.Println("===================================")
 	return nil
 }
 
 //DeregisterFromConsul removes suplied gateway json from consul
-func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir string) error {
+func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir string, consulAddress string) error {
 
 	consulServices, err := generateConsulDef(gatewayJSON)
 
@@ -114,7 +119,7 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 
 	for _, content := range consulServices {
 
-		fullURI := deRegisterURI + content.Name
+		fullURI := "http://" + consulAddress + deRegisterURI + content.Name
 
 		statusCode, err := callConsulService(fullURI, []byte(""))
 
@@ -126,9 +131,9 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 			return fmt.Errorf("deregistration failed : status code %v", statusCode)
 		}
 	}
-	fmt.Println("=====================================")
+	fmt.Println("======================================")
 	fmt.Println("Successfully de-registered with consul")
-	fmt.Println("=====================================")
+	fmt.Println("======================================")
 	return nil
 }
 

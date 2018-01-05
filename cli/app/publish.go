@@ -66,7 +66,7 @@ type cmdPublish struct {
 	consulToken      string
 	consulRegister   bool
 	consulDeRegister bool
-	consulAddress    bool
+	consulFlag       bool
 	consulDefDir     string
 }
 
@@ -93,7 +93,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	//consul variables
 	fs.BoolVar(&(c.consulRegister), "a", false, "registers mashling services")
 	fs.BoolVar(&(c.consulDeRegister), "r", false, "de-registers mashling services")
-	fs.BoolVar(&(c.consulAddress), "consul", false, "consul command info")
+	fs.BoolVar(&(c.consulFlag), "consul", false, "consul command info")
 	fs.StringVar(&(c.consulToken), "t", "", "security token")
 	fs.StringVar(&(c.consulDefDir), "d", "", "service definition folder")
 }
@@ -101,7 +101,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 // Exec implementation of cli.Command.Exec
 func (c *cmdPublish) Exec(args []string) error {
 
-	if c.consulAddress {
+	if c.consulFlag {
 
 		if !c.consulRegister && !c.consulDeRegister {
 			return errors.New("Error: use register or de-register flag")
@@ -111,8 +111,8 @@ func (c *cmdPublish) Exec(args []string) error {
 			return errors.New("Error: cannot use register and de-register together")
 		}
 
-		if c.fileName == "" || c.consulToken == "" {
-			return errors.New("Error: arguments missing mashling gateway json(-f mashling.json) and consul token(-t security token) is needed")
+		if c.fileName == "" || c.consulToken == "" || c.host == "" {
+			return errors.New("Error: arguments missing mashling gateway json(-f mashling.json), consul agent address(-h ip:port) and consul token(-t security token) is needed")
 		}
 
 		gatewayJSON, _, err := GetGatewayJSON(c.fileName)
@@ -121,7 +121,7 @@ func (c *cmdPublish) Exec(args []string) error {
 			return err
 		}
 
-		return PublishToConsul(gatewayJSON, c.consulRegister, c.consulToken, c.consulDefDir)
+		return PublishToConsul(gatewayJSON, c.consulRegister, c.consulToken, c.consulDefDir, c.host)
 
 	}
 
