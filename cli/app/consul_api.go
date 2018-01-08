@@ -29,6 +29,9 @@ type consulServiceDef struct {
 	Address string `json:"address"`
 }
 
+/***
+generateConsulDef generates usefull information like gateway name and port from supplied gateway.json
+***/
 func generateConsulDef(gatewayJSON string) ([]consulServiceDef, error) {
 
 	triggers, err := generateFlogoTriggers(gatewayJSON)
@@ -144,6 +147,9 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 	return nil
 }
 
+/**
+callConsulService used to call consul agent for registering gateway service and de-registering it
+**/
 func callConsulService(uri string, payload []byte, consulToken string) (int, error) {
 
 	client := &http.Client{}
@@ -159,7 +165,7 @@ func callConsulService(uri string, payload []byte, consulToken string) (int, err
 	return resp.StatusCode, err
 }
 
-//generateFlogoJson generates flogo json
+//generateFlogoTriggers generates array of triggers from supplied gatewayjson
 func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
