@@ -98,7 +98,7 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 
 		fullURI := "http://" + consulAddress + registerURI
 
-		statusCode, err := callConsulService(fullURI, []byte(contentPayload))
+		statusCode, err := callConsulService(fullURI, []byte(contentPayload), consulToken)
 
 		if err != nil {
 			return err
@@ -128,7 +128,7 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 
 		fullURI := "http://" + consulAddress + deRegisterURI + content.Name
 
-		statusCode, err := callConsulService(fullURI, []byte(""))
+		statusCode, err := callConsulService(fullURI, []byte(""), consulToken)
 
 		if err != nil {
 			return err
@@ -144,11 +144,12 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 	return nil
 }
 
-func callConsulService(uri string, payload []byte) (int, error) {
+func callConsulService(uri string, payload []byte, consulToken string) (int, error) {
 
 	client := &http.Client{}
 	r, _ := http.NewRequest("PUT", uri, bytes.NewReader([]byte(payload)))
 	r.Header.Add("Content-Type", "application/json")
+	r.Header.Add("X-Consul-Token", consulToken)
 
 	resp, err := client.Do(r)
 	if err != nil {
