@@ -11,11 +11,14 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
+	"runtime"
 	"strconv"
 
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 const (
@@ -75,7 +78,6 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 	}
 
 	var localIP = getLocalIP()
-	//fmt.Printf("localIP :%s\n", localIP)
 
 	for _, content := range consulServices {
 
@@ -83,7 +85,7 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 
 		checkMap := map[string]interface{}{
 			"tcp":      localIP + ":" + content.Port,
-			"interval": "10s",
+			"interval": "30s",
 			"timeout":  "1s",
 		}
 
@@ -101,14 +103,44 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 
 		fullURI := "http://" + consulAddress + registerURI
 
-		statusCode, err := callConsulService(fullURI, []byte(contentPayload), consulToken)
+		if len(consulDefDir) != 0 {
+			//to do write content payload to given directory
+			file, err := os.Create(consulDefDir + content.Name + ".json")
+			defer file.Close()
 
-		if err != nil {
-			return err
-		}
+			if err != nil {
+				return err
+			}
 
-		if statusCode != http.StatusOK {
-			return fmt.Errorf("registration failed : status code %v", statusCode)
+			serviceMap := map[string]interface{}{
+				"service": contentMap,
+			}
+
+			serviceContentPayload, err := json.MarshalIndent(&serviceMap, "", "    ")
+			if err != nil {
+				return err
+			}
+			_, dataErr := file.Write(serviceContentPayload)
+			if dataErr != nil {
+				return dataErr
+			}
+
+			err = reloadConsul()
+			if err != nil {
+				return err
+			}
+
+		} else {
+
+			statusCode, err := callConsulService(fullURI, []byte(contentPayload), consulToken)
+
+			if err != nil {
+				return err
+			}
+
+			if statusCode != http.StatusOK {
+				return fmt.Errorf("registration failed : status code %v", statusCode)
+			}
 		}
 	}
 	fmt.Println("===================================")
@@ -131,14 +163,28 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 
 		fullURI := "http://" + consulAddress + deRegisterURI + content.Name
 
-		statusCode, err := callConsulService(fullURI, []byte(""), consulToken)
+		if len(consulDefDir) != 0 {
 
-		if err != nil {
-			return err
-		}
+			err := os.Remove(consulDefDir + content.Name + ".json")
+			if err != nil {
+				return err
+			}
 
-		if statusCode != http.StatusOK {
-			return fmt.Errorf("deregistration failed : status code %v", statusCode)
+			err = reloadConsul()
+			if err != nil {
+				return err
+			}
+
+		} else {
+			statusCode, err := callConsulService(fullURI, []byte(""), consulToken)
+
+			if err != nil {
+				return err
+			}
+
+			if statusCode != http.StatusOK {
+				return fmt.Errorf("deregistration failed : status code %v", statusCode)
+			}
 		}
 	}
 	fmt.Println("======================================")
@@ -202,26 +248,12 @@ func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 		for _, triggerName := range triggerNames {
 			dispatches := link.Dispatches
 
-			flogoTrigger, isNew, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
+			flogoTrigger, err := createFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
 			if err != nil {
 				return nil, err
 			}
 
-			if *isNew {
-				//looks like a new trigger has been added
-				flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
-			} else {
-				//looks like an existing trigger with matching settings is found and modified with a new handler
-				for index, v := range flogoAppTriggers {
-					if v.Name == flogoTrigger.Name {
-						// Found the old trigger entry in the list!
-						//remove it..
-						flogoAppTriggers = append(flogoAppTriggers[:index], flogoAppTriggers[index+1:]...)
-						//...and add the modified trigger to the list
-						flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
-					}
-				}
-			}
+			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
 
 			//create unique handler actions
 			for _, dispatch := range dispatches {
@@ -235,4 +267,107 @@ func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 
 	}
 	return flogoAppTriggers, nil
+}
+
+func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, namedHandlerMap map[string]types.EventHandler,
+	dispatches []types.Dispatch, createdTriggersMap map[string]*ftrigger.Config) (*ftrigger.Config, error) {
+
+	var flogoTrigger ftrigger.Config
+	flogoTrigger.Name = trigger.Name
+	flogoTrigger.Id = trigger.Name
+	flogoTrigger.Ref = trigger.Type
+	var mtSettings interface{}
+	if err := json.Unmarshal([]byte(trigger.Settings), &mtSettings); err != nil {
+		return nil, err
+	}
+
+	//resolve any configuration references if the "config" param is set in the settings
+	mashTriggerSettings := mtSettings.(map[string]interface{})
+	mashTriggerSettingsUsable := mtSettings.(map[string]interface{})
+	for k, v := range mashTriggerSettings {
+		mashTriggerSettingsUsable[k] = v
+	}
+
+	if configDefinitions != nil && len(configDefinitions) > 0 {
+		//inherit the configuration settings if the trigger uses configuration reference
+		err := resolveConfigurationReference(configDefinitions, trigger, mashTriggerSettingsUsable)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	//check if the trigger has valid settings required
+	//1. get the trigger resource from github
+	triggerMD, err := util.GetTriggerMetadata(trigger.Type)
+	if err != nil {
+		return nil, err
+	}
+	//2. check if the trigger metadata contains the settings
+	triggerSettings := make(map[string]interface{})
+
+	for key, value := range mashTriggerSettingsUsable {
+		if util.IsValidTriggerSetting(triggerMD, key) {
+			triggerSettings[key] = value
+		}
+	}
+
+	flogoTrigger.Settings = triggerSettings
+
+	return &flogoTrigger, nil
+}
+
+func resolveConfigurationReference(configDefinitions map[string]types.Config, trigger types.Trigger, settings map[string]interface{}) error {
+	if configRef, ok := settings[util.Gateway_Trigger_Config_Ref_Key]; ok {
+		//get the configuration details
+		//the expression would be e.g. ${configurations.kafkaConfig}
+		configExpr := configRef.(string)
+		valid, configName := util.ValidateTriggerConfigExpr(&configExpr)
+		if !valid {
+			return fmt.Errorf("Invalid Configuration reference specified in the Trigger settings [%v]", configName)
+		}
+		//lets get the config object details
+		configNameStr := *configName
+
+		if configObject, ok := configDefinitions[configNameStr]; ok {
+			if configObject.Type != trigger.Type {
+				return fmt.Errorf("Mismatch in the Configuration reference [%v] and the Trigger type [%v]", configObject.Type, trigger.Type)
+			}
+
+			var configObjSettings interface{}
+			if err := json.Unmarshal([]byte(configObject.Settings), &configObjSettings); err != nil {
+				return err
+			}
+			configSettingsMap := configObjSettings.(map[string]interface{})
+			//delete the "config" key from the the Usable trigger settings map
+			delete(settings, util.Gateway_Trigger_Config_Ref_Key)
+			//copy from the config settings into the usable trigger settings map, if the key does NOT exist in the trigger already.
+			//this is to ensure that the individual trigger can override a property defined in a "common" configuration
+			for k, v := range configSettingsMap {
+				if _, ok := settings[k]; !ok {
+					settings[k] = v
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func reloadConsul() error {
+
+	var err error
+
+	if runtime.GOOS == "windows" {
+		command := exec.Command("cmd", "/c", "consul reload")
+		err = command.Run()
+	} else {
+		command := exec.Command("sh", "-c", "consul reload")
+		err = command.Run()
+	}
+
+	if err != nil {
+		fmt.Printf("\ncommand error output %s \n", err)
+		return err
+	}
+
+	return nil
 }

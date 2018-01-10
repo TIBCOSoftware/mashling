@@ -17,11 +17,12 @@ import (
 
 var optPublish = &cli.OptionInfo{
 	Name:      "publish",
-	UsageLine: "publish",
-	Short:     "Publish to mashery",
-	Long: `Publish http triggers to mashery.
+	UsageLine: "publish -consul or -mashery",
+	Short:     "Publish to mashery or consul",
+	Long: `Publish http triggers to mashery or consul.
 
 Options:
+	-mashery	 Mashery publish command info
     -f           specify the mashling json
     -k           the api key (required)
     -s           the api secret key (required)
@@ -61,6 +62,7 @@ type cmdPublish struct {
 	iodocs      string
 	testplan    string
 	apiTemplate string
+	masheryFlag bool
 
 	//consul variables
 	consulToken      string
@@ -89,6 +91,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.testplan), "testplan", "false", "testplan")
 	fs.StringVar(&(c.apiTemplate), "apitemplate", "", "api template file")
 	fs.StringVar(&(c.host), "h", "", "the publicly available hostname where this mashling will be deployed")
+	fs.BoolVar(&(c.masheryFlag), "mashery", false, "Mashery command flag info")
 
 	//consul variables
 	fs.BoolVar(&(c.consulRegister), "a", false, "registers mashling services")
@@ -162,4 +165,5 @@ func (c *cmdPublish) Exec(args []string) error {
 		panic("Invalid option for -testplan")
 	}
 	return PublishToMashery(&user, currentDir, gatewayJSON, c.host, b, d, e, apiTemplateJSON)
+
 }
