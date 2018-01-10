@@ -129,7 +129,7 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 				return dataErr
 			}
 
-			err = reloadConsul()
+			err = reloadConsul(consulToken)
 			if err != nil {
 				return err
 			}
@@ -179,7 +179,7 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 				return err
 			}
 
-			err = reloadConsul()
+			err = reloadConsul(consulToken)
 			if err != nil {
 				return err
 			}
@@ -241,13 +241,6 @@ func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 		triggerNamedMap[trigger.Name] = trigger
 	}
 
-	handlerNamedMap := make(map[string]types.EventHandler)
-	for _, evtHandler := range descriptor.Gateway.EventHandlers {
-		handlerNamedMap[evtHandler.Name] = evtHandler
-	}
-
-	createdHandlers := make(map[string]bool)
-
 	createdTriggersMap := make(map[string]*ftrigger.Config)
 
 	//translate the gateway model to the flogo model
@@ -255,31 +248,20 @@ func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 		triggerNames := link.Triggers
 
 		for _, triggerName := range triggerNames {
-			dispatches := link.Dispatches
 
-			flogoTrigger, err := createFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
+			flogoTrigger, err := createFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], createdTriggersMap)
 			if err != nil {
 				return nil, err
 			}
 
 			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
-
-			//create unique handler actions
-			for _, dispatch := range dispatches {
-				handlerName := dispatch.Handler
-
-				if !createdHandlers[handlerName] {
-					createdHandlers[handlerName] = true
-				}
-			}
 		}
 
 	}
 	return flogoAppTriggers, nil
 }
 
-func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, namedHandlerMap map[string]types.EventHandler,
-	dispatches []types.Dispatch, createdTriggersMap map[string]*ftrigger.Config) (*ftrigger.Config, error) {
+func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, createdTriggersMap map[string]*ftrigger.Config) (*ftrigger.Config, error) {
 
 	var flogoTrigger ftrigger.Config
 	flogoTrigger.Name = trigger.Name
@@ -361,9 +343,9 @@ func resolveConfigurationReference(configDefinitions map[string]types.Config, tr
 	return nil
 }
 
-func reloadConsul() error {
+func reloadConsul(consulSecurityToken string) error {
 
-	command := exec.Command("consul", "reload")
+	command := exec.Command("consul", "reload", "-token="+consulSecurityToken)
 	err := command.Run()
 
 	if err != nil {

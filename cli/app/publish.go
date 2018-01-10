@@ -88,7 +88,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.password), "p", "", "password")
 	fs.StringVar(&(c.areaId), "areaId", "", "areaId")
 	fs.StringVar(&(c.areaDomain), "areaDomain", "", "areaDomain")
-	fs.StringVar(&(c.fileName), "f", "mashling.json", "gateway app file")
+	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
 	fs.StringVar(&(c.mock), "mock", "false", "mock")
 	fs.StringVar(&(c.iodocs), "iodocs", "false", "iodocs")
 	fs.StringVar(&(c.testplan), "testplan", "false", "testplan")
@@ -118,12 +118,16 @@ func (c *cmdPublish) Exec(args []string) error {
 		}
 
 		if c.fileName == "" {
-			return errors.New("Error: arguments missing mashling gateway json(-f mashling.json) is needed")
+			return errors.New("Error: argument missing mashling gateway json(-f specify mashling.json file) is needed")
+		}
+
+		if c.consulToken == "" {
+			return errors.New("Error: argument missing consul token(-t security token) is needed")
 		}
 
 		if c.consulDefDir == "" {
-			if c.consulToken == "" || c.host == "" {
-				return errors.New("Error: arguments missing consul agent address(-h ip:port) and consul token(-t security token) are needed")
+			if c.host == "" {
+				return errors.New("Error: argument missing consul agent address(-h ip:port) is needed")
 			}
 		}
 
@@ -136,6 +140,8 @@ func (c *cmdPublish) Exec(args []string) error {
 		return PublishToConsul(gatewayJSON, c.consulRegister, c.consulToken, c.consulDefDir, c.host)
 
 	}
+
+	c.fileName = "mashling.json"
 
 	if c.apiKey == "" || c.apiSecret == "" || c.username == "" || c.password == "" ||
 		c.areaId == "" || c.areaDomain == "" {
