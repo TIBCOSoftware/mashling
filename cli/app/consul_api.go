@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"runtime"
 	"strconv"
 
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
@@ -104,8 +103,13 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 		fullURI := "http://" + consulAddress + registerURI
 
 		if len(consulDefDir) != 0 {
-			//to do write content payload to given directory
-			file, err := os.Create(consulDefDir + content.Name + ".json")
+
+			err := os.Chdir(consulDefDir)
+			if err != nil {
+				return err
+			}
+
+			file, err := os.Create(content.Name + ".json")
 			defer file.Close()
 
 			if err != nil {
@@ -165,7 +169,12 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 
 		if len(consulDefDir) != 0 {
 
-			err := os.Remove(consulDefDir + content.Name + ".json")
+			err := os.Chdir(consulDefDir)
+			if err != nil {
+				return err
+			}
+
+			err = os.Remove(content.Name + ".json")
 			if err != nil {
 				return err
 			}
@@ -354,15 +363,8 @@ func resolveConfigurationReference(configDefinitions map[string]types.Config, tr
 
 func reloadConsul() error {
 
-	var err error
-
-	if runtime.GOOS == "windows" {
-		command := exec.Command("cmd", "/c", "consul reload")
-		err = command.Run()
-	} else {
-		command := exec.Command("sh", "-c", "consul reload")
-		err = command.Run()
-	}
+	command := exec.Command("consul", "reload")
+	err := command.Run()
 
 	if err != nil {
 		fmt.Printf("\ncommand error output %s \n", err)

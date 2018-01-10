@@ -22,8 +22,10 @@ var optPublish = &cli.OptionInfo{
 	Long: `Publish http triggers to mashery or consul.
 
 Options:
-	-mashery	 Mashery publish command info
-    -f           specify the mashling json
+	-mashery	 Mashery publish command info. -f, -k, -s, -u, -p, -areaDomain, -areaId, -h, -iodocs, -testplan, -mock, -apitemplate flags to used.
+	-consul		 Consul publish command info. -a, -r, -f, -d, -h, -t flags to be used.
+
+	-f           specify the mashling json
     -k           the api key (required)
     -s           the api secret key (required)
     -u           username (required)
@@ -38,9 +40,10 @@ Options:
 	
 	-a			 registers mashling services with consul
 	-r			 de-registers mashling services with consul
-	-consul		 consul command info
-	-t			 security token
+	-f			 mashling json
 	-d			 service definition folder
+	-h			 consul agent ip and port
+	-t			 consul agent security token
  `,
 }
 
@@ -97,7 +100,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.BoolVar(&(c.consulRegister), "a", false, "registers mashling services")
 	fs.BoolVar(&(c.consulDeRegister), "r", false, "de-registers mashling services")
 	fs.BoolVar(&(c.consulFlag), "consul", false, "consul command info")
-	fs.StringVar(&(c.consulToken), "t", "", "security token")
+	fs.StringVar(&(c.consulToken), "t", "", "consul security token")
 	fs.StringVar(&(c.consulDefDir), "d", "", "service definition folder")
 }
 
@@ -114,8 +117,14 @@ func (c *cmdPublish) Exec(args []string) error {
 			return errors.New("Error: cannot use register and de-register together")
 		}
 
-		if c.fileName == "" || c.consulToken == "" || c.host == "" {
-			return errors.New("Error: arguments missing mashling gateway json(-f mashling.json), consul agent address(-h ip:port) and consul token(-t security token) is needed")
+		if c.fileName == "" {
+			return errors.New("Error: arguments missing mashling gateway json(-f mashling.json) is needed")
+		}
+
+		if c.consulDefDir == "" {
+			if c.consulToken == "" || c.host == "" {
+				return errors.New("Error: arguments missing consul agent address(-h ip:port) and consul token(-t security token) are needed")
+			}
 		}
 
 		gatewayJSON, _, err := GetGatewayJSON(c.fileName)
