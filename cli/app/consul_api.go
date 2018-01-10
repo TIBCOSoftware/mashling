@@ -33,7 +33,7 @@ type consulServiceDef struct {
 }
 
 /***
-generateConsulDef generates usefull information like gateway name and port from supplied gateway.json
+generateConsulDef generates consul service definition from supplied gateway.json
 ***/
 func generateConsulDef(gatewayJSON string) ([]consulServiceDef, error) {
 
@@ -67,7 +67,7 @@ func generateConsulDef(gatewayJSON string) ([]consulServiceDef, error) {
 	return consulServices, nil
 }
 
-//RegisterWithConsul registers suplied gateway json with consul
+//RegisterWithConsul registers suplied gateway.json services with consul
 func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir string, consulAddress string) error {
 
 	consulServices, err := generateConsulDef(gatewayJSON)
@@ -149,7 +149,7 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 	return nil
 }
 
-//DeregisterFromConsul removes suplied gateway json from consul
+//DeregisterFromConsul removes suplied gateway.json services from consul
 func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir string, consulAddress string) error {
 
 	consulServices, err := generateConsulDef(gatewayJSON)
@@ -194,7 +194,7 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 }
 
 /**
-callConsulService used to call consul agent for registering gateway service and de-registering it
+callConsulService Performs PUT API call on consul agent
 **/
 func callConsulService(uri string, payload []byte, consulToken string) (int, error) {
 
