@@ -367,8 +367,7 @@ func reloadConsul() error {
 	err := command.Run()
 
 	if err != nil {
-		fmt.Printf("\ncommand error output %s \n", err)
-		return err
+		return fmt.Errorf("command error output [%v]", err)
 	}
 
 	return nil
