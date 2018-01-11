@@ -78,6 +78,13 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 
 	var localIP = getLocalIP()
 
+	if len(consulDefDir) != 0 {
+		err = reloadConsul(consulToken)
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, content := range consulServices {
 
 		port, _ := strconv.Atoi(content.Port)
@@ -129,11 +136,6 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 				return dataErr
 			}
 
-			err = reloadConsul(consulToken)
-			if err != nil {
-				return err
-			}
-
 		} else {
 
 			statusCode, err := callConsulService(fullURI, []byte(contentPayload), consulToken)
@@ -147,6 +149,14 @@ func RegisterWithConsul(gatewayJSON string, consulToken string, consulDefDir str
 			}
 		}
 	}
+
+	if len(consulDefDir) != 0 {
+		err = reloadConsul(consulToken)
+		if err != nil {
+			return err
+		}
+	}
+
 	fmt.Println("===================================")
 	fmt.Println("Successfully registered with consul")
 	fmt.Println("===================================")
@@ -161,6 +171,13 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Unable to generate consul payload \n\n")
 		return err
+	}
+
+	if len(consulDefDir) != 0 {
+		err = reloadConsul(consulToken)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, content := range consulServices {
@@ -179,11 +196,6 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 				return err
 			}
 
-			err = reloadConsul(consulToken)
-			if err != nil {
-				return err
-			}
-
 		} else {
 			statusCode, err := callConsulService(fullURI, []byte(""), consulToken)
 
@@ -196,6 +208,14 @@ func DeregisterFromConsul(gatewayJSON string, consulToken string, consulDefDir s
 			}
 		}
 	}
+
+	if len(consulDefDir) != 0 {
+		err = reloadConsul(consulToken)
+		if err != nil {
+			return err
+		}
+	}
+
 	fmt.Println("======================================")
 	fmt.Println("Successfully de-registered with consul")
 	fmt.Println("======================================")
