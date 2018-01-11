@@ -40,8 +40,8 @@ Options:
 	
 	-a		register services with consul (required -a & -r mutually exclusive)
 	-r		de-register services with consul (required -a & -r mutually exclusive)
-	-d		service definition folder (required)
 	-t		consul agent security token (required)
+	-d		service definition folder (required)
 	`,
 }
 

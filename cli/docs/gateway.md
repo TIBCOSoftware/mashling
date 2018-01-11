@@ -216,9 +216,9 @@ For more details please use:
 
 ### publish
 This command is used to publish HTTP triggers in your mashling.json file
-to Mashery.
+to Mashery or Consul.
 
-Usage:
+Publish to Mashery Usage:
 
     mashling publish -k key -s secret_key  -u username -p password -uuid  uuid -portal mashery_portal -h petstore.swagger.io
 
@@ -243,6 +243,46 @@ Example (display transformed swagger doc only):
 Example (publish to Mashery):
 
     mashling publish -k 12345  -s 6789  -u foo -p bar -uuid  xxxyyy -portal "tibcobanqio.api.mashery.com"  -h petstore.swagger.io
+
+For more details please use:
+
+    mashling help publish
+
+
+Publish to Consul Usage:
+
+Register service with consul
+
+    mashling publish -consul -a -f <GATEWAY JSON FILE PATH> -t <TOKEN> -h <HOSTIP:PORT>
+
+De-Register service with consul
+
+    mashling publish -consul -r -f <GATEWAY JSON FILE PATH> -t <TOKEN> -h <HOSTIP:PORT>
+
+Register service with consul using -config-dir
+
+    mashling publish -consul -a -f <GATEWAY JSON FILE PATH> -t <TOKEN> -d <CONFIG DIR PATH>
+
+De-Register service with consul using -config-dir
+
+    mashling publish -consul -r -f <GATEWAY JSON FILE PATH> -t <TOKEN> -d <CONFIG DIR PATH>
+
+**options**
+
+- *-a*		: register services with consul (required -a & -r mutually exclusive)
+- *-r*		: de-register services with consul (required -a & -r mutually exclusive)
+- *-f*      : specify the Mashling json (default is mashling.json).
+- *-t*		: consul agent security token (required)
+- *-d*		: service definition folder (required)
+- *-h*		: the publicly available consul agent hostname and port where this Mashling will be deployed (required)
+
+Example (Register service with consul):
+
+    mashling publish -consul -a -f mashling-gateway-consul.json -t abcd1234 -h 192.45.32.31:8500
+
+Example (Register service with consul using -config-dir):
+
+    mashling publish -consul -a -f mashling-gateway-consul.json -t abcd1234 -d /etc/consul/configfiles/
 
 For more details please use:
 
