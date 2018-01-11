@@ -22,29 +22,27 @@ var optPublish = &cli.OptionInfo{
 	Long: `Publish http triggers to mashery or consul.
 
 Options:
-	-mashery	 Mashery publish command info. -f, -k, -s, -u, -p, -areaDomain, -areaId, -h, -iodocs, -testplan, -mock, -apitemplate flags to used.
-	-consul		 Consul publish command info. -a, -r, -f, -d, -h, -t flags to be used.
-
-	-f           specify the mashling json
-    -k           the api key (required)
-    -s           the api secret key (required)
-    -u           username (required)
-    -p           password (required)
-    -areaDomain  the public domain of the Mashery gateway (required)
-    -areaId      the Mashery area id  (required)
-    -h           the publicly available hostname where this mashling will be deployed (required)
-    -iodocs      true to create iodocs,  (default is false)
-    -testplan    true to create package, plan and test app/key,  (default is false)	
-    -mock        true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
-	-apitemplate json file that contains defaults for api/endpoint settings in mashery
+	-mashery	Publish triggers to mashery. -f, -k, -s, -u, -p, -areaDomain, -areaId, -h, -iodocs, -testplan, -mock, -apitemplate options to be used along with it.
+	-consul		Publish triggers to consul. -a, -r, -f, -d, -h, -t options to be used along with it.
 	
-	-a			 registers mashling services with consul
-	-r			 de-registers mashling services with consul
-	-f			 mashling json
-	-d			 service definition folder
-	-h			 consul agent ip and port
-	-t			 consul agent security token
- `,
+	-f		specify the mashling json
+	-k		the api key (required)
+	-s		the api secret key (required)
+	-u		username (required)
+	-p		password (required)
+	-areaDomain	the public domain of the Mashery gateway (required)
+	-areaId		the Mashery area id  (required)
+	-h		the publicly available hostname where this mashling will be deployed (required) (e.g. hostip:port)
+	-iodocs		true to create iodocs,  (default is false)
+	-testplan	true to create package, plan and test app/key,  (default is false)
+	-mock		true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
+	-apitemplate	json file that contains defaults for api/endpoint settings in mashery
+	
+	-a		register services with consul (required -a & -r mutually exclusive)
+	-r		de-register services with consul (required -a & -r mutually exclusive)
+	-d		service definition folder (required)
+	-t		consul agent security token (required)
+	`,
 }
 
 func init() {
