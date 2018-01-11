@@ -8,7 +8,6 @@ package gorillamuxtrigger
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -142,7 +141,6 @@ func TestHandlerOk(t *testing.T) {
 	}
 	defer resp.Body.Close()
 	log.Debug("response Status:", resp.Status)
-	fmt.Printf("response Status: %v", resp.Status)
 
 	if resp.StatusCode >= 300 {
 		t.Fail()
