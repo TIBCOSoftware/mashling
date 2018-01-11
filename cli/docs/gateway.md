@@ -218,7 +218,7 @@ For more details please use:
 This command is used to publish HTTP triggers in your mashling.json file
 to Mashery or Consul.
 
-Publish to Mashery Usage:
+#### Publish to Mashery Usage:
 
     mashling publish -k key -s secret_key  -u username -p password -uuid  uuid -portal mashery_portal -h petstore.swagger.io
 
@@ -249,7 +249,7 @@ For more details please use:
     mashling help publish
 
 
-Publish to Consul Usage:
+#### Publish to Consul Usage:
 
 Register service with consul:
 
