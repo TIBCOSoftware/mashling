@@ -251,19 +251,19 @@ For more details please use:
 
 Publish to Consul Usage:
 
-Register service with consul
+Register service with consul:
 
     mashling publish -consul -a -f <GATEWAY JSON FILE PATH> -t <TOKEN> -h <HOSTIP:PORT>
 
-De-Register service with consul
+De-Register service with consul:
 
     mashling publish -consul -r -f <GATEWAY JSON FILE PATH> -t <TOKEN> -h <HOSTIP:PORT>
 
-Register service with consul using -config-dir
+Register service with consul using -config-dir:
 
     mashling publish -consul -a -f <GATEWAY JSON FILE PATH> -t <TOKEN> -d <CONFIG DIR PATH>
 
-De-Register service with consul using -config-dir
+De-Register service with consul using -config-dir:
 
     mashling publish -consul -r -f <GATEWAY JSON FILE PATH> -t <TOKEN> -d <CONFIG DIR PATH>
 
