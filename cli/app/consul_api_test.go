@@ -93,9 +93,9 @@ func TestGenerateConsulDef(t *testing.T) {
 
 }
 
-func TestGenerateFlogoTriggers(t *testing.T) {
+func TestGenerateTriggers(t *testing.T) {
 
-	testTriggers, err := generateFlogoTriggers(sampleJSON)
+	testTriggers, err := generateTriggers(sampleJSON)
 
 	if err != nil {
 		t.Errorf("Test Failed Due to error in generating triggers : %s", err)

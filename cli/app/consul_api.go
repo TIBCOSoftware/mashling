@@ -14,7 +14,6 @@ import (
 	"os/exec"
 	"strconv"
 
-	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
@@ -31,12 +30,19 @@ type consulServiceDef struct {
 	Address string `json:"address"`
 }
 
+type triggerDef struct {
+	Name        string                 `json:"name"`
+	Description string                 `json:"description,omitempty"`
+	Type        string                 `json:"type"`
+	Settings    map[string]interface{} `json:"settings"`
+}
+
 /***
 generateConsulDef generates consul service definition from supplied gateway.json
 ***/
 func generateConsulDef(gatewayJSON string) ([]consulServiceDef, error) {
 
-	triggers, err := generateFlogoTriggers(gatewayJSON)
+	triggers, err := generateTriggers(gatewayJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +51,7 @@ func generateConsulDef(gatewayJSON string) ([]consulServiceDef, error) {
 
 	for i, trigger := range triggers {
 
-		if trigger.Ref == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Ref == "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger" {
+		if trigger.Type == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Type == "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger" {
 			var consulDef consulServiceDef
 
 			settings, err := json.MarshalIndent(&trigger.Settings, "", "    ")
@@ -240,15 +246,30 @@ func callConsulService(uri string, payload []byte, consulToken string) (int, err
 	return resp.StatusCode, err
 }
 
-//generateFlogoTriggers generates array of triggers from supplied gatewayjson
-func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
+/**
+reloadConsul used to reload consul services
+**/
+func reloadConsul(consulSecurityToken string) error {
+
+	command := exec.Command("consul", "reload", "-token="+consulSecurityToken)
+	err := command.Run()
+
+	if err != nil {
+		return fmt.Errorf("command error output [%v]", err)
+	}
+
+	return nil
+}
+
+/**
+generateTriggers generates array of triggers from supplied gatewayjson
+**/
+func generateTriggers(gatewayJSON string) ([]triggerDef, error) {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
 	if err != nil {
 		return nil, err
 	}
-
-	flogoAppTriggers := []*ftrigger.Config{}
 
 	//1. load the configuration, if provided.
 	configNamedMap := make(map[string]types.Config)
@@ -256,77 +277,43 @@ func generateFlogoTriggers(gatewayJSON string) ([]*ftrigger.Config, error) {
 		configNamedMap[config.Name] = config
 	}
 
-	triggerNamedMap := make(map[string]types.Trigger)
-	for _, trigger := range descriptor.Gateway.Triggers {
-		triggerNamedMap[trigger.Name] = trigger
-	}
+	var triggers = make([]triggerDef, len(descriptor.Gateway.Triggers))
 
-	createdTriggersMap := make(map[string]*ftrigger.Config)
+	for i, trigger := range descriptor.Gateway.Triggers {
 
-	//translate the gateway model to the flogo model
-	for _, link := range descriptor.Gateway.EventLinks {
-		triggerNames := link.Triggers
+		var mtSettings interface{}
+		if err := json.Unmarshal([]byte(trigger.Settings), &mtSettings); err != nil {
+			return nil, err
+		}
 
-		for _, triggerName := range triggerNames {
+		//resolve any configuration references if the "config" param is set in the settings
+		mashTriggerSettings := mtSettings.(map[string]interface{})
+		mashTriggerSettingsUsable := mtSettings.(map[string]interface{})
+		for k, v := range mashTriggerSettings {
+			mashTriggerSettingsUsable[k] = v
+		}
 
-			flogoTrigger, err := createFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], createdTriggersMap)
+		if configNamedMap != nil && len(configNamedMap) > 0 {
+			//inherit the configuration settings if the trigger uses configuration reference
+			err := resolveConfigurationReference(configNamedMap, trigger, mashTriggerSettingsUsable)
 			if err != nil {
 				return nil, err
 			}
-
-			flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
 		}
 
+		triggers[i].Name = trigger.Name
+		triggers[i].Description = trigger.Description
+		triggers[i].Type = trigger.Type
+		triggers[i].Settings = mashTriggerSettingsUsable
+
 	}
-	return flogoAppTriggers, nil
+
+	return triggers, nil
 }
 
-func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types.Trigger, createdTriggersMap map[string]*ftrigger.Config) (*ftrigger.Config, error) {
-
-	var flogoTrigger ftrigger.Config
-	flogoTrigger.Name = trigger.Name
-	flogoTrigger.Id = trigger.Name
-	flogoTrigger.Ref = trigger.Type
-	var mtSettings interface{}
-	if err := json.Unmarshal([]byte(trigger.Settings), &mtSettings); err != nil {
-		return nil, err
-	}
-
-	//resolve any configuration references if the "config" param is set in the settings
-	mashTriggerSettings := mtSettings.(map[string]interface{})
-	mashTriggerSettingsUsable := mtSettings.(map[string]interface{})
-	for k, v := range mashTriggerSettings {
-		mashTriggerSettingsUsable[k] = v
-	}
-
-	if configDefinitions != nil && len(configDefinitions) > 0 {
-		//inherit the configuration settings if the trigger uses configuration reference
-		err := resolveConfigurationReference(configDefinitions, trigger, mashTriggerSettingsUsable)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	//check if the trigger has valid settings required
-	//1. get the trigger resource from github
-	triggerMD, err := util.GetTriggerMetadata(trigger.Type)
-	if err != nil {
-		return nil, err
-	}
-	//2. check if the trigger metadata contains the settings
-	triggerSettings := make(map[string]interface{})
-
-	for key, value := range mashTriggerSettingsUsable {
-		if util.IsValidTriggerSetting(triggerMD, key) {
-			triggerSettings[key] = value
-		}
-	}
-
-	flogoTrigger.Settings = triggerSettings
-
-	return &flogoTrigger, nil
-}
-
+/**
+resolveConfigurationReference resolves config settings in triggers
+**/
 func resolveConfigurationReference(configDefinitions map[string]types.Config, trigger types.Trigger, settings map[string]interface{}) error {
 	if configRef, ok := settings[util.Gateway_Trigger_Config_Ref_Key]; ok {
 		//get the configuration details
@@ -360,17 +347,5 @@ func resolveConfigurationReference(configDefinitions map[string]types.Config, tr
 			}
 		}
 	}
-	return nil
-}
-
-func reloadConsul(consulSecurityToken string) error {
-
-	command := exec.Command("consul", "reload", "-token="+consulSecurityToken)
-	err := command.Run()
-
-	if err != nil {
-		return fmt.Errorf("command error output [%v]", err)
-	}
-
 	return nil
 }
