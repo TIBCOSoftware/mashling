@@ -1,11 +1,11 @@
 {
   "name": "tibco-reply",
   "type": "flogo:activity",
-  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/pingreply",
+  "ref": "github.com/TIBCOSoftware/mashling/tree/feature-pingreply-activity/ext/flogo/activity/pingreply",
   "version": "0.0.1",
   "title": "Reply (Legacy)",
   "description": "Simple Reply Activity",
-  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/activity/pingreply",
+  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/feature-pingreply-activity/ext/flogo/activity/pingreply",
   "reply": true,
   "inputs":[
     {
