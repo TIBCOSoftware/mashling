@@ -24,7 +24,7 @@ foobar:5VvmQnTXZ10wGZu_Gkjb8umfUPIOQTQ3p1YFadAWTl8=:6267beb3f851b7fee14011f6aa23
 
 func TestBasicAuthVerify(t *testing.T) {
 	credMap = nil
-	b := basicAuth()
+	b := basicAuth(make(map[string]interface{}))
 
 	file, err := ioutil.TempFile(os.TempDir(), "prefix")
 	if err != nil {
@@ -62,7 +62,7 @@ func TestBasicAuthVerify(t *testing.T) {
 
 func TestBasicAuthHashVerify(t *testing.T) {
 	credMap = nil
-	b := basicAuth()
+	b := basicAuth(make(map[string]interface{}))
 
 	file, err := ioutil.TempFile(os.TempDir(), "prefix")
 	if err != nil {

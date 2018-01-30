@@ -65,6 +65,14 @@
     {
       "name": "basicAuthFile",
       "type": "string"
+    },
+    {
+      "name": "ldapHost",
+      "type": "string"
+    },
+    {
+      "name": "ldapBase",
+      "type": "string"
     }
   ],
   "outputs": [

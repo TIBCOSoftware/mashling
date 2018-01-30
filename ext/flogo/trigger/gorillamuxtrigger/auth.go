@@ -17,6 +17,8 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+
+	ldap "github.com/jtblin/go-ldap-client"
 )
 
 type hashedCred struct {
@@ -30,28 +32,42 @@ type plainCred struct {
 	password string
 }
 
+// Auth allows a client to be authenticated
 type Auth interface {
 	authenticate(clientCred string) bool
 }
 
 type basic struct {
+	ldapHost string
+	ldapBase string
 }
 
 const (
 	basicAuthFile = "basicAuthFile"
+	ldapHost      = "ldapHost"
+	ldapBase      = "ldapBase"
 )
 
 var mu sync.Mutex
 var credMap map[string]hashedCred
 
-func basicAuth() Auth {
-	return &basic{}
+func basicAuth(settings map[string]interface{}) Auth {
+	auth := &basic{}
+	if value, ok := settings[ldapHost]; ok {
+		auth.ldapHost = value.(string)
+	}
+	if value, ok := settings[ldapBase]; ok {
+		auth.ldapBase = value.(string)
+	}
+	return auth
 }
 
 // isAuthEnabled check if authentication is enabled
 func isAuthEnabled(settings map[string]interface{}) bool {
 	// Check if basic auth is in use
-	if _, ok := settings[basicAuthFile]; !ok {
+	_, hasBasicAuthFile := settings[basicAuthFile]
+	_, hasLDAPHost := settings[ldapHost]
+	if !hasBasicAuthFile && !hasLDAPHost {
 		return false
 	}
 
@@ -61,6 +77,11 @@ func isAuthEnabled(settings map[string]interface{}) bool {
 // setupAuth setups up authentication.
 // This should be called to load the creds into a map once.
 func setupAuth(settings map[string]interface{}) {
+	_, hasLDAPHost := settings[ldapHost]
+	if hasLDAPHost {
+		return
+	}
+
 	err := loadCreds(settings[basicAuthFile].(string))
 	if err != nil {
 		log.Error(err)
@@ -126,8 +147,7 @@ func authenticate(r *http.Request, settings map[string]interface{}) bool {
 		return false
 	}
 	result := re.FindStringSubmatch(clientCred)
-
-	auth := basicAuth()
+	auth := basicAuth(settings)
 	if len(result) == 2 {
 		// Now verify the client creds
 		return auth.authenticate(result[1])
@@ -139,6 +159,28 @@ func authenticate(r *http.Request, settings map[string]interface{}) bool {
 // authenticate performs basic authentication against provided clientCred
 func (a *basic) authenticate(clientCred string) bool {
 	username, passwd := base64decode(clientCred)
+
+	if a.ldapHost != "" {
+		client := &ldap.LDAPClient{
+			Base:         a.ldapBase,
+			Host:         a.ldapHost,
+			Port:         389,
+			BindDN:       "uid=john,ou=People,dc=example,dc=com",
+			BindPassword: "",
+			UserFilter:   "(uid=%s)",
+			GroupFilter:  "(memberUid=%s)",
+			Attributes:   []string{"givenName", "sn", "mail", "uid"},
+		}
+		defer client.Close()
+
+		ok, user, err := client.Authenticate(username, passwd)
+		if err != nil {
+			log.Errorf("Error authenticating user %s: %+v", username, err)
+		}
+		log.Infof("Authenticated User: %+v", user)
+
+		return ok
+	}
 
 	credStruct, ok := credMap[username]
 	if !ok {
