@@ -199,6 +199,12 @@
                             },
                             "handler": {
                                 "type": "string"
+                            },
+                            "inputParams": {
+                                "type":"object",
+                                "additionalProperties": {
+                                    "type":"string"
+                                }
                             }
                         }
                     }
