@@ -7,6 +7,7 @@ package app
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -18,6 +19,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/cli/env"
+	"github.com/TIBCOSoftware/mashling/lib/types"
 )
 
 var (
@@ -156,4 +158,94 @@ func getLocalIP() string {
 	defer conn.Close()
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP.String()
+}
+
+/** CreateMashlingPingModel
+creates rest based ping mashling json used for ping functionality
+**/
+func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
+
+	microGateway := types.Microgateway{
+		MashlingSchema: "0.2",
+		Gateway: types.Gateway{
+			Name:         "GatewayPingApp",
+			Version:      "1.0.0",
+			DisplayName:  "Gateway Ping Application",
+			DisplayImage: "GatewayPingIcon.jpg",
+			Description:  "This is the first microgateway ping app",
+			Configurations: []types.Config{
+				{
+					Name:        "rest_ping_config",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+					Description: "The trigger on ping functionality",
+					Settings: json.RawMessage(`{
+						"port": "` + pingPort + `"
+						}`),
+				},
+			},
+			Triggers: []types.Trigger{
+				{
+					Name:        "rest_ping_trigger",
+					Description: "The trigger on ping functionality",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+					Settings: json.RawMessage(`{
+						"config": "${configurations.rest_ping_config}",
+						"method": "GET",
+						"path": "/ping/",
+						"optimize": "true"
+					}`),
+				}, {
+					Name:        "rest_ping_detailed_trigger",
+					Description: "The trigger on ping functionality",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+					Settings: json.RawMessage(`{
+						"config": "${configurations.rest_ping_config}",
+						"method": "GET",
+						"path": "/ping/details/",
+						"optimize": "true"
+					}`),
+				},
+			},
+			EventHandlers: []types.EventHandler{
+				{
+					Name:        "get_ping_handler",
+					Description: "Handle PING REST GET call",
+					Reference:   "github.com/nareshkumarthota/sampleflows/pingflow.json",
+				},
+				{
+					Name:        "get_ping_detailed_handler",
+					Description: "Handle PING REST GET call",
+					Reference:   "github.com/nareshkumarthota/sampleflows/pingdetailflow.json",
+				},
+			},
+			EventLinks: []types.EventLink{
+				{
+					Triggers: []string{
+						"rest_ping_trigger",
+					},
+					Dispatches: []types.Dispatch{
+						{
+							Path: types.Path{
+								Handler: "get_ping_handler",
+							},
+						},
+					},
+				},
+				{
+					Triggers: []string{
+						"rest_ping_detailed_trigger",
+					},
+					Dispatches: []types.Dispatch{
+						{
+							Path: types.Path{
+								Handler: "get_ping_detailed_handler",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	return microGateway, nil
 }

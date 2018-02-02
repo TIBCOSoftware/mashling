@@ -33,12 +33,53 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
+func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, pingPort string, customizeFunc func() error) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
 	if err != nil {
 		return err
 	}
+
+	pingEnableVal := os.Getenv("PING_ENABLE")
+	//appending ping functionality start
+	if strings.Compare(pingEnableVal, "FALSE") != 0 {
+		if len(pingPort) == 0 {
+			pingPort = os.Getenv("PING_PORT")
+			if len(pingPort) == 0 {
+				pingPort = "9090"
+			}
+		}
+		pingDescrptr, err := CreateMashlingPingModel(pingPort)
+		if err != nil {
+			return err
+		}
+
+		var includeFlag bool
+		includeFlag = true
+		for _, trigger := range pingDescrptr.Gateway.Triggers {
+
+			for _, descTrigger := range descriptor.Gateway.Triggers {
+				if strings.Compare(trigger.Name, descTrigger.Name) == 0 {
+					includeFlag = false
+					break
+				}
+			}
+
+			if includeFlag {
+				descriptor.Gateway.Triggers = append(descriptor.Gateway.Triggers, trigger)
+			}
+		}
+		for _, eventHandlr := range pingDescrptr.Gateway.EventHandlers {
+			descriptor.Gateway.EventHandlers = append(descriptor.Gateway.EventHandlers, eventHandlr)
+		}
+		for _, Config := range pingDescrptr.Gateway.Configurations {
+			descriptor.Gateway.Configurations = append(descriptor.Gateway.Configurations, Config)
+		}
+		for _, eventLink := range pingDescrptr.Gateway.EventLinks {
+			descriptor.Gateway.EventLinks = append(descriptor.Gateway.EventLinks, eventLink)
+		}
+	}
+	// ping functionality end
 
 	if appName != "" {
 		altJson := strings.Replace(gatewayJson, `"`+descriptor.Gateway.Name+`"`, `"`+appName+`"`, 1)
@@ -203,11 +244,52 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 }
 
 // TranslateGatewayJSON2FlogoJSON tanslates mashling json to flogo json
-func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
+func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string, error) {
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
 	if err != nil {
 		return "", err
 	}
+
+	pingEnableVal := os.Getenv("PING_ENABLE")
+	//appending ping functionality start
+	if strings.Compare(pingEnableVal, "FALSE") != 0 {
+		if len(pingPort) == 0 {
+			pingPort = os.Getenv("PING_PORT")
+			if len(pingPort) == 0 {
+				pingPort = "9090"
+			}
+		}
+		pingDescrptr, err := CreateMashlingPingModel(pingPort)
+		if err != nil {
+			return "", err
+		}
+
+		var includeFlag bool
+		includeFlag = true
+		for _, trigger := range pingDescrptr.Gateway.Triggers {
+
+			for _, descTrigger := range descriptor.Gateway.Triggers {
+				if strings.Compare(trigger.Name, descTrigger.Name) == 0 {
+					includeFlag = false
+					break
+				}
+			}
+
+			if includeFlag {
+				descriptor.Gateway.Triggers = append(descriptor.Gateway.Triggers, trigger)
+			}
+		}
+		for _, eventHandlr := range pingDescrptr.Gateway.EventHandlers {
+			descriptor.Gateway.EventHandlers = append(descriptor.Gateway.EventHandlers, eventHandlr)
+		}
+		for _, Config := range pingDescrptr.Gateway.Configurations {
+			descriptor.Gateway.Configurations = append(descriptor.Gateway.Configurations, Config)
+		}
+		for _, eventLink := range pingDescrptr.Gateway.EventLinks {
+			descriptor.Gateway.EventLinks = append(descriptor.Gateway.EventLinks, eventLink)
+		}
+	}
+	// ping functionality end
 
 	flogoAppTriggers := []*ftrigger.Config{}
 	flogoAppActions := []*faction.Config{}
@@ -310,10 +392,10 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
 }
 
 // BuildMashling Builds mashling gateway
-func BuildMashling(appDir string, gatewayJSON string) error {
+func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 
 	//create flogo.json from gateway descriptor
-	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON)
+	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort)
 	if err != nil {
 		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
 		return err

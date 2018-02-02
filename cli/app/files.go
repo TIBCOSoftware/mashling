@@ -2,6 +2,7 @@ package app
 
 import (
 	"os"
+	"strings"
 
 	"path"
 
@@ -50,6 +51,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	` + getImports() + `
 )
 
 var (
@@ -122,6 +124,13 @@ func setupSignalHandling() chan int {
 	return exitChan
 }
 `
+
+func getImports() string {
+	if strings.Compare(os.Getenv("PING_ENABLE"), "FALSE") != 0 {
+		return "\"github.com/nareshkumarthota/sampleflows/pingreply\""
+	}
+	return ""
+}
 
 func CreateImportsGoFile(codeSourcePath string, deps []*api.Dependency) error {
 	f, err := os.Create(path.Join(codeSourcePath, fileImportsGo))
