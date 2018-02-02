@@ -67,6 +67,8 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 
 			if includeFlag {
 				descriptor.Gateway.Triggers = append(descriptor.Gateway.Triggers, trigger)
+			} else {
+				return fmt.Errorf("Trigger name is reserved for ping functionality please use different name. \n")
 			}
 		}
 		for _, eventHandlr := range pingDescrptr.Gateway.EventHandlers {
@@ -277,6 +279,8 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string
 
 			if includeFlag {
 				descriptor.Gateway.Triggers = append(descriptor.Gateway.Triggers, trigger)
+			} else {
+				return "", fmt.Errorf("Trigger name is reserved for ping functionality please use different name. \n")
 			}
 		}
 		for _, eventHandlr := range pingDescrptr.Gateway.EventHandlers {
