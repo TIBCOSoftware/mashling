@@ -160,9 +160,9 @@ func getLocalIP() string {
 	return localAddr.IP.String()
 }
 
-/** CreateMashlingPingModel
-creates rest based ping mashling json used for ping functionality
-**/
+/*
+CreateMashlingPingModel creates rest based ping mashling json used for ping functionality
+*/
 func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 
 	microGateway := types.Microgateway{
@@ -175,9 +175,9 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 			Description:  "This is the first microgateway ping app",
 			Configurations: []types.Config{
 				{
-					Name:        "rest_ping_config",
+					Name:        "ping_config",
 					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-					Description: "The trigger on ping functionality",
+					Description: "The trigger for ping functionality",
 					Settings: json.RawMessage(`{
 						"port": "` + pingPort + `"
 						}`),
@@ -185,21 +185,21 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 			},
 			Triggers: []types.Trigger{
 				{
-					Name:        "rest_ping_trigger",
-					Description: "The trigger on ping functionality",
+					Name:        "ping_trigger",
+					Description: "The trigger for ping functionality",
 					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 					Settings: json.RawMessage(`{
-						"config": "${configurations.rest_ping_config}",
+						"config": "${configurations.ping_config}",
 						"method": "GET",
 						"path": "/ping/",
 						"optimize": "true"
 					}`),
 				}, {
-					Name:        "rest_ping_detailed_trigger",
-					Description: "The trigger on ping functionality",
+					Name:        "ping_trigger_detail",
+					Description: "The trigger for detailed ping functionality",
 					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 					Settings: json.RawMessage(`{
-						"config": "${configurations.rest_ping_config}",
+						"config": "${configurations.ping_config}",
 						"method": "GET",
 						"path": "/ping/details/",
 						"optimize": "true"
@@ -208,37 +208,37 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 			},
 			EventHandlers: []types.EventHandler{
 				{
-					Name:        "get_ping_handler",
-					Description: "Handle PING REST GET call",
+					Name:        "ping_handler",
+					Description: "Handle Ping get call",
 					Reference:   "github.com/nareshkumarthota/sampleflows/pingflow.json",
 				},
 				{
-					Name:        "get_ping_detailed_handler",
-					Description: "Handle PING REST GET call",
+					Name:        "ping_handler_detail",
+					Description: "Handle Ping detailed get call",
 					Reference:   "github.com/nareshkumarthota/sampleflows/pingdetailflow.json",
 				},
 			},
 			EventLinks: []types.EventLink{
 				{
 					Triggers: []string{
-						"rest_ping_trigger",
+						"ping_trigger",
 					},
 					Dispatches: []types.Dispatch{
 						{
 							Path: types.Path{
-								Handler: "get_ping_handler",
+								Handler: "ping_handler",
 							},
 						},
 					},
 				},
 				{
 					Triggers: []string{
-						"rest_ping_detailed_trigger",
+						"ping_trigger_detail",
 					},
 					Dispatches: []types.Dispatch{
 						{
 							Path: types.Path{
-								Handler: "get_ping_detailed_handler",
+								Handler: "ping_handler_detail",
 							},
 						},
 					},

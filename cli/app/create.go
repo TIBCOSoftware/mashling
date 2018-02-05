@@ -196,54 +196,51 @@ func (c *cmdCreate) Exec(args []string) error {
 			mashCliOutput := fmt.Sprintf("\n\tmashlingCliRev :=  \"%s\"", MashlingMasterGitRev)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliRev = mashlingCliRev")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliRev = mashlingCliRev \n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tmashlingCliVersion :=  \"%s\"", Version)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliVersion = mashlingCliVersion")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliVersion = mashlingCliVersion \n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			if DisplayLocalChanges {
 				mashCliOutput = fmt.Sprintf("\n\tmashlingLocRev :=  \"%s\"", MashlingLocalGitRev)
 				extraSrc.WriteString(string(mashCliOutput))
 
-				mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingLocRev = mashlingLocRev")
+				mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingLocRev = mashlingLocRev \n")
 				extraSrc.WriteString(string(mashCliOutput))
 			}
 
 			mashCliOutput = fmt.Sprint("\n\tappVersion := app.Version")
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppVersion = appVersion")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppVersion = appVersion \n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tschemaVersion :=  \"%s\"", schemaVersion)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.SchemaVersion = schemaVersion")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.SchemaVersion = schemaVersion \n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tflogolibRev :=  \"%s\"", flogoLibRev)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.FlogolibRev = flogolibRev")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.FlogolibRev = flogolibRev \n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tmashlingRev :=  \"%s\"", mashlingRev)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingRev = mashlingRev")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingRev = mashlingRev \n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tappDesc := app.Description")
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppDescrption = appDesc")
-			extraSrc.WriteString(string(mashCliOutput))
-
-			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.SetData()\n\n\n")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppDescrption = appDesc \n\n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 		}

@@ -144,11 +144,6 @@ func ResolveEnvironmentProperties(settings map[string]interface{}) error {
 	return nil
 }
 
-type PingDetailsItf interface {
-	SetData()
-	GetData()
-}
-
 var PingDataPntr = &PingDataDet{}
 
 type PingDataDet struct {
@@ -160,12 +155,4 @@ type PingDataDet struct {
 	FlogolibRev         string
 	MashlingRev         string
 	AppDescrption       string
-}
-
-func (p PingDataDet) SetData() {
-	PingDataPntr = &p
-}
-
-func (p PingDataDet) GetData() PingDataDet {
-	return *PingDataPntr
 }

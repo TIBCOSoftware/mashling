@@ -44,17 +44,16 @@ func (a *ReplyActivity) Eval(ctx activity.Context) (done bool, err error) {
 
 	if strings.Compare(result["response"].(string), "Detailed") == 0 {
 
-		pingDataVar := util.PingDataPntr.GetData()
 		dataBytes := []byte(`{
 			"response":"success",
-			"mashlingCliRevision":"` + pingDataVar.MashlingCliRev + `",
-			"MashlingCliLocalRev":"` + pingDataVar.MashlingCliLocalRev + `",
-			"MashlingCliVersion":"` + pingDataVar.MashlingCliVersion + `",
-			"SchemaVersion":"` + pingDataVar.SchemaVersion + `",
-			"AppVersion":"` + pingDataVar.AppVersion + `",
-			"FlogolibRev":"` + pingDataVar.FlogolibRev + `",
-			"MashlingRev":"` + pingDataVar.MashlingRev + `",
-			"AppDescrption":"` + pingDataVar.AppDescrption + `"
+			"mashlingCliRevision":"` + util.PingDataPntr.MashlingCliRev + `",
+			"MashlingCliLocalRev":"` + util.PingDataPntr.MashlingCliLocalRev + `",
+			"MashlingCliVersion":"` + util.PingDataPntr.MashlingCliVersion + `",
+			"SchemaVersion":"` + util.PingDataPntr.SchemaVersion + `",
+			"AppVersion":"` + util.PingDataPntr.AppVersion + `",
+			"FlogolibRev":"` + util.PingDataPntr.FlogolibRev + `",
+			"MashlingRev":"` + util.PingDataPntr.MashlingRev + `",
+			"AppDescrption":"` + util.PingDataPntr.AppDescrption + `"
 			}`)
 
 		var replyJSON interface{}
