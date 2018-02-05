@@ -4,7 +4,7 @@ This activity provides your flogo application the ability to reply to a trigger 
 ## Installation
 
 ```bash
-flogo add activity github.com/TIBCOSoftware/flogo-contrib/activity/pingreply
+flogo add activity github.com/TIBCOSoftware/mashling/ext/flogo/activity/pingreply
 ```
 
 ## Schema

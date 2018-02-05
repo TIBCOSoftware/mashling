@@ -40,11 +40,11 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 		return err
 	}
 
-	pingEnableVal := os.Getenv("PING_ENABLE")
+	pingEnableVal := os.Getenv(util.Mashling_Ping_Embed_Config_Property)
 	//appending ping functionality start
 	if strings.Compare(pingEnableVal, "FALSE") != 0 {
 		if len(pingPort) == 0 {
-			pingPort = os.Getenv("PING_PORT")
+			pingPort = os.Getenv(util.Mashling_Ping_Port)
 			if len(pingPort) == 0 {
 				pingPort = "9090"
 			}
@@ -252,11 +252,11 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string
 		return "", err
 	}
 
-	pingEnableVal := os.Getenv("PING_ENABLE")
+	pingEnableVal := os.Getenv(util.Mashling_Ping_Embed_Config_Property)
 	//appending ping functionality start
 	if strings.Compare(pingEnableVal, "FALSE") != 0 {
 		if len(pingPort) == 0 {
-			pingPort = os.Getenv("PING_PORT")
+			pingPort = os.Getenv(util.Mashling_Ping_Port)
 			if len(pingPort) == 0 {
 				pingPort = "9090"
 			}

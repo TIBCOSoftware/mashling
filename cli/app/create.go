@@ -21,6 +21,7 @@ import (
 	"github.com/TIBCOSoftware/mashling/cli/assets"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/lib/model"
+	mutil "github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 var optCreate = &cli.OptionInfo{
@@ -28,11 +29,11 @@ var optCreate = &cli.OptionInfo{
 	UsageLine: "create AppName",
 	Short:     "Create a mashling gateway",
 	Long: `Creates a mashling gateway.
-  
-  Options:
-	  -f       	specify the mashling.json to create gateway project from
-	  -pingport	specify the port for ping functionality
-   `,
+   
+   Options:
+	   -f       	specify the mashling.json to create gateway project from
+	   -pingport	specify the port for ping functionality
+	`,
 }
 
 type GbManifest struct {
@@ -191,55 +192,58 @@ func (c *cmdCreate) Exec(args []string) error {
 			return err
 		}
 
-		if strings.Compare(os.Getenv("PING_ENABLE"), "FALSE") != 0 {
+		if strings.Compare(os.Getenv(mutil.Mashling_Ping_Embed_Config_Property), "FALSE") != 0 {
 			mashCliOutput := fmt.Sprintf("\n\tmashlingCliRev :=  \"%s\"", MashlingMasterGitRev)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.MashlingCliRev = mashlingCliRev")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliRev = mashlingCliRev")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tmashlingCliVersion :=  \"%s\"", Version)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.MashlingCliVersion = mashlingCliVersion")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliVersion = mashlingCliVersion")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			if DisplayLocalChanges {
 				mashCliOutput = fmt.Sprintf("\n\tmashlingLocRev :=  \"%s\"", MashlingLocalGitRev)
 				extraSrc.WriteString(string(mashCliOutput))
 
-				mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.MashlingLocRev = mashlingLocRev")
+				mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingLocRev = mashlingLocRev")
 				extraSrc.WriteString(string(mashCliOutput))
 			}
 
 			mashCliOutput = fmt.Sprint("\n\tappVersion := app.Version")
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.AppVersion = appVersion")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppVersion = appVersion")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tschemaVersion :=  \"%s\"", schemaVersion)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.SchemaVersion = schemaVersion")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.SchemaVersion = schemaVersion")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tflogolibRev :=  \"%s\"", flogoLibRev)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.FlogolibRev = flogolibRev")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.FlogolibRev = flogolibRev")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tmashlingRev :=  \"%s\"", mashlingRev)
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.MashlingRev = mashlingRev")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingRev = mashlingRev")
 			extraSrc.WriteString(string(mashCliOutput))
 
 			mashCliOutput = fmt.Sprintf("\n\tappDesc := app.Description")
 			extraSrc.WriteString(string(mashCliOutput))
 
-			mashCliOutput = fmt.Sprint("\n\tpingreply.PingData.AppDescrption = appDesc")
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppDescrption = appDesc")
+			extraSrc.WriteString(string(mashCliOutput))
+
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.SetData()\n\n\n")
 			extraSrc.WriteString(string(mashCliOutput))
 
 		}

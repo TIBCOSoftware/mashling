@@ -2,16 +2,15 @@ package pingreply
 
 import (
 	"encoding/json"
-	"fmt"
+	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling/cli/app"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 // log is the default package logger
 var log = logger.GetLogger("activity-tibco-reply")
-var versioninfo = app.MashlingMasterGitRev
 
 const (
 	ivCode = "code"
@@ -39,16 +38,32 @@ func (a *ReplyActivity) Metadata() *activity.Metadata {
 func (a *ReplyActivity) Eval(ctx activity.Context) (done bool, err error) {
 
 	replyCode := ctx.GetInput(ivCode).(int)
-	//replyData := ctx.GetInput(ivData)
+	replyData := ctx.GetInput(ivData)
 
-	dataBytes := []byte(`{"Response":"success","mashling rev":"` + versioninfo + `"}`)
+	result := replyData.(map[string]interface{})
 
-	var replyJSON interface{}
-	err = json.Unmarshal(dataBytes, &replyJSON)
+	if strings.Compare(result["response"].(string), "Detailed") == 0 {
 
-	log.Debugf("Code :'%d', Data: '%+v'", replyCode, replyJSON)
+		pingDataVar := util.PingDataPntr.GetData()
+		dataBytes := []byte(`{
+			"response":"success",
+			"mashlingCliRevision":"` + pingDataVar.MashlingCliRev + `",
+			"MashlingCliLocalRev":"` + pingDataVar.MashlingCliLocalRev + `",
+			"MashlingCliVersion":"` + pingDataVar.MashlingCliVersion + `",
+			"SchemaVersion":"` + pingDataVar.SchemaVersion + `",
+			"AppVersion":"` + pingDataVar.AppVersion + `",
+			"FlogolibRev":"` + pingDataVar.FlogolibRev + `",
+			"MashlingRev":"` + pingDataVar.MashlingRev + `",
+			"AppDescrption":"` + pingDataVar.AppDescrption + `"
+			}`)
 
-	fmt.Printf("\nCode :'%d', Data: '%+v'\n", replyCode, replyJSON)
+		var replyJSON interface{}
+		err = json.Unmarshal(dataBytes, &replyJSON)
+
+		replyData = replyJSON
+	}
+
+	log.Debugf("Code :'%d', Data: '%+v'", replyCode, replyData)
 
 	replyHandler := ctx.FlowDetails().ReplyHandler()
 
@@ -56,7 +71,7 @@ func (a *ReplyActivity) Eval(ctx activity.Context) (done bool, err error) {
 
 	if replyHandler != nil {
 
-		replyHandler.Reply(replyCode, replyJSON, nil)
+		replyHandler.Reply(replyCode, replyData, nil)
 	}
 
 	return true, nil

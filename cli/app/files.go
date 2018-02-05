@@ -8,6 +8,7 @@ import (
 
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/util"
+	mutil "github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 const (
@@ -126,8 +127,8 @@ func setupSignalHandling() chan int {
 `
 
 func getImports() string {
-	if strings.Compare(os.Getenv("PING_ENABLE"), "FALSE") != 0 {
-		return "\"github.com/nareshkumarthota/sampleflows/pingreply\""
+	if strings.Compare(os.Getenv(mutil.Mashling_Ping_Embed_Config_Property), "FALSE") != 0 {
+		return "\"github.com/TIBCOSoftware/mashling/lib/util\""
 	}
 	return ""
 }

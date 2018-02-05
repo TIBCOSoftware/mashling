@@ -43,3 +43,10 @@ const Flogo_App_Type = "flogo:app"
 const Flogo_App_Embed_Config_Property = "FLOGO_EMBED"
 const Flogo_App_Embed_Config_Property_Default = true
 const Flogo_Trigger_Handler_Setting_Condition = "Condition"
+
+/**
+PING Functionality Constants
+*/
+
+const Mashling_Ping_Embed_Config_Property = "MASHLING_PING_EMBED"
+const Mashling_Ping_Port = "MASHLING_PING_PORT"
