@@ -378,13 +378,6 @@
 			"repository": "https://github.com/sourcegraph/appdash",
 			"revision": "f9a4336c02542ebbfa01c37949bd7152fb0f659c",
 			"branch": "master"
-		},
-		{
-			"importpath": "github.com/nareshkumarthota/sampleflows/pingreply",
-			"repository": "https://github.com/nareshkumarthota/sampleflows",
-			"revision": "6e0f2f23e8b8d8c76d8ef5ba6dea6ad83465e1a5",
-			"branch": "master",
-			"path": "/pingreply"
 		}
 	]
 }

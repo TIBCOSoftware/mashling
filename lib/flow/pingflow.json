@@ -1,0 +1,86 @@
+{
+  "name": "pingApp1",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "triggers": [
+    {
+      "name": "Receive HTTP Message",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+      "description": "Simple REST Trigger",
+      "settings": {
+        "port": "9090"
+      },
+      "id": "receive_http_message",
+      "handlers": [
+        {
+          "actionMappings": {
+            "input": [],
+            "output": []
+          },
+          "settings": {
+            "method": "GET",
+            "path": "/ping/",
+            "autoIdReply": "true",
+            "useReplyHandler": "true"
+          },
+          "actionId": "sample_ping_app"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "data": {
+        "flow": {
+          "name": "samplePingApp",
+          "type": 1,
+          "attributes": [],
+          "rootTask": {
+            "id": "root",
+            "type": 1,
+            "tasks": [
+              {
+                "id": "reply_2",
+                "name": "Reply (Legacy)",
+                "description": "Simple Reply Activity",
+                "type": 1,
+                "activityType": "tibco-reply",
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/pingreply",
+                "attributes": [
+                  {
+                    "name": "code",
+                    "value": 200,
+                    "required": true,
+                    "type": "integer"
+                  },
+                  {
+                    "name": "data",
+                    "value": null,
+                    "required": false,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 4,
+                    "value": {
+											"response": "success"
+										},
+                    "mapTo": "data"
+                  }
+                ]
+              }
+            ],
+            "links": [],
+            "attributes": []
+          },
+          "explicitReply": true
+        }
+      },
+      "id": "samplePingApp",
+      "metadata": null,
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+    }
+  ]
+}

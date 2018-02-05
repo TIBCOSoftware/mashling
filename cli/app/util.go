@@ -210,12 +210,12 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 				{
 					Name:        "ping_handler",
 					Description: "Handle Ping get call",
-					Reference:   "github.com/nareshkumarthota/sampleflows/pingflow.json",
+					Reference:   "github.com/TIBCOSoftware/mashling/lib/flow/pingflow.json",
 				},
 				{
 					Name:        "ping_handler_detail",
 					Description: "Handle Ping detailed get call",
-					Reference:   "github.com/nareshkumarthota/sampleflows/pingdetailflow.json",
+					Reference:   "github.com/TIBCOSoftware/mashling/lib/flow/pingflowdetailed.json",
 				},
 			},
 			EventLinks: []types.EventLink{
