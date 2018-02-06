@@ -1,11 +1,5 @@
 # tibco-reply
-This activity provides your flogo application the ability to reply to a trigger invocation.
-
-## Installation
-
-```bash
-flogo add activity github.com/TIBCOSoftware/mashling/ext/flogo/activity/pingreply
-```
+This activity provides your mashling application the ability to reply to a trigger invocation.
 
 ## Schema
 Inputs and Outputs:
