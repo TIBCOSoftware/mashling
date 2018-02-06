@@ -57,6 +57,7 @@ Options:
     -creds       path to Mashery configuration file if the dot file is not used
     -mock        true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false)
     -apitemplate json file that contains defaults for api/endpoint settings in mashery
+    -skipVerify  true to skip SSL verification; default is false
  `,
 }
 
@@ -70,6 +71,7 @@ type cmdPublish struct {
 	masheryCredsFile string
 	mock             string
 	apiTemplate      string
+	skipVerify       string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -83,6 +85,7 @@ func (c *cmdPublish) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.masheryCredsFile), "creds", "", "mashery creds file")
 	fs.StringVar(&(c.mock), "mock", "false", "mock")
 	fs.StringVar(&(c.apiTemplate), "apitemplate", "", "api template file")
+	fs.StringVar(&(c.skipVerify), "skipVerify", "false", "skip SSL verification")
 }
 
 // parseConfigFile parse file with mashery configuration
@@ -119,7 +122,12 @@ func (c *cmdPublish) Exec(args []string) error {
 
 	gatewayJSON, _, err := GetGatewayJSON(c.fileName)
 
-	user := ApiUser{mashery.Username, mashery.Password, mashery.ApiKey, mashery.ApiSecret, mashery.AreaId, mashery.AreaDomain, false}
+	skipVerify, err := strconv.ParseBool(c.skipVerify)
+	if err != nil {
+		panic("Invalid option for -skipVerify")
+	}
+
+	user := ApiUser{mashery.Username, mashery.Password, mashery.ApiKey, mashery.ApiSecret, mashery.AreaId, mashery.AreaDomain, false, skipVerify}
 
 	var apiTemplateJSON string
 	if c.apiTemplate != "" {

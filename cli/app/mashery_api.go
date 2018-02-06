@@ -7,6 +7,7 @@ package app
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,6 +27,7 @@ type ApiUser struct {
 	uuid         string
 	portal       string
 	noop         bool
+	skipVerify   bool
 }
 
 const (
@@ -77,10 +79,14 @@ func RegisterResponder(method, url string, responder Responder) {
 	DefaultNopTransport.RegisterResponder(method, url, responder)
 }
 
-func newHttp(nop bool) *http.Client {
+func newHttp(nop bool, skipVerify bool) *http.Client {
 	client := &http.Client{}
 	if nop {
 		client.Transport = DefaultNopTransport
+	}
+
+	if skipVerify {
+		client.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 	}
 
 	return client
@@ -119,7 +125,7 @@ func (user *ApiUser) CreateUpdate(method string, resource string, fields string,
 	if fields != "" {
 		fullUri = fullUri + "?fields=" + fields
 	}
-	client := newHttp(user.noop)
+	client := newHttp(user.noop, user.skipVerify)
 	r, _ := http.NewRequest(method, fullUri, bytes.NewReader([]byte(content)))
 	setContentType(r)
 	setOauthToken(r, oauthToken)
@@ -156,7 +162,7 @@ func (user *ApiUser) Read(resource string, filter string, fields string, oauthTo
 		fullUri = fullUri + "?fields=" + fields + "&filter=" + filter
 	}
 
-	client := newHttp(user.noop)
+	client := newHttp(user.noop, user.skipVerify)
 
 	r, _ := http.NewRequest("GET", masheryUri+restUri+resource+"?filter="+filter+"&fields="+fields, nil)
 	setContentType(r)
@@ -191,7 +197,7 @@ func (user *ApiUser) Update(resource string, fields string, content string, oaut
 // transformed into the target format.
 func (user *ApiUser) TransformSwagger(swaggerDoc string, sourceFormat string, targetFormat string, oauthToken string) (string, error) {
 	// New client
-	client := newHttp(user.noop)
+	client := newHttp(user.noop, user.skipVerify)
 
 	v := url.Values{}
 	v.Set("sourceFormat", sourceFormat)
@@ -222,7 +228,7 @@ func (user *ApiUser) TransformSwagger(swaggerDoc string, sourceFormat string, ta
 // FetchOAuthToken exchanges the creds for an OAuth token
 func (user *ApiUser) FetchOAuthToken() (string, error) {
 	// New client
-	client := newHttp(user.noop)
+	client := newHttp(user.noop, user.skipVerify)
 
 	data := url.Values{}
 	data.Set("grant_type", "password")

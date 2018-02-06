@@ -20,7 +20,7 @@ func TestFetchOAuthToken(t *testing.T) {
 
 	DefaultNopTransport.RegisterResponder("POST", masheryUri+"/v3/token", fn)
 
-	u := ApiUser{"foo", "pass", "key", "secretKey", "uuid", "api.example.com", true}
+	u := ApiUser{"foo", "pass", "key", "secretKey", "uuid", "api.example.com", true, false}
 	token, err := u.FetchOAuthToken()
 
 	assert.NoError(t, err, "Expected no error")
@@ -39,7 +39,7 @@ func TestFetchOAuthTokenToReturnError(t *testing.T) {
 
 	DefaultNopTransport.RegisterResponder("POST", masheryUri+"/v3/token", fn)
 
-	u := ApiUser{"foo", "pass", "key", "secretKey", "uuid", "api.example.com", true}
+	u := ApiUser{"foo", "pass", "key", "secretKey", "uuid", "api.example.com", true, false}
 	_, err := u.FetchOAuthToken()
 	assert.Error(t, err)
 }
