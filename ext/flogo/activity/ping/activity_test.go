@@ -1,6 +1,7 @@
 package ping
 
 import (
+	"encoding/json"
 	"testing"
 
 	"io/ioutil"
@@ -43,7 +44,11 @@ func TestSimpleReply(t *testing.T) {
 
 	//setup attrs
 	tc.SetInput("code", 200)
-	//tc.SetInput("data", "")
+
+	dataBytes := []byte(`{"response":"success"}`)
+	var replyJSON interface{}
+	json.Unmarshal(dataBytes, &replyJSON)
+	tc.SetInput("data", replyJSON)
 
 	//eval
 	act.Eval(tc)
