@@ -20,6 +20,7 @@ import (
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/cli/env"
 	"github.com/TIBCOSoftware/mashling/lib/types"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 var (
@@ -185,7 +186,7 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 			},
 			Triggers: []types.Trigger{
 				{
-					Name:        "ping_trigger",
+					Name:        util.Mashling_Ping_Trigger_Name,
 					Description: "The trigger for ping functionality",
 					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 					Settings: json.RawMessage(`{
@@ -195,7 +196,7 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 						"optimize": "true"
 					}`),
 				}, {
-					Name:        "ping_trigger_detail",
+					Name:        util.Mashling_Ping_Detail_Trigger_Name,
 					Description: "The trigger for detailed ping functionality",
 					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 					Settings: json.RawMessage(`{
@@ -221,7 +222,7 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 			EventLinks: []types.EventLink{
 				{
 					Triggers: []string{
-						"ping_trigger",
+						util.Mashling_Ping_Trigger_Name,
 					},
 					Dispatches: []types.Dispatch{
 						{
@@ -233,7 +234,7 @@ func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
 				},
 				{
 					Triggers: []string{
-						"ping_trigger_detail",
+						util.Mashling_Ping_Detail_Trigger_Name,
 					},
 					Dispatches: []types.Dispatch{
 						{

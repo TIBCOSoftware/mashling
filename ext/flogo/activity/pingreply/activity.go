@@ -10,7 +10,7 @@ import (
 )
 
 // log is the default package logger
-var log = logger.GetLogger("activity-tibco-reply")
+var log = logger.GetLogger("mashling-ping-activity")
 
 const (
 	ivCode = "code"

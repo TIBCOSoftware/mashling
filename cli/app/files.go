@@ -52,7 +52,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	` + getImports() + `
+	` + addPingImports() + `
 )
 
 var (
@@ -126,8 +126,8 @@ func setupSignalHandling() chan int {
 }
 `
 
-func getImports() string {
-	if strings.Compare(os.Getenv(mutil.Mashling_Ping_Embed_Config_Property), "FALSE") != 0 {
+func addPingImports() string {
+	if strings.Compare(os.Getenv(mutil.Mashling_Ping_Embed_Config_Property), "TRUE") != 0 {
 		return "\"github.com/TIBCOSoftware/mashling/lib/util\""
 	}
 	return ""

@@ -192,7 +192,7 @@ func (c *cmdCreate) Exec(args []string) error {
 			return err
 		}
 
-		if strings.Compare(os.Getenv(mutil.Mashling_Ping_Embed_Config_Property), "FALSE") != 0 {
+		if strings.Compare(os.Getenv(mutil.Mashling_Ping_Embed_Config_Property), "TRUE") != 0 {
 			mashCliOutput := fmt.Sprintf("\n\tmashlingCliRev :=  \"%s\"", MashlingMasterGitRev)
 			extraSrc.WriteString(string(mashCliOutput))
 
