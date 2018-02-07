@@ -40,7 +40,7 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 		return err
 	}
 
-	descriptor, err = appendPingFuncionality(pingPort, descriptor)
+	descriptor, err = appendPingDescriptor(pingPort, descriptor)
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string
 		return "", err
 	}
 
-	descriptor, err = appendPingFuncionality(pingPort, descriptor)
+	descriptor, err = appendPingDescriptor(pingPort, descriptor)
 	if err != nil {
 		return "", err
 	}
@@ -1262,9 +1262,9 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 }
 
 /*
-appendPingFuncionality is to append ping trigger details to user provided gateway
+appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
 */
-func appendPingFuncionality(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
+func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
 
 	//ping disable value from environment variable
 	pingDisableVal := os.Getenv(util.Mashling_Ping_Embed_Config_Property)
@@ -1284,7 +1284,7 @@ func appendPingFuncionality(pingPort string, descriptor *types.Microgateway) (*t
 		apendPingFunctionality = true
 		for _, trigger := range pingDescrptr.Gateway.Triggers {
 
-			//checking if ping trigger name is same as user defined trigger
+			//check if there are any user defined trigger names, reserved for ping functionality
 			for _, descTrigger := range descriptor.Gateway.Triggers {
 				if strings.Compare(trigger.Name, descTrigger.Name) == 0 {
 					apendPingFunctionality = false

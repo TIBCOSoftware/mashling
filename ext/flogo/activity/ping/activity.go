@@ -1,4 +1,4 @@
-package pingreply
+package ping
 
 import (
 	"encoding/json"

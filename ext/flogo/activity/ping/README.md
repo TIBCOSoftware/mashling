@@ -35,7 +35,7 @@ Configure a activity to respond with a simple http success code.
 {
   "id": 3,
   "type": 1,
-  "activityType": "tibco-reply",
+  "activityType": "mashling-ping-activity",
   "name": "Respond OK",
   "attributes": [
     { "name": "code", "value": 200 }

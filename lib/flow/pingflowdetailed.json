@@ -46,7 +46,7 @@
                 "description": "Simple Reply Activity",
                 "type": 1,
                 "activityType": "tibco-reply",
-                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/pingreply",
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/ping",
                 "attributes": [
                   {
                     "name": "code",
