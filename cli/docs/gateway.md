@@ -35,7 +35,7 @@ Example using pingport flag:
 
 	mashling create -pingport 9095 my_gw_app
 
-By default ping functionality is disabled, same can be enabled by setting environment variable 'MASHLING_PING_ENABLE' value to TRUE.
+Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
 
 **dependencies versioning**
 
@@ -62,7 +62,7 @@ Example using pingport flag:
 
 	mashling build -pingport 9095
 
-By default ping functionality is disabled, same can be enabled by setting environment variable 'MASHLING_PING_ENABLE' value to TRUE.
+Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
 
 ### help
 This command is used to display help on a particular command
