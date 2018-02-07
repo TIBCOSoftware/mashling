@@ -82,6 +82,13 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/ping",
+			"repository": "https://github.com/TIBCOSoftware/mashling",
+			"revision": "302419fb6fcf996bfa4ab2bc54d01fb29a2c412f",
+			"branch": "master",
+			"path": "/ext/flogo/activity/ping"
+		},
+		{
 			"importpath": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
 			"repository": "https://github.com/TIBCOSoftware/mashling",
 			"revision": "e6cc5894b10f792fdde4816d60409d244e2923d5",
