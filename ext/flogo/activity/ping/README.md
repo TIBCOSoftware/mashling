@@ -1,5 +1,5 @@
-# tibco-reply
-This activity provides your mashling application the ability to reply to a trigger invocation.
+# mashling-ping-activity
+This activity provides your mashling application the ability to reply gateway information as a json.
 
 ## Schema
 Inputs and Outputs:
