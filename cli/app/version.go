@@ -34,7 +34,7 @@ var MashlingLocalGitRev = "not set"
 var FlogoGitRev = "not set"
 
 //SchemaVersion is mashling schema version
-var supportedSchemaVersions = GetAllSupportedSchemas()
+var SchemaVersion = GetAllSupportedSchemas()
 
 //GitBranch is git repository checked in
 var GitBranch = "not set"
@@ -79,7 +79,7 @@ func (c *cmdVersion) Exec(args []string) error {
 		c.versionNumber = Version
 		c.mashlingMasterGitRev = MashlingMasterGitRev
 		c.mashlingLocalGitRev = MashlingLocalGitRev
-		c.schemaVersion = supportedSchemaVersions
+		c.schemaVersion = SchemaVersion
 		c.flogoGitRev = FlogoGitRev
 		c.gitBranch = GitBranch
 
