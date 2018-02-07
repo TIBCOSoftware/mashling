@@ -250,7 +250,6 @@ func TestGetGatewayDetails(t *testing.T) {
 func TestTranslateGatewayJSON2FlogoJSON(t *testing.T) {
 
 	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, "9090")
-	fmt.Printf("flogoJSON[%s]", flogoJSON)
 	if err != nil {
 		t.Error("Error in TranslateGatewayJSON2FlogoJSON function. err: ", err)
 	}
