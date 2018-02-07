@@ -2,11 +2,13 @@ package app
 
 import (
 	"os"
+	"strings"
 
 	"path"
 
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/util"
+	mutil "github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 const (
@@ -50,6 +52,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	` + addPingImports() + `
 )
 
 var (
@@ -122,6 +125,13 @@ func setupSignalHandling() chan int {
 	return exitChan
 }
 `
+
+func addPingImports() string {
+	if strings.Compare(os.Getenv(mutil.Mashling_Ping_Embed_Config_Property), "TRUE") != 0 {
+		return "\"github.com/TIBCOSoftware/mashling/lib/util\""
+	}
+	return ""
+}
 
 func CreateImportsGoFile(codeSourcePath string, deps []*api.Dependency) error {
 	f, err := os.Create(path.Join(codeSourcePath, fileImportsGo))
