@@ -17,7 +17,7 @@ import (
 const gatewayJSON string = `{
 	"mashling_schema": "0.2",
 	"gateway": {
-		"name": "testPing2",
+		"name": "mashlingApp",
 		"version": "1.0.0",
 		"display_name": "Gateway Application",
 		"display_image": "GatewayIcon.jpg",
@@ -60,7 +60,7 @@ const gatewayJSON string = `{
 	}
 }`
 const expectedFlogoJSON string = `{
-	"name": "testPing2",
+	"name": "mashlingApp",
 	"type": "flogo:app",
 	"version": "1.0.0",
 	"description": "This is the first microgateway ping app",
@@ -81,42 +81,6 @@ const expectedFlogoJSON string = `{
 						"autoIdReply": "false",
 						"method": "GET",
 						"path": "/pets/{petId}",
-						"useReplyHandler": "false"
-					},
-					"output": null,
-					"actionMappings": {},
-					"outputs": null
-				}
-			],
-			"outputs": null
-		},
-		{
-			"name": "ping_trigger",
-			"id": "ping_trigger",
-			"ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-			"settings": {
-				"port": "9092"
-			},
-			"output": null,
-			"handlers": [
-				{
-					"actionId": "ping_handler",
-					"settings": {
-						"autoIdReply": "false",
-						"method": "GET",
-						"path": "/ping/",
-						"useReplyHandler": "false"
-					},
-					"output": null,
-					"actionMappings": {},
-					"outputs": null
-				},
-				{
-					"actionId": "ping_handler_detail",
-					"settings": {
-						"autoIdReply": "false",
-						"method": "GET",
-						"path": "/ping/details/",
 						"useReplyHandler": "false"
 					},
 					"output": null,
@@ -268,110 +232,6 @@ const expectedFlogoJSON string = `{
 						],
 						"attributes": []
 					}
-				}
-			},
-			"metadata": null
-		},
-		{
-			"id": "ping_handler",
-			"ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
-			"data": {
-				"flow": {
-					"name": "samplePingApp",
-					"type": 1,
-					"attributes": [],
-					"rootTask": {
-						"id": "root",
-						"type": 1,
-						"tasks": [
-							{
-								"id": "reply_2",
-								"name": "Reply (Legacy)",
-								"description": "Simple Reply Activity",
-								"type": 1,
-								"activityType": "tibco-reply",
-								"activityRef": "github.com/nareshkumarthota/sampleflows/pingreply",
-								"attributes": [
-									{
-										"name": "code",
-										"value": 200,
-										"required": true,
-										"type": "integer"
-									},
-									{
-										"name": "data",
-										"value": null,
-										"required": false,
-										"type": "any"
-									}
-								],
-								"inputMappings": [
-									{
-										"type": 4,
-										"value": {
-											"response": "success"
-										},
-										"mapTo": "data"
-									}
-								]
-							}
-						],
-						"links": [],
-						"attributes": []
-					},
-					"explicitReply": true
-				}
-			},
-			"metadata": null
-		},
-		{
-			"id": "ping_handler_detail",
-			"ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
-			"data": {
-				"flow": {
-					"name": "samplePingDetailedApp",
-					"type": 1,
-					"attributes": [],
-					"rootTask": {
-						"id": "root",
-						"type": 1,
-						"tasks": [
-							{
-								"id": "reply_2",
-								"name": "Reply (Legacy)",
-								"description": "Simple Reply Activity",
-								"type": 1,
-								"activityType": "tibco-reply",
-								"activityRef": "github.com/nareshkumarthota/sampleflows/pingreply",
-								"attributes": [
-									{
-										"name": "code",
-										"value": 200,
-										"required": true,
-										"type": "integer"
-									},
-									{
-										"name": "data",
-										"value": null,
-										"required": false,
-										"type": "any"
-									}
-								],
-								"inputMappings": [
-									{
-										"type": 4,
-										"value": {
-											"response": "Detailed"
-										},
-										"mapTo": "data"
-									}
-								]
-							}
-						],
-						"links": [],
-						"attributes": []
-					},
-					"explicitReply": true
 				}
 			},
 			"metadata": null
