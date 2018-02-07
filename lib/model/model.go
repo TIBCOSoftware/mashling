@@ -30,7 +30,7 @@ func CreateMashlingSampleModel() (types.Microgateway, error) {
 					Settings: json.RawMessage(`{
 					  "port": "9096",
 					  "method": "GET",
-"path": "/pets/{petId}"
+					  "path": "/pets/{petId}"
 					}`),
 				},
 			},

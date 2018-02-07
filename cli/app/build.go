@@ -20,7 +20,11 @@ var optBuild = &cli.OptionInfo{
 	Name:      "build",
 	UsageLine: "build",
 	Short:     "Build mashling gateway from mashling.json",
-	Long:      "Build mashling gateway from gateway description file - mashling.json",
+	Long: `Build mashling gateway from gateway description file - mashling.json.
+  
+  Options:
+	  -pingport	specify the port for ping functionality
+   `,
 }
 
 func init() {
@@ -28,7 +32,8 @@ func init() {
 }
 
 type cmdBuild struct {
-	option *cli.OptionInfo
+	option   *cli.OptionInfo
+	pingport string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -38,6 +43,7 @@ func (c *cmdBuild) OptionInfo() *cli.OptionInfo {
 
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdBuild) AddFlags(fs *flag.FlagSet) {
+	fs.StringVar(&(c.pingport), "pingport", "", "ping port")
 }
 
 // Exec implementation of cli.Command.Exec
@@ -75,5 +81,5 @@ func (c *cmdBuild) Exec(args []string) error {
 		return err
 	}
 
-	return BuildMashling(currentDir, gatewayJSON)
+	return BuildMashling(currentDir, gatewayJSON, c.pingport)
 }
