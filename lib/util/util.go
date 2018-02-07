@@ -143,16 +143,3 @@ func ResolveEnvironmentProperties(settings map[string]interface{}) error {
 	}
 	return nil
 }
-
-var PingDataPntr = &PingDataDet{}
-
-type PingDataDet struct {
-	MashlingCliRev      string
-	MashlingCliLocalRev string
-	MashlingCliVersion  string
-	SchemaVersion       string
-	AppVersion          string
-	FlogolibRev         string
-	MashlingRev         string
-	AppDescrption       string
-}

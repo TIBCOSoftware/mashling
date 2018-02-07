@@ -33,14 +33,9 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, pingPort string, customizeFunc func() error) error {
+func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
-	if err != nil {
-		return err
-	}
-
-	descriptor, err = appendPingDescriptor(pingPort, descriptor)
 	if err != nil {
 		return err
 	}
@@ -208,13 +203,8 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 }
 
 // TranslateGatewayJSON2FlogoJSON tanslates mashling json to flogo json
-func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string, error) {
+func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
-	if err != nil {
-		return "", err
-	}
-
-	descriptor, err = appendPingDescriptor(pingPort, descriptor)
 	if err != nil {
 		return "", err
 	}
@@ -320,10 +310,10 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string
 }
 
 // BuildMashling Builds mashling gateway
-func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
+func BuildMashling(appDir string, gatewayJSON string) error {
 
 	//create flogo.json from gateway descriptor
-	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort)
+	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON)
 	if err != nil {
 		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
 		return err
@@ -1259,54 +1249,4 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 	} else {
 		return RegisterWithConsul(gatewayJSON, consulToken, consulDefDir, consulAddress)
 	}
-}
-
-/*
-appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
-*/
-func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
-
-	//ping disable value from environment variable
-	pingDisableVal := os.Getenv(util.Mashling_Ping_Embed_Config_Property)
-	if strings.Compare(pingDisableVal, "TRUE") != 0 {
-		if len(pingPort) == 0 {
-			pingPort = os.Getenv(util.Mashling_Ping_Port)
-			if len(pingPort) == 0 {
-				pingPort = util.Mashling_Default_Ping_Port_Val
-			}
-		}
-		pingDescrptr, err := CreateMashlingPingModel(pingPort)
-		if err != nil {
-			return descriptor, err
-		}
-
-		var apendPingFunctionality bool
-		apendPingFunctionality = true
-		for _, trigger := range pingDescrptr.Gateway.Triggers {
-
-			//check if there are any user defined trigger names, reserved for ping functionality
-			for _, descTrigger := range descriptor.Gateway.Triggers {
-				if strings.Compare(trigger.Name, descTrigger.Name) == 0 {
-					apendPingFunctionality = false
-					break
-				}
-			}
-
-			if apendPingFunctionality {
-				descriptor.Gateway.Triggers = append(descriptor.Gateway.Triggers, trigger)
-			} else {
-				return descriptor, fmt.Errorf("trigger name[%s] is reserved for ping functionality, please use other names for user defined triggers", trigger.Name)
-			}
-		}
-		for _, eventHandlr := range pingDescrptr.Gateway.EventHandlers {
-			descriptor.Gateway.EventHandlers = append(descriptor.Gateway.EventHandlers, eventHandlr)
-		}
-		for _, Config := range pingDescrptr.Gateway.Configurations {
-			descriptor.Gateway.Configurations = append(descriptor.Gateway.Configurations, Config)
-		}
-		for _, eventLink := range pingDescrptr.Gateway.EventLinks {
-			descriptor.Gateway.EventLinks = append(descriptor.Gateway.EventLinks, eventLink)
-		}
-	}
-	return descriptor, nil
 }

@@ -37,7 +37,7 @@ const sampleJSON = `{
 		{
 		  "name": "get_handler",
 		  "description": "Handle REST GET call",
-		  "reference": "github.com/TIBCOSoftware/mashling/lib/flow/tunable.json"
+		  "reference": "github.com/nareshkumarthota/sampleflows/tunable.json"
 		}
 	  ],
 	  "event_links": [
