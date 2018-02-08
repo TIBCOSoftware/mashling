@@ -8,9 +8,14 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/TIBCOSoftware/mashling/lib/util"
+
+	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -273,4 +278,38 @@ func AreEqualJSON(s1, s2 string) (bool, error) {
 	}
 
 	return reflect.DeepEqual(o1, o2), nil
+}
+
+func TestAppendPingDescriptor(t *testing.T) {
+
+	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
+	if err != nil {
+		t.Fail()
+	}
+
+	os.Setenv(util.Mashling_Ping_Embed_Config_Property, "TRUE")
+	descriptor, err = appendPingDescriptor("9090", descriptor)
+	if err != nil {
+		t.Fail()
+	}
+
+	pingDescrptr, err := CreateMashlingPingModel("9090")
+	if err != nil {
+		t.Fail()
+	}
+
+	var apendPingFunctionality bool
+	apendPingFunctionality = false
+	for _, trigger := range pingDescrptr.Gateway.Triggers {
+		for _, descTrigger := range descriptor.Gateway.Triggers {
+			if strings.Compare(trigger.Name, descTrigger.Name) == 0 {
+				apendPingFunctionality = true
+				break
+			}
+		}
+	}
+	if !apendPingFunctionality {
+		t.Fail()
+	}
+	os.Setenv(util.Mashling_Ping_Embed_Config_Property, "FALSE")
 }
