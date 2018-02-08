@@ -209,7 +209,7 @@ func (c *cmdCreate) Exec(args []string) error {
 				mashCliOutput = fmt.Sprintf("\n\tmashlingLocRev :=  \"%s\"", MashlingLocalGitRev)
 				extraSrc.WriteString(string(mashCliOutput))
 
-				mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingLocRev = mashlingLocRev \n")
+				mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliLocalRev = mashlingLocRev \n")
 				extraSrc.WriteString(string(mashCliOutput))
 			}
 
