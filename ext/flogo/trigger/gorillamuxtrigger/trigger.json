@@ -78,19 +78,19 @@
   "outputs": [
     {
       "name": "params",
-      "type": "params"
+      "type": "any"
     },
     {
       "name": "pathParams",
-      "type": "params"
+      "type": "any"
     },
     {
       "name": "queryParams",
-      "type": "params"
+      "type": "any"
     },
     {
       "name": "content",
-      "type": "object"
+      "type": "any"
     },
     {
       "name": "tracing",

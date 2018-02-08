@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -404,16 +405,42 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		}
 
 		var content interface{}
-		err = json.NewDecoder(r.Body).Decode(&content)
-		if err != nil {
-			switch {
-			case err == io.EOF:
-			// empty body
-			//todo should handler say if content is expected?
-			case err != nil:
-				serverSpan.SetTag("error", err.Error())
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
+		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
+			switch r.Header.Get("Content-Type") {
+			case "application/json":
+				err = json.NewDecoder(r.Body).Decode(&content)
+				if err == io.EOF {
+					str := "json body required"
+					serverSpan.SetTag("error", str)
+					http.Error(w, str, http.StatusBadRequest)
+					return
+				} else if err != nil {
+					serverSpan.SetTag("error", err.Error())
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+			case "":
+				var data []byte
+				data, err = ioutil.ReadAll(r.Body)
+				if err != nil || len(data) == 0 {
+					break
+				}
+				err = json.Unmarshal(data, &content)
+				if err == nil {
+					break
+				}
+				content = string(data)
+			case "text/xml", "application/xml":
+				fallthrough
+			default:
+				var data []byte
+				data, err = ioutil.ReadAll(r.Body)
+				if err != nil {
+					serverSpan.SetTag("error", err.Error())
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				content = string(data)
 			}
 		}
 
