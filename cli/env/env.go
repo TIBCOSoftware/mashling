@@ -13,6 +13,12 @@ type Project interface {
 	// Open the project directory and validate its structure
 	Open() error
 
+	// Sets whether this is a docker build or not
+	SetDockerBuild()
+
+	// GetDockerBuild returns whether this is a docker build or not
+	GetDockerBuild() bool
+
 	// GetBinDir get the bin directory of the project
 	GetBinDir() string
 

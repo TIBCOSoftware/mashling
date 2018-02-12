@@ -19,6 +19,7 @@ import (
 
 	"bytes"
 
+	"reflect"
 	"strconv"
 
 	api "github.com/TIBCOSoftware/flogo-cli/app"
@@ -36,9 +37,14 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, customizeFunc func() error) error {
+func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, pingPort string, customizeFunc func() error) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
+	if err != nil {
+		return err
+	}
+
+	descriptor, err = appendPingDescriptor(pingPort, descriptor)
 	if err != nil {
 		return err
 	}
@@ -206,8 +212,13 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 }
 
 // TranslateGatewayJSON2FlogoJSON tanslates mashling json to flogo json
-func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
+func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string, error) {
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
+	if err != nil {
+		return "", err
+	}
+
+	descriptor, err = appendPingDescriptor(pingPort, descriptor)
 	if err != nil {
 		return "", err
 	}
@@ -313,10 +324,10 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string) (string, error) {
 }
 
 // BuildMashling Builds mashling gateway
-func BuildMashling(appDir string, gatewayJSON string) error {
+func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 
 	//create flogo.json from gateway descriptor
-	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON)
+	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort)
 	if err != nil {
 		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
 		return err
@@ -428,7 +439,7 @@ func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error)
 }
 
 // PublishToMashery publishes to mashery
-func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host string, mock bool) error {
+func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host string, mock bool, iodocs bool, testplan bool, apiTemplateJSON string) error {
 	// Get HTTP triggers from JSON
 	swaggerDoc, err := generateSwagger(host, "", gatewayJSON)
 	if err != nil {
@@ -443,47 +454,550 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host str
 	}
 
 	// Delay to avoid hitting QPS limit
-	delayMilli(500)
+	shortDelay()
 
-	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), token)
+	mApi, err := TransformSwagger(user, string(swaggerDoc), "swagger2", "masheryapi", token)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger doc\n\n")
+		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger to mashery api\n\n")
 		return err
 	}
 
-	// Only need the value of 'document'. Including the rest will cause errors
-	m := map[string]interface{}{}
-	if err = json.Unmarshal([]byte(tfSwaggerDoc), &m); err != nil {
-		panic(err)
+	shortDelay()
+
+	mIodoc, err := TransformSwagger(user, string(swaggerDoc), "swagger2", "iodocsv1", token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger to mashery iodocs\n\n")
+		return err
 	}
 
-	var cleanedTfSwaggerDoc []byte
+	shortDelay()
 
-	if cleanedTfSwaggerDoc, err = json.Marshal(m["document"]); err != nil {
-		panic(err)
-	}
-
+	templApi, templEndpoint, templPackage, templPlan := BuildMasheryTemplates(apiTemplateJSON)
 	if mock == false {
-		s, err := user.CreateAPI(string(cleanedTfSwaggerDoc), token)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Unable to create the api %s\n\n", s)
-			fmt.Errorf("%v", err)
-			return err
+
+		mApi = UpdateApiWithDefaults(mApi, templApi, templEndpoint)
+
+		apiId, apiName, endpoints, updated := CreateOrUpdateApi(user, token, MapToByteArray(mApi), mApi)
+
+		if iodocs == true {
+
+			cleanedTfIodocSwaggerDoc := UpdateIodocsDataWithApi(MapToByteArray(mIodoc), apiId)
+
+			CreateOrUpdateIodocs(user, token, cleanedTfIodocSwaggerDoc, apiId, updated)
+			shortDelay()
 		}
 
-		fmt.Println("Successfully published to mashery!")
+		var key string
+		if testplan == true {
+
+			packagePlanDoc := CreatePackagePlanDataFromApi(apiId, apiName, endpoints)
+			packagePlanDoc = UpdatePackageWithDefaults(packagePlanDoc, templPackage, templPlan)
+			var marshalledDoc []byte
+			marshalledDoc, err = json.Marshal(packagePlanDoc)
+			if err != nil {
+				panic(err)
+			}
+
+			shortDelay()
+
+			p := CreateOrUpdatePackage(user, token, marshalledDoc, apiName, updated)
+
+			shortDelay()
+
+			key = CreateApplicationAndKey(user, token, p, apiName)
+
+		}
+		fmt.Println("==================================================================")
+		fmt.Printf("Successfully published to mashery= API %s (id=%s)\n", apiName, apiId)
+		fmt.Println("==================================================================")
+		fmt.Println("API Control Center Link: https://" + strings.Replace(user.portal, "api", "admin", -1) + "/control-center/api-definitions/" + apiId)
+		if testplan == true {
+			fmt.Println("==================================================================")
+			fmt.Println("Example Curls:")
+			for _, endpoint := range endpoints {
+				ep := endpoint.(map[string]interface{})
+				fmt.Println(GenerateExampleCall(ep, key))
+			}
+		}
 	} else {
 		var prettyJSON bytes.Buffer
-		err := json.Indent(&prettyJSON, cleanedTfSwaggerDoc, "", "\t")
+		err := json.Indent(&prettyJSON, MapToByteArray(mApi), "", "\t")
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s", prettyJSON.Bytes())
+		//fmt.Printf("%s", prettyJSON.Bytes())
 		fmt.Println("\nMocked! Did not attempt to publish.\n")
 	}
 
 	return nil
+}
+
+func UpdateApiWithDefaults(mApi map[string]interface{}, templApi map[string]interface{}, templEndpoint map[string]interface{}) map[string]interface{} {
+	var m1 map[string]interface{}
+	json.Unmarshal(MapToByteArray(mApi), &m1)
+	merged := merge(m1, templApi, 0)
+	m_d := m1["endpoints"].([]interface{})
+
+	items := []map[string]interface{}{}
+
+	for _, d_item := range m_d {
+		merged := merge(d_item.(map[string]interface{}), templEndpoint, 0)
+		items = append(items, merged)
+	}
+
+	merged["endpoints"] = items
+	return merged
+
+}
+
+func UpdatePackageWithDefaults(mApi map[string]interface{}, templPackage map[string]interface{}, templPlan map[string]interface{}) map[string]interface{} {
+	var m1 map[string]interface{}
+	json.Unmarshal(MapToByteArray(mApi), &m1)
+	merged := merge(m1, templPackage, 0)
+	m_d := m1["plans"].([]interface{})
+
+	items := []map[string]interface{}{}
+
+	for _, d_item := range m_d {
+		merged := merge(d_item.(map[string]interface{}), templPlan, 0)
+		items = append(items, merged)
+	}
+
+	merged["plans"] = items
+	return merged
+
+}
+
+func BuildMasheryTemplates(apiTemplateJSON string) (map[string]interface{}, map[string]interface{}, map[string]interface{}, map[string]interface{}) {
+	apiTemplate := map[string]interface{}{}
+	endpointTemplate := map[string]interface{}{}
+	packageTemplate := map[string]interface{}{}
+	planTemplate := map[string]interface{}{}
+
+	if apiTemplateJSON != "" {
+		var m map[string]interface{}
+		if err := json.Unmarshal([]byte(apiTemplateJSON), &m); err != nil {
+			panic(err)
+		}
+		apiTemplate = m["api"].(map[string]interface{})
+		endpointTemplate = apiTemplate["endpoint"].(map[string]interface{})
+		delete(apiTemplate, "endpoint")
+		packageTemplate = m["package"].(map[string]interface{})
+		planTemplate = packageTemplate["plan"].(map[string]interface{})
+		delete(packageTemplate, "plan")
+
+	} else {
+		apiTemplate["qpsLimitOverall"] = 0
+		endpointTemplate["requestAuthenticationType"] = "apiKeyAndSecret_SHA256"
+		packageTemplate["sharedSecretLength"] = 10
+		planTemplate["selfServiceKeyProvisioningEnabled"] = false
+
+	}
+
+	return apiTemplate, endpointTemplate, packageTemplate, planTemplate
+}
+func TransformSwagger(user *ApiUser, swaggerDoc string, sourceFormat string, targetFormat string, oauthToken string) (map[string]interface{}, error) {
+	tfSwaggerDoc, err := user.TransformSwagger(string(swaggerDoc), sourceFormat, targetFormat, oauthToken)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to transform swagger doc\n\n")
+	}
+
+	// Only need the value of 'document'. Including the rest will cause errors
+	var m map[string]interface{}
+	if err = json.Unmarshal([]byte(tfSwaggerDoc), &m); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to process swagger doc\n\n")
+	}
+
+	return m, err
+}
+
+func MapToByteArray(mapToConvert map[string]interface{}) []byte {
+	var convertedByteArray []byte
+	var err error
+
+	if val, ok := mapToConvert["document"]; ok {
+		mapToConvert = val.(map[string]interface{})
+	}
+
+	if convertedByteArray, err = json.Marshal(mapToConvert); err != nil {
+		panic(err)
+	}
+
+	return convertedByteArray
+}
+
+func CreateOrUpdateApi(user *ApiUser, token string, cleanedTfApiSwaggerDoc []byte, mApi map[string]interface{}) (string, string, []interface{}, bool) {
+	updated := false
+
+	masheryObject := "services"
+	masheryObjectProperties := "id,name,endpoints.id,endpoints.name,endpoints.inboundSslRequired,endpoints.outboundRequestTargetPath,endpoints.outboundTransportProtocol,endpoints.publicDomains,endpoints.requestAuthenticationType,endpoints.requestPathAlias,endpoints.requestProtocol,endpoints.supportedHttpMethods,endoints.systemDomains,endpoints.trafficManagerDomain"
+	var apiId string
+	var apiName string
+	var endpoints [](interface{})
+
+	api, err := user.Read(masheryObject, "name:"+mApi["name"].(string), masheryObjectProperties, token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to fetch api\n\n")
+		panic(err)
+	}
+
+	shortDelay()
+
+	var f [](interface{})
+	if err = json.Unmarshal([]byte(api), &f); err != nil {
+		panic(err)
+	}
+	if len(f) == 0 {
+		s, err := user.Create(masheryObject, masheryObjectProperties, string(cleanedTfApiSwaggerDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to create the api %s\n\n", s)
+			fmt.Errorf("%v", err)
+			panic(err)
+		}
+		apiId, apiName, endpoints = GetApiDetails(s)
+
+	} else {
+		m := f[0].(map[string]interface{})
+		var m1 map[string]interface{}
+		json.Unmarshal(cleanedTfApiSwaggerDoc, &m1)
+		merged := merge(m, m1, 0)
+		var mergedDoc []byte
+		if mergedDoc, err = json.Marshal(merged); err != nil {
+			panic(err)
+		}
+		serviceId := merged["id"].(string)
+		s, err := user.Update(masheryObject+"/"+serviceId, masheryObjectProperties, string(mergedDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to update the api %s\n\n", s)
+			fmt.Errorf("%v", err)
+			panic(err)
+		}
+		apiId, apiName, endpoints = GetApiDetails(s)
+
+		updated = true
+	}
+
+	return apiId, apiName, endpoints, updated
+}
+
+func merge(dst, src map[string]interface{}, depth int) map[string]interface{} {
+	for key, srcVal := range src {
+		if dstVal, ok := dst[key]; ok {
+			if reflect.ValueOf(dstVal).Kind() == reflect.Map {
+				srcMap, srcMapOk := mapify(srcVal)
+				dstMap, dstMapOk := mapify(dstVal)
+				if srcMapOk && dstMapOk {
+					srcVal = merge(dstMap, srcMap, depth+1)
+				}
+			} else if (key == "endpoints" || key == "plans") && reflect.ValueOf(dstVal).Kind() == reflect.Slice {
+				m_d := dstVal.([]interface{})
+				m_s := srcVal.([]interface{})
+				items := []map[string]interface{}{}
+
+				for _, d_item := range m_d {
+					i_d := d_item.(map[string]interface{})
+					var i_s map[string]interface{}
+					for _, s_item := range m_s {
+						i_s = s_item.(map[string]interface{})
+						if i_s["requestPathAlias"] == i_d["requestPathAlias"] {
+							i_s2 := merge(i_d, i_s, depth+1)
+							items = append(items, i_s2)
+						}
+					}
+				}
+
+				for _, s_item := range m_s {
+					i_s := s_item.(map[string]interface{})
+					if !MatchingEndpoint(i_s, m_d) {
+						items = append(items, i_s)
+					}
+				}
+				srcVal = items
+			}
+		}
+
+		dst[key] = srcVal
+	}
+	return dst
+}
+
+func MatchingEndpoint(ep map[string]interface{}, epList []interface{}) bool {
+	var i_d map[string]interface{}
+	for _, d_item := range epList {
+		i_d = d_item.(map[string]interface{})
+		if i_d["requestPathAlias"] == ep["requestPathAlias"] {
+			return true
+		}
+	}
+	return false
+}
+
+func mapify(i interface{}) (map[string]interface{}, bool) {
+	value := reflect.ValueOf(i)
+	if value.Kind() == reflect.Map {
+		m := map[string]interface{}{}
+		for _, k := range value.MapKeys() {
+			m[k.String()] = value.MapIndex(k).Interface()
+		}
+		return m, true
+	}
+	return map[string]interface{}{}, false
+}
+
+func CreateOrUpdateIodocs(user *ApiUser, token string, cleanedTfIodocSwaggerDoc []byte, apiId string, updated bool) {
+	masheryObject := "iodocs/services"
+	masheryObjectProperties := "id"
+
+	item, err := user.Read(masheryObject, "serviceId:"+apiId, masheryObjectProperties, token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to fetch iodocs\n\n")
+		panic(err)
+	}
+
+	var f [](interface{})
+	if err = json.Unmarshal([]byte(item), &f); err != nil {
+		panic(err)
+	}
+
+	shortDelay()
+
+	if len(f) == 0 {
+		s, err := user.Create(masheryObject, masheryObjectProperties, string(cleanedTfIodocSwaggerDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to create the iodocs %s\n\n", s)
+			fmt.Errorf("%v", err)
+		}
+	} else {
+		s, err := user.Update(masheryObject+"/"+apiId, masheryObjectProperties, string(cleanedTfIodocSwaggerDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to create the iodocs %s\n\n", s)
+			fmt.Errorf("%v", err)
+		}
+	}
+}
+
+func CreateOrUpdatePackage(user *ApiUser, token string, packagePlanDoc []byte, apiName string, updated bool) string {
+	var p string
+	masheryObject := "packages"
+	masheryObjectProperties := "id,name,plans.id,plans.name"
+
+	item, err := user.Read(masheryObject, "name:"+apiName, masheryObjectProperties, token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to fetch package\n\n")
+		panic(err)
+	}
+
+	var f [](interface{})
+	if err = json.Unmarshal([]byte(item), &f); err != nil {
+		panic(err)
+	}
+
+	if len(f) == 0 {
+		p, err = user.Create(masheryObject, masheryObjectProperties, string(packagePlanDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to create the package %s\n\n", p)
+			fmt.Errorf("%v", err)
+			panic(err)
+		}
+	} else {
+
+		m := f[0].(map[string]interface{})
+
+		var m1 map[string]interface{}
+		json.Unmarshal(packagePlanDoc, &m1)
+		merged := merge(m, m1, 0)
+		var mergedDoc []byte
+		if mergedDoc, err = json.Marshal(merged); err != nil {
+			panic(err)
+		}
+		packageId := merged["id"].(string)
+		p, err = user.Update(masheryObject+"/"+packageId, masheryObjectProperties, string(mergedDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to update the package %s\n\n", p)
+			fmt.Errorf("%v", err)
+			panic(err)
+		}
+	}
+	return p
+}
+
+func GetApiDetails(api string) (string, string, []interface{}) {
+	m := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(api), &m); err != nil {
+		panic(err)
+	}
+	return m["id"].(string), m["name"].(string), m["endpoints"].([]interface{}) // getting the api id and name
+}
+
+func GetPackagePlanDetails(packagePlan string) (string, string) {
+	m := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(packagePlan), &m); err != nil {
+		panic(err)
+	}
+	plans := m["plans"].([]interface{})
+	plan := plans[0].(map[string]interface{})
+	return m["id"].(string), plan["id"].(string) // getting the package id and plan id
+}
+
+func UpdateIodocsDataWithApi(ioDoc []byte, apiId string) []byte {
+	// need to create a different json representation for an IOdocs post body
+	m1 := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(string(ioDoc)), &m1); err != nil {
+		panic(err)
+	}
+
+	var cleanedTfIodocSwaggerDoc []byte
+
+	m := map[string]interface{}{}
+	m["definition"] = m1
+	m["serviceId"] = apiId
+	cleanedTfIodocSwaggerDoc, err := json.Marshal(m)
+	if err != nil {
+		panic(err)
+	}
+
+	return cleanedTfIodocSwaggerDoc
+}
+
+func CreatePackagePlanDataFromApi(apiId string, apiName string, endpoints []interface{}) map[string]interface{} {
+	pack := map[string]interface{}{}
+	pack["name"] = apiName
+	pack["sharedSecretLength"] = 10
+
+	plan := map[string]interface{}{}
+	plan["name"] = apiName
+	plan["selfServiceKeyProvisioningEnabled"] = false
+	plan["numKeysBeforeReview"] = 1
+
+	service := map[string]interface{}{}
+	service["id"] = apiId
+
+	service["endpoints"] = endpoints
+
+	planServices := []map[string]interface{}{}
+	planServices = append(planServices, service)
+
+	plan["services"] = planServices
+
+	plans := []map[string]interface{}{}
+	plans = append(plans, plan)
+	pack["plans"] = plans
+
+	return pack
+}
+
+func CreateApplicationAndKey(user *ApiUser, token string, packagePlan string, apiName string) string {
+	var key string
+	member, err := user.Read("members", "username:"+user.username, "id,username,applications,packageKeys", token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Unable to fetch api\n\n")
+		panic(err)
+	}
+
+	var f [](interface{})
+	if err = json.Unmarshal([]byte(member), &f); err != nil {
+		panic(err)
+	}
+
+	var f_app interface{}
+	testApplication := map[string]interface{}{}
+	m := f[0].(map[string]interface{})
+	var f2 [](interface{})
+	f2 = m["applications"].([](interface{}))
+	for _, application := range f2 {
+		if application.(map[string]interface{})["name"] == "Test Application: "+apiName {
+			testApplication = application.(map[string]interface{})
+			packageKeys, err := user.Read("applications/"+testApplication["id"].(string)+"/packageKeys", "", "id,apikey,secret", token)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: Unable to fetch packagekeys\n\n")
+				panic(err)
+			}
+
+			var f [](interface{})
+			if err = json.Unmarshal([]byte(packageKeys), &f); err != nil {
+				panic(err)
+			}
+			if len(f) > 0 {
+				pk := f[0].(map[string]interface{})
+
+				testKeyDoc, err := json.Marshal(pk)
+				if err != nil {
+					panic(err)
+				}
+				key = string(testKeyDoc)
+			}
+			f_app = testApplication
+		}
+	}
+
+	if len(testApplication) == 0 {
+		testApplication["name"] = "Test Application: " + apiName
+		testApplication["username"] = user.username
+		testApplication["is_packaged"] = true
+		var testApplicationDoc []byte
+
+		testApplicationDoc, err = json.Marshal(testApplication)
+		if err != nil {
+			panic(err)
+		}
+		application, err := user.Create("members/"+m["id"].(string)+"/applications", "id,name", string(testApplicationDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to create application\n\n")
+			panic(err)
+		}
+
+		if err = json.Unmarshal([]byte(application), &f_app); err != nil {
+			panic(err)
+		}
+
+	}
+
+	if key == "" {
+		packageId, planId := GetPackagePlanDetails(packagePlan)
+		keyToCreate := map[string]interface{}{}
+		keyPackage := map[string]interface{}{}
+		keyPackage["id"] = packageId
+		keyPlan := map[string]interface{}{}
+		keyPlan["id"] = planId
+		keyToCreate["package"] = keyPackage
+		keyToCreate["plan"] = keyPlan
+		var testKeyDoc []byte
+
+		testKeyDoc, err = json.Marshal(keyToCreate)
+		if err != nil {
+			panic(err)
+		}
+		key, err = user.Create("applications/"+f_app.(map[string]interface{})["id"].(string)+"/packageKeys", "", string(testKeyDoc), token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to create key\n\n")
+			panic(err)
+		}
+	}
+
+	return key
+
+}
+
+func GenerateExampleCall(endpoint map[string]interface{}, key string) string {
+	var exampleCall string
+
+	public_domains := endpoint["publicDomains"].([]interface{})
+	pd_map := public_domains[0].(map[string]interface{})
+	var pk map[string]interface{}
+	if err := json.Unmarshal([]byte(key), &pk); err != nil {
+		panic(err)
+	}
+	protocol := "https"
+	if !endpoint["inboundSslRequired"].(bool) {
+		protocol = "http"
+	}
+	sig := ""
+	if endpoint["requestAuthenticationType"] == "apiKeyAndSecret_SHA256" {
+		sig = "&sig='$(php -r \"echo hash('sha256', '" + pk["apikey"].(string) + "'.'" + pk["secret"].(string) + "'.time());\")"
+	}
+	exampleCall = "curl -i -v -k -X " + strings.ToUpper(endpoint["supportedHttpMethods"].([]interface{})[0].(string)) + " '" + protocol + "://" + pd_map["address"].(string) + endpoint["requestPathAlias"].(string) + "?api_key=" + pk["apikey"].(string) + sig
+	return exampleCall
 }
 
 // GetGatewayDetails returns gateway details i.e all Triggers, Handlers & Links
@@ -739,6 +1253,66 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 	CreateImportsGoFile(cmdPath, deps)
 
 	return nil
+}
+
+//PublishToConsul integrates suplied gateway json into consul
+func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consulDefDir string, consulAddress string) error {
+
+	if !addFlag {
+		return DeregisterFromConsul(gatewayJSON, consulToken, consulDefDir, consulAddress)
+	} else {
+		return RegisterWithConsul(gatewayJSON, consulToken, consulDefDir, consulAddress)
+	}
+}
+
+/*
+appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
+*/
+func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
+
+	//ping disable value from environment variable
+	pingDisableVal := os.Getenv(util.Mashling_Ping_Embed_Config_Property)
+	if strings.Compare(pingDisableVal, "TRUE") == 0 {
+		if len(pingPort) == 0 {
+			pingPort = os.Getenv(util.Mashling_Ping_Port)
+			if len(pingPort) == 0 {
+				pingPort = util.Mashling_Default_Ping_Port_Val
+			}
+		}
+		pingDescrptr, err := CreateMashlingPingModel(pingPort)
+		if err != nil {
+			return descriptor, err
+		}
+
+		var apendPingFunctionality bool
+		apendPingFunctionality = true
+		for _, trigger := range pingDescrptr.Gateway.Triggers {
+
+			//check if there are any user defined trigger names, reserved for ping functionality
+			for _, descTrigger := range descriptor.Gateway.Triggers {
+				if strings.Compare(trigger.Name, descTrigger.Name) == 0 {
+					apendPingFunctionality = false
+					break
+				}
+			}
+
+			if apendPingFunctionality {
+				descriptor.Gateway.Triggers = append(descriptor.Gateway.Triggers, trigger)
+			} else {
+				return descriptor, fmt.Errorf("trigger name[%s] is reserved for ping functionality, please use other names for user defined triggers", trigger.Name)
+			}
+		}
+		for _, eventHandlr := range pingDescrptr.Gateway.EventHandlers {
+			descriptor.Gateway.EventHandlers = append(descriptor.Gateway.EventHandlers, eventHandlr)
+		}
+		for _, Config := range pingDescrptr.Gateway.Configurations {
+			descriptor.Gateway.Configurations = append(descriptor.Gateway.Configurations, Config)
+		}
+		for _, eventLink := range pingDescrptr.Gateway.EventLinks {
+			descriptor.Gateway.EventLinks = append(descriptor.Gateway.EventLinks, eventLink)
+		}
+	}
+	return descriptor, nil
 }
 
 func BuildApp(env env.Project, options *api.BuildOptions) (err error) {

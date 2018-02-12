@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package types
 
 import "encoding/json"
@@ -53,8 +53,9 @@ type EventLink struct {
 }
 
 type Path struct {
-	If      string `json:"if,omitempty"`
-	Handler string `json:"handler,omitempty"`
+	If          string          `json:"if,omitempty"`
+	Handler     string          `json:"handler,omitempty"`
+	InputParams json.RawMessage `json:"inputParams,omitempty"`
 }
 
 type Dispatch struct {

@@ -21,10 +21,11 @@ git:
 # Do a github login using token
 before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
+  - pip install --user awscli
 install:
   - go get -u github.com/constabulary/gb/...
-  - go get -u github.com/tools/godep/... 
-  
+  - go get -u github.com/tools/godep/...
+  - go get -u github.com/ains/go-test-html 
   
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
@@ -32,14 +33,16 @@ script:
   - cp -r $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/dependency-config/* $GOPATH/src/github.com/TIBCOSoftware/mashling
   - cd mashling
   - godep restore
-  - go test ./...
+  - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
   - go install ./...
-  - mashling version
+  - make all
+  - mashling help
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - pushd mashling-cicd/sample-recipes
   - rm -rf builds
   - mkdir -p builds/latest
-  - chmod ugo+x ./build-recipes.sh ./sanity.sh
+  - chmod ugo+x ./build-recipes.sh ./sanity.sh ./gotestreport.sh
+  - ./gotestreport.sh
   - ./build-recipes.sh
   - ./sanity.sh
   - popd
@@ -48,17 +51,17 @@ script:
     chmod ugo+x ./build-mashling.sh ;
     ./build-mashling.sh ;
     popd ;
-    fi
+    fi  
     
 after_script:
   - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
+  - "[ -f \"${HOME}/.aws\" ] && rm -f ${HOME}/.aws"
 
 after_success:
   - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
   - source $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh
   - mashling::module::postbuild mashling mashling
-
-
+  
 notifications: 
   email: 
     on_failure: always

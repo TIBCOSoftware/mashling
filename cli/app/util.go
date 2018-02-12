@@ -7,8 +7,10 @@ package app
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -17,6 +19,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/cli/env"
+	"github.com/TIBCOSoftware/mashling/lib/types"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 var (
@@ -114,6 +118,10 @@ func delayMilli(amount int) {
 	time.Sleep(time.Duration(amount) * time.Millisecond)
 }
 
+func shortDelay() {
+	delayMilli(500)
+}
+
 func Usage() {
 	printUsage(os.Stderr)
 	os.Exit(2)
@@ -141,3 +149,104 @@ Commands:
 {{range .}}
     {{.Name | printf "%-12s"}} {{.Short}}{{end}}
 `
+
+// getLocalIP gets the public ip address of the system
+func getLocalIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return "127.0.0.1"
+	}
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String()
+}
+
+/*
+CreateMashlingPingModel creates rest based ping mashling json used for ping functionality
+*/
+func CreateMashlingPingModel(pingPort string) (types.Microgateway, error) {
+
+	microGateway := types.Microgateway{
+		MashlingSchema: "0.2",
+		Gateway: types.Gateway{
+			Name:         "GatewayPingApp",
+			Version:      "1.0.0",
+			DisplayName:  "Gateway Ping Application",
+			DisplayImage: "GatewayPingIcon.jpg",
+			Description:  "This is the first microgateway ping app",
+			Configurations: []types.Config{
+				{
+					Name:        "ping_config",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+					Description: "The trigger for ping functionality",
+					Settings: json.RawMessage(`{
+						"port": "` + pingPort + `"
+						}`),
+				},
+			},
+			Triggers: []types.Trigger{
+				{
+					Name:        util.Mashling_Ping_Trigger_Name,
+					Description: "The trigger for ping functionality",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+					Settings: json.RawMessage(`{
+						"config": "${configurations.ping_config}",
+						"method": "GET",
+						"path": "/ping/",
+						"optimize": "true"
+					}`),
+				}, {
+					Name:        util.Mashling_Ping_Detail_Trigger_Name,
+					Description: "The trigger for detailed ping functionality",
+					Type:        "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+					Settings: json.RawMessage(`{
+						"config": "${configurations.ping_config}",
+						"method": "GET",
+						"path": "/ping/details/",
+						"optimize": "true"
+					}`),
+				},
+			},
+			EventHandlers: []types.EventHandler{
+				{
+					Name:        "ping_handler",
+					Description: "Handle Ping get call",
+					Reference:   "github.com/TIBCOSoftware/mashling/lib/flow/pingflow.json",
+				},
+				{
+					Name:        "ping_handler_detail",
+					Description: "Handle Ping detailed get call",
+					Reference:   "github.com/TIBCOSoftware/mashling/lib/flow/pingflowdetailed.json",
+				},
+			},
+			EventLinks: []types.EventLink{
+				{
+					Triggers: []string{
+						util.Mashling_Ping_Trigger_Name,
+					},
+					Dispatches: []types.Dispatch{
+						{
+							Path: types.Path{
+								Handler: "ping_handler",
+							},
+						},
+					},
+				},
+				{
+					Triggers: []string{
+						util.Mashling_Ping_Detail_Trigger_Name,
+					},
+					Dispatches: []types.Dispatch{
+						{
+							Path: types.Path{
+								Handler: "ping_handler_detail",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	return microGateway, nil
+}

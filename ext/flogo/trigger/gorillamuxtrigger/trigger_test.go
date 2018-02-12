@@ -8,13 +8,13 @@ package gorillamuxtrigger
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
 	"io/ioutil"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
@@ -110,9 +110,8 @@ func TestInitOk(t *testing.T) {
 }
 
 //Run the specified Action
-func (tr *TestRunner) RunAction(context context.Context, actionID string, inputGenerator action.InputGenerator, options map[string]interface{}) (results map[string]interface{}, err error) {
-	log.Debugf("RuAction called with actionID: %s", actionID)
-	fmt.Println("Test 2")
+func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
+	log.Debugf("Ran Action: %v", act.Config().Id)
 	return nil, nil
 }
 
@@ -142,7 +141,6 @@ func TestHandlerOk(t *testing.T) {
 	}
 	defer resp.Body.Close()
 	log.Debug("response Status:", resp.Status)
-	fmt.Printf("response Status: %v", resp.Status)
 
 	if resp.StatusCode >= 300 {
 		t.Fail()

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
@@ -60,9 +61,8 @@ func (tr *TestRunner) Run(context context.Context, action action.Action, uri str
 	return 0, nil, nil
 }
 
-func (tr *TestRunner) RunAction(context context.Context, actionID string, inputGenerator action.InputGenerator,
-	options map[string]interface{}) (results map[string]interface{}, err error) {
-	tr.t.Logf("Ran Action: %v", actionID)
+func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
+	log.Debugf("Ran Action: %v", act.Config().Id)
 	return nil, nil
 }
 

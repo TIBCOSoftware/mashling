@@ -232,7 +232,7 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 	setTag("response", string(respBody))
 	setTag("responseStatus", resp.Status)
 	context.SetOutput(ovResult, result)
-	context.SetOutput(ovStatus, resp.Status)
+	context.SetOutput(ovStatus, resp.StatusCode)
 
 	return true, nil
 }
