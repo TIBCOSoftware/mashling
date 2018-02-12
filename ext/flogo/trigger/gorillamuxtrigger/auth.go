@@ -38,26 +38,49 @@ type Auth interface {
 }
 
 type basic struct {
-	ldapHost string
-	ldapBase string
+	ldapHost         string
+	ldapBase         string
+	ldapBindDN       string
+	ldapBindPassword string
+	ldapUserFilter   string
+	ldapGroupFilter  string
 }
 
 const (
-	basicAuthFile = "basicAuthFile"
-	ldapHost      = "ldapHost"
-	ldapBase      = "ldapBase"
+	basicAuthFile    = "basicAuthFile"
+	ldapHost         = "ldapHost"
+	ldapBase         = "ldapBase"
+	ldapBindDN       = "ldapBindDN"
+	ldapBindPassword = "ldapBindPassword"
+	ldapUserFilter   = "ldapUserFilter"
+	ldapGroupFilter  = "ldapGroupFilter"
 )
 
 var mu sync.Mutex
 var credMap map[string]hashedCred
 
 func basicAuth(settings map[string]interface{}) Auth {
-	auth := &basic{}
+	auth := &basic{
+		ldapUserFilter:  "(uid=%s)",
+		ldapGroupFilter: "(memberUid=%s)",
+	}
 	if value, ok := settings[ldapHost]; ok {
 		auth.ldapHost = value.(string)
 	}
 	if value, ok := settings[ldapBase]; ok {
 		auth.ldapBase = value.(string)
+	}
+	if value, ok := settings[ldapBindDN]; ok {
+		auth.ldapBindDN = value.(string)
+	}
+	if value, ok := settings[ldapBindPassword]; ok {
+		auth.ldapBindPassword = value.(string)
+	}
+	if value, ok := settings[ldapUserFilter]; ok {
+		auth.ldapUserFilter = value.(string)
+	}
+	if value, ok := settings[ldapGroupFilter]; ok {
+		auth.ldapGroupFilter = value.(string)
 	}
 	return auth
 }
@@ -165,10 +188,10 @@ func (a *basic) authenticate(clientCred string) bool {
 			Base:         a.ldapBase,
 			Host:         a.ldapHost,
 			Port:         389,
-			BindDN:       "uid=john,ou=People,dc=example,dc=com",
-			BindPassword: "",
-			UserFilter:   "(uid=%s)",
-			GroupFilter:  "(memberUid=%s)",
+			BindDN:       a.ldapBindDN,
+			BindPassword: a.ldapBindPassword,
+			UserFilter:   a.ldapUserFilter,
+			GroupFilter:  a.ldapGroupFilter,
 			Attributes:   []string{"givenName", "sn", "mail", "uid"},
 		}
 		defer client.Close()

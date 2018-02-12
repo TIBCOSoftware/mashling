@@ -73,6 +73,22 @@
     {
       "name": "ldapBase",
       "type": "string"
+    },
+    {
+      "name": "ldapBindDN",
+      "type": "string"
+    },
+    {
+      "name": "ldapBindPassword",
+      "type": "string"
+    },
+    {
+      "name": "ldapUserFilter",
+      "type": "string"
+    },
+    {
+      "name": "ldapGroupFilter",
+      "type": "string"
     }
   ],
   "outputs": [
