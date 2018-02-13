@@ -6,7 +6,7 @@ import (
 
 	"path"
 
-	api "github.com/TIBCOSoftware/flogo-cli/app"
+	config "github.com/TIBCOSoftware/flogo-cli/config"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	mutil "github.com/TIBCOSoftware/mashling/lib/util"
 )
@@ -133,7 +133,7 @@ func addPingImports() string {
 	return ""
 }
 
-func CreateImportsGoFile(codeSourcePath string, deps []*api.Dependency) error {
+func CreateImportsGoFile(codeSourcePath string, deps []*config.Dependency) error {
 	f, err := os.Create(path.Join(codeSourcePath, fileImportsGo))
 
 	if err != nil {
