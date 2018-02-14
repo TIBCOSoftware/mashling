@@ -94,15 +94,15 @@
   "outputs": [
     {
       "name": "params",
-      "type": "any"
+      "type": "params"
     },
     {
       "name": "pathParams",
-      "type": "any"
+      "type": "params"
     },
     {
       "name": "queryParams",
-      "type": "any"
+      "type": "params"
     },
     {
       "name": "content",
