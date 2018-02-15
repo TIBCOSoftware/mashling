@@ -64,6 +64,30 @@ settings, outputs and handler:
     {
       "name": "basicAuthFile",
       "type": "string"
+    },
+    {
+      "name": "ldapHost",
+      "type": "string"
+    },
+    {
+      "name": "ldapBase",
+      "type": "string"
+    },
+    {
+      "name": "ldapBindDN",
+      "type": "string"
+    },
+    {
+      "name": "ldapBindPassword",
+      "type": "string"
+    },
+    {
+      "name": "ldapUserFilter",
+      "type": "string"
+    },
+    {
+      "name": "ldapGroupFilter",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -81,7 +105,7 @@ settings, outputs and handler:
     },
     {
       "name": "content",
-      "type": "object"
+      "type": "any"
     },
     {
       "name": "tracing",
@@ -133,6 +157,12 @@ settings, outputs and handler:
 | enableClientAuth | true - To enable client AUTH, false - Client AUTH is not enabled |
 | trustStore | Trust dir containing clinet CAs |
 | basicAuthFile | Path to a password file with username/passwords. An environment variable can be used here. |
+| ldapHost | The host name of the ldap server. |
+| ldapBase | The LDAP base distinguished name. |
+| ldapBindDN | The bind distinguished name. |
+| ldapBindPassword | The bind password for the bind distinguished name. |
+| ldapUserFilter | The filter to use for authentication. |
+| ldapGroupFilter | The filter to use for find user groups. |
 
 ### Outputs
 | Key    | Description   |
@@ -335,8 +365,21 @@ Start the gateway:
 BASIC_AUTH_FILE=/home/test/password.txt myApp
 ```
 
-**NOTE**: It is important to limit access to the password.txt on your environment. 
+**NOTE**: It is important to limit access to the password.txt on your environment.
 
+#### Basic Authentication with LDAP
 
-
-
+```json
+"configurations": [
+  {
+    "name": "restConfig",
+    "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+    "description": "Configuration for rest trigger",
+    "settings": {
+      "port": "9096",
+      "ldapHost": "localhost",
+      "ldapBase": "dc=example,dc=com"
+    }
+  }
+],
+```
