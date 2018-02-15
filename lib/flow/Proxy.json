@@ -103,9 +103,45 @@
                                         "mapTo": "tracing"
                                     }
                                 ]
+                            },
+                            {
+                                "id": 3,
+                                "name": "Reply To Trigger",
+                                "description": "Simple Reply Activity",
+                                "type": 1,
+                                "activityType": "tibco-reply",
+                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                                "attributes": [
+                                    {
+                                        "name": "code",
+                                        "value": 200,
+                                        "required": true,
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "name": "data",
+                                        "value": null,
+                                        "required": false,
+                                        "type": "any"
+                                    }
+                                ],
+                                "inputMappings": [
+                                    {
+                                        "type": 1,
+                                        "value": "$activity[2].result",
+                                        "mapTo": "data"
+                                    }
+                                ]
                             }
                         ],
-                        "links": [],
+                        "links": [
+                            {
+                                "id": 1,
+                                "from": 2,
+                                "to": 3,
+                                "type": 0
+                            }
+                        ],
                         "attributes": []
                     },
                     "errorHandlerTask": {

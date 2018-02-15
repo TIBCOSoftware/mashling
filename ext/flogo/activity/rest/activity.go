@@ -221,15 +221,21 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 	respBody, _ := ioutil.ReadAll(resp.Body)
 
 	var result interface{}
+	response := string(respBody)
 
 	d := json.NewDecoder(bytes.NewReader(respBody))
 	d.UseNumber()
 	err = d.Decode(&result)
+	if err != nil {
+		result = map[string]interface{}{
+			"___string___": response,
+		}
+	}
 
 	//json.Unmarshal(respBody, &result)
 
 	log.Debug("response Body:", result)
-	setTag("response", string(respBody))
+	setTag("response", response)
 	setTag("responseStatus", resp.Status)
 	context.SetOutput(ovResult, result)
 	context.SetOutput(ovStatus, resp.StatusCode)

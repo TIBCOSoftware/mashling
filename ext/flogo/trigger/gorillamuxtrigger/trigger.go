@@ -569,9 +569,15 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		if replyData != nil {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 			w.WriteHeader(replyCode)
-			if err := json.NewEncoder(w).Encode(replyData); err != nil {
-				serverSpan.SetTag("error", err.Error())
-				log.Error(err)
+			if object, ok := replyData.(map[string]interface{}); ok {
+				if str := object["___string___"]; str != nil {
+					if raw, ok := str.(string); ok {
+						w.Write([]byte(raw))
+					}
+				} else if err := json.NewEncoder(w).Encode(object); err != nil {
+					serverSpan.SetTag("error", err.Error())
+					log.Error(err)
+				}
 			}
 			return
 		}
