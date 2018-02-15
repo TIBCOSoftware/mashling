@@ -13,7 +13,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -143,7 +142,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	appDir := path.Join(currentDir, gatewayName)
+	appDir := filepath.Join(currentDir, gatewayName)
 
 	isValidJSON, err := IsValidGateway(gatewayJSON)
 

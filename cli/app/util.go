@@ -28,12 +28,12 @@ var (
 )
 
 func SetupNewProjectEnv() env.Project {
-	return env.NewGbProjectEnv()
+	return env.NewMashlingProject()
 }
 
 func SetupExistingProjectEnv(appDir string) env.Project {
 
-	env := env.NewGbProjectEnv()
+	env := env.NewMashlingProject()
 
 	if err := env.Init(appDir); err != nil {
 		fmt.Fprintf(os.Stderr, "Error initializing mashling app project: %s\n\n", err.Error())

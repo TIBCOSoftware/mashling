@@ -15,7 +15,6 @@ import (
 
 	"fmt"
 	"os"
-	"path"
 
 	"bytes"
 
@@ -191,18 +190,18 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
 	}
 
-	if customizeFunc != nil {
-		err = customizeFunc()
-		if err != nil {
-			return err
-		}
-	}
+	// if customizeFunc != nil {
+	// 	err = customizeFunc()
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
 	BuildApp(SetupExistingProjectEnv(appDir), options)
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
 	//create the mashling json descriptor file
-	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJson)
+	err = fgutil.CreateFileFromString(filepath.Join(appDir, util.Gateway_Definition_File_Name), gatewayJson)
 	if err != nil {
 		return err
 	}
@@ -333,7 +332,7 @@ func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
 		return err
 	}
-	err = fgutil.CreateFileFromString(path.Join(appDir, "flogo.json"), flogoJSON)
+	err = fgutil.CreateFileFromString(filepath.Join(appDir, "flogo.json"), flogoJSON)
 	if err != nil {
 		fmt.Fprint(os.Stderr, "Error: Error while creating flogo.json.\n\n")
 		return err
@@ -1369,12 +1368,12 @@ func BuildApp(env env.Project, options *api.BuildOptions) (err error) {
 	}
 
 	if !options.EmbedConfig {
-		fgutil.CopyFile(path.Join(env.GetRootDir(), fileDescriptor), path.Join(env.GetBinDir(), fileDescriptor))
+		fgutil.CopyFile(filepath.Join(env.GetRootDir(), fileDescriptor), filepath.Join(env.GetBinDir(), fileDescriptor))
 		if err != nil {
 			return err
 		}
 	} else {
-		os.Remove(path.Join(env.GetBinDir(), fileDescriptor))
+		os.Remove(filepath.Join(env.GetBinDir(), fileDescriptor))
 	}
 
 	return
@@ -1383,10 +1382,18 @@ func BuildApp(env env.Project, options *api.BuildOptions) (err error) {
 // PrepareApp do all pre-build setup and pre-processing
 func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 
+	// Create the dep manager
+	depManager := dep.DepManager{Env: env}
+	if !depManager.IsInitialized() {
+		// This is an old app
+		fmt.Printf("This is old project\n")
+	}
+
 	if options == nil {
 		options = &api.PrepareOptions{}
 	}
 
+	// Call external preprocessor
 	if options.PreProcessor != nil {
 		err = options.PreProcessor.PrepareForBuild(env)
 		if err != nil {
@@ -1401,7 +1408,7 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 	}
 
 	//load descriptor
-	appJson, err := fgutil.LoadLocalFile(path.Join(env.GetRootDir(), "flogo.json"))
+	appJson, err := fgutil.LoadLocalFile(filepath.Join(env.GetRootDir(), "flogo.json"))
 
 	if err != nil {
 		return err
@@ -1411,27 +1418,13 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 		return err
 	}
 
-	//generate imports file
-	var deps []*config.Dependency
-
-	if options.OptimizeImports {
-
-		deps = config.ExtractDependencies(descriptor)
-
-	} else {
-		deps, err = ListDependencies(env, 0)
-	}
-
-	cmdPath := path.Join(env.GetSourceDir(), strings.ToLower(descriptor.Name))
-	CreateImportsGoFile(cmdPath, deps)
-
-	removeEmbeddedAppGoFile(cmdPath)
-	removeShimGoFiles(cmdPath)
+	removeEmbeddedAppGoFile(env.GetAppDir())
+	removeShimGoFiles(env.GetAppDir())
 
 	if options.Shim != "" {
 
-		removeMainGoFile(cmdPath) //todo maybe rename if it exists
-		createShimSupportGoFile(cmdPath, appJson, options.EmbedConfig)
+		removeMainGoFile(env.GetAppDir()) //todo maybe rename if it exists
+		createShimSupportGoFile(env.GetAppDir(), appJson, options.EmbedConfig)
 
 		fmt.Println("Shim:", options.Shim)
 
@@ -1439,7 +1432,7 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 
 			fmt.Println("Id:", value.ID)
 			if value.ID == options.Shim {
-				triggerPath := path.Join(env.GetVendorSrcDir(), value.Ref, "trigger.json")
+				triggerPath := filepath.Join(env.GetVendorSrcDir(), value.Ref, "trigger.json")
 
 				mdJson, err := fgutil.LoadLocalFile(triggerPath)
 				if err != nil {
@@ -1450,35 +1443,23 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 					return err
 				}
 
+				fmt.Println("Shim Metadata:", metadata.Shim)
+
 				if metadata.Shim != "" {
 
 					//todo blow up if shim file not found
-					shimFilePath := path.Join(env.GetVendorSrcDir(), value.Ref, dirShim, fileShimGo)
+					shimFilePath := filepath.Join(env.GetVendorSrcDir(), value.Ref, dirShim, fileShimGo)
 					fmt.Println("Shim File:", shimFilePath)
-					fgutil.CopyFile(shimFilePath, path.Join(cmdPath, fileShimGo))
+					fgutil.CopyFile(shimFilePath, filepath.Join(env.GetAppDir(), fileShimGo))
 
 					if metadata.Shim == "plugin" {
 						//look for Makefile and execute it
-						makeFilePath := path.Join(env.GetVendorSrcDir(), value.Ref, dirShim, makeFile)
+						makeFilePath := filepath.Join(env.GetVendorSrcDir(), value.Ref, dirShim, makeFile)
 						fmt.Println("Make File:", makeFilePath)
-						fgutil.CopyFile(makeFilePath, path.Join(cmdPath, makeFile))
-
-						// Copy the vendor folder (Ugly workaround, this will go once our app is golang structure compliant)
-						vendorDestDir := path.Join(cmdPath, "vendor")
-						_, err = os.Stat(vendorDestDir)
-						if err == nil {
-							// We don't support existing vendor folders yet
-							return fmt.Errorf("Unsupported vendor folder found for function build, please create an issue on https://github.com/TIBCOSoftware/flogo")
-						}
-						// Create vendor folder
-						err = api.CopyDir(env.GetVendorSrcDir(), vendorDestDir)
-						if err != nil {
-							return err
-						}
-						defer os.RemoveAll(vendorDestDir)
+						fgutil.CopyFile(makeFilePath, filepath.Join(env.GetAppDir(), makeFile))
 
 						// Execute make
-						cmd := exec.Command("make", "-C", cmdPath)
+						cmd := exec.Command("make", "-C", env.GetAppDir())
 						cmd.Stdout = os.Stdout
 						cmd.Stderr = os.Stderr
 						cmd.Env = append(os.Environ(),
@@ -1497,9 +1478,8 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 		}
 
 	} else if options.EmbedConfig {
-		createEmbeddedAppGoFile(cmdPath, appJson)
+		createEmbeddedAppGoFile(env.GetAppDir(), appJson)
 	}
-
 	return
 }
 
@@ -1521,23 +1501,23 @@ func generateGoMetadata(env env.Project) error {
 func createMetadata(env env.Project, dependency *config.Dependency) error {
 
 	vendorSrc := env.GetVendorSrcDir()
-	mdFilePath := path.Join(vendorSrc, dependency.Ref)
-	mdGoFilePath := path.Join(vendorSrc, dependency.Ref)
-	pkg := path.Base(mdFilePath)
+	mdFilePath := filepath.Join(vendorSrc, dependency.Ref)
+	mdGoFilePath := filepath.Join(vendorSrc, dependency.Ref)
+	pkg := filepath.Base(mdFilePath)
 
 	tplMetadata := tplMetadataGoFile
 
 	switch dependency.ContribType {
 	case config.ACTION:
-		mdFilePath = path.Join(mdFilePath, "action.json")
-		mdGoFilePath = path.Join(mdGoFilePath, "action_metadata.go")
+		mdFilePath = filepath.Join(mdFilePath, "action.json")
+		mdGoFilePath = filepath.Join(mdGoFilePath, "action_metadata.go")
 	case config.TRIGGER:
-		mdFilePath = path.Join(mdFilePath, "trigger.json")
-		mdGoFilePath = path.Join(mdGoFilePath, "trigger_metadata.go")
+		mdFilePath = filepath.Join(mdFilePath, "trigger.json")
+		mdGoFilePath = filepath.Join(mdGoFilePath, "trigger_metadata.go")
 		tplMetadata = tplTriggerMetadataGoFile
 	case config.ACTIVITY:
-		mdFilePath = path.Join(mdFilePath, "activity.json")
-		mdGoFilePath = path.Join(mdGoFilePath, "activity_metadata.go")
+		mdFilePath = filepath.Join(mdFilePath, "activity.json")
+		mdGoFilePath = filepath.Join(mdGoFilePath, "activity_metadata.go")
 		tplMetadata = tplActivityMetadataGoFile
 	default:
 		return nil
