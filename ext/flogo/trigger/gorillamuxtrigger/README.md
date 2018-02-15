@@ -70,6 +70,10 @@ settings, outputs and handler:
       "type": "string"
     },
     {
+      "name": "ldapPort",
+      "type": "string"
+    },
+    {
       "name": "ldapBase",
       "type": "string"
     },
@@ -157,7 +161,8 @@ settings, outputs and handler:
 | enableClientAuth | true - To enable client AUTH, false - Client AUTH is not enabled |
 | trustStore | Trust dir containing clinet CAs |
 | basicAuthFile | Path to a password file with username/passwords. An environment variable can be used here. |
-| ldapHost | The host name of the ldap server. |
+| ldapHost | The host name of the LDAP server. |
+| ldapPort | The port of the LDAP server.
 | ldapBase | The LDAP base distinguished name. |
 | ldapBindDN | The bind distinguished name. |
 | ldapBindPassword | The bind password for the bind distinguished name. |

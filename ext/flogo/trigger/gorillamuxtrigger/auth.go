@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -39,6 +40,7 @@ type Auth interface {
 
 type basic struct {
 	ldapHost         string
+	ldapPort         int
 	ldapBase         string
 	ldapBindDN       string
 	ldapBindPassword string
@@ -49,6 +51,7 @@ type basic struct {
 const (
 	basicAuthFile    = "basicAuthFile"
 	ldapHost         = "ldapHost"
+	ldapPort         = "ldapPort"
 	ldapBase         = "ldapBase"
 	ldapBindDN       = "ldapBindDN"
 	ldapBindPassword = "ldapBindPassword"
@@ -61,11 +64,18 @@ var credMap map[string]hashedCred
 
 func basicAuth(settings map[string]interface{}) Auth {
 	auth := &basic{
+		ldapPort:        389,
 		ldapUserFilter:  "(uid=%s)",
 		ldapGroupFilter: "(memberUid=%s)",
 	}
 	if value, ok := settings[ldapHost]; ok {
 		auth.ldapHost = value.(string)
+	}
+	if value, ok := settings[ldapPort]; ok {
+		port, err := strconv.Atoi(value.(string))
+		if err == nil {
+			auth.ldapPort = port
+		}
 	}
 	if value, ok := settings[ldapBase]; ok {
 		auth.ldapBase = value.(string)
@@ -187,7 +197,7 @@ func (a *basic) authenticate(clientCred string) bool {
 		client := &ldap.LDAPClient{
 			Base:         a.ldapBase,
 			Host:         a.ldapHost,
-			Port:         389,
+			Port:         a.ldapPort,
 			BindDN:       a.ldapBindDN,
 			BindPassword: a.ldapBindPassword,
 			UserFilter:   a.ldapUserFilter,
