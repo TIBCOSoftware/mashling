@@ -29,6 +29,7 @@ import (
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	assets "github.com/TIBCOSoftware/mashling/cli/assets"
+	"github.com/TIBCOSoftware/mashling/cli/dep"
 	"github.com/TIBCOSoftware/mashling/cli/env"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
@@ -1177,8 +1178,14 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir string, appName string, vendorDir string) error {
+func CreateApp(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir string) error {
+	return doCreate(env, appJson, manifest, rootDir, appName, vendorDir, "")
+}
 
+// CreateApp creates an application from the specified json application descriptor
+func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir string, appName string, vendorDir string, constraints string) error {
+
+	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
 	descriptor, err := api.ParseAppDescriptor(appJson)
 	if err != nil {
 		return err
@@ -1211,46 +1218,73 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 		}
 
 		descriptor.Name = appName
-	}
-
-	env.Init(appDir)
-	err = env.Create(false, vendorDir)
-	if err != nil {
-		return err
-	}
-
-	err = fgutil.CreateFileFromString(path.Join(appDir, "flogo.json"), appJson)
-	if err != nil {
-		return err
-	}
-
-	deps := config.ExtractDependencies(descriptor)
-
-	//if manifest exists, use it to set up the dependecies
-	err = env.RestoreDependency(manifest)
-	if err == nil {
-		fmt.Println("Dependent libraries are restored.")
 	} else {
-		//todo allow ability to specify flogo-lib version
-		env.InstallDependency("github.com/TIBCOSoftware/flogo-lib", "")
+		appName = descriptor.Name
+		rootDir = filepath.Join(rootDir, appName)
+	}
 
-		for _, dep := range deps {
-			path, version := splitVersion(dep.Ref)
-			err = env.InstallDependency(path, version)
-			/*
-				if err != nil {
-					return err
-				}
-			*/
+	err = env.Init(rootDir)
+	if err != nil {
+		return err
+	}
+
+	err = env.Create(false, "")
+	if err != nil {
+		return err
+	}
+
+	err = fgutil.CreateFileFromString(filepath.Join(rootDir, "flogo.json"), appJson)
+	if err != nil {
+		return err
+	}
+	// create initial structure
+	appDir := filepath.Join(env.GetSourceDir(), descriptor.Name)
+	os.MkdirAll(appDir, os.ModePerm)
+
+	// Validate structure
+	err = env.Open()
+	if err != nil {
+		return err
+	}
+
+	// Create the dep manager
+	depManager := &dep.DepManager{Env: env}
+
+	// Initialize the dep manager
+	err = depManager.Init()
+	if err != nil {
+		return err
+	}
+
+	// Create initial files
+	deps := config.ExtractDependencies(descriptor)
+	CreateMainGoFile(appDir, "")
+	CreateImportsGoFile(appDir, deps)
+
+	// Add constraints
+	if len(constraints) > 0 {
+		newConstraints := []string{"-add"}
+		newConstraints = append(newConstraints, strings.Split(constraints, ",")...)
+		err = depManager.Ensure(newConstraints...)
+		if err != nil {
+			return err
 		}
 	}
 
-	// create source files
-	cmdPath := path.Join(env.GetSourceDir(), strings.ToLower(descriptor.Name))
-	os.MkdirAll(cmdPath, 0777)
+	ensureArgs := []string{}
 
-	CreateMainGoFile(cmdPath, "")
-	CreateImportsGoFile(cmdPath, deps)
+	if len(vendorDir) > 0 {
+		// Copy vendor directory
+		fgutil.CopyDir(vendorDir, env.GetVendorDir())
+		// Do not touch vendor folder when ensuring
+		ensureArgs = append(ensureArgs, "-no-vendor")
+	}
+
+	// Sync up
+	err = depManager.Ensure(ensureArgs...)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
