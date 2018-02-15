@@ -1,0 +1,174 @@
+{
+    "name": "Proxy",
+    "type": "flogo:app",
+    "version": "0.0.1",
+    "description": "",
+    "triggers": [
+        {
+            "name": "Receive HTTP Message",
+            "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+            "description": "Simple REST Trigger",
+            "settings": {
+                "port": "9096"
+            },
+            "id": "receive_http_message",
+            "handlers": [
+                {
+                    "settings": {
+                        "method": "POST",
+                        "path": "/",
+                        "autoIdReply": "false",
+                        "useReplyHandler": "false"
+                    },
+                    "actionId": "flow"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "data": {
+                "flow": {
+                    "name": "flow",
+                    "explicitReply": true,
+                    "type": 1,
+                    "attributes": [],
+                    "rootTask": {
+                        "id": 1,
+                        "type": 1,
+                        "tasks": [
+                            {
+                                "id": 2,
+                                "name": "Invoke REST Service",
+                                "description": "Simple REST Activity",
+                                "type": 1,
+                                "activityType": "github-com-tibco-software-mashling-ext-flogo-activity-rest",
+                                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+                                "attributes": [
+                                    {
+                                        "name": "method",
+                                        "value": "POST",
+                                        "required": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "name": "uri",
+                                        "value": "http://localhost:8080",
+                                        "required": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "name": "pathParams",
+                                        "value": null,
+                                        "required": false,
+                                        "type": "params"
+                                    },
+                                    {
+                                        "name": "queryParams",
+                                        "value": null,
+                                        "required": false,
+                                        "type": "params"
+                                    },
+                                    {
+                                        "name": "content",
+                                        "value": null,
+                                        "required": false,
+                                        "type": "any"
+                                    },
+                                    {
+                                        "name": "tracing",
+                                        "value": null,
+                                        "type": "any"
+                                    }
+                                ],
+                                "inputMappings": [
+                                    {
+                                        "type": 1,
+                                        "value": "$flow.method",
+                                        "mapTo": "method"
+                                    },
+                                    {
+                                        "type": 1,
+                                        "value": "$flow.uri",
+                                        "mapTo": "uri"
+                                    },
+                                    {
+                                        "type": 1,
+                                        "value": "$flow.content",
+                                        "mapTo": "content"
+                                    },
+                                    {
+                                        "type": 1,
+                                        "value": "$flow.tracing",
+                                        "mapTo": "tracing"
+                                    }
+                                ]
+                            }
+                        ],
+                        "links": [],
+                        "attributes": []
+                    },
+                    "errorHandlerTask": {
+                        "id": 3,
+                        "type": 1,
+                        "tasks": [
+                            {
+                                "id": 10,
+                                "name": "Error Message",
+                                "description": "Simple Log Activity",
+                                "type": 1,
+                                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
+                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                                "attributes": [
+                                    {
+                                        "name": "message",
+                                        "value": "Error processing request in gateway",
+                                        "required": false,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "name": "flowInfo",
+                                        "value": "true",
+                                        "required": false,
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "name": "addToFlow",
+                                        "value": "true",
+                                        "required": false,
+                                        "type": "boolean"
+                                    }
+                                ]
+                            }
+                        ],
+                        "links": [],
+                        "attributes": []
+                    }
+                }
+            },
+            "id": "flow",
+            "metadata": {
+              "input": [
+                {
+                  "name": "method",
+                  "type": "string"
+                },
+                {
+                  "name": "uri",
+                  "type": "string"
+                },
+                {
+                  "name": "content",
+                  "type": "any"
+                },
+                {
+                  "name": "tracing",
+                  "type": "any"
+                }
+              ],
+              "output": []
+            },
+            "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+        }
+    ]
+}
