@@ -20,6 +20,7 @@ Usage:
 **options**
 
 - *-f* : specify the Mashling json (default is mashling.json).
+- *-pingport* : specify the mashling ping port (default is 9090).
 
 Example using default mashling.json :
 
@@ -30,11 +31,38 @@ Example using recipe rest-gateway-with-tracing.json:
 
 	mashling create -f rest-gateway-with-tracing.json  my_rest_gw_app
 
+Example using pingport flag:
+
+	mashling create -pingport 9095 my_gw_app
+
+Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
+
 **dependencies versioning**
 
 By default a new GB based dependency manifest is created in the vendor folder of the gateway project.
 If the manifest file exists in the current working directory, that is used to restore the vendor folder.
 The default mashling created by 'mashling create app' uses a default manifest built into the mashling binary.
+
+### build
+This command is used to build the created Mashling gateway.
+
+*Build the created project*
+
+	mashling build
+
+Usage:
+
+	mashling build
+
+**options**
+
+- *-pingport* : specify the mashling ping port (default is 9090).
+
+Example using pingport flag:
+
+	mashling build -pingport 9095
+
+Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
 
 ### help
 This command is used to display help on a particular command

@@ -29,6 +29,9 @@ Additional developer tooling is included in below open source repo that contains
 
 ### Install Mashling
     go get github.com/TIBCOSoftware/mashling/...
+    
+Note: If you already have Flogo installed, you will need to use below (as Mashling includes necessary Flogo dependencies) 
+    go get -u github.com/TIBCOSoftware/mashling/...
 
 ### Update Mashling
     go get -u github.com/TIBCOSoftware/mashling/...
