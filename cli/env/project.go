@@ -1,7 +1,6 @@
 package env
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -11,8 +10,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/TIBCOSoftware/flogo-cli/config"
 	"github.com/TIBCOSoftware/flogo-cli/util"
+	"github.com/TIBCOSoftware/mashling/lib/model"
 )
 
 type MashlingProject struct {
@@ -83,7 +82,7 @@ func (e *MashlingProject) Open() error {
 	}
 
 	// Check file descriptor
-	fd := filepath.Join(e.RootDir, config.FileDescriptor)
+	fd := filepath.Join(e.RootDir, "mashling.json")
 	_, err = os.Stat(fd)
 
 	if err != nil {
@@ -96,17 +95,16 @@ func (e *MashlingProject) Open() error {
 		return fmt.Errorf("Invalid reading file descriptor '%s' error: %s", fd, err)
 	}
 
-	descriptor, err := ParseAppDescriptor(string(fdbytes))
+	descriptor, err := model.ParseGatewayDescriptor(string(fdbytes))
 	if err != nil {
 		return fmt.Errorf("Invalid parsing file descriptor '%s' error: %s", fd, err)
 	}
 
-	appName := descriptor.Name
+	appName := descriptor.Gateway.Name
 
 	// Validate that there is an app dir
 	e.AppDir = filepath.Join(e.SourceDir, appName)
 	info, err = os.Stat(e.AppDir)
-
 	if err != nil || !info.IsDir() {
 		return fmt.Errorf("Invalid project, app directory '%s' doesn't exists", e.AppDir)
 	}
@@ -175,19 +173,6 @@ func (e *MashlingProject) Build() error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
-}
-
-// ParseAppDescriptor parse the application descriptor
-func ParseAppDescriptor(appJson string) (*config.FlogoAppDescriptor, error) {
-	descriptor := &config.FlogoAppDescriptor{}
-
-	err := json.Unmarshal([]byte(appJson), descriptor)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return descriptor, nil
 }
 
 //Restores dependecies using a manifest in the current working directory.

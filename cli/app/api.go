@@ -175,7 +175,7 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 
 	flogoJson := string(bytes)
 
-	err = CreateApp(SetupNewProjectEnv(), flogoJson, manifest, appDir, appName, vendorDir)
+	err = CreateApp(SetupNewProjectEnv(), flogoJson, manifest, appDir, appName, vendorDir, gatewayJson)
 	if err != nil {
 		return err
 	}
@@ -1177,12 +1177,12 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir string) error {
-	return doCreate(env, appJson, manifest, rootDir, appName, vendorDir, "")
+func CreateApp(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir, gatewayJSON string) error {
+	return doCreate(env, appJson, manifest, rootDir, appName, vendorDir, gatewayJSON, "")
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir string, appName string, vendorDir string, constraints string) error {
+func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir string, appName string, vendorDir string, gatewayJSON string, constraints string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
 	descriptor, err := api.ParseAppDescriptor(appJson)
@@ -1236,6 +1236,11 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir strin
 	if err != nil {
 		return err
 	}
+
+	err = fgutil.CreateFileFromString(filepath.Join(rootDir, "mashling.json"), gatewayJSON)
+	if err != nil {
+		return err
+	}
 	// create initial structure
 	appDir := filepath.Join(env.GetSourceDir(), descriptor.Name)
 	os.MkdirAll(appDir, os.ModePerm)
@@ -1272,14 +1277,10 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir strin
 
 	ensureArgs := []string{}
 
-	fmt.Printf("before vendor check [%s]", vendorDir)
 	if len(vendorDir) > 0 {
 		// Copy vendor directory
-		fmt.Printf("before copy vendor[%s]", env.GetVendorDir())
 		err := CopyDir(vendorDir, env.GetVendorDir())
-
 		if err == nil {
-			fmt.Println("vendor copy success")
 			// Do not touch vendor folder when ensuring
 			ensureArgs = append(ensureArgs, "-no-vendor")
 		} else {
