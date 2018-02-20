@@ -1272,11 +1272,20 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir strin
 
 	ensureArgs := []string{}
 
+	fmt.Printf("before vendor check [%s]", vendorDir)
 	if len(vendorDir) > 0 {
 		// Copy vendor directory
-		fgutil.CopyDir(vendorDir, env.GetVendorDir())
-		// Do not touch vendor folder when ensuring
-		ensureArgs = append(ensureArgs, "-no-vendor")
+		fmt.Printf("before copy vendor[%s]", env.GetVendorDir())
+		err := CopyDir(vendorDir, env.GetVendorDir())
+
+		if err == nil {
+			fmt.Println("vendor copy success")
+			// Do not touch vendor folder when ensuring
+			ensureArgs = append(ensureArgs, "-no-vendor")
+		} else {
+			fmt.Printf("\n error [%s]\n", err)
+		}
+
 	}
 
 	// Sync up
@@ -1386,7 +1395,10 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 	depManager := dep.DepManager{Env: env}
 	if !depManager.IsInitialized() {
 		// This is an old app
-		fmt.Printf("This is old project\n")
+		err = MigrateOldApp(env, depManager)
+		if err != nil {
+			return err
+		}
 	}
 
 	if options == nil {
@@ -1664,4 +1676,33 @@ func readDescriptor(path string, info os.FileInfo) (*config.Descriptor, error) {
 	}
 
 	return api.ParseDescriptor(string(raw))
+}
+
+func MigrateOldApp(env env.Project, depManager dep.DepManager) error {
+	// This is an old app
+
+	// Move old vendor folder to /src/<my_app>/vendor/
+	oldVendorDir := filepath.Join(env.GetRootDir(), "vendor")
+	_, err := os.Stat(oldVendorDir)
+	if err == nil {
+		// Vendor found, move it
+		err = CopyDir(oldVendorDir, env.GetVendorDir())
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(oldVendorDir)
+	}
+
+	fmt.Println("Initializing dependency management files ....")
+	err = depManager.Init()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Ensure is a wrapper for dep ensure command
+func Ensure(depManager *dep.DepManager, args ...string) error {
+	return depManager.Ensure(args...)
 }

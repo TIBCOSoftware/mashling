@@ -31,6 +31,7 @@ var optCreate = &cli.OptionInfo{
    
    Options:
 	   -f       	specify the mashling.json to create gateway project from
+	   -vendor  specify existing vendor directory to copy
 	   -pingport	specify the port for ping functionality
 	`,
 }
@@ -48,14 +49,15 @@ type Dependency struct {
 }
 
 func init() {
-	CommandRegistry.RegisterCommand(&cmdCreate{option: optCreate})
+	CommandRegistry.RegisterCommand(&cmdCreate{option: optCreate, currentDir: getwd})
 }
 
 type cmdCreate struct {
-	option    *cli.OptionInfo
-	fileName  string
-	vendorDir string
-	pingport  string
+	option     *cli.OptionInfo
+	fileName   string
+	vendorDir  string
+	pingport   string
+	currentDir func() (dir string, err error)
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -66,6 +68,7 @@ func (c *cmdCreate) OptionInfo() *cli.OptionInfo {
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
+	fs.StringVar(&(c.vendorDir), "vendor", "", "vendor dir")
 	fs.StringVar(&(c.pingport), "pingport", "", "ping port")
 }
 
@@ -136,7 +139,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		}
 	}
 
-	currentDir, err := os.Getwd()
+	currentDir, err := c.currentDir()
 
 	if err != nil {
 		return err
@@ -292,4 +295,8 @@ func (c *cmdCreate) Exec(args []string) error {
 		}
 		return ioutil.WriteFile(filepath.Join(appDir, "src", strings.ToLower(gatewayName), "main.go"), []byte(fileContent), 0644)
 	})
+}
+
+func getwd() (dir string, err error) {
+	return os.Getwd()
 }
