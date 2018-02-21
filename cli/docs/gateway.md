@@ -24,8 +24,9 @@ Usage:
 **options**
 
 - *-f* : specify the Mashling json (default is mashling.json).
-- *-pingport* : specify the mashling ping port (default is 9090).
+- *-mlc-* : specify the mashling dependency constraints as comma separated value (for example github.com/TIBCOSoftware/flogo-lib@0.0.0,github.com/TIBCOSoftware/flogo-contrib@0.0.0)
 - *-vendor* : specify existing vendor directory to copy
+- *-pingport* : specify the mashling ping port (default is 9090).
 
 Example using default mashling.json :
 

@@ -37,7 +37,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, pingPort string, customizeFunc func() error) error {
+func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir, appName, vendorDir, pingPort, constraints string, customizeFunc func() error) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
 	if err != nil {
@@ -175,7 +175,7 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 
 	flogoJson := string(bytes)
 
-	err = CreateApp(SetupNewProjectEnv(), flogoJson, manifest, appDir, appName, vendorDir, gatewayJson)
+	err = CreateApp(SetupNewProjectEnv(), flogoJson, manifest, appDir, appName, vendorDir, constraints, gatewayJson)
 	if err != nil {
 		return err
 	}
@@ -1177,12 +1177,12 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir, gatewayJSON string) error {
-	return doCreate(env, appJson, manifest, rootDir, appName, vendorDir, gatewayJSON, "")
+func CreateApp(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
+	return doCreate(env, appJson, manifest, rootDir, appName, vendorDir, constraints, gatewayJSON)
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir string, appName string, vendorDir string, gatewayJSON string, constraints string) error {
+func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
 	descriptor, err := api.ParseAppDescriptor(appJson)
@@ -1280,13 +1280,10 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir strin
 	if len(vendorDir) > 0 {
 		// Copy vendor directory
 		err := CopyDir(vendorDir, env.GetVendorDir())
-		if err == nil {
-			// Do not touch vendor folder when ensuring
-			ensureArgs = append(ensureArgs, "-no-vendor")
-		} else {
+		if err != nil {
 			fmt.Printf("\n error [%s]\n", err)
 		}
-
+		ensureArgs = append(ensureArgs, "-no-vendor")
 	}
 
 	// Sync up

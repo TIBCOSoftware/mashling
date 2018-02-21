@@ -31,7 +31,8 @@ var optCreate = &cli.OptionInfo{
    
    Options:
 	   -f       	specify the mashling.json to create gateway project from
-	   -vendor  specify existing vendor directory to copy
+	   -mlc     	specify the mashling dependency constraints as comma separated value (for example github.com/TIBCOSoftware/flogo-lib@0.0.0,github.com/TIBCOSoftware/flogo-contrib@0.0.0)
+	   -vendor  	specify existing vendor directory to copy
 	   -pingport	specify the port for ping functionality
 	`,
 }
@@ -53,11 +54,12 @@ func init() {
 }
 
 type cmdCreate struct {
-	option     *cli.OptionInfo
-	fileName   string
-	vendorDir  string
-	pingport   string
-	currentDir func() (dir string, err error)
+	option      *cli.OptionInfo
+	constraints string
+	fileName    string
+	vendorDir   string
+	pingport    string
+	currentDir  func() (dir string, err error)
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -67,6 +69,7 @@ func (c *cmdCreate) OptionInfo() *cli.OptionInfo {
 
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
+	fs.StringVar(&(c.constraints), "mlc", "", "mashling library constraints")
 	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
 	fs.StringVar(&(c.vendorDir), "vendor", "", "vendor dir")
 	fs.StringVar(&(c.pingport), "pingport", "", "ping port")
@@ -154,7 +157,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, manifest, appDir, gatewayName, c.vendorDir, c.pingport, func() error {
+	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, manifest, appDir, gatewayName, c.vendorDir, c.pingport, c.constraints, func() error {
 		// Load GB manifest file to extract flogo-lib and mashling repository revisions.
 		manifestFile, err := ioutil.ReadFile(filepath.Join(appDir, "vendor", "manifest"))
 		if err != nil {
