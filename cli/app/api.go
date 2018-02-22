@@ -33,11 +33,12 @@ import (
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJSON string, manifest io.Reader, appDir, appName, vendorDir, pingPort, constraints string, customizeFunc func() error) error {
+func CreateMashling(env env.Project, gatewayJSON string, manifest io.Reader, appDir, appName, vendorDir, pingPort, constraints string) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
 	if err != nil {
@@ -190,14 +191,16 @@ func CreateMashling(env env.Project, gatewayJSON string, manifest io.Reader, app
 		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
 	}
 
-	// if customizeFunc != nil {
-	// 	err = customizeFunc()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+	envProj := SetupExistingProjectEnv(appDir)
+
+	err = customizeMainFile(envProj.GetAppDir(), appName, gatewayJSON)
+
+	if err != nil {
+		return err
+	}
+
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
-	BuildApp(SetupExistingProjectEnv(appDir), options)
+	BuildApp(envProj, options)
 
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
@@ -1720,4 +1723,171 @@ func MigrateOldApp(env env.Project, depManager dep.DepManager) error {
 // Ensure is a wrapper for dep ensure command
 func Ensure(depManager *dep.DepManager, args ...string) error {
 	return depManager.Ensure(args...)
+}
+
+func customizeMainFile(appDir, gatewayName, gatewayJSON string) error {
+
+	//copy gopkg.lock file to gopkglock.toml and load the data into viper object
+	err := CopyFile(filepath.Join(appDir, "Gopkg.lock"), filepath.Join(appDir, "Gopkglock.toml"))
+	if err != nil {
+		return err
+	}
+
+	viper.SetConfigName("Gopkglock") // no need to include file extension
+	viper.AddConfigPath(appDir)      // set the path of your config file
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		fmt.Println("Gopkg Config file not found...")
+		os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
+		return err
+	}
+
+	err = os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
+
+	if err != nil {
+		return err
+	}
+
+	devServer := viper.AllSettings()
+	//fmt.Printf("values [%s] \n", devServer)
+
+	test := devServer["projects"]
+	projects := test.([]interface{})
+
+	var flogoLibRev, mashlingRev string
+	for _, project := range projects {
+		projectMap := project.(map[string]interface{})
+		if flogoLibRev != "" && mashlingRev != "" {
+			break
+		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/flogo-lib") == 0 {
+			fmt.Printf("flogo lib revision [%s]\n", projectMap["revision"])
+			flogoLibRev = projectMap["revision"].(string)
+		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/mashling") == 0 {
+			fmt.Printf("mashling revision [%s]\n", projectMap["revision"])
+			mashlingRev = projectMap["revision"].(string)
+		}
+	}
+
+	// Load the main.go file so we can inject extract meta data output.
+	gatewayMain, err := ioutil.ReadFile(filepath.Join(appDir, "main.go"))
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(gatewayMain), "\n")
+	fileContent := ""
+	// Create src payload.
+	var extraSrc bytes.Buffer
+	// Add the ASCII banner.
+	banner, err := assets.Asset("assets/banner.txt")
+	if err != nil {
+		// Asset was not found.
+		return err
+	}
+
+	schemaVersion, err := getSchemaVersion(gatewayJSON)
+	if err != nil {
+		return err
+	}
+
+	if strings.Compare(os.Getenv(util.Mashling_Ping_Embed_Config_Property), "TRUE") == 0 {
+		mashCliOutput := fmt.Sprintf("\n\tmashlingCliRev :=  \"%s\"", MashlingMasterGitRev)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliRev = mashlingCliRev \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tmashlingCliVersion :=  \"%s\"", Version)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliVersion = mashlingCliVersion \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		if DisplayLocalChanges {
+			mashCliOutput = fmt.Sprintf("\n\tmashlingLocRev :=  \"%s\"", MashlingLocalGitRev)
+			extraSrc.WriteString(string(mashCliOutput))
+
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliLocalRev = mashlingLocRev \n")
+			extraSrc.WriteString(string(mashCliOutput))
+		}
+
+		mashCliOutput = fmt.Sprint("\n\tappVersion := app.Version")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppVersion = appVersion \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tschemaVersion :=  \"%s\"", schemaVersion)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.SchemaVersion = schemaVersion \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tflogolibRev :=  \"%s\"", flogoLibRev)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.FlogolibRev = flogolibRev \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tmashlingRev :=  \"%s\"", mashlingRev)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingRev = mashlingRev \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tappDesc := app.Description")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppDescrption = appDesc \n\n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+	}
+
+	mashlingCliOutput := fmt.Sprintf("\n\tmashlingTxt :=  \"\\n[mashling] mashling CLI version %s\"", Version)
+	extraSrc.WriteString(string(mashlingCliOutput))
+
+	mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling CLI revision %s\"", MashlingMasterGitRev)
+	extraSrc.WriteString(string(mashlingCliOutput))
+
+	if DisplayLocalChanges {
+		mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling local revision %s\"", MashlingLocalGitRev)
+		extraSrc.WriteString(string(mashlingCliOutput))
+	}
+
+	mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n\\n\"")
+	extraSrc.WriteString(string(mashlingCliOutput))
+
+	mashlingCliOutput = fmt.Sprintf("\n\tfmt.Printf(\"%%s\\n\", mashlingTxt)\n")
+	extraSrc.WriteString(string(mashlingCliOutput))
+
+	bannerOutput := fmt.Sprintf("\tbannerTxt := `%s`\n\tfmt.Printf(\"%%s\\n\", bannerTxt)\n", banner)
+	extraSrc.WriteString(string(bannerOutput))
+
+	// Append file version output.
+	versionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Version: %%s\\n\", app.Version)\n")
+	extraSrc.WriteString(versionOutput)
+	// Append schema version output.
+	schemaString := fmt.Sprintf("\tfmt.Printf(\"[mashling] Schema Version: %s\\n\")\n", schemaVersion)
+	extraSrc.WriteString(schemaString)
+	// Append flogo-lib and mashling revisions
+	if flogoLibRev != "" {
+		flogoLibString := fmt.Sprintf("\tfmt.Printf(\"[mashling] flogo-lib revision: %s\\n\")\n", flogoLibRev)
+		extraSrc.WriteString(flogoLibString)
+	}
+	if mashlingRev != "" {
+		mashlingString := fmt.Sprintf("\tfmt.Printf(\"[mashling] mashling revision: %s\\n\")\n", mashlingRev)
+		extraSrc.WriteString(mashlingString)
+	}
+	// Append app description.
+	descriptionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Description: %%s\\n\", app.Description)\n")
+	extraSrc.WriteString(descriptionOutput)
+	// Cycle through the file contents, inject source, then rewrite the file.
+	for _, line := range lines {
+		if strings.Contains(line, "e.Start()") {
+			fileContent += extraSrc.String()
+		}
+		fileContent += line
+		fileContent += "\n"
+	}
+	return ioutil.WriteFile(filepath.Join(appDir, "main.go"), []byte(fileContent), 0644)
 }
