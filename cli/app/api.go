@@ -37,9 +37,9 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir, appName, vendorDir, pingPort, constraints string, customizeFunc func() error) error {
+func CreateMashling(env env.Project, gatewayJSON string, manifest io.Reader, appDir, appName, vendorDir, pingPort, constraints string, customizeFunc func() error) error {
 
-	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
+	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
 	if err != nil {
 		return err
 	}
@@ -50,16 +50,16 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 	}
 
 	if appName != "" {
-		altJson := strings.Replace(gatewayJson, `"`+descriptor.Gateway.Name+`"`, `"`+appName+`"`, 1)
-		altDescriptor, err := model.ParseGatewayDescriptor(altJson)
+		altJSON := strings.Replace(gatewayJSON, `"`+descriptor.Gateway.Name+`"`, `"`+appName+`"`, 1)
+		altDescriptor, err := model.ParseGatewayDescriptor(altJSON)
 
 		//see if we can get away with simple replace so we don't reorder the existing json
 		if err == nil && altDescriptor.Gateway.Name == appName {
-			gatewayJson = altJson
+			gatewayJSON = altJSON
 		} else {
 			//simple replace didn't work so we have to unmarshal & re-marshal the supplied json
 			var appObj map[string]interface{}
-			err := json.Unmarshal([]byte(gatewayJson), &appObj)
+			err := json.Unmarshal([]byte(gatewayJSON), &appObj)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 			if err != nil {
 				return err
 			}
-			gatewayJson = string(updApp)
+			gatewayJSON = string(updApp)
 		}
 
 		descriptor.Gateway.Name = appName
@@ -173,9 +173,9 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 		return nil
 	}
 
-	flogoJson := string(bytes)
+	flogoJSON := string(bytes)
 
-	err = CreateApp(SetupNewProjectEnv(), flogoJson, manifest, appDir, appName, vendorDir, constraints, gatewayJson)
+	err = CreateApp(SetupNewProjectEnv(), flogoJSON, manifest, appDir, appName, vendorDir, constraints, gatewayJSON)
 	if err != nil {
 		return err
 	}
@@ -198,13 +198,9 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 	// }
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
 	BuildApp(SetupExistingProjectEnv(appDir), options)
+
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
-	//create the mashling json descriptor file
-	err = fgutil.CreateFileFromString(filepath.Join(appDir, util.Gateway_Definition_File_Name), gatewayJson)
-	if err != nil {
-		return err
-	}
 
 	fmt.Println("Mashling gateway successfully built!")
 
@@ -1177,15 +1173,15 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
-	return doCreate(env, appJson, manifest, rootDir, appName, vendorDir, constraints, gatewayJSON)
+func CreateApp(env env.Project, appJSON string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
+	return doCreate(env, appJSON, manifest, rootDir, appName, vendorDir, constraints, gatewayJSON)
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
+func doCreate(env env.Project, appJSON string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
-	descriptor, err := api.ParseAppDescriptor(appJson)
+	descriptor, err := api.ParseAppDescriptor(appJSON)
 	if err != nil {
 		return err
 	}
@@ -1193,16 +1189,16 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir, appN
 	if appName != "" {
 		// override the application name
 
-		altJson := strings.Replace(appJson, `"`+descriptor.Name+`"`, `"`+appName+`"`, 1)
-		altDescriptor, err := api.ParseAppDescriptor(altJson)
+		altJSON := strings.Replace(appJSON, `"`+descriptor.Name+`"`, `"`+appName+`"`, 1)
+		altDescriptor, err := api.ParseAppDescriptor(altJSON)
 
 		//see if we can get away with simple replace so we don't reorder the existing json
 		if err == nil && altDescriptor.Name == appName {
-			appJson = altJson
+			appJSON = altJSON
 		} else {
 			//simple replace didn't work so we have to unmarshal & re-marshal the supplied json
 			var appObj map[string]interface{}
-			err := json.Unmarshal([]byte(appJson), &appObj)
+			err := json.Unmarshal([]byte(appJSON), &appObj)
 			if err != nil {
 				return err
 			}
@@ -1213,13 +1209,27 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir, appN
 			if err != nil {
 				return err
 			}
-			appJson = string(updApp)
+			appJSON = string(updApp)
 		}
 
 		descriptor.Name = appName
 	} else {
 		appName = descriptor.Name
 		rootDir = filepath.Join(rootDir, appName)
+	}
+
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	_, gpkgLockErr := os.Stat(filepath.Join(dir, "Gopkg.lock"))
+	_, gpkgTomlErr := os.Stat(filepath.Join(dir, "Gopkg.toml"))
+
+	gopkgFilesExists := false
+
+	if gpkgLockErr == nil && gpkgTomlErr == nil {
+		gopkgFilesExists = true
 	}
 
 	err = env.Init(rootDir)
@@ -1232,12 +1242,12 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir, appN
 		return err
 	}
 
-	err = fgutil.CreateFileFromString(filepath.Join(rootDir, "flogo.json"), appJson)
+	err = fgutil.CreateFileFromString(filepath.Join(rootDir, "flogo.json"), appJSON)
 	if err != nil {
 		return err
 	}
 
-	err = fgutil.CreateFileFromString(filepath.Join(rootDir, "mashling.json"), gatewayJSON)
+	err = fgutil.CreateFileFromString(filepath.Join(rootDir, util.Gateway_Definition_File_Name), gatewayJSON)
 	if err != nil {
 		return err
 	}
@@ -1277,13 +1287,19 @@ func doCreate(env env.Project, appJson string, manifest io.Reader, rootDir, appN
 
 	ensureArgs := []string{}
 
-	if len(vendorDir) > 0 {
+	if len(vendorDir) > 0 && !gopkgFilesExists {
 		// Copy vendor directory
 		err := CopyDir(vendorDir, env.GetVendorDir())
 		if err != nil {
 			fmt.Printf("\n error [%s]\n", err)
 		}
 		ensureArgs = append(ensureArgs, "-no-vendor")
+	}
+
+	if gopkgFilesExists {
+		CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(env.GetAppDir(), "Gopkg.lock"))
+		CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(env.GetAppDir(), "Gopkg.toml"))
+		ensureArgs = append(ensureArgs, "-vendor-only")
 	}
 
 	// Sync up
@@ -1355,6 +1371,7 @@ func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*typ
 	return descriptor, nil
 }
 
+//BuildApp builds the gateway app
 func BuildApp(env env.Project, options *api.BuildOptions) (err error) {
 
 	if options == nil {
@@ -1418,12 +1435,12 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 	}
 
 	//load descriptor
-	appJson, err := fgutil.LoadLocalFile(filepath.Join(env.GetRootDir(), "flogo.json"))
+	appJSON, err := fgutil.LoadLocalFile(filepath.Join(env.GetRootDir(), "flogo.json"))
 
 	if err != nil {
 		return err
 	}
-	descriptor, err := api.ParseAppDescriptor(appJson)
+	descriptor, err := api.ParseAppDescriptor(appJSON)
 	if err != nil {
 		return err
 	}
@@ -1434,7 +1451,7 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 	if options.Shim != "" {
 
 		removeMainGoFile(env.GetAppDir()) //todo maybe rename if it exists
-		createShimSupportGoFile(env.GetAppDir(), appJson, options.EmbedConfig)
+		createShimSupportGoFile(env.GetAppDir(), appJSON, options.EmbedConfig)
 
 		fmt.Println("Shim:", options.Shim)
 
@@ -1444,11 +1461,11 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 			if value.ID == options.Shim {
 				triggerPath := filepath.Join(env.GetVendorSrcDir(), value.Ref, "trigger.json")
 
-				mdJson, err := fgutil.LoadLocalFile(triggerPath)
+				mdJSON, err := fgutil.LoadLocalFile(triggerPath)
 				if err != nil {
 					return err
 				}
-				metadata, err := api.ParseTriggerMetadata(mdJson)
+				metadata, err := api.ParseTriggerMetadata(mdJSON)
 				if err != nil {
 					return err
 				}
@@ -1488,7 +1505,7 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 		}
 
 	} else if options.EmbedConfig {
-		createEmbeddedAppGoFile(env.GetAppDir(), appJson)
+		createEmbeddedAppGoFile(env.GetAppDir(), appJSON)
 	}
 	return
 }
