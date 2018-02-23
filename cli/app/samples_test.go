@@ -59,7 +59,7 @@ func TestSampleGateways(t *testing.T) {
 		gatewayName := "Sample" + strconv.Itoa(index)
 		appDir := filepath.Join(currentDir, gatewayName)
 
-		err = CreateMashling(SetupNewProjectEnv(), gatewayJson, nil, appDir, gatewayName, "", "9090", "", nil)
+		err = CreateMashling(SetupNewProjectEnv(), gatewayJson, false, appDir, gatewayName, "", "9090", "")
 		assert.NoError(t, err, "Error: Error creating mashling app '%v' - %v", gatewayName, err)
 
 		sample := testDir + "/" + gatewayName
