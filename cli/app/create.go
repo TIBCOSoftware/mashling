@@ -6,16 +6,13 @@
 package app
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
-	"github.com/TIBCOSoftware/mashling/cli/assets"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/lib/model"
 )
@@ -76,24 +73,14 @@ func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
 func (c *cmdCreate) Exec(args []string) error {
 
 	var (
-		gatewayJSON string
-		gatewayName string
-		manifest    io.Reader
+		gatewayJSON    string
+		gatewayName    string
+		defaultAppFlag bool
+		err            error
 	)
 
-	_, err := os.Stat("manifest")
-	if err == nil {
-		var file *os.File
-		file, err = os.Open("manifest")
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		manifest = file
-	}
-
 	if c.fileName != "" {
-
+		defaultAppFlag = false
 		if fgutil.IsRemote(c.fileName) {
 
 			gatewayJSON, err = fgutil.LoadRemoteFile(c.fileName)
@@ -133,10 +120,7 @@ func (c *cmdCreate) Exec(args []string) error {
 			return err
 		}
 		gatewayJSON = string(data)
-
-		if manifest == nil {
-			manifest = bytes.NewBuffer(assets.MustAsset("assets/default_manifest"))
-		}
+		defaultAppFlag = true
 	}
 
 	currentDir, err := c.currentDir()
@@ -154,7 +138,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, manifest, appDir, gatewayName, c.vendorDir, c.pingport, c.constraints)
+	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, defaultAppFlag, appDir, gatewayName, c.vendorDir, c.pingport, c.constraints)
 }
 
 func getwd() (dir string, err error) {

@@ -7,7 +7,6 @@ package app
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
@@ -38,7 +37,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJSON string, manifest io.Reader, appDir, appName, vendorDir, pingPort, constraints string) error {
+func CreateMashling(env env.Project, gatewayJSON string, defaultAppFlag bool, appDir, appName, vendorDir, pingPort, constraints string) error {
 
 	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
 	if err != nil {
@@ -176,7 +175,7 @@ func CreateMashling(env env.Project, gatewayJSON string, manifest io.Reader, app
 
 	flogoJSON := string(bytes)
 
-	err = CreateApp(SetupNewProjectEnv(), flogoJSON, manifest, appDir, appName, vendorDir, constraints, gatewayJSON)
+	err = CreateApp(SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName, vendorDir, constraints, gatewayJSON)
 	if err != nil {
 		return err
 	}
@@ -1176,12 +1175,12 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJSON string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
-	return doCreate(env, appJSON, manifest, rootDir, appName, vendorDir, constraints, gatewayJSON)
+func CreateApp(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
+	return doCreate(env, appJSON, defaultAppFlag, rootDir, appName, vendorDir, constraints, gatewayJSON)
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func doCreate(env env.Project, appJSON string, manifest io.Reader, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
+func doCreate(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName, vendorDir, constraints, gatewayJSON string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
 	descriptor, err := api.ParseAppDescriptor(appJSON)
@@ -1274,7 +1273,7 @@ func doCreate(env env.Project, appJSON string, manifest io.Reader, rootDir, appN
 	}
 
 	// Create initial files
-	deps := config.ExtractDependencies(descriptor)
+	deps := config.ExtractAllDependencies(appJSON)
 	CreateMainGoFile(appDir, "")
 	CreateImportsGoFile(appDir, deps)
 
@@ -1283,6 +1282,21 @@ func doCreate(env env.Project, appJSON string, manifest io.Reader, rootDir, appN
 		newConstraints := []string{"-add"}
 		newConstraints = append(newConstraints, strings.Split(constraints, ",")...)
 		err = depManager.Ensure(newConstraints...)
+		if err != nil {
+			return err
+		}
+	}
+
+	//for default app writing dep files
+	if defaultAppFlag {
+		gopkgFilesExists = true
+		defGpkgLock := assets.MustAsset("assets/defGopkg.lock")
+		defGpkgToml := assets.MustAsset("assets/defGopkg.toml")
+		err = ioutil.WriteFile(filepath.Join(env.GetAppDir(), "Gopkg.lock"), defGpkgLock, 0644)
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile(filepath.Join(env.GetAppDir(), "Gopkg.toml"), defGpkgToml, 0644)
 		if err != nil {
 			return err
 		}
@@ -1300,8 +1314,11 @@ func doCreate(env env.Project, appJSON string, manifest io.Reader, rootDir, appN
 	}
 
 	if gopkgFilesExists {
-		CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(env.GetAppDir(), "Gopkg.lock"))
-		CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(env.GetAppDir(), "Gopkg.toml"))
+		// for default app dep files written properly
+		if !defaultAppFlag {
+			CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(env.GetAppDir(), "Gopkg.lock"))
+			CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(env.GetAppDir(), "Gopkg.toml"))
+		}
 		ensureArgs = append(ensureArgs, "-vendor-only")
 	}
 
@@ -1761,10 +1778,10 @@ func customizeMainFile(appDir, gatewayName, gatewayJSON string) error {
 		if flogoLibRev != "" && mashlingRev != "" {
 			break
 		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/flogo-lib") == 0 {
-			fmt.Printf("flogo lib revision [%s]\n", projectMap["revision"])
+			//fmt.Printf("flogo lib revision [%s]\n", projectMap["revision"])
 			flogoLibRev = projectMap["revision"].(string)
 		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/mashling") == 0 {
-			fmt.Printf("mashling revision [%s]\n", projectMap["revision"])
+			//fmt.Printf("mashling revision [%s]\n", projectMap["revision"])
 			mashlingRev = projectMap["revision"].(string)
 		}
 	}
