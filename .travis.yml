@@ -29,7 +29,7 @@ install:
   
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
+  - git clone -b feature-dep-update https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
   - go get -u github.com/TIBCOSoftware/mashling/...
   - cd mashling
   - git checkout feature-dep
@@ -40,7 +40,7 @@ script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - pushd mashling-cicd/sample-recipes
   - rm -rf builds
-  - mkdir -p builds/latest
+  - mkdir -p $HOME/builds/latest
   - chmod ugo+x ./build-recipes.sh ./sanity.sh ./gotestreport.sh
   - ./gotestreport.sh
   - ./build-recipes.sh
