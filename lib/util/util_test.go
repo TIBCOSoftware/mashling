@@ -132,7 +132,29 @@ func TestXMLUnmarshal(t *testing.T) {
 	}
 }
 
+func TestXMLMarshal(t *testing.T) {
+	var output map[string]interface{}
+	err := XMLUnmarshal([]byte(XML), &output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := XMLMarshal(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data) != len([]byte(XML)) {
+		t.Fatal("length of input is not same as the length of output")
+	}
+}
+
 func TestParse(t *testing.T) {
+	jsonMarshal = func(v interface{}) ([]byte, error) {
+		return json.MarshalIndent(v, "", " ")
+	}
+	defer func() {
+		jsonMarshal = json.Marshal
+	}()
+
 	test := func(mime string, input []byte) {
 		var output map[string]interface{}
 		err := Parse(mime, input, &output)
@@ -143,7 +165,19 @@ func TestParse(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		data, err := json.Marshal(output)
+		data, err := Unparse(output)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(data) != len(input) {
+			t.Fatal("Unparse failed", string(data))
+		}
+
+		if len(input) == 0 {
+			return
+		}
+
+		data, err = json.Marshal(output)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -177,4 +211,5 @@ func TestParse(t *testing.T) {
 	test("application/json", []byte(JSON))
 	test("application/json", []byte{})
 	test("", []byte(JSON))
+	test("", []byte{})
 }
