@@ -148,13 +148,6 @@ func TestXMLMarshal(t *testing.T) {
 }
 
 func TestMarshal(t *testing.T) {
-	jsonMarshal = func(v interface{}) ([]byte, error) {
-		return json.MarshalIndent(v, "", " ")
-	}
-	defer func() {
-		jsonMarshal = json.Marshal
-	}()
-
 	test := func(mime string, input []byte) {
 		var output map[string]interface{}
 		err := Unmarshal(mime, input, &output)

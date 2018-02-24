@@ -367,15 +367,13 @@ func Clean(input map[string]interface{}) map[string]interface{} {
 	return output
 }
 
-var jsonMarshal = json.Marshal
-
 // Marshal generates a string from a map
 func Marshal(v interface{}) ([]byte, error) {
 	var input map[string]interface{}
 	if x, ok := v.(map[string]interface{}); ok {
 		input = x
 	} else {
-		return jsonMarshal(v)
+		return json.MarshalIndent(v, "", " ")
 	}
 
 	mime, err := getString(MetaMIME, input)
@@ -384,7 +382,7 @@ func Marshal(v interface{}) ([]byte, error) {
 	}
 	switch mime {
 	case MIMEApplicationJSON:
-		return jsonMarshal(Clean(input))
+		return json.MarshalIndent(Clean(input), "", " ")
 	case MIMETextXML, MIMEApplicationXML:
 		return XMLMarshal(Clean(input))
 	}
@@ -394,7 +392,7 @@ func Marshal(v interface{}) ([]byte, error) {
 		return nil, err
 	}
 	if cp == "" {
-		return jsonMarshal(Clean(input))
+		return json.MarshalIndent(Clean(input), "", " ")
 	}
 	return []byte(cp), nil
 }
