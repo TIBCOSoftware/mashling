@@ -148,7 +148,8 @@ func TestXMLMarshal(t *testing.T) {
 }
 
 func TestMarshal(t *testing.T) {
-	test := func(mime string, input []byte) {
+	test := func(mime string, input []byte, short bool) {
+		t.Log("mime=", "'"+mime+"'")
 		var output map[string]interface{}
 		err := Unmarshal(mime, input, &output)
 		if (err == ErrorXMLRequired || err == ErrorJSONRequired) && len(input) == 0 {
@@ -165,8 +166,9 @@ func TestMarshal(t *testing.T) {
 		if len(data) != len(input) {
 			t.Fatal("Unparse failed", string(data))
 		}
+		t.Log("'"+string(input)+"'", "=", "'"+string(data)+"'")
 
-		if len(input) == 0 {
+		if short {
 			return
 		}
 
@@ -198,11 +200,14 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(eval.Error)
 		}
 	}
-	test("application/xml", []byte(XML))
-	test("application/xml", []byte{})
-	test("", []byte(XML))
-	test("application/json", []byte(JSON))
-	test("application/json", []byte{})
-	test("", []byte(JSON))
-	test("", []byte{})
+	test("application/xml", []byte(XML), false)
+	test("application/xml", []byte{}, false)
+	test("", []byte(XML), false)
+	test("application/json", []byte(JSON), false)
+	test("application/json", []byte{}, false)
+	test("", []byte(JSON), false)
+	test("", []byte{}, true)
+	test("blah", []byte("abc123"), true)
+	test("blah", []byte{}, true)
+	test("", []byte("abc123"), true)
 }

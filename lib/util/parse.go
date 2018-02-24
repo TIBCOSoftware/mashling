@@ -44,6 +44,8 @@ const (
 	MIMETextXML = "text/xml"
 	// MIMEApplicationXML a XML MIME type
 	MIMEApplicationXML = "application/xml"
+	// MIMEUnknown is an unknown MIME type
+	MIMEUnknown = "application/octet-stream"
 
 	// MetaMIME the meta MIME key
 	MetaMIME = "___mime___"
@@ -308,6 +310,7 @@ func Unmarshal(mime string, data []byte, v interface{}) error {
 		return ErrorPointerRequired
 	}
 
+	parsed := false
 	switch mime {
 	case MIMEApplicationJSON:
 		if len(data) == 0 {
@@ -317,6 +320,7 @@ func Unmarshal(mime string, data []byte, v interface{}) error {
 		if err != nil {
 			return err
 		}
+		parsed = true
 	case MIMETextXML, MIMEApplicationXML:
 		if len(data) == 0 {
 			return ErrorXMLRequired
@@ -325,31 +329,35 @@ func Unmarshal(mime string, data []byte, v interface{}) error {
 		if err != nil {
 			return err
 		}
+		parsed = true
 	case "":
 		err := json.Unmarshal(data, v)
 		if err == nil {
 			mime = MIMEApplicationJSON
+			parsed = true
 			break
 		}
 		err = XMLUnmarshal(data, v)
 		if err == nil {
 			mime = MIMEApplicationXML
+			parsed = true
+			break
 		}
+		mime = MIMEUnknown
 	}
 
-	x := output.Elem().Interface()
-	if x == nil {
-		x = make(map[string]interface{})
-	}
-	if y, ok := x.(map[string]interface{}); ok {
-		if mime != "" {
+	if y, ok := output.Elem().Interface().(map[string]interface{}); ok {
+		if y == nil {
+			y = make(map[string]interface{})
+			output.Elem().Set(reflect.ValueOf(y))
+		}
+		if mime != MIMEApplicationJSON {
 			y[MetaMIME] = mime
 		}
-		if len(data) > 0 {
+		if !parsed {
 			y[MetaCopy] = string(data)
 		}
 	}
-	output.Elem().Set(reflect.ValueOf(x))
 
 	return nil
 }
@@ -381,7 +389,7 @@ func Marshal(v interface{}) ([]byte, error) {
 		return nil, err
 	}
 	switch mime {
-	case MIMEApplicationJSON:
+	case MIMEApplicationJSON, "":
 		return json.MarshalIndent(Clean(input), "", " ")
 	case MIMETextXML, MIMEApplicationXML:
 		return XMLMarshal(Clean(input))
@@ -390,9 +398,6 @@ func Marshal(v interface{}) ([]byte, error) {
 	cp, err := getString(MetaCopy, input)
 	if err != nil {
 		return nil, err
-	}
-	if cp == "" {
-		return json.MarshalIndent(Clean(input), "", " ")
 	}
 	return []byte(cp), nil
 }
