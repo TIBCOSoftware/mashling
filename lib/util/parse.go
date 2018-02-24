@@ -23,6 +23,57 @@ var (
 	ErrorXMLRequired = errors.New("xml body required")
 	// ErrorPointerRequired produced when v is not a pointer
 	ErrorPointerRequired = errors.New("v must be a pointer")
+	// ErrorXMLMismatchedElements XML start and end elements dont' match
+	ErrorXMLMismatchedElements = errors.New("mismatched elements")
+	// ErrorXMLMapRequired a XML map is required
+	ErrorXMLMapRequired = errors.New("XML map required")
+	// ErrorXMLItemNotMap a XML item is not a map
+	ErrorXMLItemNotMap = errors.New("item should be a map")
+	// ErrorXMLBodyNotSlice a XML body is not a slice
+	ErrorXMLBodyNotSlice = errors.New("body should be a slice")
+	// ErrorXMLInvalidAttribute XML attribute is invalid
+	ErrorXMLInvalidAttribute = errors.New("invalid attribute")
+	// ErrorXMLAttributeNotString XML attribute is not a string
+	ErrorXMLAttributeNotString = errors.New("attribute should be a string")
+)
+
+const (
+	// MIMEApplicationJSON the JSON MIME type
+	MIMEApplicationJSON = "application/json"
+	// MIMETextXML a XML MIME type
+	MIMETextXML = "text/xml"
+	// MIMEApplicationXML a XML MIME type
+	MIMEApplicationXML = "application/xml"
+
+	// MetaMIME the meta MIME key
+	MetaMIME = "___mime___"
+	// MetaCopy the meta copy key
+	MetaCopy = "___copy___"
+
+	// XMLKeyType is the key for the XML type
+	XMLKeyType = "_type"
+	// XMLKeyTarget is the key for the processing target
+	XMLKeyTarget = "_target"
+	// XMLKeyInst is the key for the processing instruction
+	XMLKeyInst = "_inst"
+	// XMLKeyBody is the key for the XML body
+	XMLKeyBody = "_body"
+	// XMLKeySpace is the key for the XML namespace
+	XMLKeySpace = "_space"
+	// XMLKeyName is the key for the XML name
+	XMLKeyName = "_name"
+
+	// XMLTypeProcInst is a XML processing instruction
+	XMLTypeProcInst = "ProcInst"
+	// XMLTypeComment is a XML comment
+	XMLTypeComment = "Comment"
+	// XMLTypeElement is a XML element
+	XMLTypeElement = "Element"
+	// XMLTypeCharData is XML char data
+	XMLTypeCharData = "CharData"
+
+	// XMLAttributeSep XML attribute separator
+	XMLAttributeSep = "___"
 )
 
 // XMLUnmarshal parases XML and stores it in a JSON like data structure
@@ -44,45 +95,45 @@ func XMLUnmarshal(data []byte, v interface{}) error {
 			switch t := token.(type) {
 			case xml.ProcInst:
 				data := make(map[string]interface{})
-				data["_type"] = "ProcInst"
-				data["_target"] = t.Target
-				data["_inst"] = string(t.Inst)
-				children := x["_body"].([]interface{})
-				x["_body"] = append(children, data)
+				data[XMLKeyType] = XMLTypeProcInst
+				data[XMLKeyTarget] = t.Target
+				data[XMLKeyInst] = string(t.Inst)
+				children := x[XMLKeyBody].([]interface{})
+				x[XMLKeyBody] = append(children, data)
 			case xml.Comment:
 				data := make(map[string]interface{})
-				data["_type"] = "Comment"
-				data["_body"] = string(t)
-				children := x["_body"].([]interface{})
-				x["_body"] = append(children, data)
+				data[XMLKeyType] = XMLTypeComment
+				data[XMLKeyBody] = string(t)
+				children := x[XMLKeyBody].([]interface{})
+				x[XMLKeyBody] = append(children, data)
 			case xml.StartElement:
 				child := make(map[string]interface{})
-				child["_type"] = "Element"
-				child["_space"] = t.Name.Space
-				child["_name"] = t.Name.Local
+				child[XMLKeyType] = XMLTypeElement
+				child[XMLKeySpace] = t.Name.Space
+				child[XMLKeyName] = t.Name.Local
 				for _, attr := range t.Attr {
 					name := attr.Name.Local
 					if attr.Name.Space != "" {
-						name = attr.Name.Space + "___" + name
+						name = attr.Name.Space + XMLAttributeSep + name
 					}
 					child[name] = attr.Value
 				}
-				child["_body"] = make([]interface{}, 0)
+				child[XMLKeyBody] = make([]interface{}, 0)
 				err = parse(t.Name, child)
 				if err != nil {
 					return err
 				}
-				children := x["_body"].([]interface{})
-				x["_body"] = append(children, child)
+				children := x[XMLKeyBody].([]interface{})
+				x[XMLKeyBody] = append(children, child)
 			case xml.CharData:
 				data := make(map[string]interface{})
-				data["_type"] = "CharData"
-				data["_body"] = string(t)
-				children := x["_body"].([]interface{})
-				x["_body"] = append(children, data)
+				data[XMLKeyType] = XMLTypeCharData
+				data[XMLKeyBody] = string(t)
+				children := x[XMLKeyBody].([]interface{})
+				x[XMLKeyBody] = append(children, data)
 			case xml.EndElement:
 				if name != t.Name {
-					return errors.New("mismatched elements")
+					return ErrorXMLMismatchedElements
 				}
 				return nil
 			}
@@ -90,7 +141,7 @@ func XMLUnmarshal(data []byte, v interface{}) error {
 	}
 
 	x := make(map[string]interface{})
-	x["_body"] = make([]interface{}, 0)
+	x[XMLKeyBody] = make([]interface{}, 0)
 	err := parse(xml.Name{}, x)
 	if err != nil && err != io.EOF {
 		return err
@@ -117,13 +168,13 @@ func XMLMarshal(v interface{}) ([]byte, error) {
 	if x, ok := v.(map[string]interface{}); ok {
 		input = x
 	} else {
-		return nil, errors.New("XML map required")
+		return nil, ErrorXMLMapRequired
 	}
 
 	output := bytes.Buffer{}
 	var unparse func(v map[string]interface{}) error
 	processBody := func(v map[string]interface{}) error {
-		if x, ok := v["_body"]; ok {
+		if x, ok := v[XMLKeyBody]; ok {
 			if y, ok := x.([]interface{}); ok {
 				for _, z := range y {
 					if item, ok := z.(map[string]interface{}); ok {
@@ -131,29 +182,29 @@ func XMLMarshal(v interface{}) ([]byte, error) {
 							return err
 						}
 					} else {
-						return errors.New("item should be a map")
+						return ErrorXMLItemNotMap
 					}
 				}
 			} else {
-				return errors.New("body should be a slice")
+				return ErrorXMLBodyNotSlice
 			}
 		}
 		return nil
 	}
 	unparse = func(v map[string]interface{}) error {
-		typ, err := getString("_type", v)
+		typ, err := getString(XMLKeyType, v)
 		if err != nil {
 			return err
 		}
 
 		switch typ {
-		case "ProcInst":
+		case XMLTypeProcInst:
 			var target, inst string
-			target, err = getString("_target", v)
+			target, err = getString(XMLKeyTarget, v)
 			if err != nil {
 				return err
 			}
-			inst, err = getString("_inst", v)
+			inst, err = getString(XMLKeyInst, v)
 			if err != nil {
 				return err
 			}
@@ -162,22 +213,22 @@ func XMLMarshal(v interface{}) ([]byte, error) {
 			output.WriteString(" ")
 			output.WriteString(inst)
 			output.WriteString("?>")
-		case "Comment":
+		case XMLTypeComment:
 			var body string
-			body, err = getString("_body", v)
+			body, err = getString(XMLKeyBody, v)
 			if err != nil {
 				return err
 			}
 			output.WriteString("<!--")
 			output.WriteString(body)
 			output.WriteString("-->")
-		case "Element":
+		case XMLTypeElement:
 			var space, name string
-			space, err = getString("_space", v)
+			space, err = getString(XMLKeySpace, v)
 			if err != nil {
 				return err
 			}
-			name, err = getString("_name", v)
+			name, err = getString(XMLKeyName, v)
 			if err != nil {
 				return err
 			}
@@ -189,10 +240,10 @@ func XMLMarshal(v interface{}) ([]byte, error) {
 			output.WriteString(name)
 			for key, value := range v {
 				switch key {
-				case "_type", "_target", "_inst", "_body", "_space", "_name":
+				case XMLKeyType, XMLKeyTarget, XMLKeyInst, XMLKeyBody, XMLKeySpace, XMLKeyName:
 				default:
 					if x, ok := value.(string); ok {
-						parts := strings.Split(key, "___")
+						parts := strings.Split(key, XMLAttributeSep)
 						output.WriteString(" ")
 						switch len(parts) {
 						case 1:
@@ -202,14 +253,14 @@ func XMLMarshal(v interface{}) ([]byte, error) {
 							output.WriteString(":")
 							output.WriteString(parts[1])
 						default:
-							return errors.New("invalid attribute")
+							return ErrorXMLInvalidAttribute
 						}
 						output.WriteString("=")
 						output.WriteString("\"")
 						output.WriteString(x)
 						output.WriteString("\"")
 					} else {
-						return errors.New("attribute should be a string")
+						return ErrorXMLAttributeNotString
 					}
 				}
 			}
@@ -225,9 +276,9 @@ func XMLMarshal(v interface{}) ([]byte, error) {
 			}
 			output.WriteString(name)
 			output.WriteString(">")
-		case "CharData":
+		case XMLTypeCharData:
 			var body string
-			body, err = getString("_body", v)
+			body, err = getString(XMLKeyBody, v)
 			if err != nil {
 				return err
 			}
@@ -258,7 +309,7 @@ func Parse(mime string, data []byte, v interface{}) error {
 	}
 
 	switch mime {
-	case "application/json":
+	case MIMEApplicationJSON:
 		if len(data) == 0 {
 			return ErrorJSONRequired
 		}
@@ -266,7 +317,7 @@ func Parse(mime string, data []byte, v interface{}) error {
 		if err != nil {
 			return err
 		}
-	case "text/xml", "application/xml":
+	case MIMETextXML, MIMEApplicationXML:
 		if len(data) == 0 {
 			return ErrorXMLRequired
 		}
@@ -277,12 +328,12 @@ func Parse(mime string, data []byte, v interface{}) error {
 	case "":
 		err := json.Unmarshal(data, v)
 		if err == nil {
-			mime = "application/json"
+			mime = MIMEApplicationJSON
 			break
 		}
 		err = XMLUnmarshal(data, v)
 		if err == nil {
-			mime = "application/xml"
+			mime = MIMEApplicationXML
 		}
 	}
 
@@ -292,10 +343,10 @@ func Parse(mime string, data []byte, v interface{}) error {
 	}
 	if y, ok := x.(map[string]interface{}); ok {
 		if mime != "" {
-			y["___mime___"] = mime
+			y[MetaMIME] = mime
 		}
 		if len(data) > 0 {
-			y["___copy___"] = string(data)
+			y[MetaCopy] = string(data)
 		}
 	}
 	output.Elem().Set(reflect.ValueOf(x))
@@ -308,7 +359,7 @@ func Clean(input map[string]interface{}) map[string]interface{} {
 	output := make(map[string]interface{})
 	for key, value := range input {
 		switch key {
-		case "___mime___", "___copy___":
+		case MetaMIME, MetaCopy:
 		default:
 			output[key] = value
 		}
@@ -327,18 +378,18 @@ func Unparse(v interface{}) ([]byte, error) {
 		return jsonMarshal(v)
 	}
 
-	mime, err := getString("___mime___", input)
+	mime, err := getString(MetaMIME, input)
 	if err != nil {
 		return nil, err
 	}
 	switch mime {
-	case "application/json":
+	case MIMEApplicationJSON:
 		return jsonMarshal(Clean(input))
-	case "text/xml", "application/xml":
+	case MIMETextXML, MIMEApplicationXML:
 		return XMLMarshal(Clean(input))
 	}
 
-	cp, err := getString("___copy___", input)
+	cp, err := getString(MetaCopy, input)
 	if err != nil {
 		return nil, err
 	}

@@ -111,7 +111,7 @@ func TestXMLUnmarshal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, ok := output["_body"].([]interface{})
+	body, ok := output[XMLKeyBody].([]interface{})
 	if !ok {
 		t.Fatal("invalid _body element")
 	}
@@ -122,12 +122,12 @@ func TestXMLUnmarshal(t *testing.T) {
 	if !ok {
 		t.Fatal("invalid element")
 	}
-	typ, ok := element["_type"]
+	typ, ok := element[XMLKeyType]
 	if !ok {
 		t.Fatal("there should be a type")
 	}
 	ty, ok := typ.(string)
-	if !ok || ty != "Element" {
+	if !ok || ty != XMLTypeElement {
 		t.Fatal("invalid type")
 	}
 }
