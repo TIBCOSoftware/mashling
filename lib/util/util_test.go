@@ -147,7 +147,7 @@ func TestXMLMarshal(t *testing.T) {
 	}
 }
 
-func TestParse(t *testing.T) {
+func TestMarshal(t *testing.T) {
 	jsonMarshal = func(v interface{}) ([]byte, error) {
 		return json.MarshalIndent(v, "", " ")
 	}
@@ -157,7 +157,7 @@ func TestParse(t *testing.T) {
 
 	test := func(mime string, input []byte) {
 		var output map[string]interface{}
-		err := Parse(mime, input, &output)
+		err := Unmarshal(mime, input, &output)
 		if (err == ErrorXMLRequired || err == ErrorJSONRequired) && len(input) == 0 {
 			return
 		}
@@ -165,7 +165,7 @@ func TestParse(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		data, err := Unparse(output)
+		data, err := Marshal(output)
 		if err != nil {
 			t.Fatal(err)
 		}

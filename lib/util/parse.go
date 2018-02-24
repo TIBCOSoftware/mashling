@@ -301,8 +301,8 @@ func XMLMarshal(v interface{}) ([]byte, error) {
 	return output.Bytes(), nil
 }
 
-// Parse parses JSON or XML with a give MIME type into an interface
-func Parse(mime string, data []byte, v interface{}) error {
+// Unmarshal parses JSON or XML with a give MIME type into an interface
+func Unmarshal(mime string, data []byte, v interface{}) error {
 	output := reflect.ValueOf(v)
 	if output.Kind() != reflect.Ptr {
 		return ErrorPointerRequired
@@ -369,8 +369,8 @@ func Clean(input map[string]interface{}) map[string]interface{} {
 
 var jsonMarshal = json.Marshal
 
-// Unparse generates a string from a map
-func Unparse(v interface{}) ([]byte, error) {
+// Marshal generates a string from a map
+func Marshal(v interface{}) ([]byte, error) {
 	var input map[string]interface{}
 	if x, ok := v.(map[string]interface{}); ok {
 		input = x
