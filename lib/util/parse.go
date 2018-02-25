@@ -35,11 +35,15 @@ var (
 	ErrorXMLInvalidAttribute = errors.New("invalid attribute")
 	// ErrorXMLAttributeNotString XML attribute is not a string
 	ErrorXMLAttributeNotString = errors.New("attribute should be a string")
+	// ErrorInvalidXML XML is invalid
+	ErrorInvalidXML = errors.New("invalid XML")
 )
 
 const (
 	// MIMEApplicationJSON the JSON MIME type
 	MIMEApplicationJSON = "application/json"
+	// MIMEApplicationJSONUTF8 the UTF8 JSON MIME type
+	MIMEApplicationJSONUTF8 = "application/json; charset=UTF-8"
 	// MIMETextXML a XML MIME type
 	MIMETextXML = "text/xml"
 	// MIMEApplicationXML a XML MIME type
@@ -85,8 +89,8 @@ func XMLUnmarshal(data []byte, v interface{}) error {
 		return ErrorPointerRequired
 	}
 
-	buffer := bytes.NewBuffer(data)
-	decoder := xml.NewDecoder(buffer)
+	buffer := bytes.NewReader(data)
+	decoder, valid := xml.NewDecoder(buffer), false
 	var parse func(name xml.Name, x map[string]interface{}) error
 	parse = func(name xml.Name, x map[string]interface{}) error {
 		for {
@@ -109,6 +113,7 @@ func XMLUnmarshal(data []byte, v interface{}) error {
 				children := x[XMLKeyBody].([]interface{})
 				x[XMLKeyBody] = append(children, data)
 			case xml.StartElement:
+				valid = true
 				child := make(map[string]interface{})
 				child[XMLKeyType] = XMLTypeElement
 				child[XMLKeySpace] = t.Name.Space
@@ -147,6 +152,9 @@ func XMLUnmarshal(data []byte, v interface{}) error {
 	err := parse(xml.Name{}, x)
 	if err != nil && err != io.EOF {
 		return err
+	}
+	if !valid {
+		return ErrorInvalidXML
 	}
 
 	output.Elem().Set(reflect.ValueOf(x))
@@ -312,11 +320,13 @@ func Unmarshal(mime string, data []byte, v interface{}) error {
 
 	parsed := false
 	switch mime {
-	case MIMEApplicationJSON:
+	case MIMEApplicationJSON, MIMEApplicationJSONUTF8:
 		if len(data) == 0 {
 			return ErrorJSONRequired
 		}
-		err := json.Unmarshal(data, v)
+		decoder := json.NewDecoder(bytes.NewReader(data))
+		decoder.UseNumber()
+		err := decoder.Decode(v)
 		if err != nil {
 			return err
 		}
@@ -331,7 +341,9 @@ func Unmarshal(mime string, data []byte, v interface{}) error {
 		}
 		parsed = true
 	case "":
-		err := json.Unmarshal(data, v)
+		decoder := json.NewDecoder(bytes.NewReader(data))
+		decoder.UseNumber()
+		err := decoder.Decode(v)
 		if err == nil {
 			mime = MIMEApplicationJSON
 			parsed = true
@@ -344,14 +356,13 @@ func Unmarshal(mime string, data []byte, v interface{}) error {
 			break
 		}
 		mime = MIMEUnknown
+		fallthrough
+	default:
+		output.Elem().Set(reflect.ValueOf(make(map[string]interface{})))
 	}
 
 	if y, ok := output.Elem().Interface().(map[string]interface{}); ok {
-		if y == nil {
-			y = make(map[string]interface{})
-			output.Elem().Set(reflect.ValueOf(y))
-		}
-		if mime != MIMEApplicationJSON {
+		if mime != MIMEApplicationJSON && mime != MIMEApplicationJSONUTF8 {
 			y[MetaMIME] = mime
 		}
 		if !parsed {
@@ -389,7 +400,7 @@ func Marshal(v interface{}) ([]byte, error) {
 		return nil, err
 	}
 	switch mime {
-	case MIMEApplicationJSON, "":
+	case MIMEApplicationJSON, MIMEApplicationJSONUTF8, "":
 		return json.MarshalIndent(Clean(input), "", " ")
 	case MIMETextXML, MIMEApplicationXML:
 		return XMLMarshal(Clean(input))

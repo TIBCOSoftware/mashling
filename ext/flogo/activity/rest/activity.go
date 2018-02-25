@@ -20,6 +20,8 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/mashling/lib/util"
+
 	opentracing "github.com/opentracing/opentracing-go"
 	ctx "golang.org/x/net/context"
 )
@@ -136,23 +138,22 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 	var reqBody io.Reader
 
 	contentType := contentTypeApplicationJSON
-
 	if method == methodPOST || method == methodPUT || method == methodPATCH {
-
 		content := context.GetInput(ivContent)
-
-		contentType = getContentType(content)
-
-		if content != nil {
-			if str, ok := content.(string); ok {
-				reqBody = bytes.NewBuffer([]byte(str))
-				setTag("payload", str)
-			} else {
-				b, _ := json.Marshal(content) //todo handle error
-				reqBody = bytes.NewBuffer([]byte(b))
-				setTag("payload", str)
+		if object, ok := content.(map[string]interface{}); ok {
+			if mime, ok := object[util.MetaMIME]; ok {
+				if s, ok := mime.(string); ok {
+					contentType = s
+				}
 			}
 		}
+
+		data, err := util.Marshal(content)
+		if err != nil {
+			return false, err
+		}
+		reqBody = bytes.NewReader(data)
+		setTag("payload", string(data))
 	} else {
 		reqBody = nil
 	}
@@ -222,17 +223,11 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 
 	var result interface{}
 	response := string(respBody)
-
-	d := json.NewDecoder(bytes.NewReader(respBody))
-	d.UseNumber()
-	err = d.Decode(&result)
+	contentType = resp.Header.Get("Content-Type")
+	err = util.Unmarshal(contentType, respBody, &result)
 	if err != nil {
-		result = map[string]interface{}{
-			"___string___": response,
-		}
+		return false, err
 	}
-
-	//json.Unmarshal(respBody, &result)
 
 	log.Debug("response Body:", result)
 	setTag("response", response)

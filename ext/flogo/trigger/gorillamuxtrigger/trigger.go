@@ -6,6 +6,7 @@
 package gorillamuxtrigger
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -406,41 +407,18 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 
 		var content interface{}
 		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
-			switch r.Header.Get("Content-Type") {
-			case "application/json":
-				err = json.NewDecoder(r.Body).Decode(&content)
-				if err == io.EOF {
-					str := "json body required"
-					serverSpan.SetTag("error", str)
-					http.Error(w, str, http.StatusBadRequest)
-					return
-				} else if err != nil {
-					serverSpan.SetTag("error", err.Error())
-					http.Error(w, err.Error(), http.StatusBadRequest)
-					return
-				}
-			case "":
-				var data []byte
-				data, err = ioutil.ReadAll(r.Body)
-				if err != nil || len(data) == 0 {
-					break
-				}
-				err = json.Unmarshal(data, &content)
-				if err == nil {
-					break
-				}
-				content = string(data)
-			case "text/xml", "application/xml":
-				fallthrough
-			default:
-				var data []byte
-				data, err = ioutil.ReadAll(r.Body)
-				if err != nil {
-					serverSpan.SetTag("error", err.Error())
-					http.Error(w, err.Error(), http.StatusBadRequest)
-					return
-				}
-				content = string(data)
+			data, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				serverSpan.SetTag("error", err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			mime := r.Header.Get("Content-Type")
+			err = util.Unmarshal(mime, data, &content)
+			if err != nil {
+				serverSpan.SetTag("error", err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
 			}
 		}
 
@@ -567,16 +545,27 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		}
 
 		if replyData != nil {
-			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-			w.WriteHeader(replyCode)
 			if object, ok := replyData.(map[string]interface{}); ok {
-				if str := object["___string___"]; str != nil {
-					if raw, ok := str.(string); ok {
-						w.Write([]byte(raw))
+				if mime, ok := object[util.MetaMIME]; ok {
+					if s, ok := mime.(string); ok {
+						w.Header().Set("Content-Type", s)
 					}
-				} else if err := json.NewEncoder(w).Encode(object); err != nil {
+				} else {
+					w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+				}
+				w.WriteHeader(replyCode)
+
+				data, err := util.Marshal(replyData)
+				if err != nil {
 					serverSpan.SetTag("error", err.Error())
-					log.Error(err)
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				_, err = io.Copy(w, bytes.NewReader(data))
+				if err != nil {
+					serverSpan.SetTag("error", err.Error())
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
 				}
 			}
 			return
