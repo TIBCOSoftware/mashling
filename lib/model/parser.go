@@ -166,7 +166,7 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 			}
 		}
 
-		actionMappings := &ftrigger.Mappings{
+		actionMappings := &data.IOMappings{
 			Input:  inputParams,
 			Output: outputParams,
 		}
