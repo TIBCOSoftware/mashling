@@ -339,22 +339,22 @@ func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 	//Install dependencies explicitly, as api.BuildApp() doesn't install newly added dependencies.
 	//Workaround for https://github.com/TIBCOSoftware/flogo-cli/issues/56
 	/*
-		//This creates an issue of pulling down the latest flogo packages on every build.
-		//User can run 'create' instead of 'build' if there is an additional packages required
-		//for the recipe. Thus, commenting out to make sure the build command executes only with
-		//the local vendor folder.
-		fmt.Println("Installing dependencies...")
-		env := SetupExistingProjectEnv(appDir)
-		flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
-		deps := api.ExtractDependencies(flogoAppDescriptor)
+		 //This creates an issue of pulling down the latest flogo packages on every build.
+		 //User can run 'create' instead of 'build' if there is an additional packages required
+		 //for the recipe. Thus, commenting out to make sure the build command executes only with
+		 //the local vendor folder.
+		 fmt.Println("Installing dependencies...")
+		 env := SetupExistingProjectEnv(appDir)
+		 flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
+		 deps := api.ExtractDependencies(flogoAppDescriptor)
 
-		for _, dep := range deps {
-			path, version := splitVersion(dep.Ref)
-			err = env.InstallDependency(path, version)
-			if err != nil {
-				return err
-			}
-		}
+		 for _, dep := range deps {
+			 path, version := splitVersion(dep.Ref)
+			 err = env.InstallDependency(path, version)
+			 if err != nil {
+				 return err
+			 }
+		 }
 	*/
 	//END of workaround https://github.com/TIBCOSoftware/flogo-cli/issues/56
 
@@ -1342,7 +1342,7 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 }
 
 /*
-appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
+ appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
 */
 func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
 
@@ -1591,43 +1591,43 @@ func createMetadata(env env.Project, dependency *config.Dependency) error {
 }
 
 var tplMetadataGoFile = `package {{.Package}}
-
-var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
-
-func getJsonMetadata() string {
-	return jsonMetadata
-}
-`
+ 
+ var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+ 
+ func getJsonMetadata() string {
+	 return jsonMetadata
+ }
+ `
 
 var tplActivityMetadataGoFile = `package {{.Package}}
-
-import (
-	"github.com/TIBCOSoftware/flogo-lib/core/activity"
-)
-
-var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
-
-// init create & register activity
-func init() {
-	md := activity.NewMetadata(jsonMetadata)
-	activity.Register(NewActivity(md))
-}
-`
+ 
+ import (
+	 "github.com/TIBCOSoftware/flogo-lib/core/activity"
+ )
+ 
+ var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+ 
+ // init create & register activity
+ func init() {
+	 md := activity.NewMetadata(jsonMetadata)
+	 activity.Register(NewActivity(md))
+ }
+ `
 
 var tplTriggerMetadataGoFile = `package {{.Package}}
-
-import (
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-)
-
-var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
-
-// init create & register trigger factory
-func init() {
-	md := trigger.NewMetadata(jsonMetadata)
-	trigger.RegisterFactory(md.ID, NewFactory(md))
-}
-`
+ 
+ import (
+	 "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+ )
+ 
+ var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+ 
+ // init create & register trigger factory
+ func init() {
+	 md := trigger.NewMetadata(jsonMetadata)
+	 trigger.RegisterFactory(md.ID, NewFactory(md))
+ }
+ `
 
 // ListDependencies lists all installed dependencies
 func ListDependencies(env env.Project, cType config.ContribType) ([]*config.Dependency, error) {
@@ -1744,46 +1744,9 @@ func Ensure(depManager *dep.DepManager, args ...string) error {
 
 func customizeMainFile(appDir, gatewayName, gatewayJSON string) error {
 
-	//copy gopkg.lock file to gopkglock.toml and load the data into viper object
-	err := CopyFile(filepath.Join(appDir, "Gopkg.lock"), filepath.Join(appDir, "Gopkglock.toml"))
+	flogoLibRev, mashlingRev, err := getProjectRev(appDir)
 	if err != nil {
 		return err
-	}
-
-	viper.SetConfigName("Gopkglock") // no need to include file extension
-	viper.AddConfigPath(appDir)      // set the path of your config file
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		fmt.Println("Gopkg Config file not found...")
-		os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
-		return err
-	}
-
-	err = os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
-
-	if err != nil {
-		return err
-	}
-
-	devServer := viper.AllSettings()
-	//fmt.Printf("values [%s] \n", devServer)
-
-	test := devServer["projects"]
-	projects := test.([]interface{})
-
-	var flogoLibRev, mashlingRev string
-	for _, project := range projects {
-		projectMap := project.(map[string]interface{})
-		if flogoLibRev != "" && mashlingRev != "" {
-			break
-		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/flogo-lib") == 0 {
-			//fmt.Printf("flogo lib revision [%s]\n", projectMap["revision"])
-			flogoLibRev = projectMap["revision"].(string)
-		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/mashling") == 0 {
-			//fmt.Printf("mashling revision [%s]\n", projectMap["revision"])
-			mashlingRev = projectMap["revision"].(string)
-		}
 	}
 
 	// Load the main.go file so we can inject extract meta data output.
@@ -1907,4 +1870,49 @@ func customizeMainFile(appDir, gatewayName, gatewayJSON string) error {
 		fileContent += "\n"
 	}
 	return ioutil.WriteFile(filepath.Join(appDir, "main.go"), []byte(fileContent), 0644)
+}
+
+func getProjectRev(appDir string) (string, string, error) {
+	//copy gopkg.lock file to gopkglock.toml and load the data into viper object
+	err := CopyFile(filepath.Join(appDir, "Gopkg.lock"), filepath.Join(appDir, "Gopkglock.toml"))
+	if err != nil {
+		return "", "", err
+	}
+
+	viper.SetConfigName("Gopkglock") // no need to include file extension
+	viper.AddConfigPath(appDir)      // set the path of your config file
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		fmt.Println("Gopkg Config file not found...")
+		os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
+		return "", "", err
+	}
+
+	err = os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
+
+	if err != nil {
+		return "", "", err
+	}
+
+	devServer := viper.AllSettings()
+	//fmt.Printf("values [%s] \n", devServer)
+
+	test := devServer["projects"]
+	projects := test.([]interface{})
+
+	var flogoLibRev, mashlingRev string
+	for _, project := range projects {
+		projectMap := project.(map[string]interface{})
+		if flogoLibRev != "" && mashlingRev != "" {
+			break
+		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/flogo-lib") == 0 {
+			//fmt.Printf("flogo lib revision [%s]\n", projectMap["revision"])
+			flogoLibRev = projectMap["revision"].(string)
+		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/mashling") == 0 {
+			//fmt.Printf("mashling revision [%s]\n", projectMap["revision"])
+			mashlingRev = projectMap["revision"].(string)
+		}
+	}
+	return flogoLibRev, mashlingRev, err
 }
