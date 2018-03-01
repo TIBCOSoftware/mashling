@@ -62,10 +62,11 @@ func (tr *TestRunner) Run(context context.Context, action action.Action, uri str
 }
 
 func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
-	log.Debugf("Ran Action: %v", act.Config().Id)
 	return nil, nil
 }
-
+func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
+	return nil, nil
+}
 func TestInit(t *testing.T) {
 
 	// New  factory
