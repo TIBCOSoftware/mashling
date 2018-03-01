@@ -10,7 +10,6 @@ branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - feature-dep
     
 cache:
   bundler: false

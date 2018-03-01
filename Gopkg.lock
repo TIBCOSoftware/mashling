@@ -33,21 +33,26 @@
   revision = "81619ab8d300cda9c0ef82a72a82dc7a8cd3bd79"
 
 [[projects]]
+  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
     "action/flow/definition",
     "action/flow/model",
+    "action/flow/model/simple",
+    "action/flow/script/fggos",
     "action/flow/support",
     "action/flow/test",
+    "action/flow/util",
     "trigger/rest/cors"
   ]
-  revision = "757754f73368d90d8dcc4f7d1073d3200d037786"
-  version = "v0.5.1"
+  revision = "8c3e4267e89078404a8855c1cbdeff6619513dcc"
 
 [[projects]]
+  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
+    "app/resource",
     "config",
     "core/action",
     "core/activity",
@@ -57,8 +62,7 @@
     "logger",
     "util"
   ]
-  revision = "2b805c0105ea1c260484a671b0afcafe3c7b83a5"
-  version = "v0.5.1"
+  revision = "d92ecb00d86d18aa7c5c8b6b32fc3008a7c51a27"
 
 [[projects]]
   name = "github.com/apache/thrift"
@@ -172,6 +176,12 @@
     "json/token"
   ]
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/japm/goScript"
+  packages = ["."]
+  revision = "caab90145b05376536bbab332312f4812123e197"
 
 [[projects]]
   branch = "master"
@@ -444,6 +454,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5dd2cfcf1216567e2c411dd193eb94be9d1cb50f3b541a5bf792389188cde0e7"
+  inputs-digest = "7c47bf976a7de72ccd384f42f1e111a618cc99c6d433b237f12476d566051a10"
   solver-name = "gps-cdcl"
   solver-version = 1
