@@ -10,11 +10,12 @@ branches:
   only:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
+    - feature-dep
     
 cache:
   bundler: false
   directories:
-  - .build-cache          # images.txt
+  - .build-cache
 # Handle git submodules yourself
 git:
     submodules: false
@@ -31,12 +32,10 @@ script:
   - git clone -b feature-dep-update https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
   - go get -u github.com/TIBCOSoftware/mashling/...
   - cd mashling
-  - dep ensure
-  - cp -r vendor/ $GOPATH
   - git checkout feature-dep
+  - dep ensure
   - make all
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
-  # - make all
   - mashling help
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - pushd mashling-cicd/sample-recipes
@@ -68,8 +67,8 @@ notifications:
     on_failure: always
     on_success: always
     recipients: 
-      - jpark@tibco.com
+      #- jpark@tibco.com
       - rpolishe@tibco.com
       - lmekala@tibco.com
       - nthota@tibco.com
-      - ykalidin@tibco.com
+      #- ykalidin@tibco.com
