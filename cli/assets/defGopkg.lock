@@ -48,7 +48,7 @@
   revision = "f3d47d0c7954dec155dc00e8c6348f89faa500a9"
 
 [[projects]]
-  branch = "dep"
+  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
