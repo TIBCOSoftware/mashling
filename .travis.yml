@@ -30,7 +30,7 @@ install:
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone -b feature-dep-update https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
-  - go get -u github.com/TIBCOSoftware/mashling/...
+  - go get -d -u github.com/TIBCOSoftware/mashling/...
   - cd mashling
   - git checkout feature-dep
   - dep ensure
