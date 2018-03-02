@@ -18,8 +18,10 @@ import (
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
+const tempRepoName = "sampleRepo"
+
 func doGitClone(path, ref string) error {
-	cmd := exec.Command("git", "clone", "https://"+ref, "sampleRepo")
+	cmd := exec.Command("git", "clone", "https://"+ref, tempRepoName)
 	cmd.Dir = path
 	return cmd.Run()
 }
@@ -64,9 +66,10 @@ func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 
 	gitPath = strings.Replace(gitPath, gitRefPath, "", -1)
 
-	return ioutil.ReadFile(filepath.Join(tmp, "sampleRepo", gitPath, resourceFile))
+	return ioutil.ReadFile(filepath.Join(tmp, tempRepoName, gitPath, resourceFile))
 }
 
+//GetTriggerMetadata returns trigger.json for supplied trigger github path
 func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 	data, err := GetGithubResource(gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
 	if err != nil {
