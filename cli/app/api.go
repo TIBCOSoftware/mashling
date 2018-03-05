@@ -341,22 +341,22 @@ func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 	//Install dependencies explicitly, as api.BuildApp() doesn't install newly added dependencies.
 	//Workaround for https://github.com/TIBCOSoftware/flogo-cli/issues/56
 	/*
-		//This creates an issue of pulling down the latest flogo packages on every build.
-		//User can run 'create' instead of 'build' if there is an additional packages required
-		//for the recipe. Thus, commenting out to make sure the build command executes only with
-		//the local vendor folder.
-		fmt.Println("Installing dependencies...")
-		env := SetupExistingProjectEnv(appDir)
-		flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
-		deps := api.ExtractDependencies(flogoAppDescriptor)
+		 //This creates an issue of pulling down the latest flogo packages on every build.
+		 //User can run 'create' instead of 'build' if there is an additional packages required
+		 //for the recipe. Thus, commenting out to make sure the build command executes only with
+		 //the local vendor folder.
+		 fmt.Println("Installing dependencies...")
+		 env := SetupExistingProjectEnv(appDir)
+		 flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
+		 deps := api.ExtractDependencies(flogoAppDescriptor)
 
-		for _, dep := range deps {
-			path, version := splitVersion(dep.Ref)
-			err = env.InstallDependency(path, version)
-			if err != nil {
-				return err
-			}
-		}
+		 for _, dep := range deps {
+			 path, version := splitVersion(dep.Ref)
+			 err = env.InstallDependency(path, version)
+			 if err != nil {
+				 return err
+			 }
+		 }
 	*/
 	//END of workaround https://github.com/TIBCOSoftware/flogo-cli/issues/56
 
@@ -1224,7 +1224,7 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 		return err
 	}
 
-	deps := config.ExtractDependencies(descriptor)
+	deps := config.ExtractAllDependencies(appJson)
 
 	//if manifest exists, use it to set up the dependecies
 	err = env.RestoreDependency(manifest)
@@ -1238,9 +1238,9 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 			path, version := splitVersion(dep.Ref)
 			err = env.InstallDependency(path, version)
 			/*
-				if err != nil {
-					return err
-				}
+				 if err != nil {
+					 return err
+				 }
 			*/
 		}
 	}
@@ -1266,7 +1266,7 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 }
 
 /*
-appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
+ appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
 */
 func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
 
@@ -1382,7 +1382,7 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 
 	if options.OptimizeImports {
 
-		deps = config.ExtractDependencies(descriptor)
+		deps = config.ExtractAllDependencies(appJson)
 
 	} else {
 		deps, err = ListDependencies(env, 0)
@@ -1530,43 +1530,43 @@ func createMetadata(env env.Project, dependency *config.Dependency) error {
 }
 
 var tplMetadataGoFile = `package {{.Package}}
-
-var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
-
-func getJsonMetadata() string {
-	return jsonMetadata
-}
-`
+ 
+ var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+ 
+ func getJsonMetadata() string {
+	 return jsonMetadata
+ }
+ `
 
 var tplActivityMetadataGoFile = `package {{.Package}}
-
-import (
-	"github.com/TIBCOSoftware/flogo-lib/core/activity"
-)
-
-var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
-
-// init create & register activity
-func init() {
-	md := activity.NewMetadata(jsonMetadata)
-	activity.Register(NewActivity(md))
-}
-`
+ 
+ import (
+	 "github.com/TIBCOSoftware/flogo-lib/core/activity"
+ )
+ 
+ var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+ 
+ // init create & register activity
+ func init() {
+	 md := activity.NewMetadata(jsonMetadata)
+	 activity.Register(NewActivity(md))
+ }
+ `
 
 var tplTriggerMetadataGoFile = `package {{.Package}}
-
-import (
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-)
-
-var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
-
-// init create & register trigger factory
-func init() {
-	md := trigger.NewMetadata(jsonMetadata)
-	trigger.RegisterFactory(md.ID, NewFactory(md))
-}
-`
+ 
+ import (
+	 "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+ )
+ 
+ var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
+ 
+ // init create & register trigger factory
+ func init() {
+	 md := trigger.NewMetadata(jsonMetadata)
+	 trigger.RegisterFactory(md.ID, NewFactory(md))
+ }
+ `
 
 // ListDependencies lists all installed dependencies
 func ListDependencies(env env.Project, cType config.ContribType) ([]*config.Dependency, error) {
