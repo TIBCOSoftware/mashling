@@ -1525,7 +1525,7 @@ func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
 		}
 
 	} else if options.EmbedConfig {
-		createEmbeddedAppGoFile(env.GetAppDir(), appJson)
+		createEmbeddedAppGoFile(env.GetAppDir(), appJSON)
 	}
 
 	return
