@@ -28,12 +28,11 @@ install:
   
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - go get -d -u github.com/TIBCOSoftware/mashling/...
+  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
   - cd mashling
-  - git checkout feature-dep
   - dep ensure
-  - make all
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
+  - make all
   - mashling help
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - pushd mashling-cicd/sample-recipes
