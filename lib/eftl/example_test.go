@@ -12,8 +12,23 @@ package eftl
 import (
 	"fmt"
 	"log"
+	"net"
+	"os"
+	"testing"
 	"time"
 )
+
+func skip() bool {
+	_, err := net.Dial("tcp", "127.0.0.1:9191")
+	return err != nil
+}
+
+func TestMain(m *testing.M) {
+	if skip() {
+		return
+	}
+	os.Exit(m.Run())
+}
 
 // Connect to the server.
 func ExampleConnect() {
