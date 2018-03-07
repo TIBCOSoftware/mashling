@@ -106,7 +106,7 @@ func (h *OptimizedHandler) GetActionID(payload string, span Span) string {
 				actionID = dispatch.actionID
 			}
 		} else if exprType == condition.EXPR_TYPE_HEADER {
-			span.Error("header expression type is invalid for mqtt trigger condition")
+			span.Error("header expression type is invalid for eftl trigger condition")
 		} else if exprType == condition.EXPR_TYPE_ENV {
 			//environment variable based condition
 			envFlagValue := os.Getenv(conditionOperation.LHS)
@@ -496,6 +496,10 @@ func (t *Trigger) constructStartRequest(message []byte, span Span) (string, map[
 				for _, e := range body.([]interface{}) {
 					element, ok := e.(map[string]interface{})
 					if !ok {
+						continue
+					}
+					typ, ok := element[util.XMLKeyType].(string)
+					if !ok || typ != util.XMLTypeElement {
 						continue
 					}
 					params[element["key"].(string)] = element["value"].(string)
