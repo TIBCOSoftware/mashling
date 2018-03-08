@@ -30,22 +30,22 @@
     "env",
     "util"
   ]
-  revision = "81619ab8d300cda9c0ef82a72a82dc7a8cd3bd79"
+  revision = "14872ccbb357378b90a1ec4ca08657979028ac32"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
     "action/flow/definition",
+    "action/flow/linker",
     "action/flow/model",
     "action/flow/model/simple",
-    "action/flow/script/fggos",
     "action/flow/support",
     "action/flow/test",
     "action/flow/util",
     "trigger/rest/cors"
   ]
-  revision = "8c3e4267e89078404a8855c1cbdeff6619513dcc"
+  revision = "a401edba2327d3572d54146892a37faffb306b90"
+  version = "v0.5.2-rc1"
 
 [[projects]]
   branch = "master"
@@ -58,11 +58,25 @@
     "core/activity",
     "core/data",
     "core/mapper",
+    "core/mapper/exprmapper",
+    "core/mapper/exprmapper/expression",
+    "core/mapper/exprmapper/expression/direction",
+    "core/mapper/exprmapper/expression/expr",
+    "core/mapper/exprmapper/expression/function",
+    "core/mapper/exprmapper/expression/gocc/errors",
+    "core/mapper/exprmapper/expression/gocc/lexer",
+    "core/mapper/exprmapper/expression/gocc/parser",
+    "core/mapper/exprmapper/expression/gocc/token",
+    "core/mapper/exprmapper/funcexprtype",
+    "core/mapper/exprmapper/json",
+    "core/mapper/exprmapper/json/field",
+    "core/mapper/exprmapper/ref",
     "core/trigger",
     "logger",
-    "util"
+    "util",
+    "util/managed"
   ]
-  revision = "d92ecb00d86d18aa7c5c8b6b32fc3008a7c51a27"
+  revision = "f3988b95d914f98704fbeb9bb1c845ea21153b56"
 
 [[projects]]
   name = "github.com/apache/thrift"
@@ -179,12 +193,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/japm/goScript"
-  packages = ["."]
-  revision = "caab90145b05376536bbab332312f4812123e197"
-
-[[projects]]
-  branch = "master"
   name = "github.com/kr/logfmt"
   packages = ["."]
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
@@ -248,8 +256,8 @@
     "types",
     "wire"
   ]
-  revision = "45e90b00710a4c34a1a7d8a78d90f9b010b0bd4d"
-  version = "v0.3.2"
+  revision = "4c9fbcbd6d73a644fd17214fe475296780c68fb5"
+  version = "v0.3.3"
 
 [[projects]]
   name = "github.com/pelletier/go-toml"
@@ -348,7 +356,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "49796115aa4b964c318aad4f3084fdb41e9aa067"
+  revision = "85f98707c97e11569271e4d9b3d397e079c4f4d0"
 
 [[projects]]
   branch = "master"
@@ -364,7 +372,7 @@
     "trace",
     "websocket"
   ]
-  revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
+  revision = "07e8617a6db2368fa55d4616f371ee1b1403c817"
 
 [[projects]]
   branch = "master"
@@ -373,7 +381,7 @@
     "unix",
     "windows"
   ]
-  revision = "c1138c84af3a9927aee1a1b8b7ce06c9b7ea52bc"
+  revision = "349b81fb5c64ec1734eb6ee148df25459ea48517"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -403,7 +411,7 @@
     "googleapis/api/annotations",
     "googleapis/rpc/status"
   ]
-  revision = "2b5a72b8730b0b16380010cfe5286c42108d88e7"
+  revision = "df60624c1e9b9d2973e889c7a1cff73155da81c4"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -436,10 +444,10 @@
   version = "v1.10.0"
 
 [[projects]]
-  branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "d670f9405373e636a5a2765eea47fac0c9bc91a4"
+  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
+  version = "v2.1.1"
 
 [[projects]]
   branch = "master"
