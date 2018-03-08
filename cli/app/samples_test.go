@@ -8,7 +8,6 @@ package app
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -58,9 +57,9 @@ func TestSampleGateways(t *testing.T) {
 		assert.NoError(t, err, "Error: Error getting working dir '%v'", err)
 
 		gatewayName := "Sample" + strconv.Itoa(index)
-		appDir := path.Join(currentDir, gatewayName)
+		appDir := filepath.Join(currentDir, gatewayName)
 
-		err = CreateMashling(SetupNewProjectEnv(), gatewayJson, nil, appDir, gatewayName, "", "9090", nil)
+		err = CreateMashling(SetupNewProjectEnv(), gatewayJson, false, appDir, gatewayName, "", "9090", "")
 		assert.NoError(t, err, "Error: Error creating mashling app '%v' - %v", gatewayName, err)
 
 		sample := testDir + "/" + gatewayName

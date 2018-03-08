@@ -27,5 +27,6 @@ ifndef HAS_BINDATA
 endif
 	cd cli && go-bindata -o assets/assets.go -pkg assets \
 	assets/banner.txt \
-	assets/default_manifest \
+	assets/defGopkg.lock \
+	assets/defGopkg.toml \
 	schema/mashling_schema-0.2.json

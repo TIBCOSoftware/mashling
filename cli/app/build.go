@@ -9,7 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
@@ -61,7 +61,7 @@ func (c *cmdBuild) Exec(args []string) error {
 		fmt.Fprint(os.Stderr, "Error: Not able read current directory. \n\n")
 		return err
 	}
-	var gatewayFile = path.Join(currentDir, util.Gateway_Definition_File_Name)
+	var gatewayFile = filepath.Join(currentDir, util.Gateway_Definition_File_Name)
 	if !fgutil.FileExists(gatewayFile) {
 		fmt.Fprintf(os.Stderr, "Error: Invalid gateway project, didn't find "+gatewayFile+"\n\n")
 		return err

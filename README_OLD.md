@@ -1,15 +1,31 @@
-# mashling/cli
-> Command line tool for building **Mashling** based gateways.
+# Project Mashling
 
-**Mashling** is a Micro-gateway framework written in Go. It was designed from the ground up to be robust enough for microservices.
+[![Build Status](https://travis-ci.org/TIBCOSoftware/mashling.svg?branch=master)](https://travis-ci.org/TIBCOSoftware/mashling)
 
+Project Mashling<sup>TM</sup> is an open source event-driven microgateway.
+
+Project Mashling highlights include:
+* Ultra lightweight: 10-50x times less compute resource intensive
+* Event-driven by design
+* Complements Service Meshes
+* Co-exists with API management platforms in a federated API Gateway model
+
+Project Mashling consists of the following open source repos:
+* [mashling](http://github.com/TIBCOSoftware/mashling): This is the main repo that includes the below components
+	- CLI to build Mashling apps
+	- Mashling triggers and activities
+	- Library to build Mashling extensions
+* [mashling-recipes](http://github.com/TIBCOSoftware/mashling-recipes): This is the repo that includes recipes that illustrate configuration of common microgateway patterns. These recipes are curated and searchable via [mashling.io](http://mashling.io)
+
+Additional developer tooling is included in below open source repo that contains the VSCode plugin for Mashling configuration:
+* [VSCode Plugin for Mashling](https://github.com/TIBCOSoftware/vscode-extension-mashling)
 
 ## Installation
 
 ### Prerequisites
-* The Go programming language 1.9 or later should be [installed](https://golang.org/doc/install).
+* The Go programming language 1.7 or later should be [installed](https://golang.org/doc/install).
 * Set GOPATH environment variable on your system
-* In order to simplify dependency management, we're using **go dep**. You can install that by following the instructions [here](https://github.com/golang/dep#setup). 
+* In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).
 
 ### Install Mashling
     go get github.com/TIBCOSoftware/mashling/...
@@ -26,10 +42,6 @@ cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 make all
 ```
 NOTE: Windows users has to install [gnuwin32](https://sourceforge.net/projects/gnuwin32/files/make/) in order to use make command.
-
-### IMPORTANT UPDATE ##
-
-The original **mashling** CLI tool has been deprecated and will be going away in the near future.  It has been temporarily renamed to **mashling_old** and its documentation can still be accessed [here](README_OLD.md).
 
 ## Getting Started
 A Mashling microgateway is created using the **Mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
