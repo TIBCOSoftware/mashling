@@ -1,15 +1,15 @@
 {
-    "name": "Recipe31 (1)",
+    "name": "RestTriggerToRestPutActivity",
     "type": "flogo:app",
     "version": "0.0.1",
     "description": "",
     "triggers": [
         {
             "name": "Receive HTTP Message",
-            "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+            "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
             "description": "Simple REST Trigger",
             "settings": {
-                "port": "9093"
+                "port": "9096"
             },
             "id": "receive_http_message",
             "handlers": [
@@ -20,7 +20,12 @@
                         "autoIdReply": "false",
                         "useReplyHandler": "false"
                     },
-                    "actionId": "flow"
+                    "actionId": "flow",
+                    "output": null,
+                    "actionMappings": {
+                        "input": []
+                    },
+                    "outputs": null
                 }
             ]
         }
@@ -122,7 +127,7 @@
                                 "attributes": [
                                     {
                                         "name": "message",
-                                        "value": "",
+                                        "value": "Failure",
                                         "required": false,
                                         "type": "string"
                                     },
@@ -138,52 +143,10 @@
                                         "required": false,
                                         "type": "boolean"
                                     }
-                                ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "{A2.result}.id",
-                                        "mapTo": "message"
-                                    }
                                 ]
                             },
                             {
-                                "id": 12,
-                                "name": "Log Message (7)",
-                                "description": "Simple Log Activity",
-                                "type": 1,
-                                "activityType": "tibco-log",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
-                                "attributes": [
-                                    {
-                                        "name": "message",
-                                        "value": "",
-                                        "required": false,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "flowInfo",
-                                        "value": "false",
-                                        "required": false,
-                                        "type": "boolean"
-                                    },
-                                    {
-                                        "name": "addToFlow",
-                                        "value": "false",
-                                        "required": false,
-                                        "type": "boolean"
-                                    }
-                                ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "{A2.result}",
-                                        "mapTo": "message"
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 13,
+                                "id": 5,
                                 "name": "Reply To Trigger (3)",
                                 "description": "Simple Reply Activity",
                                 "type": 1,
@@ -206,99 +169,12 @@
                                 "inputMappings": [
                                     {
                                         "type": 1,
-                                        "value": "{A2.result}",
-                                        "mapTo": "data"
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 6,
-                                "name": "Log Message (3)",
-                                "description": "Simple Log Activity",
-                                "type": 1,
-                                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
-                                "attributes": [
-                                    {
-                                        "name": "message",
-                                        "value": "Failed",
-                                        "required": false,
-                                        "type": "string"
+                                        "value": "$activity[2].status",
+                                        "mapTo": "code"
                                     },
-                                    {
-                                        "name": "flowInfo",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    },
-                                    {
-                                        "name": "addToFlow",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 7,
-                                "name": "Log Message (4)",
-                                "description": "Simple Log Activity",
-                                "type": 1,
-                                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
-                                "attributes": [
-                                    {
-                                        "name": "message",
-                                        "value": "",
-                                        "required": false,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "flowInfo",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    },
-                                    {
-                                        "name": "addToFlow",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    }
-                                ],
-                                "inputMappings": [
                                     {
                                         "type": 1,
-                                        "value": "{A2.result}",
-                                        "mapTo": "message"
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 8,
-                                "name": "Reply To Trigger (2)",
-                                "description": "Simple Reply Activity",
-                                "type": 1,
-                                "activityType": "github-com-tibco-software-flogo-contrib-activity-reply",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
-                                "attributes": [
-                                    {
-                                        "name": "code",
-                                        "value": 400,
-                                        "required": true,
-                                        "type": "integer"
-                                    },
-                                    {
-                                        "name": "data",
-                                        "value": null,
-                                        "required": true,
-                                        "type": "any"
-                                    }
-                                ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "{A2.result}",
+                                        "value": "$activity[2].result",
                                         "mapTo": "data"
                                     }
                                 ]
@@ -310,55 +186,37 @@
                                 "from": 2,
                                 "to": 3,
                                 "type": 1,
-                                "value": "${A2.result}.id==${T.content}.id"
+                                "value": "${A2.status}==200"
                             },
                             {
                                 "id": 2,
                                 "from": 3,
-                                "to": 4,
+                                "to": 5,
                                 "type": 0
                             },
                             {
                                 "id": 3,
-                                "from": 4,
-                                "to": 12,
-                                "type": 0
+                                "from": 2,
+                                "to": 4,
+                                "type": 1,
+                                "value": "${A2.status}!=200"
                             },
                             {
                                 "id": 4,
-                                "from": 12,
-                                "to": 13,
-                                "type": 0
-                            },
-                            {
-                                "id": 5,
-                                "from": 2,
-                                "to": 6,
-                                "type": 1,
-                                "value": "${A2.result}.code==1"
-                            },
-                            {
-                                "id": 6,
-                                "from": 6,
-                                "to": 7,
-                                "type": 0
-                            },
-                            {
-                                "id": 7,
-                                "from": 7,
-                                "to": 8,
+                                "from": 4,
+                                "to": 5,
                                 "type": 0
                             }
                         ],
                         "attributes": []
                     },
                     "errorHandlerTask": {
-                        "id": 9,
+                        "id": 6,
                         "type": 1,
                         "tasks": [
                             {
-                                "id": 10,
-                                "name": "Log Message (5)",
+                                "id": 7,
+                                "name": "Log Message (2)",
                                 "description": "Simple Log Activity",
                                 "type": 1,
                                 "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
@@ -366,7 +224,7 @@
                                 "attributes": [
                                     {
                                         "name": "message",
-                                        "value": "Error processing request in gateway",
+                                        "value": "Failure in Gateway",
                                         "required": false,
                                         "type": "string"
                                     },
@@ -385,37 +243,24 @@
                                 ]
                             },
                             {
-                                "id": 11,
-                                "name": "Log Message (6)",
-                                "description": "Simple Log Activity",
+                                "id": 8,
+                                "name": "Reply To Trigger (3)",
+                                "description": "Simple Reply Activity",
                                 "type": 1,
-                                "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                                "activityType": "tibco-reply",
+                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
                                 "attributes": [
                                     {
-                                        "name": "message",
-                                        "value": "",
-                                        "required": false,
-                                        "type": "string"
+                                        "name": "code",
+                                        "value": 502,
+                                        "required": true,
+                                        "type": "integer"
                                     },
                                     {
-                                        "name": "flowInfo",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    },
-                                    {
-                                        "name": "addToFlow",
-                                        "value": "true",
-                                        "required": false,
-                                        "type": "boolean"
-                                    }
-                                ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "{T.content}",
-                                        "mapTo": "message"
+                                        "name": "data",
+                                        "value": null,
+                                        "required": true,
+                                        "type": "any"
                                     }
                                 ]
                             }
@@ -423,8 +268,8 @@
                         "links": [
                             {
                                 "id": 8,
-                                "from": 10,
-                                "to": 11,
+                                "from": 7,
+                                "to": 8,
                                 "type": 0
                             }
                         ],
@@ -433,7 +278,8 @@
                 }
             },
             "id": "flow",
-            "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+            "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
+            "metadata": null
         }
     ]
 }
