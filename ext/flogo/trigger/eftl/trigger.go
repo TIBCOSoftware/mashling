@@ -72,13 +72,15 @@ func (s *Span) Error(format string, a ...interface{}) {
 
 //OptimizedHandler optimized handler
 type OptimizedHandler struct {
-	defaultActionID string
-	dispatches      []*Dispatch
+	defaultActionID   string
+	defaultHandlerCfg *trigger.HandlerConfig
+	dispatches        []*Dispatch
 }
 
 // GetActionID gets the action id of the matched handler
-func (h *OptimizedHandler) GetActionID(payload string, span Span) string {
+func (h *OptimizedHandler) GetActionID(payload string, span Span) (string, *trigger.HandlerConfig) {
 	actionID := ""
+	var handlerCfg *trigger.HandlerConfig
 
 	for _, dispatch := range h.dispatches {
 		expressionStr := dispatch.condition
@@ -104,6 +106,7 @@ func (h *OptimizedHandler) GetActionID(payload string, span Span) string {
 			}
 			if exprResult {
 				actionID = dispatch.actionID
+				handlerCfg = dispatch.handlerCfg
 			}
 		} else if exprType == condition.EXPR_TYPE_HEADER {
 			span.Error("header expression type is invalid for eftl trigger condition")
@@ -117,6 +120,7 @@ func (h *OptimizedHandler) GetActionID(payload string, span Span) string {
 				exprResult := op.Eval(conditionOperation.LHS, conditionOperation.RHS)
 				if exprResult {
 					actionID = dispatch.actionID
+					handlerCfg = dispatch.handlerCfg
 				}
 			}
 		}
@@ -130,16 +134,18 @@ func (h *OptimizedHandler) GetActionID(payload string, span Span) string {
 	//If no dispatch is found, use default action
 	if actionID == "" {
 		actionID = h.defaultActionID
+		handlerCfg = h.defaultHandlerCfg
 		log.Debugf("dispatch not resolved. Continue with default action - %v", actionID)
 	}
 
-	return actionID
+	return actionID, handlerCfg
 }
 
 //Dispatch holds dispatch actionId and condition
 type Dispatch struct {
-	actionID  string
-	condition string
+	actionID   string
+	condition  string
+	handlerCfg *trigger.HandlerConfig
 }
 
 // Trigger is a simple EFTL trigger
@@ -191,12 +197,14 @@ func (t *Trigger) CreateHandlers() map[string]*OptimizedHandler {
 
 		if condition := h.Settings[util.Flogo_Trigger_Handler_Setting_Condition]; condition != nil {
 			dispatch := &Dispatch{
-				actionID:  h.ActionId,
-				condition: condition.(string),
+				actionID:   h.ActionId,
+				condition:  condition.(string),
+				handlerCfg: h,
 			}
 			handler.dispatches = append(handler.dispatches, dispatch)
 		} else {
 			handler.defaultActionID = h.ActionId
+			handler.defaultHandlerCfg = h
 		}
 	}
 
@@ -410,9 +418,9 @@ func (t *Trigger) RunAction(handler *OptimizedHandler, dest string, content []by
 		span.Error("Error setting up attrs: %v", err)
 	}
 
-	actionURI := handler.GetActionID(string(content), span)
+	actionURI, handlerCfg := handler.GetActionID(string(content), span)
 	action := action.Get(actionURI)
-	context := trigger.NewContext(context.Background(), startAttrs)
+	context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: handlerCfg})
 	_, replyData, err := t.runner.Run(context, action, actionURI, nil)
 	if err != nil {
 		span.Error("Error starting action: %v", err)

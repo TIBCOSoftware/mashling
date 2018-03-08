@@ -208,19 +208,19 @@ func TestHandler(t *testing.T) {
 		},
 	}
 
-	action := handler.GetActionID("null", span)
+	action, _ := handler.GetActionID("null", span)
 	if action != "action_1" {
 		t.Error("expected action_1")
 	}
 
 	content := `{"value": "A"}`
-	action = handler.GetActionID(content, span)
+	action, _ = handler.GetActionID(content, span)
 	if action != "action_2" {
 		t.Error("expected action_2")
 	}
 
 	os.Setenv("value", "A")
-	action = handler.GetActionID("null", span)
+	action, _ = handler.GetActionID("null", span)
 	if action != "action_3" {
 		t.Error("expected action_3")
 	}
