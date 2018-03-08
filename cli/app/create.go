@@ -26,8 +26,6 @@ var optCreate = &cli.OptionInfo{
 	
 	Options:
 		-f       	specify the mashling.json to create gateway project from
-		-mlc     	specify the mashling dependency constraints as comma separated value (for example github.com/TIBCOSoftware/flogo-lib@0.0.0,github.com/TIBCOSoftware/flogo-contrib@0.0.0)
-		-vendor  	specify existing vendor directory to copy
 		-pingport	specify the port for ping functionality
 	 `,
 }
@@ -45,16 +43,13 @@ type Dependency struct {
 }
 
 func init() {
-	CommandRegistry.RegisterCommand(&cmdCreate{option: optCreate, currentDir: getwd})
+	CommandRegistry.RegisterCommand(&cmdCreate{option: optCreate})
 }
 
 type cmdCreate struct {
-	option      *cli.OptionInfo
-	constraints string
-	fileName    string
-	vendorDir   string
-	pingport    string
-	currentDir  func() (dir string, err error)
+	option   *cli.OptionInfo
+	fileName string
+	pingport string
 }
 
 // HasOptionInfo implementation of cli.HasOptionInfo.OptionInfo
@@ -64,9 +59,7 @@ func (c *cmdCreate) OptionInfo() *cli.OptionInfo {
 
 // AddFlags implementation of cli.Command.AddFlags
 func (c *cmdCreate) AddFlags(fs *flag.FlagSet) {
-	fs.StringVar(&(c.constraints), "mlc", "", "mashling library constraints")
 	fs.StringVar(&(c.fileName), "f", "", "gateway app file")
-	fs.StringVar(&(c.vendorDir), "vendor", "", "vendor dir")
 	fs.StringVar(&(c.pingport), "pingport", "", "ping port")
 }
 
@@ -124,7 +117,7 @@ func (c *cmdCreate) Exec(args []string) error {
 		defaultAppFlag = true
 	}
 
-	currentDir, err := c.currentDir()
+	currentDir, err := os.Getwd()
 
 	if err != nil {
 		return err
@@ -139,9 +132,5 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(api.SetupNewProjectEnv(), gatewayJSON, defaultAppFlag, appDir, gatewayName, c.vendorDir, c.pingport, c.constraints)
-}
-
-func getwd() (dir string, err error) {
-	return os.Getwd()
+	return CreateMashling(api.SetupNewProjectEnv(), gatewayJSON, defaultAppFlag, appDir, gatewayName, c.pingport)
 }

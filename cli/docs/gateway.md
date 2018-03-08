@@ -20,8 +20,6 @@ Usage:
 **options**
 
 - *-f* : specify the Mashling json (default is mashling.json).
-- *-mlc-* : specify the mashling dependency constraints as comma separated value (for example github.com/TIBCOSoftware/flogo-lib@0.0.0,github.com/TIBCOSoftware/flogo-contrib@0.0.0)
-- *-vendor* : specify existing vendor directory to copy
 - *-pingport* : specify the mashling ping port (default is 9090).
 
 Example using default mashling.json :
@@ -39,16 +37,10 @@ Example using pingport flag:
 
 Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
 
-Create a mashling application project using your own vendor directory.
-
-	mashling create -vendor /path/to/my/vendor
-
-Important, when using -vendor option use ‘mashling ensure -no-vendor’ when updating dependencies to not override your imported vendor folder.
-
 **dependencies versioning**
 
 By default a new dep based dependency files(gopkg.toml and gopkg.lock) are created in the vendor folder of the gateway project.
-If gopkg.toml and gopkg.lock files exists in the current working directory, that is used to restore the vendor folder(Use mashling ensure command).
+If gopkg.toml and gopkg.lock files exists in the current working directory, that is used to restore the vendor folder.
 The default mashling created by 'mashling create app' uses a default gopkg.toml and gopkg.lock files built into the mashling binary.
 
 ### build
@@ -71,19 +63,6 @@ Example using pingport flag:
 	mashling build -pingport 9095
 
 Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
-
-### ensure
-This command is used to manage project dependencies. It is mainly a wrapper for the ‘dep ensure’ command for the official [dep](https://github.com/golang/dep) library
-
-	mashling ensure
-
-**options**
-
-- *-add* : add new dependencies, or populate Gopkg.toml with constraints for existing dependencies (default: false)
-- *-no-vendor* : update Gopkg.lock (if needed), but do not update vendor/ (default: false)
-- *-update* : update the named dependencies (or all, if none are named) in Gopkg.lock to the latest allowed by Gopkg.toml (default: false)
-- *-v* : enable verbose logging (default: false)
-- *-vendor-only* : populate vendor/ from Gopkg.lock without updating it first (default: false)
 
 ### help
 This command is used to display help on a particular command

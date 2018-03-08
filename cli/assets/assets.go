@@ -106,7 +106,7 @@ func assetsDefgopkgLock() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/defGopkg.lock", size: 7749, mode: os.FileMode(438), modTime: time.Unix(1520488189, 0)}
+	info := bindataFileInfo{name: "assets/defGopkg.lock", size: 7749, mode: os.FileMode(438), modTime: time.Unix(1520511445, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -126,7 +126,7 @@ func assetsDefgopkgToml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/defGopkg.toml", size: 683, mode: os.FileMode(438), modTime: time.Unix(1520488189, 0)}
+	info := bindataFileInfo{name: "assets/defGopkg.toml", size: 683, mode: os.FileMode(438), modTime: time.Unix(1520511445, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

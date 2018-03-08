@@ -38,7 +38,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(fenv fenv.Project, gatewayJSON string, defaultAppFlag bool, appDir, appName, vendorDir, pingPort, constraints string) error {
+func CreateMashling(fenv fenv.Project, gatewayJSON string, defaultAppFlag bool, appDir, appName, pingPort string) error {
 
 	flogoJSON, gatewayJSON, appName, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort, appName)
 	if err != nil {
@@ -46,7 +46,7 @@ func CreateMashling(fenv fenv.Project, gatewayJSON string, defaultAppFlag bool, 
 		return err
 	}
 
-	err = CreateApp(api.SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName, vendorDir, constraints)
+	err = CreateApp(api.SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName)
 	if err != nil {
 		return err
 	}
@@ -998,63 +998,19 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName, vendorDir, constraints string) error {
-	return doCreate(fenv, appJSON, defaultAppFlag, rootDir, appName, vendorDir, constraints)
+func CreateApp(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName string) error {
+	return doCreate(fenv, appJSON, defaultAppFlag, rootDir, appName)
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName, vendorDir, constraints string) error {
+func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
-	descriptor, err := api.ParseAppDescriptor(appJSON)
-	if err != nil {
-		return err
-	}
-
-	if appName != "" {
-		// override the application name
-
-		altJSON := strings.Replace(appJSON, `"`+descriptor.Name+`"`, `"`+appName+`"`, 1)
-		altDescriptor, err := api.ParseAppDescriptor(altJSON)
-
-		//see if we can get away with simple replace so we don't reorder the existing json
-		if err == nil && altDescriptor.Name == appName {
-			appJSON = altJSON
-		} else {
-			//simple replace didn't work so we have to unmarshal & re-marshal the supplied json
-			var appObj map[string]interface{}
-			err := json.Unmarshal([]byte(appJSON), &appObj)
-			if err != nil {
-				return err
-			}
-
-			appObj["name"] = appName
-
-			updApp, err := json.MarshalIndent(appObj, "", "  ")
-			if err != nil {
-				return err
-			}
-			appJSON = string(updApp)
-		}
-
-		descriptor.Name = appName
-	} else {
-		appName = descriptor.Name
-		rootDir = filepath.Join(rootDir, appName)
-	}
+	rootDir = filepath.Join(rootDir, appName)
 
 	dir, err := os.Getwd()
 	if err != nil {
 		return err
-	}
-
-	_, gpkgLockErr := os.Stat(filepath.Join(dir, "Gopkg.lock"))
-	_, gpkgTomlErr := os.Stat(filepath.Join(dir, "Gopkg.toml"))
-
-	gopkgFilesExists := false
-
-	if gpkgLockErr == nil && gpkgTomlErr == nil {
-		gopkgFilesExists = true
 	}
 
 	err = fenv.Init(rootDir)
@@ -1073,7 +1029,7 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 	}
 
 	// create initial structure
-	appDir := filepath.Join(fenv.GetSourceDir(), descriptor.Name)
+	appDir := filepath.Join(fenv.GetSourceDir(), appName)
 	os.MkdirAll(appDir, os.ModePerm)
 
 	// Validate structure
@@ -1096,19 +1052,18 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 	CreateMainGoFile(appDir, "")
 	CreateImportsGoFile(appDir, deps)
 
-	// Add constraints
-	if len(constraints) > 0 {
-		newConstraints := []string{"-add"}
-		newConstraints = append(newConstraints, strings.Split(constraints, ",")...)
-		err = depManager.Ensure(newConstraints...)
-		if err != nil {
-			return err
-		}
-	}
+	_, gpkgLockErr := os.Stat(filepath.Join(dir, "Gopkg.lock"))
+	_, gpkgTomlErr := os.Stat(filepath.Join(dir, "Gopkg.toml"))
 
-	//for default app writing dep files
-	if defaultAppFlag {
+	gopkgFilesExists := false
+
+	if gpkgLockErr == nil && gpkgTomlErr == nil {
 		gopkgFilesExists = true
+	}
+	ensureArgs := []string{}
+
+	if defaultAppFlag {
+		//for default app writing dep files
 		defGpkgLock := assets.MustAsset("assets/defGopkg.lock")
 		defGpkgToml := assets.MustAsset("assets/defGopkg.toml")
 		err = ioutil.WriteFile(filepath.Join(fenv.GetAppDir(), "Gopkg.lock"), defGpkgLock, 0644)
@@ -1119,25 +1074,10 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 		if err != nil {
 			return err
 		}
-	}
-
-	ensureArgs := []string{}
-
-	if len(vendorDir) > 0 && !gopkgFilesExists {
-		// Copy vendor directory
-		err := CopyDir(vendorDir, fenv.GetVendorDir())
-		if err != nil {
-			fmt.Printf("\n error [%s]\n", err)
-		}
-		ensureArgs = append(ensureArgs, "-no-vendor")
-	}
-
-	if gopkgFilesExists {
-		// for default app dep files written properly
-		if !defaultAppFlag {
-			CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(fenv.GetAppDir(), "Gopkg.lock"))
-			CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(fenv.GetAppDir(), "Gopkg.toml"))
-		}
+		ensureArgs = append(ensureArgs, "-vendor-only")
+	} else if gopkgFilesExists {
+		CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(fenv.GetAppDir(), "Gopkg.lock"))
+		CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(fenv.GetAppDir(), "Gopkg.toml"))
 		ensureArgs = append(ensureArgs, "-vendor-only")
 	}
 
@@ -1383,9 +1323,4 @@ func getProjectRev(appDir string) (string, string, error) {
 		}
 	}
 	return flogoLibRev, mashlingRev, err
-}
-
-// Ensure is a wrapper for dep ensure command
-func Ensure(depManager *dep.DepManager, args ...string) error {
-	return depManager.Ensure(args...)
 }
