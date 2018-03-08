@@ -1006,7 +1006,6 @@ func CreateApp(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, 
 func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
-	rootDir = filepath.Join(rootDir, appName)
 
 	dir, err := os.Getwd()
 	if err != nil {
@@ -1052,14 +1051,6 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 	CreateMainGoFile(appDir, "")
 	CreateImportsGoFile(appDir, deps)
 
-	_, gpkgLockErr := os.Stat(filepath.Join(dir, "Gopkg.lock"))
-	_, gpkgTomlErr := os.Stat(filepath.Join(dir, "Gopkg.toml"))
-
-	gopkgFilesExists := false
-
-	if gpkgLockErr == nil && gpkgTomlErr == nil {
-		gopkgFilesExists = true
-	}
 	ensureArgs := []string{}
 
 	if defaultAppFlag {
@@ -1075,12 +1066,15 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 			return err
 		}
 		ensureArgs = append(ensureArgs, "-vendor-only")
-	} else if gopkgFilesExists {
-		CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(fenv.GetAppDir(), "Gopkg.lock"))
-		CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(fenv.GetAppDir(), "Gopkg.toml"))
-		ensureArgs = append(ensureArgs, "-vendor-only")
+	} else {
+		_, gpkgLockErr := os.Stat(filepath.Join(dir, "Gopkg.lock"))
+		_, gpkgTomlErr := os.Stat(filepath.Join(dir, "Gopkg.toml"))
+		if gpkgLockErr == nil && gpkgTomlErr == nil {
+			CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(fenv.GetAppDir(), "Gopkg.lock"))
+			CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(fenv.GetAppDir(), "Gopkg.toml"))
+			ensureArgs = append(ensureArgs, "-vendor-only")
+		}
 	}
-
 	// Sync up
 	err = depManager.Ensure(ensureArgs...)
 	if err != nil {
