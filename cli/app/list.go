@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 package app
 
 import (
@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 
+	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 )
 
@@ -81,7 +82,7 @@ func (c *cmdList) Exec(args []string) error {
 		os.Exit(2)
 	}
 
-	gwDetails, err := GetGatewayDetails(SetupExistingProjectEnv(appDir), cType)
+	gwDetails, err := GetGatewayDetails(api.SetupExistingProjectEnv(appDir), cType)
 	if err != nil {
 		return err
 	}
