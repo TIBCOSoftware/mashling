@@ -10,44 +10,68 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-cli/env"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
+const tempRepoName = "sampleRepo"
+
+func doGitClone(path, ref string) error {
+	cmd := exec.Command("git", "clone", "https://"+ref, tempRepoName)
+	cmd.Dir = path
+	return cmd.Run()
+}
+
+//GetGithubResource used to get github files present in given path
 func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
-	gbProject := env.NewGbProjectEnv()
+
 	tmp, err := ioutil.TempDir("", "github_resource")
 	if err != nil {
 		return nil, err
 	}
 	defer os.RemoveAll(tmp)
-	err = os.Mkdir(tmp+"/src", 0755)
-	if err != nil {
-		return nil, err
+
+	gitPath := gitHubPath
+	tokens := strings.Split(gitHubPath, "/")
+	gitRefPath := gitPath
+	gitCloneFlag := false
+
+	if len(tokens) == 0 {
+		fmt.Println("Invalid github path")
+		return nil, nil
 	}
-	gbProject.Init(tmp)
 
-	resourceDir := gbProject.GetVendorSrcDir()
-	resourcePath := resourceDir + "/" + gitHubPath + "/" + resourceFile
+	for i := 0; i < len(tokens); i++ {
+		err := doGitClone(tmp, gitRefPath)
+		if err == nil {
+			gitCloneFlag = true
+			break
+		}
+		index := strings.LastIndex(gitRefPath, "/")
+		if index < 0 {
+			gitCloneFlag = false
+			break
+		}
+		gitRefPath = gitRefPath[0:index]
+	}
 
-	gbProject.InstallDependency(gitHubPath, "")
+	if !gitCloneFlag {
+		fmt.Println("Provided github refference is Invalid ", gitHubPath)
+		return nil, nil
+	}
 
-	return ioutil.ReadFile(resourcePath)
+	gitPath = strings.Replace(gitPath, gitRefPath, "", -1)
+
+	return ioutil.ReadFile(filepath.Join(tmp, tempRepoName, gitPath, resourceFile))
 }
 
+//GetTriggerMetadata returns trigger.json for supplied trigger github path
 func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
-	gbProject := env.NewGbProjectEnv()
-
-	gbProject.Init(os.Getenv("GOPATH"))
-
-	resourceDir := gbProject.GetVendorSrcDir()
-	triggerPath := resourceDir + "/" + gitHubPath + "/" + Gateway_Trigger_Metadata_JSON_Name
-
-	gbProject.InstallDependency(gitHubPath, "")
-	data, err := ioutil.ReadFile(triggerPath)
+	data, err := GetGithubResource(gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
 	if err != nil {
 		return nil, err
 	}

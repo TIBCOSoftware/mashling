@@ -7,9 +7,7 @@ package app
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -24,12 +22,15 @@ import (
 
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	config "github.com/TIBCOSoftware/flogo-cli/config"
+	"github.com/TIBCOSoftware/flogo-cli/dep"
+	fenv "github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	assets "github.com/TIBCOSoftware/mashling/cli/assets"
-	"github.com/TIBCOSoftware/mashling/cli/env"
+	"github.com/spf13/viper"
+
 	"github.com/TIBCOSoftware/mashling/lib/model"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
@@ -37,40 +38,86 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, appDir string, appName string, vendorDir string, pingPort string, customizeFunc func() error) error {
+func CreateMashling(fenv fenv.Project, gatewayJSON string, defaultAppFlag bool, appDir, appName, vendorDir, pingPort, constraints string) error {
 
-	descriptor, err := model.ParseGatewayDescriptor(gatewayJson)
+	flogoJSON, gatewayJSON, appName, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort, appName)
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
+		return err
+	}
+
+	err = CreateApp(api.SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName, vendorDir, constraints)
 	if err != nil {
 		return err
+	}
+
+	fmt.Println("Generated mashling Artifacts.")
+	fmt.Println("Building mashling Artifacts.")
+
+	embed := util.Flogo_App_Embed_Config_Property_Default
+
+	envFlogoEmbed := os.Getenv(util.Flogo_App_Embed_Config_Property)
+	if len(envFlogoEmbed) > 0 {
+		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
+	}
+
+	envProj := api.SetupExistingProjectEnv(appDir)
+
+	err = customizeMainFile(envProj.GetAppDir(), appName, gatewayJSON)
+
+	if err != nil {
+		return err
+	}
+
+	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
+	api.BuildApp(envProj, options)
+	//delete flogo.json file from the app dir
+	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
+	//create the mashling json descriptor file
+	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJSON)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Mashling gateway successfully built!")
+
+	return nil
+}
+
+// TranslateGatewayJSON2FlogoJSON tanslates mashling json to flogo json
+func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort, appName string) (string, string, string, error) {
+	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
+	if err != nil {
+		return "", "", "", err
 	}
 
 	descriptor, err = appendPingDescriptor(pingPort, descriptor)
 	if err != nil {
-		return err
+		return "", "", "", err
 	}
 
 	if appName != "" {
-		altJson := strings.Replace(gatewayJson, `"`+descriptor.Gateway.Name+`"`, `"`+appName+`"`, 1)
-		altDescriptor, err := model.ParseGatewayDescriptor(altJson)
+		altJSON := strings.Replace(gatewayJSON, `"`+descriptor.Gateway.Name+`"`, `"`+appName+`"`, 1)
+		altDescriptor, err := model.ParseGatewayDescriptor(altJSON)
 
 		//see if we can get away with simple replace so we don't reorder the existing json
 		if err == nil && altDescriptor.Gateway.Name == appName {
-			gatewayJson = altJson
+			gatewayJSON = altJSON
 		} else {
 			//simple replace didn't work so we have to unmarshal & re-marshal the supplied json
 			var appObj map[string]interface{}
-			err := json.Unmarshal([]byte(gatewayJson), &appObj)
+			err := json.Unmarshal([]byte(gatewayJSON), &appObj)
 			if err != nil {
-				return err
+				return "", "", "", err
 			}
 
 			appObj["name"] = appName
 
 			updApp, err := json.MarshalIndent(appObj, "", "  ")
 			if err != nil {
-				return err
+				return "", "", "", err
 			}
-			gatewayJson = string(updApp)
+			gatewayJSON = string(updApp)
 		}
 
 		descriptor.Gateway.Name = appName
@@ -100,7 +147,6 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 	createdHandlers := make(map[string]bool)
 
 	//new map to maintain existing trigger and its settings, to be used in comparing one trigger definition with another
-	//createdTriggersSettingsMap := make(map[*ftrigger.Config]map[string]interface{})
 	createdTriggersMap := make(map[string]*ftrigger.Config)
 
 	//translate the gateway model to the flogo model
@@ -120,151 +166,7 @@ func CreateMashling(env env.Project, gatewayJson string, manifest io.Reader, app
 			*/
 			flogoTrigger, isNew, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
 			if err != nil {
-				return err
-			}
-
-			if *isNew {
-				//looks like a new trigger has been added
-				flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
-			} else {
-				//looks like an existing trigger with matching settings is found and modified with a new handler
-				for index, v := range flogoAppTriggers {
-					if v.Name == flogoTrigger.Name {
-						// Found the old trigger entry in the list!
-						//remove it..
-						flogoAppTriggers = append(flogoAppTriggers[:index], flogoAppTriggers[index+1:]...)
-						//...and add the modified trigger to the list
-						flogoAppTriggers = append(flogoAppTriggers, flogoTrigger)
-					}
-				}
-			}
-
-			//create unique handler actions
-			for _, dispatch := range dispatches {
-				handlerName := dispatch.Handler
-
-				if !createdHandlers[handlerName] {
-					//not already created, so create it
-					flogoAction, err := model.CreateFlogoFlowAction(handlerNamedMap[handlerName])
-					if err != nil {
-						return err
-					}
-
-					flogoAppActions = append(flogoAppActions, flogoAction)
-					createdHandlers[handlerName] = true
-				}
-			}
-		}
-
-	}
-
-	flogoApp := app.Config{
-		Name:        descriptor.Gateway.Name,
-		Type:        util.Flogo_App_Type,
-		Version:     descriptor.Gateway.Version,
-		Description: descriptor.Gateway.Description,
-		Triggers:    flogoAppTriggers,
-		Actions:     flogoAppActions,
-	}
-
-	//create flogo PP JSON
-	bytes, err := json.MarshalIndent(flogoApp, "", "\t")
-	if err != nil {
-		return nil
-	}
-
-	flogoJson := string(bytes)
-
-	err = CreateApp(SetupNewProjectEnv(), flogoJson, manifest, appDir, appName, vendorDir)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Generated mashling Artifacts.")
-	fmt.Println("Building mashling Artifacts.")
-
-	embed := util.Flogo_App_Embed_Config_Property_Default
-
-	envFlogoEmbed := os.Getenv(util.Flogo_App_Embed_Config_Property)
-	if len(envFlogoEmbed) > 0 {
-		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
-	}
-
-	if customizeFunc != nil {
-		err = customizeFunc()
-		if err != nil {
-			return err
-		}
-	}
-	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
-	BuildApp(SetupExistingProjectEnv(appDir), options)
-	//delete flogo.json file from the app dir
-	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
-	//create the mashling json descriptor file
-	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJson)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Mashling gateway successfully built!")
-
-	return nil
-}
-
-// TranslateGatewayJSON2FlogoJSON tanslates mashling json to flogo json
-func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string, error) {
-	descriptor, err := model.ParseGatewayDescriptor(gatewayJSON)
-	if err != nil {
-		return "", err
-	}
-
-	descriptor, err = appendPingDescriptor(pingPort, descriptor)
-	if err != nil {
-		return "", err
-	}
-
-	flogoAppTriggers := []*ftrigger.Config{}
-	flogoAppActions := []*faction.Config{}
-
-	//1. load the configuration, if provided.
-	configNamedMap := make(map[string]types.Config)
-	for _, config := range descriptor.Gateway.Configurations {
-		configNamedMap[config.Name] = config
-	}
-
-	triggerNamedMap := make(map[string]types.Trigger)
-	for _, trigger := range descriptor.Gateway.Triggers {
-		triggerNamedMap[trigger.Name] = trigger
-	}
-
-	handlerNamedMap := make(map[string]types.EventHandler)
-	for _, evtHandler := range descriptor.Gateway.EventHandlers {
-		handlerNamedMap[evtHandler.Name] = evtHandler
-	}
-
-	createdHandlers := make(map[string]bool)
-
-	//new map to maintain existing trigger and its settings, to be used in comparing one trigger definition with another
-	createdTriggersMap := make(map[string]*ftrigger.Config)
-
-	//translate the gateway model to the flogo model
-	for _, link := range descriptor.Gateway.EventLinks {
-		triggerNames := link.Triggers
-
-		for _, triggerName := range triggerNames {
-			dispatches := link.Dispatches
-
-			//create trigger sections for flogo
-			/**
-			TODO handle condition parsing and setting the condition in the trigger.
-			//get the condition if available
-			condition := path.If
-			//create the trigger using the condition
-			.......
-			*/
-			flogoTrigger, isNew, err := model.CreateFlogoTrigger(configNamedMap, triggerNamedMap[triggerName], handlerNamedMap, dispatches, createdTriggersMap)
-			if err != nil {
-				return "", err
+				return "", "", "", err
 			}
 
 			//	check if the trigger is a new trigger or a "logically" same trigger.
@@ -292,7 +194,7 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string
 					//not already created, so create it
 					flogoAction, err := model.CreateFlogoFlowAction(handlerNamedMap[handlerName])
 					if err != nil {
-						return "", err
+						return "", "", "", err
 					}
 
 					flogoAppActions = append(flogoAppActions, flogoAction)
@@ -315,19 +217,19 @@ func TranslateGatewayJSON2FlogoJSON(gatewayJSON string, pingPort string) (string
 	//create flogo PP JSON
 	bytes, err := json.MarshalIndent(flogoApp, "", "\t")
 	if err != nil {
-		return "", nil
+		return "", "", "", nil
 	}
 
 	flogoJSON := string(bytes)
 
-	return flogoJSON, nil
+	return flogoJSON, gatewayJSON, appName, nil
 }
 
 // BuildMashling Builds mashling gateway
 func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 
 	//create flogo.json from gateway descriptor
-	flogoJSON, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort)
+	flogoJSON, gatewayJSON, _, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort, "")
 	if err != nil {
 		fmt.Fprint(os.Stderr, "Error: Error while processing gateway descriptor.\n\n")
 		return err
@@ -338,28 +240,6 @@ func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 		return err
 	}
 
-	//Install dependencies explicitly, as api.BuildApp() doesn't install newly added dependencies.
-	//Workaround for https://github.com/TIBCOSoftware/flogo-cli/issues/56
-	/*
-		 //This creates an issue of pulling down the latest flogo packages on every build.
-		 //User can run 'create' instead of 'build' if there is an additional packages required
-		 //for the recipe. Thus, commenting out to make sure the build command executes only with
-		 //the local vendor folder.
-		 fmt.Println("Installing dependencies...")
-		 env := SetupExistingProjectEnv(appDir)
-		 flogoAppDescriptor, err := api.ParseAppDescriptor(flogoJSON)
-		 deps := api.ExtractDependencies(flogoAppDescriptor)
-
-		 for _, dep := range deps {
-			 path, version := splitVersion(dep.Ref)
-			 err = env.InstallDependency(path, version)
-			 if err != nil {
-				 return err
-			 }
-		 }
-	*/
-	//END of workaround https://github.com/TIBCOSoftware/flogo-cli/issues/56
-
 	embed := util.Flogo_App_Embed_Config_Property_Default
 
 	envFlogoEmbed := os.Getenv(util.Flogo_App_Embed_Config_Property)
@@ -368,7 +248,7 @@ func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 	}
 
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
-	BuildApp(SetupExistingProjectEnv(appDir), options)
+	api.BuildApp(api.SetupExistingProjectEnv(appDir), options)
 
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
@@ -377,65 +257,6 @@ func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 
 	return nil
 
-}
-
-func ListComponents(env env.Project, cType ComponentType) ([]*Component, error) {
-
-	var components []*Component
-
-	rootDir := env.GetRootDir()
-	mashlingDescriptorFile := rootDir + "/" + util.Gateway_Definition_File_Name
-	mashlingJson, err1 := fgutil.LoadLocalFile(mashlingDescriptorFile)
-	if err1 != nil {
-		fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", mashlingDescriptorFile, err1.Error())
-		os.Exit(2)
-	}
-
-	microgateway, err := model.ParseGatewayDescriptor(mashlingJson)
-
-	if cType == 2 || cType == TRIGGER {
-		if microgateway.Gateway.Triggers != nil {
-			for _, trigger := range microgateway.Gateway.Triggers {
-				components = append(components, &Component{Name: trigger.Name, Type: TRIGGER, Ref: trigger.Type})
-			}
-		}
-	}
-
-	if cType == 3 || cType == HANDLER {
-		if microgateway.Gateway.EventHandlers != nil {
-			for _, handler := range microgateway.Gateway.EventHandlers {
-				cType.String()
-				components = append(components, &Component{Name: handler.Name, Type: HANDLER, Ref: handler.Reference})
-			}
-		}
-	}
-
-	return components, err
-}
-
-func ListLinks(env env.Project, cType ComponentType) ([]*types.EventLink, error) {
-
-	rootDir := env.GetRootDir()
-	var links []*types.EventLink
-
-	mashlingDescriptorFile := rootDir + "/" + util.Gateway_Definition_File_Name
-	mashlingJson, err1 := fgutil.LoadLocalFile(mashlingDescriptorFile)
-	if err1 != nil {
-		fmt.Fprintf(os.Stderr, "Error: Error loading app file '%s' - %s\n\n", mashlingDescriptorFile, err1.Error())
-		os.Exit(2)
-	}
-
-	microgateway, err := model.ParseGatewayDescriptor(mashlingJson)
-
-	if cType == 1 || cType == LINK {
-		if microgateway.Gateway.EventLinks != nil {
-			for _, link := range microgateway.Gateway.EventLinks {
-				links = append(links, &link)
-			}
-		}
-	}
-
-	return links, err
 }
 
 // PublishToMashery publishes to mashery
@@ -1001,9 +822,9 @@ func GenerateExampleCall(endpoint map[string]interface{}, key string) string {
 }
 
 // GetGatewayDetails returns gateway details i.e all Triggers, Handlers & Links
-func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
+func GetGatewayDetails(fenv fenv.Project, cType ComponentType) (string, error) {
 	gwInfoBuffer := bytes.NewBufferString("")
-	rootDir := env.GetRootDir()
+	rootDir := fenv.GetRootDir()
 	mashlingDescriptorFile := rootDir + "/" + util.Gateway_Definition_File_Name
 	mashlingJSON, err := fgutil.LoadLocalFile(mashlingDescriptorFile)
 	if err != nil {
@@ -1177,9 +998,15 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir string, appName string, vendorDir string) error {
+func CreateApp(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName, vendorDir, constraints string) error {
+	return doCreate(fenv, appJSON, defaultAppFlag, rootDir, appName, vendorDir, constraints)
+}
 
-	descriptor, err := api.ParseAppDescriptor(appJson)
+// CreateApp creates an application from the specified json application descriptor
+func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName, vendorDir, constraints string) error {
+
+	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
+	descriptor, err := api.ParseAppDescriptor(appJSON)
 	if err != nil {
 		return err
 	}
@@ -1187,16 +1014,16 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 	if appName != "" {
 		// override the application name
 
-		altJson := strings.Replace(appJson, `"`+descriptor.Name+`"`, `"`+appName+`"`, 1)
-		altDescriptor, err := api.ParseAppDescriptor(altJson)
+		altJSON := strings.Replace(appJSON, `"`+descriptor.Name+`"`, `"`+appName+`"`, 1)
+		altDescriptor, err := api.ParseAppDescriptor(altJSON)
 
 		//see if we can get away with simple replace so we don't reorder the existing json
 		if err == nil && altDescriptor.Name == appName {
-			appJson = altJson
+			appJSON = altJSON
 		} else {
 			//simple replace didn't work so we have to unmarshal & re-marshal the supplied json
 			var appObj map[string]interface{}
-			err := json.Unmarshal([]byte(appJson), &appObj)
+			err := json.Unmarshal([]byte(appJSON), &appObj)
 			if err != nil {
 				return err
 			}
@@ -1207,50 +1034,118 @@ func CreateApp(env env.Project, appJson string, manifest io.Reader, appDir strin
 			if err != nil {
 				return err
 			}
-			appJson = string(updApp)
+			appJSON = string(updApp)
 		}
 
 		descriptor.Name = appName
-	}
-
-	env.Init(appDir)
-	err = env.Create(false, vendorDir)
-	if err != nil {
-		return err
-	}
-
-	err = fgutil.CreateFileFromString(path.Join(appDir, "flogo.json"), appJson)
-	if err != nil {
-		return err
-	}
-
-	deps := config.ExtractAllDependencies(appJson)
-
-	//if manifest exists, use it to set up the dependecies
-	err = env.RestoreDependency(manifest)
-	if err == nil {
-		fmt.Println("Dependent libraries are restored.")
 	} else {
-		//todo allow ability to specify flogo-lib version
-		env.InstallDependency("github.com/TIBCOSoftware/flogo-lib", "")
+		appName = descriptor.Name
+		rootDir = filepath.Join(rootDir, appName)
+	}
 
-		for _, dep := range deps {
-			path, version := splitVersion(dep.Ref)
-			err = env.InstallDependency(path, version)
-			/*
-				 if err != nil {
-					 return err
-				 }
-			*/
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	_, gpkgLockErr := os.Stat(filepath.Join(dir, "Gopkg.lock"))
+	_, gpkgTomlErr := os.Stat(filepath.Join(dir, "Gopkg.toml"))
+
+	gopkgFilesExists := false
+
+	if gpkgLockErr == nil && gpkgTomlErr == nil {
+		gopkgFilesExists = true
+	}
+
+	err = fenv.Init(rootDir)
+	if err != nil {
+		return err
+	}
+
+	err = fenv.Create(false, "")
+	if err != nil {
+		return err
+	}
+
+	err = fgutil.CreateFileFromString(filepath.Join(rootDir, "flogo.json"), appJSON)
+	if err != nil {
+		return err
+	}
+
+	// create initial structure
+	appDir := filepath.Join(fenv.GetSourceDir(), descriptor.Name)
+	os.MkdirAll(appDir, os.ModePerm)
+
+	// Validate structure
+	err = fenv.Open()
+	if err != nil {
+		return err
+	}
+
+	// Create the dep manager
+	depManager := &dep.DepManager{Env: fenv}
+
+	// Initialize the dep manager
+	err = depManager.Init()
+	if err != nil {
+		return err
+	}
+
+	// Create initial files
+	deps := config.ExtractAllDependencies(appJSON)
+	CreateMainGoFile(appDir, "")
+	CreateImportsGoFile(appDir, deps)
+
+	// Add constraints
+	if len(constraints) > 0 {
+		newConstraints := []string{"-add"}
+		newConstraints = append(newConstraints, strings.Split(constraints, ",")...)
+		err = depManager.Ensure(newConstraints...)
+		if err != nil {
+			return err
 		}
 	}
 
-	// create source files
-	cmdPath := path.Join(env.GetSourceDir(), strings.ToLower(descriptor.Name))
-	os.MkdirAll(cmdPath, 0777)
+	//for default app writing dep files
+	if defaultAppFlag {
+		gopkgFilesExists = true
+		defGpkgLock := assets.MustAsset("assets/defGopkg.lock")
+		defGpkgToml := assets.MustAsset("assets/defGopkg.toml")
+		err = ioutil.WriteFile(filepath.Join(fenv.GetAppDir(), "Gopkg.lock"), defGpkgLock, 0644)
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile(filepath.Join(fenv.GetAppDir(), "Gopkg.toml"), defGpkgToml, 0644)
+		if err != nil {
+			return err
+		}
+	}
 
-	CreateMainGoFile(cmdPath, "")
-	CreateImportsGoFile(cmdPath, deps)
+	ensureArgs := []string{}
+
+	if len(vendorDir) > 0 && !gopkgFilesExists {
+		// Copy vendor directory
+		err := CopyDir(vendorDir, fenv.GetVendorDir())
+		if err != nil {
+			fmt.Printf("\n error [%s]\n", err)
+		}
+		ensureArgs = append(ensureArgs, "-no-vendor")
+	}
+
+	if gopkgFilesExists {
+		// for default app dep files written properly
+		if !defaultAppFlag {
+			CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(fenv.GetAppDir(), "Gopkg.lock"))
+			CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(fenv.GetAppDir(), "Gopkg.toml"))
+		}
+		ensureArgs = append(ensureArgs, "-vendor-only")
+	}
+
+	// Sync up
+	err = depManager.Ensure(ensureArgs...)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -1260,9 +1155,9 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 
 	if !addFlag {
 		return DeregisterFromConsul(gatewayJSON, consulToken, consulDefDir, consulAddress)
-	} else {
-		return RegisterWithConsul(gatewayJSON, consulToken, consulDefDir, consulAddress)
 	}
+
+	return RegisterWithConsul(gatewayJSON, consulToken, consulDefDir, consulAddress)
 }
 
 /*
@@ -1315,339 +1210,182 @@ func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*typ
 	return descriptor, nil
 }
 
-func BuildApp(env env.Project, options *api.BuildOptions) (err error) {
+func customizeMainFile(appDir, gatewayName, gatewayJSON string) error {
 
-	if options == nil {
-		options = &api.BuildOptions{}
-	}
-
-	if !options.SkipPrepare {
-		err = PrepareApp(env, options.PrepareOptions)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	err = env.Build()
+	flogoLibRev, mashlingRev, err := getProjectRev(appDir)
 	if err != nil {
 		return err
 	}
 
-	if !options.EmbedConfig {
-		fgutil.CopyFile(path.Join(env.GetRootDir(), fileDescriptor), path.Join(env.GetBinDir(), fileDescriptor))
-		if err != nil {
-			return err
-		}
-	} else {
-		os.Remove(path.Join(env.GetBinDir(), fileDescriptor))
+	// Load the main.go file so we can inject extract meta data output.
+	gatewayMain, err := ioutil.ReadFile(filepath.Join(appDir, "main.go"))
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(gatewayMain), "\n")
+	fileContent := ""
+	// Create src payload.
+	var extraSrc bytes.Buffer
+	// Add the ASCII banner.
+	banner, err := assets.Asset("assets/banner.txt")
+	if err != nil {
+		// Asset was not found.
+		return err
 	}
 
-	return
-}
-
-// PrepareApp do all pre-build setup and pre-processing
-func PrepareApp(env env.Project, options *api.PrepareOptions) (err error) {
-
-	if options == nil {
-		options = &api.PrepareOptions{}
-	}
-
-	if options.PreProcessor != nil {
-		err = options.PreProcessor.PrepareForBuild(env)
-		if err != nil {
-			return err
-		}
-	}
-
-	//generate metadata
-	err = generateGoMetadata(env)
+	schemaVersion, err := getSchemaVersion(gatewayJSON)
 	if err != nil {
 		return err
 	}
 
-	//load descriptor
-	appJson, err := fgutil.LoadLocalFile(path.Join(env.GetRootDir(), "flogo.json"))
+	if strings.Compare(os.Getenv(util.Mashling_Ping_Embed_Config_Property), "TRUE") == 0 {
+		mashCliOutput := fmt.Sprintf("\n\tmashlingCliRev :=  \"%s\"", MashlingMasterGitRev)
+		extraSrc.WriteString(string(mashCliOutput))
 
-	if err != nil {
-		return err
-	}
-	descriptor, err := api.ParseAppDescriptor(appJson)
-	if err != nil {
-		return err
-	}
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliRev = mashlingCliRev \n")
+		extraSrc.WriteString(string(mashCliOutput))
 
-	//generate imports file
-	var deps []*config.Dependency
+		mashCliOutput = fmt.Sprintf("\n\tmashlingCliVersion :=  \"%s\"", Version)
+		extraSrc.WriteString(string(mashCliOutput))
 
-	if options.OptimizeImports {
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliVersion = mashlingCliVersion \n")
+		extraSrc.WriteString(string(mashCliOutput))
 
-		deps = config.ExtractAllDependencies(appJson)
+		if DisplayLocalChanges {
+			mashCliOutput = fmt.Sprintf("\n\tmashlingLocRev :=  \"%s\"", MashlingLocalGitRev)
+			extraSrc.WriteString(string(mashCliOutput))
 
-	} else {
-		deps, err = ListDependencies(env, 0)
-	}
-
-	cmdPath := path.Join(env.GetSourceDir(), strings.ToLower(descriptor.Name))
-	CreateImportsGoFile(cmdPath, deps)
-
-	removeEmbeddedAppGoFile(cmdPath)
-	removeShimGoFiles(cmdPath)
-
-	if options.Shim != "" {
-
-		removeMainGoFile(cmdPath) //todo maybe rename if it exists
-		createShimSupportGoFile(cmdPath, appJson, options.EmbedConfig)
-
-		fmt.Println("Shim:", options.Shim)
-
-		for _, value := range descriptor.Triggers {
-
-			fmt.Println("Id:", value.ID)
-			if value.ID == options.Shim {
-				triggerPath := path.Join(env.GetVendorSrcDir(), value.Ref, "trigger.json")
-
-				mdJson, err := fgutil.LoadLocalFile(triggerPath)
-				if err != nil {
-					return err
-				}
-				metadata, err := api.ParseTriggerMetadata(mdJson)
-				if err != nil {
-					return err
-				}
-
-				if metadata.Shim != "" {
-
-					//todo blow up if shim file not found
-					shimFilePath := path.Join(env.GetVendorSrcDir(), value.Ref, dirShim, fileShimGo)
-					fmt.Println("Shim File:", shimFilePath)
-					fgutil.CopyFile(shimFilePath, path.Join(cmdPath, fileShimGo))
-
-					if metadata.Shim == "plugin" {
-						//look for Makefile and execute it
-						makeFilePath := path.Join(env.GetVendorSrcDir(), value.Ref, dirShim, makeFile)
-						fmt.Println("Make File:", makeFilePath)
-						fgutil.CopyFile(makeFilePath, path.Join(cmdPath, makeFile))
-
-						// Copy the vendor folder (Ugly workaround, this will go once our app is golang structure compliant)
-						vendorDestDir := path.Join(cmdPath, "vendor")
-						_, err = os.Stat(vendorDestDir)
-						if err == nil {
-							// We don't support existing vendor folders yet
-							return fmt.Errorf("Unsupported vendor folder found for function build, please create an issue on https://github.com/TIBCOSoftware/flogo")
-						}
-						// Create vendor folder
-						err = api.CopyDir(env.GetVendorSrcDir(), vendorDestDir)
-						if err != nil {
-							return err
-						}
-						defer os.RemoveAll(vendorDestDir)
-
-						// Execute make
-						cmd := exec.Command("make", "-C", cmdPath)
-						cmd.Stdout = os.Stdout
-						cmd.Stderr = os.Stderr
-						cmd.Env = append(os.Environ(),
-							fmt.Sprintf("GOPATH=%s", env.GetRootDir()),
-						)
-
-						err = cmd.Run()
-						if err != nil {
-							return err
-						}
-					}
-				}
-
-				break
-			}
+			mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingCliLocalRev = mashlingLocRev \n")
+			extraSrc.WriteString(string(mashCliOutput))
 		}
 
-	} else if options.EmbedConfig {
-		createEmbeddedAppGoFile(cmdPath, appJson)
+		mashCliOutput = fmt.Sprint("\n\tappVersion := app.Version")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppVersion = appVersion \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tschemaVersion :=  \"%s\"", schemaVersion)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.SchemaVersion = schemaVersion \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tflogolibRev :=  \"%s\"", flogoLibRev)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.FlogolibRev = flogolibRev \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tmashlingRev :=  \"%s\"", mashlingRev)
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.MashlingRev = mashlingRev \n")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprintf("\n\tappDesc := app.Description")
+		extraSrc.WriteString(string(mashCliOutput))
+
+		mashCliOutput = fmt.Sprint("\n\tutil.PingDataPntr.AppDescrption = appDesc \n\n")
+		extraSrc.WriteString(string(mashCliOutput))
+
 	}
 
-	return
-}
+	mashlingCliOutput := fmt.Sprintf("\n\tmashlingTxt :=  \"\\n[mashling] mashling CLI version %s\"", Version)
+	extraSrc.WriteString(string(mashlingCliOutput))
 
-func generateGoMetadata(env env.Project) error {
-	//todo optimize metadata recreation to minimize compile times
-	dependencies, err := ListDependencies(env, 0)
+	mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling CLI revision %s\"", MashlingMasterGitRev)
+	extraSrc.WriteString(string(mashlingCliOutput))
 
-	if err != nil {
-		return err
+	if DisplayLocalChanges {
+		mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n[mashling] mashling local revision %s\"", MashlingLocalGitRev)
+		extraSrc.WriteString(string(mashlingCliOutput))
 	}
 
-	for _, dependency := range dependencies {
-		createMetadata(env, dependency)
+	mashlingCliOutput = fmt.Sprintf("\n\tmashlingTxt = mashlingTxt + \"\\n\\n\"")
+	extraSrc.WriteString(string(mashlingCliOutput))
+
+	mashlingCliOutput = fmt.Sprintf("\n\tfmt.Printf(\"%%s\\n\", mashlingTxt)\n")
+	extraSrc.WriteString(string(mashlingCliOutput))
+
+	bannerOutput := fmt.Sprintf("\tbannerTxt := `%s`\n\tfmt.Printf(\"%%s\\n\", bannerTxt)\n", banner)
+	extraSrc.WriteString(string(bannerOutput))
+
+	// Append file version output.
+	versionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Version: %%s\\n\", app.Version)\n")
+	extraSrc.WriteString(versionOutput)
+	// Append schema version output.
+	schemaString := fmt.Sprintf("\tfmt.Printf(\"[mashling] Schema Version: %s\\n\")\n", schemaVersion)
+	extraSrc.WriteString(schemaString)
+	// Append flogo-lib and mashling revisions
+	if flogoLibRev != "" {
+		flogoLibString := fmt.Sprintf("\tfmt.Printf(\"[mashling] flogo-lib revision: %s\\n\")\n", flogoLibRev)
+		extraSrc.WriteString(flogoLibString)
 	}
-
-	return nil
-}
-
-func createMetadata(env env.Project, dependency *config.Dependency) error {
-
-	vendorSrc := env.GetVendorSrcDir()
-	mdFilePath := path.Join(vendorSrc, dependency.Ref)
-	mdGoFilePath := path.Join(vendorSrc, dependency.Ref)
-	pkg := path.Base(mdFilePath)
-
-	tplMetadata := tplMetadataGoFile
-
-	switch dependency.ContribType {
-	case config.ACTION:
-		mdFilePath = path.Join(mdFilePath, "action.json")
-		mdGoFilePath = path.Join(mdGoFilePath, "action_metadata.go")
-	case config.TRIGGER:
-		mdFilePath = path.Join(mdFilePath, "trigger.json")
-		mdGoFilePath = path.Join(mdGoFilePath, "trigger_metadata.go")
-		tplMetadata = tplTriggerMetadataGoFile
-	case config.ACTIVITY:
-		mdFilePath = path.Join(mdFilePath, "activity.json")
-		mdGoFilePath = path.Join(mdGoFilePath, "activity_metadata.go")
-		tplMetadata = tplActivityMetadataGoFile
-	default:
-		return nil
+	if mashlingRev != "" {
+		mashlingString := fmt.Sprintf("\tfmt.Printf(\"[mashling] mashling revision: %s\\n\")\n", mashlingRev)
+		extraSrc.WriteString(mashlingString)
 	}
-
-	raw, err := ioutil.ReadFile(mdFilePath)
-	if err != nil {
-		return err
-	}
-
-	info := &struct {
-		Package      string
-		MetadataJSON string
-	}{
-		Package:      pkg,
-		MetadataJSON: string(raw),
-	}
-
-	f, _ := os.Create(mdGoFilePath)
-	fgutil.RenderTemplate(f, tplMetadata, info)
-	f.Close()
-
-	return nil
-}
-
-var tplMetadataGoFile = `package {{.Package}}
- 
- var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
- 
- func getJsonMetadata() string {
-	 return jsonMetadata
- }
- `
-
-var tplActivityMetadataGoFile = `package {{.Package}}
- 
- import (
-	 "github.com/TIBCOSoftware/flogo-lib/core/activity"
- )
- 
- var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
- 
- // init create & register activity
- func init() {
-	 md := activity.NewMetadata(jsonMetadata)
-	 activity.Register(NewActivity(md))
- }
- `
-
-var tplTriggerMetadataGoFile = `package {{.Package}}
- 
- import (
-	 "github.com/TIBCOSoftware/flogo-lib/core/trigger"
- )
- 
- var jsonMetadata = ` + "`{{.MetadataJSON}}`" + `
- 
- // init create & register trigger factory
- func init() {
-	 md := trigger.NewMetadata(jsonMetadata)
-	 trigger.RegisterFactory(md.ID, NewFactory(md))
- }
- `
-
-// ListDependencies lists all installed dependencies
-func ListDependencies(env env.Project, cType config.ContribType) ([]*config.Dependency, error) {
-
-	vendorSrc := env.GetVendorSrcDir()
-	var deps []*config.Dependency
-
-	err := filepath.Walk(vendorSrc, func(filePath string, info os.FileInfo, _ error) error {
-
-		if !info.IsDir() {
-
-			switch info.Name() {
-			case "action.json":
-				if cType == 0 || cType == config.ACTION {
-					ref := refPath(vendorSrc, filePath)
-					desc, err := readDescriptor(filePath, info)
-					if err == nil && desc.Type == "flogo:action" {
-						deps = append(deps, &config.Dependency{ContribType: config.ACTION, Ref: ref})
-					}
-				}
-			case "trigger.json":
-				//temporary hack to handle old contrib dir layout
-				dir := filePath[0 : len(filePath)-12]
-				if _, err := os.Stat(fmt.Sprintf("%s/../trigger.json", dir)); err == nil {
-					//old trigger.json, ignore
-					return nil
-				}
-				if cType == 0 || cType == config.TRIGGER {
-					ref := refPath(vendorSrc, filePath)
-					desc, err := readDescriptor(filePath, info)
-					if err == nil && desc.Type == "flogo:trigger" {
-						deps = append(deps, &config.Dependency{ContribType: config.TRIGGER, Ref: ref})
-					}
-				}
-			case "activity.json":
-				//temporary hack to handle old contrib dir layout
-				dir := filePath[0 : len(filePath)-13]
-				if _, err := os.Stat(fmt.Sprintf("%s/../activity.json", dir)); err == nil {
-					//old activity.json, ignore
-					return nil
-				}
-				if cType == 0 || cType == config.ACTIVITY {
-					ref := refPath(vendorSrc, filePath)
-					desc, err := readDescriptor(filePath, info)
-					if err == nil && desc.Type == "flogo:activity" {
-						deps = append(deps, &config.Dependency{ContribType: config.ACTIVITY, Ref: ref})
-					}
-				}
-			case "flow-model.json":
-				if cType == 0 || cType == config.FLOW_MODEL {
-					ref := refPath(vendorSrc, filePath)
-					desc, err := readDescriptor(filePath, info)
-					if err == nil && desc.Type == "flogo:flow-model" {
-						deps = append(deps, &config.Dependency{ContribType: config.FLOW_MODEL, Ref: ref})
-					}
-				}
-			}
-
+	// Append app description.
+	descriptionOutput := fmt.Sprintf("\tfmt.Printf(\"[mashling] App Description: %%s\\n\", app.Description)\n")
+	extraSrc.WriteString(descriptionOutput)
+	// Cycle through the file contents, inject source, then rewrite the file.
+	for _, line := range lines {
+		if strings.Contains(line, "e.Start()") {
+			fileContent += extraSrc.String()
 		}
-
-		return nil
-	})
-
-	return deps, err
+		fileContent += line
+		fileContent += "\n"
+	}
+	return ioutil.WriteFile(filepath.Join(appDir, "main.go"), []byte(fileContent), 0644)
 }
 
-func refPath(vendorSrc string, filePath string) string {
-
-	startIdx := len(vendorSrc) + 1
-	endIdx := strings.LastIndex(filePath, string(os.PathSeparator))
-
-	return strings.Replace(filePath[startIdx:endIdx], string(os.PathSeparator), "/", -1)
-}
-
-func readDescriptor(path string, info os.FileInfo) (*config.Descriptor, error) {
-
-	raw, err := ioutil.ReadFile(path)
+func getProjectRev(appDir string) (string, string, error) {
+	//copy gopkg.lock file to gopkglock.toml and load the data into viper object
+	err := CopyFile(filepath.Join(appDir, "Gopkg.lock"), filepath.Join(appDir, "Gopkglock.toml"))
 	if err != nil {
-		fmt.Println("error: " + err.Error())
-		return nil, err
+		return "", "", err
 	}
 
-	return api.ParseDescriptor(string(raw))
+	viper.SetConfigName("Gopkglock") // no need to include file extension
+	viper.AddConfigPath(appDir)      // set the path of your config file
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		fmt.Println("Gopkg Config file not found...")
+		os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
+		return "", "", err
+	}
+
+	err = os.Remove(filepath.Join(appDir, "Gopkglock.toml"))
+
+	if err != nil {
+		return "", "", err
+	}
+
+	devServer := viper.AllSettings()
+	//fmt.Printf("values [%s] \n", devServer)
+
+	test := devServer["projects"]
+	projects := test.([]interface{})
+
+	var flogoLibRev, mashlingRev string
+	for _, project := range projects {
+		projectMap := project.(map[string]interface{})
+		if flogoLibRev != "" && mashlingRev != "" {
+			break
+		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/flogo-lib") == 0 {
+			//fmt.Printf("flogo lib revision [%s]\n", projectMap["revision"])
+			flogoLibRev = projectMap["revision"].(string)
+		} else if strings.Compare(projectMap["name"].(string), "github.com/TIBCOSoftware/mashling") == 0 {
+			//fmt.Printf("mashling revision [%s]\n", projectMap["revision"])
+			mashlingRev = projectMap["revision"].(string)
+		}
+	}
+	return flogoLibRev, mashlingRev, err
+}
+
+// Ensure is a wrapper for dep ensure command
+func Ensure(depManager *dep.DepManager, args ...string) error {
+	return depManager.Ensure(args...)
 }
