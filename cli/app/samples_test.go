@@ -7,6 +7,7 @@ package app
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -24,7 +25,10 @@ func TestSampleGateways(t *testing.T) {
 	defer os.Chdir(resetDir)
 	assert.NoError(t, err, "Unable to access the current directory %v", err)
 	now := time.Now()
-	testDir := os.Getenv("GOPATH") + "/sample_mashling_gateways_" + now.Format(time.RFC3339)
+	tmp, err := ioutil.TempDir("", "testAppsDir")
+	assert.NoError(t, err, "Unable to create the testAppsDir", err)
+
+	testDir := filepath.Join(tmp, "sample_mashling_gateways_"+now.Format(time.RFC3339))
 
 	err = os.Mkdir(testDir, 0755)
 	assert.NoError(t, err, "Unable to create the tests directory under $GOPATH %v", err)
