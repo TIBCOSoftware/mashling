@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-cli/env"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/TIBCOSoftware/mashling/cli/env"
 )
 
 func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
