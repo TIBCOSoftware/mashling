@@ -35,9 +35,8 @@ func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 	}
 	defer os.RemoveAll(tmp)
 
-	gitPath := gitHubPath
 	tokens := strings.Split(gitHubPath, "/")
-	gitRefPath := gitPath
+	gitRepoPath := gitHubPath
 	gitCloneFlag := false
 
 	if len(tokens) == 0 {
@@ -46,17 +45,17 @@ func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 	}
 
 	for i := 0; i < len(tokens); i++ {
-		err := doGitClone(tmp, gitRefPath)
+		err := doGitClone(tmp, gitRepoPath)
 		if err == nil {
 			gitCloneFlag = true
 			break
 		}
-		index := strings.LastIndex(gitRefPath, "/")
+		index := strings.LastIndex(gitRepoPath, "/")
 		if index < 0 {
 			gitCloneFlag = false
 			break
 		}
-		gitRefPath = gitRefPath[0:index]
+		gitRepoPath = gitRepoPath[0:index]
 	}
 
 	if !gitCloneFlag {
@@ -64,9 +63,9 @@ func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 		return nil, nil
 	}
 
-	gitPath = strings.Replace(gitPath, gitRefPath, "", -1)
+	resourceFilePath := strings.Replace(gitHubPath, gitRepoPath, "", -1)
 
-	return ioutil.ReadFile(filepath.Join(tmp, tempRepoName, gitPath, resourceFile))
+	return ioutil.ReadFile(filepath.Join(tmp, tempRepoName, resourceFilePath, resourceFile))
 }
 
 //GetTriggerMetadata returns trigger.json for supplied trigger github path

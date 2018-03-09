@@ -71,10 +71,10 @@ func TestGetGatewayDetails(t *testing.T) {
 
 func TestTranslateGatewayJSON2FlogoJSON(t *testing.T) {
 
-	// _, _, _, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, "9090", "")
-	// if err != nil {
-	// 	t.Error("Error in TranslateGatewayJSON2FlogoJSON function. err: ", err)
-	// }
+	_, _, _, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, "9090", "")
+	if err != nil {
+		t.Error("Error in TranslateGatewayJSON2FlogoJSON function. err: ", err)
+	}
 }
 
 func TestAppendPingDescriptor(t *testing.T) {
