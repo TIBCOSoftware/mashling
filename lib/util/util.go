@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-cli/env"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/TIBCOSoftware/mashling/cli/env"
 )
 
 func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
@@ -40,14 +40,20 @@ func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 
 func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 	gbProject := env.NewGbProjectEnv()
-
+	fmt.Println("os.Getenv(GOPATH) ", os.Getenv("GOPATH"))
 	gbProject.Init(os.Getenv("GOPATH"))
-
+	fmt.Println("gbProject.GetVendorSrcDir() ", gbProject.GetVendorSrcDir())
 	resourceDir := gbProject.GetVendorSrcDir()
 	triggerPath := resourceDir + "/" + gitHubPath + "/" + Gateway_Trigger_Metadata_JSON_Name
 
-	gbProject.InstallDependency(gitHubPath, "")
+	_, status := os.Stat(triggerPath)
+	fmt.Println(gitHubPath, " file status ", triggerPath, status)
+	err1 := gbProject.InstallDependency(gitHubPath, "")
+	fmt.Println("err1 for installdeps ", err1)
+	_, status = os.Stat(triggerPath)
+	fmt.Println(gitHubPath, " file status ", triggerPath, status)
 	data, err := ioutil.ReadFile(triggerPath)
+
 	if err != nil {
 		return nil, err
 	}
