@@ -236,7 +236,7 @@
                 "from": "rest_2",
                 "to": "log_5",
                 "type": 1,
-                "value": "$activity[rest_2].status>299"
+                "value": "$activity[rest_2].status>399"
               },
               {
                 "id": 4,
