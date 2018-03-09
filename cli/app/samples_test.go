@@ -24,7 +24,7 @@ func TestSampleGateways(t *testing.T) {
 	defer os.Chdir(resetDir)
 	assert.NoError(t, err, "Unable to access the current directory %v", err)
 	now := time.Now()
-	testDir := os.Getenv("GOPATH") + "/sample_mashling_gateways_" + now.Format(time.RFC3339)
+	testDir := "/tmp/sample_mashling_gateways_" + now.Format(time.RFC3339)
 
 	err = os.Mkdir(testDir, 0755)
 	assert.NoError(t, err, "Unable to create the tests directory under $GOPATH %v", err)
