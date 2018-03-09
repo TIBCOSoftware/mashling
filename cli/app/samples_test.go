@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/stretchr/testify/assert"
 )
@@ -60,7 +61,7 @@ func TestSampleGateways(t *testing.T) {
 		gatewayName := "Sample" + strconv.Itoa(index)
 		appDir := path.Join(currentDir, gatewayName)
 
-		err = CreateMashling(SetupNewProjectEnv(), gatewayJson, nil, appDir, gatewayName, "", "9090", nil)
+		err = CreateMashling(api.SetupNewProjectEnv(), gatewayJson, false, appDir, gatewayName, "9090")
 		assert.NoError(t, err, "Error: Error creating mashling app '%v' - %v", gatewayName, err)
 
 		sample := testDir + "/" + gatewayName

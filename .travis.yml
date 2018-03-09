@@ -31,7 +31,7 @@ script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
   - cd mashling
-  - dep ensure
+  - dep ensure -vendor-only
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
   - make all
   - mashling help
