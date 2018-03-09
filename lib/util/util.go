@@ -47,11 +47,11 @@ func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 	triggerPath := resourceDir + "/" + gitHubPath + "/" + Gateway_Trigger_Metadata_JSON_Name
 
 	_, status := os.Stat(triggerPath)
-	fmt.Println(gitHubPath, " file status ", status)
+	fmt.Println(gitHubPath, " file status ", triggerPath, status)
 	err1 := gbProject.InstallDependency(gitHubPath, "")
 	fmt.Println("err1 for installdeps ", err1)
 	_, status = os.Stat(triggerPath)
-	fmt.Println(gitHubPath, " file status ", status)
+	fmt.Println(gitHubPath, " file status ", triggerPath, status)
 	data, err := ioutil.ReadFile(triggerPath)
 
 	if err != nil {

@@ -175,7 +175,7 @@ func (e *GbProject) InstallDependency(depPath string, version string) error {
 	if _, err := os.Stat(path.Join(e.VendorSrcDir, depPath)); err == nil {
 		//todo ignore installed dependencies for now
 		//exists, return
-		fmt.Println("file exists already")
+		fmt.Println("file exists : ", path.Join(e.VendorSrcDir, depPath))
 		return nil
 	}
 
