@@ -242,7 +242,43 @@
             ],
             "attributes": []
           },
-          "explicitReply": true
+          "explicitReply": true,
+          "errorHandlerTask": {
+            "id": 7,
+            "type": 1,
+            "tasks": [
+              {
+                "id": "log_8",
+                "name": "Log Message (5)",
+                "description": "Simple Log Activity",
+                "type": 1,
+                "activityType": "tibco-log",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                "attributes": [
+                  {
+                    "name": "message",
+                    "value": "Error Processing request in gateway",
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "flowInfo",
+                    "value": "true",
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "addToFlow",
+                    "value": "true",
+                    "required": false,
+                    "type": "boolean"
+                  }
+                ]
+              }
+            ],
+            "links": [],
+            "attributes": []
+          }
         }
       },
       "id": "flow",
