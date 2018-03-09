@@ -11,10 +11,6 @@ branches:
     - master
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
     
-cache:
-  bundler: false
-  directories:
-  - .build-cache
 # Handle git submodules yourself
 git:
     submodules: false
