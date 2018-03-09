@@ -168,12 +168,14 @@ func (e *GbProject) GetVendorSrcDir() string {
 func (e *GbProject) InstallDependency(depPath string, version string) error {
 	var cmd *exec.Cmd
 	cwd, _ := os.Getwd()
+	fmt.Println("cwd ", cwd)
 	defer os.Chdir(cwd)
 
 	//check if dependency is installed
 	if _, err := os.Stat(path.Join(e.VendorSrcDir, depPath)); err == nil {
 		//todo ignore installed dependencies for now
 		//exists, return
+		fmt.Println("file exists already")
 		return nil
 	}
 
@@ -181,6 +183,7 @@ func (e *GbProject) InstallDependency(depPath string, version string) error {
 		//if strings.HasPrefix(depPath,"github.com/TIBCOSoftware/flogo-") {
 		//	cmd = exec.Command("gb", "vendor", "fetch", "-branch", "entrypoint", depPath)
 		//} else {
+		fmt.Println("gb vendor fetch depath ", depPath)
 		cmd = exec.Command("gb", "vendor", "fetch", depPath)
 		//}
 	} else {
@@ -191,7 +194,7 @@ func (e *GbProject) InstallDependency(depPath string, version string) error {
 		} else {
 			tag = version
 		}
-
+		fmt.Println("gb vendor fetch depath version", depPath)
 		cmd = exec.Command("gb", "vendor", "fetch", "-tag", tag, depPath)
 	}
 

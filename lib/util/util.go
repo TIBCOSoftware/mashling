@@ -40,15 +40,16 @@ func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 
 func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 	gbProject := env.NewGbProjectEnv()
-
+	fmt.Println("os.Getenv(GOPATH) ", os.Getenv("GOPATH"))
 	gbProject.Init(os.Getenv("GOPATH"))
-
+	fmt.Println("gbProject.GetVendorSrcDir() ", gbProject.GetVendorSrcDir())
 	resourceDir := gbProject.GetVendorSrcDir()
 	triggerPath := resourceDir + "/" + gitHubPath + "/" + Gateway_Trigger_Metadata_JSON_Name
 
 	_, status := os.Stat(triggerPath)
 	fmt.Println(gitHubPath, " file status ", status)
-	gbProject.InstallDependency(gitHubPath, "")
+	err1 := gbProject.InstallDependency(gitHubPath, "")
+	fmt.Println("err1 for installdeps ", err1)
 	_, status = os.Stat(triggerPath)
 	fmt.Println(gitHubPath, " file status ", status)
 	data, err := ioutil.ReadFile(triggerPath)
