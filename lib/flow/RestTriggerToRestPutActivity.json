@@ -2,7 +2,7 @@
   "name": "flow",
   "type": "flogo:app",
   "version": "0.0.1",
-  "description": "",
+  "description": "Rest Trigger To Rest Put Activity",
   "triggers": [
     {
       "name": "Receive HTTP Message",
