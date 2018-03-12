@@ -1,0 +1,58 @@
+{
+  "name": "eftl",
+  "version": "0.0.1",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/eftl",
+  "title": "A EFTL message producer",
+  "description": "A EFTL message producer",
+  "author": "Andrew Snodgrass <asnodgra@tibco.com>",
+  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/activity/eftl",
+  "inputs":[
+    {
+      "name": "content",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "dest",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "url",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "user",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "ca",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "tracing",
+      "type": "any",
+      "required": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "tracing",
+      "type": "any"
+    }
+  ]
+}
