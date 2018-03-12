@@ -1,8 +1,8 @@
 {
-  "name": "helloo",
+  "name": "flow",
   "type": "flogo:app",
   "version": "0.0.1",
-  "description": "",
+  "description": "Kafka Trigger To Rest Activity",
   "triggers": [
     {
       "name": "Receive Kafka Messages",
