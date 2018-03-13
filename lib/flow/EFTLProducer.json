@@ -1,0 +1,165 @@
+{
+  "name": "eftlProducer",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "EFTL Producer",
+  "triggers": [
+    {
+      "id": "my_rest_trigger",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+      "settings": {
+        "port": "9233"
+      },
+      "handlers": [
+        {
+          "actionId": "my_simple_flow",
+          "settings": {
+            "method": "POST",
+            "path": "/test"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "my_simple_flow",
+      "name": "my simple flow",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
+      "data": {
+        "flow": {
+          "name": "my simple flow",
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "type": 1,
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/eftl",
+                "name": "mqtt",
+                "attributes": [
+                  {
+                    "name": "content",
+                    "value": null,
+                    "type": "any"
+                  },
+                  {
+                    "name": "dest",
+                    "value": null,
+                    "type": "string"
+                  },
+                  {
+                    "name": "url",
+                    "value": null,
+                    "type": "string"
+                  },
+                  {
+                    "name": "id",
+                    "value": null,
+                    "type": "string"
+                  },
+                  {
+                    "name": "tracing",
+                    "value": null,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "$flow.content",
+                    "mapTo": "content"
+                  },
+                  {
+                    "type": 1,
+                    "value": "$flow.dest",
+                    "mapTo": "dest"
+                  },
+                  {
+                    "type": 1,
+                    "value": "$flow.url",
+                    "mapTo": "url"
+                  },
+                  {
+                    "type": 1,
+                    "value": "$flow.id",
+                    "mapTo": "id"
+                  },
+                  {
+                    "type": 1,
+                    "value": "$flow.tracing",
+                    "mapTo": "tracing"
+                  }
+                ]
+              }
+            ],
+            "links": []
+          },
+          "errorHandlerTask": {
+              "id": 3,
+              "type": 1,
+              "tasks": [
+                  {
+                      "id": 10,
+                      "name": "Error Message",
+                      "description": "Simple Log Activity",
+                      "type": 1,
+                      "activityType": "github-com-tibco-software-flogo-contrib-activity-log",
+                      "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                      "attributes": [
+                          {
+                              "name": "message",
+                              "value": "Error processing request in gateway",
+                              "required": false,
+                              "type": "string"
+                          },
+                          {
+                              "name": "flowInfo",
+                              "value": "true",
+                              "required": false,
+                              "type": "boolean"
+                          },
+                          {
+                              "name": "addToFlow",
+                              "value": "true",
+                              "required": false,
+                              "type": "boolean"
+                          }
+                      ]
+                  }
+              ],
+              "links": [],
+              "attributes": []
+          }
+        }
+      },
+      "metadata": {
+        "input": [
+          {
+            "name": "content",
+            "type": "any"
+          },
+          {
+            "name": "dest",
+            "type": "string"
+          },
+          {
+            "name": "url",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "tracing",
+            "type": "any"
+          }
+        ],
+        "output": []
+      }
+    }
+  ]
+}
