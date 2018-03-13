@@ -46,7 +46,7 @@ func CreateMashling(env env.Project, gatewayJSON string, defaultAppFlag bool, ap
 		return err
 	}
 
-	err = CreateApp(SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName)
+	err = CreateApp(SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName, gatewayJSON)
 	if err != nil {
 		return err
 	}
@@ -73,11 +73,6 @@ func CreateMashling(env env.Project, gatewayJSON string, defaultAppFlag bool, ap
 	api.BuildApp(envProj, options)
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
-	//create the mashling json descriptor file
-	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJSON)
-	if err != nil {
-		return err
-	}
 
 	fmt.Println("Mashling gateway successfully built!")
 
@@ -998,12 +993,12 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName string) error {
-	return doCreate(env, appJSON, defaultAppFlag, rootDir, appName)
+func CreateApp(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName, gatewayJSON string) error {
+	return doCreate(env, appJSON, defaultAppFlag, rootDir, appName, gatewayJSON)
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func doCreate(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName string) error {
+func doCreate(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName, gatewayJSON string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
 
@@ -1023,6 +1018,12 @@ func doCreate(env env.Project, appJSON string, defaultAppFlag bool, rootDir, app
 	}
 
 	err = fgutil.CreateFileFromString(filepath.Join(rootDir, "flogo.json"), appJSON)
+	if err != nil {
+		return err
+	}
+
+	//create the mashling json descriptor file
+	err = fgutil.CreateFileFromString(path.Join(rootDir, util.Gateway_Definition_File_Name), gatewayJSON)
 	if err != nil {
 		return err
 	}
