@@ -70,12 +70,32 @@ func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
 
 //GetTriggerMetadata returns trigger.json for supplied trigger github path
 func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
-	data, err := GetGithubResource(gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
-	if err != nil {
-		return nil, err
-	}
+	goPathVendor := filepath.Join(os.Getenv("GOPATH"), "vendor")
 	triggerMetadata := &ftrigger.Metadata{}
-	json.Unmarshal(data, triggerMetadata)
+	if _, err := os.Stat(filepath.Join(goPathVendor, gitHubPath, Gateway_Trigger_Metadata_JSON_Name)); os.IsNotExist(err) {
+		fmt.Println("creating trigger.json ", gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
+		if _, err := os.Stat(goPathVendor); os.IsNotExist(err) {
+			os.Mkdir(goPathVendor, os.ModePerm)
+		}
+		data, err := GetGithubResource(gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
+		if err != nil {
+			return nil, err
+		}
+		json.Unmarshal(data, triggerMetadata)
+
+		err = ioutil.WriteFile(filepath.Join(goPathVendor, gitHubPath, Gateway_Trigger_Metadata_JSON_Name), data, os.ModePerm)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		fmt.Println("reading trigger.json ", gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
+		data, err := ioutil.ReadFile(filepath.Join(goPathVendor, gitHubPath, Gateway_Trigger_Metadata_JSON_Name))
+		if err != nil {
+			return nil, err
+		}
+		json.Unmarshal(data, triggerMetadata)
+	}
+
 	return triggerMetadata, nil
 }
 
