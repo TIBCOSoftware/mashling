@@ -18,6 +18,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
+	"github.com/TIBCOSoftware/mashling/cli/env"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
 )
@@ -26,6 +27,26 @@ var (
 	CommandRegistry = cli.NewCommandRegistry()
 )
 
+func SetupNewProjectEnv() env.Project {
+	return env.NewMashlingProject()
+}
+
+func SetupExistingProjectEnv(rootDir string) env.Project {
+
+	proj := env.NewMashlingProject()
+
+	if err := proj.Init(rootDir); err != nil {
+		fmt.Fprintf(os.Stderr, "Error initializing Mashling app project: %s\n\n", err.Error())
+		os.Exit(2)
+	}
+
+	if err := proj.Open(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening Mashling app project: %s\n\n", err.Error())
+		os.Exit(2)
+	}
+
+	return proj
+}
 func GetGatewayJSON(fileName string) (string, string, error) {
 	var gatewayJson string
 	var gatewayName string

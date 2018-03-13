@@ -23,7 +23,6 @@ before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
   - pip install --user awscli
 install:
-  - go get -u github.com/constabulary/gb/...
   - go get -u github.com/golang/dep/cmd/dep
   - go get -u github.com/ains/go-test-html 
   
@@ -31,7 +30,7 @@ script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
   - cd mashling
-  - dep ensure
+  - dep ensure -vendor-only
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
   - make all
   - mashling help
