@@ -83,6 +83,7 @@ func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 		}
 		json.Unmarshal(data, triggerMetadata)
 
+		os.Create(filepath.Join(goPathVendor, gitHubPath, Gateway_Trigger_Metadata_JSON_Name))
 		err = ioutil.WriteFile(filepath.Join(goPathVendor, gitHubPath, Gateway_Trigger_Metadata_JSON_Name), data, os.ModePerm)
 		if err != nil {
 			return nil, err
