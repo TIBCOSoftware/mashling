@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"os"
 
-	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 )
 
@@ -82,7 +81,7 @@ func (c *cmdList) Exec(args []string) error {
 		os.Exit(2)
 	}
 
-	gwDetails, err := GetGatewayDetails(api.SetupExistingProjectEnv(appDir), cType)
+	gwDetails, err := GetGatewayDetails(SetupExistingProjectEnv(appDir), cType)
 	if err != nil {
 		return err
 	}

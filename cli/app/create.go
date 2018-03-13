@@ -12,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 
-	api "github.com/TIBCOSoftware/flogo-cli/app"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/mashling/cli/cli"
 	"github.com/TIBCOSoftware/mashling/lib/model"
@@ -132,5 +131,5 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(api.SetupNewProjectEnv(), gatewayJSON, defaultAppFlag, appDir, gatewayName, c.pingport)
+	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, defaultAppFlag, appDir, gatewayName, c.pingport)
 }
