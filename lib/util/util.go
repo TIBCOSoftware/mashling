@@ -74,8 +74,8 @@ func GetTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 	triggerMetadata := &ftrigger.Metadata{}
 	if _, err := os.Stat(filepath.Join(goPathVendor, gitHubPath, Gateway_Trigger_Metadata_JSON_Name)); os.IsNotExist(err) {
 		fmt.Println("creating trigger.json ", gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
-		if _, err := os.Stat(goPathVendor); os.IsNotExist(err) {
-			os.Mkdir(goPathVendor, os.ModePerm)
+		if _, err := os.Stat(filepath.Join(goPathVendor, gitHubPath)); os.IsNotExist(err) {
+			os.Mkdir(filepath.Join(goPathVendor, gitHubPath), os.ModePerm)
 		}
 		data, err := GetGithubResource(gitHubPath, Gateway_Trigger_Metadata_JSON_Name)
 		if err != nil {
