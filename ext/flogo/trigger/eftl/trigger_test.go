@@ -17,6 +17,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling/lib/eftl"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 
 	opentracing "github.com/opentracing/opentracing-go"
 )
@@ -426,13 +427,55 @@ func TestConstructXMLStartRequest(t *testing.T) {
 		t.Fatal("tracing is nil")
 	}
 
-	/*if content.(map[string]interface{})["replyTo"] != nil {
-		t.Fatal("replyTo should be nil in content")
+	if content, ok := content.(map[string]interface{}); ok {
+		getRoot := func() map[string]interface{} {
+			body := content[util.XMLKeyBody]
+			if body == nil {
+				return nil
+			}
+			for _, e := range body.([]interface{}) {
+				element, ok := e.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				name, ok := element[util.XMLKeyType].(string)
+				if !ok || name != util.XMLTypeElement {
+					continue
+				}
+				return element
+			}
+			return nil
+		}
+		root := getRoot()
+
+		if root["replyTo"] != nil {
+			t.Fatal("replyTo should be nil in content")
+		}
+
+		find := func(target string) bool {
+			rootBody, ok := root[util.XMLKeyBody].([]interface{})
+			if !ok {
+				return false
+			}
+			for _, e := range rootBody {
+				element, ok := e.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				name, ok := element[util.XMLKeyName].(string)
+				if !ok || name != target {
+					continue
+				}
+				return true
+			}
+
+			return false
+		}
+		if find("pathParams") {
+			t.Fatal("pathParams should be nil in content")
+		}
+		if find("queryParams") {
+			t.Fatal("queryParams should be nil in content")
+		}
 	}
-	if content.(map[string]interface{})["pathParams"] != nil {
-		t.Fatal("pathParams should be nil in content")
-	}
-	if content.(map[string]interface{})["queryParams"] != nil {
-		t.Fatal("queryParams should be nil in content")
-	}*/
 }
