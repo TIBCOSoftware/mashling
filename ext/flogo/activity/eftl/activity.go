@@ -34,7 +34,7 @@ const (
 	ovTracing = "tracing"
 )
 
-var log = logger.GetLogger("activity-tibco-rest")
+var log = logger.GetLogger("activity-tibco-eftl")
 
 // Activity is a EFTL client
 type Activity struct {
@@ -124,6 +124,8 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	}
 
 	if dest, ok := context.GetInput(ivDest).(string); ok {
+		setTag("dest", dest)
+		setTag("content", string(data))
 		err = connection.Publish(eftl.Message{
 			"_dest":   dest,
 			"content": data,

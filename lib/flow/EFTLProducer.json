@@ -38,7 +38,7 @@
                 "id": 2,
                 "type": 1,
                 "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/eftl",
-                "name": "mqtt",
+                "name": "eftl",
                 "attributes": [
                   {
                     "name": "content",

@@ -413,6 +413,9 @@ func (t *Trigger) RunAction(handler *OptimizedHandler, dest string, content []by
 	}
 	defer span.Finish()
 
+	span.SetTag("dest", dest)
+	span.SetTag("content", string(content))
+
 	replyTo, data := t.constructStartRequest(content, span)
 
 	startAttrs, err := t.metadata.OutputsToAttrs(data, false)
@@ -428,6 +431,7 @@ func (t *Trigger) RunAction(handler *OptimizedHandler, dest string, content []by
 		span.Error("Error starting action: %v", err)
 	}
 	log.Debugf("Ran action: [%s]", actionURI)
+	span.SetTag("actionURI", actionURI)
 
 	if replyTo == "" {
 		return
