@@ -38,7 +38,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(env env.Project, gatewayJSON string, defaultAppFlag bool, appDir, appName, pingPort string) error {
+func CreateMashling(gatewayJSON string, defaultAppFlag bool, appDir, appName, pingPort string) error {
 
 	flogoJSON, gatewayJSON, appName, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort, appName)
 	if err != nil {
@@ -61,7 +61,7 @@ func CreateMashling(env env.Project, gatewayJSON string, defaultAppFlag bool, ap
 		embed, err = strconv.ParseBool(os.Getenv(util.Flogo_App_Embed_Config_Property))
 	}
 
-	envProj := api.SetupExistingProjectEnv(appDir)
+	envProj := SetupExistingProjectEnv(appDir)
 
 	err = customizeMainFile(envProj.GetAppDir(), appName, gatewayJSON)
 
@@ -243,7 +243,7 @@ func BuildMashling(appDir string, gatewayJSON string, pingPort string) error {
 	}
 
 	options := &api.BuildOptions{SkipPrepare: false, PrepareOptions: &api.PrepareOptions{OptimizeImports: false, EmbedConfig: embed}}
-	api.BuildApp(api.SetupExistingProjectEnv(appDir), options)
+	api.BuildApp(SetupExistingProjectEnv(appDir), options)
 
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")

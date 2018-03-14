@@ -71,9 +71,12 @@ func TestGetGatewayDetails(t *testing.T) {
 
 func TestTranslateGatewayJSON2FlogoJSON(t *testing.T) {
 
-	_, _, _, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, "9090", "")
+	_, _, appName, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, "9090", "")
 	if err != nil {
 		t.Error("Error in TranslateGatewayJSON2FlogoJSON function. err: ", err)
+	}
+	if strings.Compare(appName, "mashlingApp") != 0 {
+		t.Error("gatewayJSON parsing error")
 	}
 }
 

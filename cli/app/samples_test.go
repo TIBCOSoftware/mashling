@@ -6,62 +6,76 @@
 package app
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strconv"
 	"testing"
+
+	"github.com/TIBCOSoftware/flogo-cli/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSampleGateways(t *testing.T) {
-	// 	resetDir, err := os.Getwd()
-	// 	defer os.Chdir(resetDir)
-	// 	assert.NoError(t, err, "Unable to access the current directory %v", err)
-	// 	now := time.Now()
-	// 	testDir := os.Getenv("GOPATH") + "/src/sample_mashling_gateways_" + now.Format(time.RFC3339)
+	resetDir, err := os.Getwd()
+	defer os.Chdir(resetDir)
+	assert.NoError(t, err, "Unable to access the current directory %v", err)
 
-	// 	err = os.Mkdir(testDir, 0755)
-	// 	assert.NoError(t, err, "Unable to create the tests directory under $GOPATH %v", err)
+	tmp, err := ioutil.TempDir("", "mashlingApps")
+	if err != nil {
+		t.Error("Temp Directory creation failed")
+	}
+	defer os.RemoveAll(tmp)
 
-	// 	samplesDir, err := filepath.Abs("../samples")
-	// 	assert.NoError(t, err, "Unable to access the samples directory %v", samplesDir)
+	testDir := filepath.Join(tmp, "sample_mashling_gateways")
 
-	// 	//change into the test directory
-	// 	os.Chdir(testDir)
+	err = os.Mkdir(testDir, 0755)
+	assert.NoError(t, err, "Unable to create the tests directory %v", err)
 
-	// 	fileList := []string{}
+	samplesDir, err := filepath.Abs("../samples")
+	assert.NoError(t, err, "Unable to access the samples directory %v", samplesDir)
 
-	// 	filepath.Walk(samplesDir, func(fpath string, info os.FileInfo, err error) error {
-	// 		if !info.IsDir() && filepath.Ext(info.Name()) == ".json" {
-	// 			fileList = append(fileList, fpath)
-	// 		}
-	// 		return nil
-	// 	})
+	//change into the test directory
+	os.Chdir(testDir)
 
-	// 	for index, file := range fileList {
-	// 		// Skip secure sample for now until env vars are handled at test time.
-	// 		if filepath.Base(file) == "secure-rest-conditional-gateway.json" {
-	// 			fmt.Fprintf(os.Stdout, "Skipping: '%v'\n", file)
-	// 			continue
-	// 		}
-	// 		fmt.Fprintf(os.Stdout, "Loading: '%v'\n", file)
+	fileList := []string{}
 
-	// 		gatewayJson, err := fgutil.LoadLocalFile(file)
-	// 		assert.NoError(t, err, "Error: Error loading sample app file '%s' - %s\n\n", file, err)
+	filepath.Walk(samplesDir, func(fpath string, info os.FileInfo, err error) error {
+		if !info.IsDir() && filepath.Ext(info.Name()) == ".json" {
+			fileList = append(fileList, fpath)
+		}
+		return nil
+	})
 
-	// 		currentDir, err := os.Getwd()
-	// 		assert.NoError(t, err, "Error: Error getting working dir '%v'", err)
+	for index, file := range fileList {
+		// Skip secure sample for now until env vars are handled at test time.
+		if filepath.Base(file) == "secure-rest-conditional-gateway.json" {
+			fmt.Fprintf(os.Stdout, "Skipping: '%v'\n", file)
+			continue
+		}
+		fmt.Fprintf(os.Stdout, "Loading: '%v'\n", file)
 
-	// 		gatewayName := "Sample" + strconv.Itoa(index)
-	// 		appDir := path.Join(currentDir, gatewayName)
+		gatewayJson, err := fgutil.LoadLocalFile(file)
+		assert.NoError(t, err, "Error: Error loading sample app file '%s' - %s\n\n", file, err)
 
-	// 		err = CreateMashling(SetupNewProjectEnv(), gatewayJson, false, appDir, gatewayName, "9090")
-	// 		assert.NoError(t, err, "Error: Error creating mashling app '%v' - %v", gatewayName, err)
+		currentDir, err := os.Getwd()
+		assert.NoError(t, err, "Error: Error getting working dir '%v'", err)
 
-	// 		sample := testDir + "/" + gatewayName
-	// 		if _, err := os.Stat(sample); os.IsNotExist(err) {
-	// 			fmt.Sprintf("File [%v] generated Samples dir [%v]", file, sample)
-	// 		}
-	// 		assert.NoError(t, err, "Error: Error getting the sample app dir '%v' %v", sample, err)
+		gatewayName := "Sample" + strconv.Itoa(index)
+		appDir := filepath.Join(currentDir, gatewayName)
 
-	// 	}
+		err = CreateMashling(gatewayJson, false, appDir, gatewayName, "9090")
+		assert.NoError(t, err, "Error: Error creating mashling app '%v' - %v", gatewayName, err)
 
-	// 	err = os.RemoveAll(testDir)
-	// 	assert.NoError(t, err, "Error: Error cleaning up working dir '%v' %v", testDir, err)
+		sample := filepath.Join(testDir, gatewayName)
+		if _, err := os.Stat(sample); os.IsNotExist(err) {
+			fmt.Sprintf("File [%v] generated Samples dir [%v]", file, sample)
+		}
+		assert.NoError(t, err, "Error: Error getting the sample app dir '%v' %v", sample, err)
+
+	}
+
+	err = os.RemoveAll(testDir)
+	assert.NoError(t, err, "Error: Error cleaning up working dir '%v' %v", testDir, err)
 }
