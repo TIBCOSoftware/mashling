@@ -131,5 +131,5 @@ func (c *cmdCreate) Exec(args []string) error {
 		return err
 	}
 
-	return CreateMashling(SetupNewProjectEnv(), gatewayJSON, defaultAppFlag, appDir, gatewayName, c.pingport)
+	return CreateMashling(gatewayJSON, defaultAppFlag, appDir, gatewayName, c.pingport)
 }
