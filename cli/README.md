@@ -8,7 +8,7 @@
 ### Prerequisites
 * The Go programming language 1.9 or later should be [installed](https://golang.org/doc/install).
 * Set GOPATH environment variable on your system
-* In order to simplify development and dependency management, we're using **gb** and **go dep** tools. You can install them by following the instructions [gb](https://getgb.io) and [dep](https://github.com/golang/dep#setup). 
+* In order to simplify development and dependency management, we're using **go dep** tool. You can install it by following the instructions [here](https://github.com/golang/dep#setup). 
 
 ### Install Mashling
     go get github.com/TIBCOSoftware/mashling/...

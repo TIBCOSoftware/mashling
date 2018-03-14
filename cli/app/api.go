@@ -23,12 +23,12 @@ import (
 	api "github.com/TIBCOSoftware/flogo-cli/app"
 	config "github.com/TIBCOSoftware/flogo-cli/config"
 	"github.com/TIBCOSoftware/flogo-cli/dep"
-	fenv "github.com/TIBCOSoftware/flogo-cli/env"
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	faction "github.com/TIBCOSoftware/flogo-lib/core/action"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	assets "github.com/TIBCOSoftware/mashling/cli/assets"
+	"github.com/TIBCOSoftware/mashling/cli/env"
 	"github.com/spf13/viper"
 
 	"github.com/TIBCOSoftware/mashling/lib/model"
@@ -38,7 +38,7 @@ import (
 )
 
 // CreateMashling creates a gateway application from the specified json gateway descriptor
-func CreateMashling(fenv fenv.Project, gatewayJSON string, defaultAppFlag bool, appDir, appName, pingPort string) error {
+func CreateMashling(env env.Project, gatewayJSON string, defaultAppFlag bool, appDir, appName, pingPort string) error {
 
 	flogoJSON, gatewayJSON, appName, err := TranslateGatewayJSON2FlogoJSON(gatewayJSON, pingPort, appName)
 	if err != nil {
@@ -46,7 +46,7 @@ func CreateMashling(fenv fenv.Project, gatewayJSON string, defaultAppFlag bool, 
 		return err
 	}
 
-	err = CreateApp(api.SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName)
+	err = CreateApp(SetupNewProjectEnv(), flogoJSON, defaultAppFlag, appDir, appName, gatewayJSON)
 	if err != nil {
 		return err
 	}
@@ -73,11 +73,6 @@ func CreateMashling(fenv fenv.Project, gatewayJSON string, defaultAppFlag bool, 
 	api.BuildApp(envProj, options)
 	//delete flogo.json file from the app dir
 	fgutil.DeleteFilesWithPrefix(appDir, "flogo")
-	//create the mashling json descriptor file
-	err = fgutil.CreateFileFromString(path.Join(appDir, util.Gateway_Definition_File_Name), gatewayJSON)
-	if err != nil {
-		return err
-	}
 
 	fmt.Println("Mashling gateway successfully built!")
 
@@ -822,9 +817,9 @@ func GenerateExampleCall(endpoint map[string]interface{}, key string) string {
 }
 
 // GetGatewayDetails returns gateway details i.e all Triggers, Handlers & Links
-func GetGatewayDetails(fenv fenv.Project, cType ComponentType) (string, error) {
+func GetGatewayDetails(env env.Project, cType ComponentType) (string, error) {
 	gwInfoBuffer := bytes.NewBufferString("")
-	rootDir := fenv.GetRootDir()
+	rootDir := env.GetRootDir()
 	mashlingDescriptorFile := rootDir + "/" + util.Gateway_Definition_File_Name
 	mashlingJSON, err := fgutil.LoadLocalFile(mashlingDescriptorFile)
 	if err != nil {
@@ -998,12 +993,12 @@ func getSchemaVersion(gatewayJSON string) (string, error) {
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func CreateApp(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName string) error {
-	return doCreate(fenv, appJSON, defaultAppFlag, rootDir, appName)
+func CreateApp(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName, gatewayJSON string) error {
+	return doCreate(env, appJSON, defaultAppFlag, rootDir, appName, gatewayJSON)
 }
 
 // CreateApp creates an application from the specified json application descriptor
-func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, appName string) error {
+func doCreate(env env.Project, appJSON string, defaultAppFlag bool, rootDir, appName, gatewayJSON string) error {
 
 	fmt.Print("Creating initial project structure, this might take a few seconds ... \n")
 
@@ -1012,12 +1007,12 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 		return err
 	}
 
-	err = fenv.Init(rootDir)
+	err = env.Init(rootDir)
 	if err != nil {
 		return err
 	}
 
-	err = fenv.Create(false, "")
+	err = env.Create(false, "")
 	if err != nil {
 		return err
 	}
@@ -1027,18 +1022,24 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 		return err
 	}
 
+	//create the mashling json descriptor file
+	err = fgutil.CreateFileFromString(path.Join(rootDir, util.Gateway_Definition_File_Name), gatewayJSON)
+	if err != nil {
+		return err
+	}
+
 	// create initial structure
-	appDir := filepath.Join(fenv.GetSourceDir(), appName)
+	appDir := filepath.Join(env.GetSourceDir(), appName)
 	os.MkdirAll(appDir, os.ModePerm)
 
 	// Validate structure
-	err = fenv.Open()
+	err = env.Open()
 	if err != nil {
 		return err
 	}
 
 	// Create the dep manager
-	depManager := &dep.DepManager{Env: fenv}
+	depManager := &dep.DepManager{Env: env}
 
 	// Initialize the dep manager
 	err = depManager.Init()
@@ -1057,11 +1058,11 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 		//for default app writing dep files
 		defGpkgLock := assets.MustAsset("assets/defGopkg.lock")
 		defGpkgToml := assets.MustAsset("assets/defGopkg.toml")
-		err = ioutil.WriteFile(filepath.Join(fenv.GetAppDir(), "Gopkg.lock"), defGpkgLock, 0644)
+		err = ioutil.WriteFile(filepath.Join(env.GetAppDir(), "Gopkg.lock"), defGpkgLock, 0644)
 		if err != nil {
 			return err
 		}
-		err = ioutil.WriteFile(filepath.Join(fenv.GetAppDir(), "Gopkg.toml"), defGpkgToml, 0644)
+		err = ioutil.WriteFile(filepath.Join(env.GetAppDir(), "Gopkg.toml"), defGpkgToml, 0644)
 		if err != nil {
 			return err
 		}
@@ -1070,8 +1071,8 @@ func doCreate(fenv fenv.Project, appJSON string, defaultAppFlag bool, rootDir, a
 		_, gpkgLockErr := os.Stat(filepath.Join(dir, "Gopkg.lock"))
 		_, gpkgTomlErr := os.Stat(filepath.Join(dir, "Gopkg.toml"))
 		if gpkgLockErr == nil && gpkgTomlErr == nil {
-			CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(fenv.GetAppDir(), "Gopkg.lock"))
-			CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(fenv.GetAppDir(), "Gopkg.toml"))
+			CopyFile(filepath.Join(dir, "Gopkg.lock"), filepath.Join(env.GetAppDir(), "Gopkg.lock"))
+			CopyFile(filepath.Join(dir, "Gopkg.toml"), filepath.Join(env.GetAppDir(), "Gopkg.toml"))
 			ensureArgs = append(ensureArgs, "-vendor-only")
 		}
 	}
@@ -1095,7 +1096,7 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 }
 
 /*
- appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
+  appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
 */
 func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
 
