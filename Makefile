@@ -8,7 +8,7 @@ GITBRANCH:=$(shell git rev-parse --abbrev-ref --symbolic-full-name @{u})
 MASHLINGLOCALGITREV=`git rev-parse HEAD`
 MASHLINGMASTERGITREV=`git rev-parse ${GITBRANCH}`
 
-LDFLAGS= -ldflags "-X ./cli/app.MashlingMasterGitRev=${MASHLINGMASTERGITREV} -X ./cli/app.MashlingLocalGitRev=${MASHLINGLOCALGITREV}  -X ./cli/app.GitBranch=${GITBRANCH}"
+LDFLAGS= -ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.MashlingMasterGitRev=${MASHLINGMASTERGITREV} -X github.com/TIBCOSoftware/mashling/cli/app.MashlingLocalGitRev=${MASHLINGLOCALGITREV}  -X github.com/TIBCOSoftware/mashling/cli/app.GitBranch=${GITBRANCH}"
 
 
 .PHONY: all
