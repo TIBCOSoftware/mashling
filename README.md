@@ -28,19 +28,17 @@ Additional developer tooling is included in below open source repo that contains
 * In order to simplify development and dependency management, we're using **go dep** tool. You can install it by following the instructions [here](https://github.com/golang/dep#setup). 
 
 ### Install Mashling
-    go get github.com/TIBCOSoftware/mashling/...
+	git clone https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
+	cd $GOPATH/src/github.com/TIBCOSoftware/mashling
+	dep ensure -vendor-only
+	make all
     
-Note: If you already have Flogo installed, you will need to use below (as Mashling includes necessary Flogo dependencies) 
-    go get -u github.com/TIBCOSoftware/mashling/...
-
 ### Update Mashling
-    go get -u github.com/TIBCOSoftware/mashling/...
+    cd $GOPATH/src/github.com/TIBCOSoftware/mashling
+	git pull
+	dep ensure -vendor-only
+	make all
 
-Rub below commands to Build and Install:
-```bash
-cd $GOPATH/src/github.com/TIBCOSoftware/mashling
-make all
-```
 NOTE: Windows users has to install [gnuwin32](https://sourceforge.net/projects/gnuwin32/files/make/) in order to use make command.
 
 ## Getting Started

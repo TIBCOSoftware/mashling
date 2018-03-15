@@ -11,10 +11,16 @@
 * In order to simplify development and dependency management, we're using **go dep** tool. You can install it by following the instructions [here](https://github.com/golang/dep#setup). 
 
 ### Install Mashling
-    go get github.com/TIBCOSoftware/mashling/...
-
+	git clone https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
+	cd $GOPATH/src/github.com/TIBCOSoftware/mashling
+	dep ensure -vendor-only
+	make all
+    
 ### Update Mashling
-    go get -u github.com/TIBCOSoftware/mashling/...
+    cd $GOPATH/src/github.com/TIBCOSoftware/mashling
+	git pull
+	dep ensure -vendor-only
+	make all
 
 ## Getting Started
 A Mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base gateway.
