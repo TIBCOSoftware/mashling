@@ -49,5 +49,3 @@ Use below command to check gateway service with additional details:
 Expected Result: 
 
 	{"AppDescrption":"This is the first microgateway app","AppVersion":"1.0.0","FlogolibRev":"XXX......","MashlingCliLocalRev":"","MashlingCliVersion":"0.3.0","MashlingRev":"XXX......","SchemaVersion":"0.2","mashlingCliRevision":"XXX......","response":"success"}
-
-Along with supplied gateway.json triggers mashling cli will include ping functionality mechanism.
