@@ -21,6 +21,7 @@ bin/
 pkg/
 **/vendor/src/
 **/vendor/manifest
+vendor/
 
 ## Golang
 

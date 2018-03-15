@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/TIBCOSoftware/mashling.svg?branch=master)](https://travis-ci.org/TIBCOSoftware/mashling)
 
 Project Mashling<sup>TM</sup> is an open source event-driven microgateway.
-
+ 
 Project Mashling highlights include:
 * Ultra lightweight: 10-50x times less compute resource intensive
 * Event-driven by design
@@ -23,9 +23,9 @@ Additional developer tooling is included in below open source repo that contains
 ## Installation
 
 ### Prerequisites
-* The Go programming language 1.7 or later should be [installed](https://golang.org/doc/install).
+* The Go programming language 1.9 or later should be [installed](https://golang.org/doc/install).
 * Set GOPATH environment variable on your system
-* In order to simplify development and building in Go, we are using the **gb** build tool.  It can be downloaded from [here](https://getgb.io).
+* In order to simplify development and dependency management, we're using **go dep** tool. You can install it by following the instructions [here](https://github.com/golang/dep#setup). 
 
 ### Install Mashling
     go get github.com/TIBCOSoftware/mashling/...
