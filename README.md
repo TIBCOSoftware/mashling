@@ -39,7 +39,7 @@ Additional developer tooling is included in below open source repo that contains
 	dep ensure -vendor-only
 	make all
 
-NOTE: Windows users has to install [gnuwin32](https://sourceforge.net/projects/gnuwin32/files/make/) in order to use make command.
+NOTE: Windows users has to install [gnuwin32](https://sourceforge.net/projects/gnuwin32/files/make/) in order to use make command. Also make sure to execute above commands in git bash terminal.
 
 ## Getting Started
 A Mashling microgateway is created using the **Mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
