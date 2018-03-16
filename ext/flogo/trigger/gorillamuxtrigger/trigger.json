@@ -65,6 +65,34 @@
     {
       "name": "basicAuthFile",
       "type": "string"
+    },
+    {
+      "name": "ldapHost",
+      "type": "string"
+    },
+    {
+      "name": "ldapPort",
+      "type": "string"
+    },
+    {
+      "name": "ldapBase",
+      "type": "string"
+    },
+    {
+      "name": "ldapBindDN",
+      "type": "string"
+    },
+    {
+      "name": "ldapBindPassword",
+      "type": "string"
+    },
+    {
+      "name": "ldapUserFilter",
+      "type": "string"
+    },
+    {
+      "name": "ldapGroupFilter",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -82,7 +110,7 @@
     },
     {
       "name": "content",
-      "type": "object"
+      "type": "any"
     },
     {
       "name": "tracing",

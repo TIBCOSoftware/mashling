@@ -6,11 +6,13 @@
 package gorillamuxtrigger
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -404,13 +406,16 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		}
 
 		var content interface{}
-		err = json.NewDecoder(r.Body).Decode(&content)
-		if err != nil {
-			switch {
-			case err == io.EOF:
-			// empty body
-			//todo should handler say if content is expected?
-			case err != nil:
+		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
+			data, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				serverSpan.SetTag("error", err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			mime := r.Header.Get("Content-Type")
+			err = util.Unmarshal(mime, data, &content)
+			if err != nil {
 				serverSpan.SetTag("error", err.Error())
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
@@ -540,11 +545,28 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		}
 
 		if replyData != nil {
-			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-			w.WriteHeader(replyCode)
-			if err := json.NewEncoder(w).Encode(replyData); err != nil {
-				serverSpan.SetTag("error", err.Error())
-				log.Error(err)
+			if object, ok := replyData.(map[string]interface{}); ok {
+				if mime, ok := object[util.MetaMIME]; ok {
+					if s, ok := mime.(string); ok {
+						w.Header().Set("Content-Type", s)
+					}
+				} else {
+					w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+				}
+				w.WriteHeader(replyCode)
+
+				data, err := util.Marshal(replyData)
+				if err != nil {
+					serverSpan.SetTag("error", err.Error())
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				_, err = io.Copy(w, bytes.NewReader(data))
+				if err != nil {
+					serverSpan.SetTag("error", err.Error())
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
 			}
 			return
 		}

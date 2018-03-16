@@ -18,7 +18,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
-var jsonMetadata = getJSONMetadata()
+var testJsonMetadata = getJSONMetadata()
 
 func getJSONMetadata() string {
 	jsonMetadataBytes, err := ioutil.ReadFile("trigger.json")
@@ -121,7 +121,7 @@ func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map
 func TestHandlerOk(t *testing.T) {
 
 	// New  factory
-	md := trigger.NewMetadata(jsonMetadata)
+	md := trigger.NewMetadata(testJsonMetadata)
 	f := NewFactory(md)
 
 	config := trigger.Config{}
@@ -153,7 +153,7 @@ func TestHandlerOk(t *testing.T) {
 func BenchmarkHandlerOk(b *testing.B) {
 
 	// New  factory
-	md := trigger.NewMetadata(jsonMetadata)
+	md := trigger.NewMetadata(testJsonMetadata)
 	f := NewFactory(md)
 
 	config := trigger.Config{}

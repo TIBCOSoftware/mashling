@@ -18,6 +18,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/test"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 
 	opentracing "github.com/opentracing/opentracing-go"
 )
@@ -65,6 +66,7 @@ func TestMain(m *testing.M) {
 				panic(err)
 			}
 
+			w.Header().Set("Content-Type", "application/json")
 			_, err = w.Write(body)
 			if err != nil {
 				panic(err)
@@ -83,6 +85,7 @@ func TestMain(m *testing.M) {
 			if err != nil {
 				panic(err)
 			}
+			w.Header().Set("Content-Type", "application/json")
 			_, err = w.Write(data)
 			if err != nil {
 				panic(err)
@@ -100,6 +103,7 @@ func TestMain(m *testing.M) {
 			if err != nil {
 				panic(err)
 			}
+			w.Header().Set("Content-Type", "application/json")
 			_, err = w.Write(data)
 			if err != nil {
 				panic(err)
@@ -140,8 +144,12 @@ func TestSimplePost(t *testing.T) {
 	//setup attrs
 	tc.SetInput(ivMethod, "POST")
 	tc.SetInput(ivURI, "http://localhost:8080/v2/pet")
-	tc.SetInput(ivContent, reqPostStr)
-
+	var content interface{}
+	err := util.Unmarshal("application/json", []byte(reqPostStr), &content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tc.SetInput(ivContent, content)
 	span := opentracing.StartSpan("test")
 	ctx := opentracing.ContextWithSpan(context.Background(), span)
 	tc.SetInput(ivTracing, ctx)
