@@ -198,12 +198,6 @@
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
 
 [[projects]]
-  name = "github.com/jtblin/go-ldap-client"
-  packages = ["."]
-  revision = "ad9f2ea47a83452873c01f1dc6960aedb9ff7e0e"
-  version = "0.0.3"
-
-[[projects]]
   branch = "master"
   name = "github.com/jtblin/go-ldap-client"
   packages = ["."]
@@ -492,6 +486,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4088a57cc6b93d24811710c2438a159acda2581a4c39933b5ebad6b6d6293887"
+  inputs-digest = "8847fc368fe8ef05d8f807ceb794e1ea3cc577aa31fe31e9bea0f2d2d7c6ac0a"
   solver-name = "gps-cdcl"
   solver-version = 1
