@@ -205,6 +205,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/jtblin/go-ldap-client"
+  packages = ["."]
+  revision = "b73f66626b33ca4ac4fd6558efbb062c4fe4e52c"
+
+[[projects]]
+  branch = "master"
   name = "github.com/kr/logfmt"
   packages = ["."]
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
@@ -486,6 +492,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2f3597364f26740976a9d3138ba46643f65dff9c3c09a2f115511a5060819a17"
+  inputs-digest = "4088a57cc6b93d24811710c2438a159acda2581a4c39933b5ebad6b6d6293887"
   solver-name = "gps-cdcl"
   solver-version = 1
