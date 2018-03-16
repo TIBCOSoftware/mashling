@@ -260,6 +260,7 @@ const testCreateHandlersConfig string = `{
  }`
 
 func TestCreateHandlers(t *testing.T) {
+	jsonMetadata := getJsonMetadata()
 	// New  factory
 	md := trigger.NewMetadata(jsonMetadata)
 	f := NewFactory(md)
@@ -304,6 +305,7 @@ func TestConstructJSONStartRequest(t *testing.T) {
 	}
 	defer span.Finish()
 
+	jsonMetadata := getJsonMetadata()
 	// New  factory
 	md := trigger.NewMetadata(jsonMetadata)
 	f := NewFactory(md)
@@ -382,6 +384,7 @@ func TestConstructXMLStartRequest(t *testing.T) {
 	}
 	defer span.Finish()
 
+	jsonMetadata := getJsonMetadata()
 	// New  factory
 	md := trigger.NewMetadata(jsonMetadata)
 	f := NewFactory(md)
