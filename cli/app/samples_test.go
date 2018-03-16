@@ -7,12 +7,11 @@ package app
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
 	"github.com/stretchr/testify/assert"
@@ -22,11 +21,17 @@ func TestSampleGateways(t *testing.T) {
 	resetDir, err := os.Getwd()
 	defer os.Chdir(resetDir)
 	assert.NoError(t, err, "Unable to access the current directory %v", err)
-	now := time.Now()
-	testDir := os.Getenv("GOPATH") + "/sample_mashling_gateways_" + now.Format(time.RFC3339)
+
+	tmp, err := ioutil.TempDir("", "mashlingApps")
+	if err != nil {
+		t.Error("Temp Directory creation failed")
+	}
+	defer os.RemoveAll(tmp)
+
+	testDir := filepath.Join(tmp, "sample_mashling_gateways")
 
 	err = os.Mkdir(testDir, 0755)
-	assert.NoError(t, err, "Unable to create the tests directory under $GOPATH %v", err)
+	assert.NoError(t, err, "Unable to create the tests directory %v", err)
 
 	samplesDir, err := filepath.Abs("../samples")
 	assert.NoError(t, err, "Unable to access the samples directory %v", samplesDir)
@@ -58,12 +63,12 @@ func TestSampleGateways(t *testing.T) {
 		assert.NoError(t, err, "Error: Error getting working dir '%v'", err)
 
 		gatewayName := "Sample" + strconv.Itoa(index)
-		appDir := path.Join(currentDir, gatewayName)
+		appDir := filepath.Join(currentDir, gatewayName)
 
-		err = CreateMashling(SetupNewProjectEnv(), gatewayJson, nil, appDir, gatewayName, "", "9090", nil)
+		err = CreateMashling(gatewayJson, false, appDir, gatewayName, "9090")
 		assert.NoError(t, err, "Error: Error creating mashling app '%v' - %v", gatewayName, err)
 
-		sample := testDir + "/" + gatewayName
+		sample := filepath.Join(testDir, gatewayName)
 		if _, err := os.Stat(sample); os.IsNotExist(err) {
 			fmt.Sprintf("File [%v] generated Samples dir [%v]", file, sample)
 		}
