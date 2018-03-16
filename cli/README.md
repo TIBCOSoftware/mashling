@@ -8,19 +8,24 @@
 ### Prerequisites
 * The Go programming language 1.9 or later should be [installed](https://golang.org/doc/install).
 * Set GOPATH environment variable on your system
-* In order to simplify development and dependency management, we're using **go dep** tool. You can install it by following the instructions [here](https://github.com/golang/dep#setup). 
+* In order to simplify development and dependency management, we're using **go dep** tool. You can install it by following the instructions [here](https://github.com/golang/dep#setup).
+* Mashling uses make for building CLI. Make tool doesnt come by default with Windows, it can be installed from [here](https://sourceforge.net/projects/gnuwin32/files/make/).
 
 ### Install Mashling
 	git clone https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
 	cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 	dep ensure -vendor-only
 	make all
-    
+
+Note: Windows users can execute above commands as is using git-bash terminal.
+
 ### Update Mashling
     cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 	git pull
 	dep ensure -vendor-only
 	make all
+
+Note: Windows users can execute above commands as is using git-bash terminal.
 
 ## Getting Started
 A Mashling gateway is created using the **mashling** CLI tool.  The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base gateway.
