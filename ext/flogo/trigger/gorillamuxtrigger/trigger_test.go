@@ -111,7 +111,10 @@ func TestInitOk(t *testing.T) {
 
 //Run the specified Action
 func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
-	log.Debugf("Ran Action: %v", act.Config().Id)
+	return nil, nil
+}
+
+func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 	return nil, nil
 }
 

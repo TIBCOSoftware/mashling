@@ -129,10 +129,12 @@ func (tr *TestRunner) Run(context context.Context, action action.Action, uri str
 	log.Printf("Ran Action: %v", uri)
 	return 0, nil, nil
 }
+func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
+	return nil, nil
+}
 
 //Run the specified Action
 func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
-	log.Printf("Ran Action: %v", act.Config().Id)
 	return nil, nil
 }
 

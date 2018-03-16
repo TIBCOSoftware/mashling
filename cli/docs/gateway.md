@@ -35,13 +35,13 @@ Example using pingport flag:
 
 	mashling create -pingport 9095 my_gw_app
 
-Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
+Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled. For more information on ping fucntionality click [here](https://github.com/TIBCOSoftware/mashling/blob/master/docs/pingfunctionality.md) 
 
 **dependencies versioning**
 
-By default a new GB based dependency manifest is created in the vendor folder of the gateway project.
-If the manifest file exists in the current working directory, that is used to restore the vendor folder.
-The default mashling created by 'mashling create app' uses a default manifest built into the mashling binary.
+By default a new dep based dependency files(gopkg.toml and gopkg.lock) are created in the vendor folder of the gateway project.
+If gopkg.toml and gopkg.lock files exists in the current working directory, that is used to restore the vendor folder.
+The default mashling created by 'mashling create app' uses a default gopkg.toml and gopkg.lock files built into the mashling binary.
 
 ### build
 This command is used to build the created Mashling gateway.
@@ -62,7 +62,7 @@ Example using pingport flag:
 
 	mashling build -pingport 9095
 
-Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled.
+Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled. For more information on ping fucntionality click [here](https://github.com/TIBCOSoftware/mashling/blob/master/docs/pingfunctionality.md) 
 
 ### help
 This command is used to display help on a particular command
