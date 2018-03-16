@@ -44,8 +44,8 @@
     "action/flow/util",
     "trigger/rest/cors"
   ]
-  revision = "a401edba2327d3572d54146892a37faffb306b90"
-  version = "v0.5.2-rc1"
+  revision = "8dea1ab327b9680cbc493657273eca60a061fe5e"
+  version = "v0.5.2-rc3"
 
 [[projects]]
   branch = "master"
@@ -177,6 +177,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/gorilla/websocket"
+  packages = ["."]
+  revision = "eb925808374e5ca90c83401a40d711dc08c0c0f6"
+
+[[projects]]
+  branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -190,6 +196,12 @@
     "json/token"
   ]
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
+
+[[projects]]
+  name = "github.com/jtblin/go-ldap-client"
+  packages = ["."]
+  revision = "ad9f2ea47a83452873c01f1dc6960aedb9ff7e0e"
+  version = "0.0.3"
 
 [[projects]]
   branch = "master"
@@ -444,6 +456,18 @@
   version = "v1.10.0"
 
 [[projects]]
+  name = "gopkg.in/asn1-ber.v1"
+  packages = ["."]
+  revision = "379148ca0225df7a432012b8df0355c2a2063ac0"
+  version = "v1.2"
+
+[[projects]]
+  name = "gopkg.in/ldap.v2"
+  packages = ["."]
+  revision = "bb7a9ca6e4fbc2129e3db588a34bc970ffe811a9"
+  version = "v2.5.1"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
@@ -462,6 +486,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "789a2e0a97feaf78f5e00793638177f6c5b0f96afe127e30467e0ebb94150811"
+  inputs-digest = "2f3597364f26740976a9d3138ba46643f65dff9c3c09a2f115511a5060819a17"
   solver-name = "gps-cdcl"
   solver-version = 1
