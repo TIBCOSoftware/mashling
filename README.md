@@ -29,7 +29,7 @@ Additional developer tooling is included in below open source repo that contains
 * Mashling uses make for building CLI. Make tool doesnt come by default with Windows, it can be installed from [here](https://sourceforge.net/projects/gnuwin32/files/make/).
 
 ### Install Mashling
-	git clone https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
+	git clone -b master --single-branch https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
 	cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 	dep ensure -vendor-only
 	make all
