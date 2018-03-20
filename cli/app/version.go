@@ -22,7 +22,7 @@ var optVersion = &cli.OptionInfo{
 }
 
 //Version is Mashling Version
-var Version = "0.3.0"
+var Version = "0.3.2"
 
 //MashlingMasterGitRev is mashling git tag
 var MashlingMasterGitRev = "not set"
@@ -31,7 +31,7 @@ var MashlingMasterGitRev = "not set"
 var MashlingLocalGitRev = "not set"
 
 //FlogoGitRev is flogo-lib git tag
-var FlogoGitRev = "not set"
+var FlogoGitRev = "f3988b95d914f98704fbeb9bb1c845ea21153b56"
 
 //SchemaVersion is mashling schema version
 var supportedSchemaVersions = GetAllSupportedSchemas()
