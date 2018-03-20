@@ -89,10 +89,14 @@
   branch = "master"
   name = "sourcegraph.com/sourcegraph/appdash"
 
-[prune]
-  go-tests = true
-  unused-packages = true
+[[constraint]]
+  branch = "master"
+  name = "github.com/gorilla/websocket"
 
 [[constraint]]
   branch = "master"
   name = "github.com/jtblin/go-ldap-client"
+
+[prune]
+  go-tests = true
+  unused-packages = true
