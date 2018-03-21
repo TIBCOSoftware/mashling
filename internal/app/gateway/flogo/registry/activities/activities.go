@@ -2,6 +2,7 @@
 // sources:
 // ext/flogo/activity/tracer/activity.json
 // ext/flogo/activity/ping/activity.json
+// ext/flogo/activity/eftl/activity.json
 // ext/flogo/activity/mqtt/activity.json
 // ext/flogo/activity/rest/activity.json
 // internal/pkg/model/v2/activity/core/activity.json
@@ -124,6 +125,26 @@ func extFlogoActivityPingActivityJson() (*asset, error) {
 	return a, nil
 }
 
+var _extFlogoActivityEftlActivityJson = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\x92\xcf\x6a\xf3\x30\x10\xc4\xef\x7e\x8a\xc5\xe7\x10\xe5\xbb\x9a\x8f\xd2\x3f\xb4\x50\x28\xf4\x90\xdc\x4a\x0f\x8a\xbc\xb6\x05\xb6\xa4\xee\xae\x92\x86\x90\x77\x2f\x96\x13\xd2\x42\xea\x34\x90\x8b\xb1\x47\xa3\xdf\x8e\xe4\xd9\x66\x00\xb9\xd3\x1d\xe6\x05\xe4\x58\x49\x9b\x4f\x7a\x65\x85\xc4\xd6\xbb\x5e\x9c\x4d\x67\xd3\x7f\x83\x2a\x9b\x90\x7c\x55\xeb\x6b\x5f\x68\x23\x76\x65\x65\x33\xac\x11\x56\xfd\x52\x6d\xa5\x89\xcb\xa9\xf1\x9d\x5a\x3c\xdf\x3f\xbc\xce\x7d\x25\x6b\x4d\xa8\x3a\xcd\x4d\x6b\x5d\xad\xf0\x53\x54\x02\xa8\x03\x40\x1d\xe7\x8a\x95\x36\x8d\xb8\x83\xc7\xa7\xc5\x0b\x74\xc8\xac\x6b\x84\x40\xbe\x8c\x06\x69\x70\x95\xc8\x86\x6c\x90\x7d\xc2\x51\xaf\x8e\xd2\x78\x4a\x36\x57\x12\xae\x61\xee\x7c\x59\x93\x66\x86\xff\x9a\x87\xf7\x5b\xb1\x4b\xe3\xfb\xd0\x37\xc3\xa6\xc6\x77\x18\x74\x9d\x92\x34\x22\x81\x0b\xa5\xce\x9f\x4c\x08\xd3\x97\x20\x8d\x9f\xd2\xba\x10\x85\xf3\xe2\x2d\x03\x00\xd8\xa6\xe7\xb7\xdf\x60\xbc\x13\x74\x92\xbc\x69\xe1\x70\xef\xda\x6d\x8e\x22\xe1\x47\xb4\x84\x65\x5e\x40\xa5\x5b\xc6\xa4\xef\x26\xa7\x91\x25\xf2\x09\x1e\x0b\x59\x57\x9f\x44\x0a\xc5\x71\x62\xa4\xf6\xba\x40\x5b\x5e\x39\x20\xef\x2b\xf0\x57\xe2\xf9\x5b\x0c\x9a\x79\xed\xe9\xb2\xa0\xe7\xb1\x46\x5f\x19\x28\xa4\xcd\x8f\xdd\x17\x14\x28\x03\x78\x4f\x25\xf5\x51\x86\x96\xc2\x2f\x35\x1d\x9d\x72\x84\x65\xbb\xec\x2b\x00\x00\xff\xff\xfd\x32\x3f\x30\x65\x04\x00\x00")
+
+func extFlogoActivityEftlActivityJsonBytes() ([]byte, error) {
+	return bindataRead(
+		_extFlogoActivityEftlActivityJson,
+		"ext/flogo/activity/eftl/activity.json",
+	)
+}
+
+func extFlogoActivityEftlActivityJson() (*asset, error) {
+	bytes, err := extFlogoActivityEftlActivityJsonBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "ext/flogo/activity/eftl/activity.json", size: 1125, mode: os.FileMode(420), modTime: time.Unix(1521666940, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _extFlogoActivityMqttActivityJson = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\x92\x4f\x8b\xdb\x30\x10\xc5\xef\xfe\x14\x83\xcf\x4b\xb4\xbd\x9a\x52\xfa\xe7\xd4\x43\x29\x65\x73\x2b\x3d\xc8\xf2\xd8\x16\xb5\x35\xca\xcc\x68\xd3\xb0\xec\x77\x2f\x96\x13\x92\x92\xd4\x4b\xc0\x17\x63\xbf\x79\xfe\xcd\xd3\x68\x5e\x0a\x80\x32\xd8\x11\xcb\x0a\xca\x71\xa7\x5a\x3e\x4c\xca\x33\xb2\x78\x0a\x93\xf8\xb8\x79\xdc\xbc\x9b\x55\x3d\xc4\xec\x6b\x07\xea\xa8\xb2\x4e\xfd\xb3\xd7\xc3\x5c\x63\x6c\xa7\x52\xe7\xb5\x4f\xf5\xc6\xd1\x68\xb6\x5f\x3f\x7f\xf9\xfe\x44\xad\xee\x2d\xa3\x19\xad\xf4\x83\x0f\x9d\xc1\x3f\x6a\x32\xc0\x9c\x00\xe6\xdc\x57\xbd\x0e\xb9\xc5\x27\xf8\xf6\x63\xbb\x85\x11\x45\x6c\x87\x10\x99\x9a\xe4\x90\x67\x57\x83\xe2\xd8\x47\x3d\x26\x5c\xf4\xda\xa4\x3d\x71\xb6\x85\x86\x71\x0f\x4f\x81\x9a\x8e\xad\x08\xbc\xb7\x32\xbf\x7f\x54\x5f\x3b\x9a\x42\x7f\x98\x7f\xea\x69\xc4\x68\xbb\x9c\xa4\x57\x8d\x52\x19\xf3\xf6\xc9\x94\x31\x7f\x29\xf2\xf2\x29\x7d\x88\x49\xa5\xac\x7e\x16\x00\x00\x2f\xf9\x79\x71\x0d\x8e\x82\x62\x98\xbd\xb9\x70\x9a\xbb\x0d\x87\xb3\xc8\xb8\x4b\x9e\xb1\x29\x2b\x68\xed\x20\x98\xf5\xd7\x87\xdb\x48\xa5\xe8\xdd\x35\x50\x94\x7d\xe8\x6e\x32\x95\xd3\x32\xb2\x66\xfa\x7d\x1c\xf2\x6a\x4c\xdf\xac\xcb\x4b\xb2\x76\xc2\x68\x45\xf6\xc4\x2b\xe7\xdc\x91\x5c\x03\x43\x1a\xeb\xcb\xf8\xf7\x00\x95\xad\xfb\x27\xcd\x1d\x2b\x54\x00\xfc\xca\x6b\x4a\x49\xe7\x3d\x85\xff\x2c\xea\x62\x97\x33\xac\x78\x2d\xfe\x06\x00\x00\xff\xff\xda\xd9\x2e\xfa\x67\x04\x00\x00")
 
 func extFlogoActivityMqttActivityJsonBytes() ([]byte, error) {
@@ -179,7 +200,7 @@ func internalPkgModelV2ActivityCoreActivityJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "internal/pkg/model/v2/activity/core/activity.json", size: 831, mode: os.FileMode(420), modTime: time.Unix(1521659793, 0)}
+	info := bindataFileInfo{name: "internal/pkg/model/v2/activity/core/activity.json", size: 831, mode: os.FileMode(420), modTime: time.Unix(1521666937, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -199,7 +220,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityKafkapubActivityJson() (*as
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub/activity.json", size: 962, mode: os.FileMode(420), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub/activity.json", size: 962, mode: os.FileMode(420), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -219,7 +240,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityAppActivityJson() (*asset, 
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/app/activity.json", size: 825, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/app/activity.json", size: 825, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -239,7 +260,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityWsmessageActivityJson() (*a
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage/activity.json", size: 958, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage/activity.json", size: 958, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -259,7 +280,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityAwsiotActivityJson() (*asse
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awsiot/activity.json", size: 628, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awsiot/activity.json", size: 628, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -279,7 +300,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityReplyActivityJson() (*asset
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/reply/activity.json", size: 498, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/reply/activity.json", size: 498, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -299,7 +320,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityLambdaActivityJson() (*asse
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/lambda/activity.json", size: 979, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/lambda/activity.json", size: 979, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -319,7 +340,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityLogActivityJson() (*asset, 
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/log/activity.json", size: 647, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/log/activity.json", size: 647, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -339,7 +360,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityCounterActivityJson() (*ass
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/counter/activity.json", size: 632, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/counter/activity.json", size: 632, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -359,7 +380,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityErrorActivityJson() (*asset
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/error/activity.json", size: 459, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/error/activity.json", size: 459, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -379,7 +400,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityCoapActivityJson() (*asset,
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json", size: 930, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json", size: 930, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -399,7 +420,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityRestActivityJson() (*asset,
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/rest/activity.json", size: 958, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/rest/activity.json", size: 958, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -419,7 +440,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityTwilioActivityJson() (*asse
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/twilio/activity.json", size: 650, mode: os.FileMode(493), modTime: time.Unix(1521664260, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/twilio/activity.json", size: 650, mode: os.FileMode(493), modTime: time.Unix(1521667072, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -478,6 +499,7 @@ func AssetNames() []string {
 var _bindata = map[string]func() (*asset, error){
 	"ext/flogo/activity/tracer/activity.json":                                        extFlogoActivityTracerActivityJson,
 	"ext/flogo/activity/ping/activity.json":                                          extFlogoActivityPingActivityJson,
+	"ext/flogo/activity/eftl/activity.json":                                          extFlogoActivityEftlActivityJson,
 	"ext/flogo/activity/mqtt/activity.json":                                          extFlogoActivityMqttActivityJson,
 	"ext/flogo/activity/rest/activity.json":                                          extFlogoActivityRestActivityJson,
 	"internal/pkg/model/v2/activity/core/activity.json":                              internalPkgModelV2ActivityCoreActivityJson,
@@ -539,6 +561,9 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"ext": &bintree{nil, map[string]*bintree{
 		"flogo": &bintree{nil, map[string]*bintree{
 			"activity": &bintree{nil, map[string]*bintree{
+				"eftl": &bintree{nil, map[string]*bintree{
+					"activity.json": &bintree{extFlogoActivityEftlActivityJson, map[string]*bintree{}},
+				}},
 				"mqtt": &bintree{nil, map[string]*bintree{
 					"activity.json": &bintree{extFlogoActivityMqttActivityJson, map[string]*bintree{}},
 				}},

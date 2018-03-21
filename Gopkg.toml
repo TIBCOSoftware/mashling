@@ -87,6 +87,10 @@
 
 [[constraint]]
   branch = "master"
+  name = "github.com/gorilla/websocket"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/jtblin/go-ldap-client"
 
 [[constraint]]
