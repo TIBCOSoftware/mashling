@@ -1,0 +1,7 @@
+{
+  "name": "tibco-simple",
+  "type": "flogo:flow-model",
+  "version": "0.0.1",
+  "Title": "Simple Flow Model",
+  "description": "Simple Flow Model"
+}

@@ -1,0 +1,47 @@
+{
+  "name": "sendWSMessage",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage",
+  "version": "0.0.1",
+  "title": "Send WebSocket Message",
+  "description": "This activity sends a message to a WebSocket enabled server like TIBCO eFTL",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/wsmessage",
+  "inputs":[
+    {
+      "name": "Server",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "name": "Channel",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "name": "Destination",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "name": "Message",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "name": "Username",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "name": "Password",
+      "type": "string",
+      "value": ""
+    }
+  ],
+  "outputs": [
+    {
+      "name": "output",
+      "type": "string"
+    }
+  ]
+}

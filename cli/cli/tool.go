@@ -2,7 +2,7 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 // Command, OptionInfo, help and command execution pattern derived from
 // github.com/constabulary/gb, released under MIT license
 // https://github.com/constabulary/gb/blob/master/LICENSE

@@ -343,7 +343,7 @@ func PublishToMashery(user *ApiUser, appDir string, gatewayJSON string, host str
 		}
 
 		//fmt.Printf("%s", prettyJSON.Bytes())
-		fmt.Println("\nMocked! Did not attempt to publish.\n")
+		fmt.Println("Mocked! Did not attempt to publish.")
 	}
 
 	return nil
@@ -468,7 +468,6 @@ func CreateOrUpdateApi(user *ApiUser, token string, cleanedTfApiSwaggerDoc []byt
 		s, err := user.Create(masheryObject, masheryObjectProperties, string(cleanedTfApiSwaggerDoc), token)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Unable to create the api %s\n\n", s)
-			fmt.Errorf("%v", err)
 			panic(err)
 		}
 		apiId, apiName, endpoints = GetApiDetails(s)
@@ -486,7 +485,6 @@ func CreateOrUpdateApi(user *ApiUser, token string, cleanedTfApiSwaggerDoc []byt
 		s, err := user.Update(masheryObject+"/"+serviceId, masheryObjectProperties, string(mergedDoc), token)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Unable to update the api %s\n\n", s)
-			fmt.Errorf("%v", err)
 			panic(err)
 		}
 		apiId, apiName, endpoints = GetApiDetails(s)
@@ -582,13 +580,11 @@ func CreateOrUpdateIodocs(user *ApiUser, token string, cleanedTfIodocSwaggerDoc 
 		s, err := user.Create(masheryObject, masheryObjectProperties, string(cleanedTfIodocSwaggerDoc), token)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Unable to create the iodocs %s\n\n", s)
-			fmt.Errorf("%v", err)
 		}
 	} else {
 		s, err := user.Update(masheryObject+"/"+apiId, masheryObjectProperties, string(cleanedTfIodocSwaggerDoc), token)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Unable to create the iodocs %s\n\n", s)
-			fmt.Errorf("%v", err)
 		}
 	}
 }
@@ -613,7 +609,6 @@ func CreateOrUpdatePackage(user *ApiUser, token string, packagePlanDoc []byte, a
 		p, err = user.Create(masheryObject, masheryObjectProperties, string(packagePlanDoc), token)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Unable to create the package %s\n\n", p)
-			fmt.Errorf("%v", err)
 			panic(err)
 		}
 	} else {
@@ -631,7 +626,6 @@ func CreateOrUpdatePackage(user *ApiUser, token string, packagePlanDoc []byte, a
 		p, err = user.Update(masheryObject+"/"+packageId, masheryObjectProperties, string(mergedDoc), token)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Unable to update the package %s\n\n", p)
-			fmt.Errorf("%v", err)
 			panic(err)
 		}
 	}

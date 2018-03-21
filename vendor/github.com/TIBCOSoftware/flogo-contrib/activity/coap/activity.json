@@ -1,0 +1,49 @@
+{
+  "name": "tibco-coap",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/coap",
+  "version": "0.0.1",
+  "title": "Send CoAP Message",
+  "description": "Simple CoAP Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/coap",
+  "inputs":[
+    {
+      "name": "uri",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "method",
+      "type": "string",
+      "required": true,
+      "allowed" : ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "type",
+      "type": "string"
+    },
+    {
+      "name": "messageId",
+      "type": "integer"
+    },
+    {
+      "name": "options",
+      "type": "params"
+    },
+    {
+      "name": "payload",
+      "type": "string"
+    }
+
+  ],
+  "outputs": [
+    {
+      "name": "response",
+      "type": "string"
+    }
+  ]
+}

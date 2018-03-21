@@ -70,7 +70,7 @@ func TestSampleGateways(t *testing.T) {
 
 		sample := filepath.Join(testDir, gatewayName)
 		if _, err := os.Stat(sample); os.IsNotExist(err) {
-			fmt.Sprintf("File [%v] generated Samples dir [%v]", file, sample)
+			fmt.Printf("File [%v] generated Samples dir [%v]", file, sample)
 		}
 		assert.NoError(t, err, "Error: Error getting the sample app dir '%v' %v", sample, err)
 

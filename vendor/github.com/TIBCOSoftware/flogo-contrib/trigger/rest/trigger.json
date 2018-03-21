@@ -1,0 +1,67 @@
+{
+  "name": "tibco-rest",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+  "version": "0.0.1",
+  "title": "Receive HTTP Message",
+  "description": "Simple REST Trigger",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/rest",
+  "settings": [
+    {
+      "name": "port",
+      "type": "integer",
+      "required": true
+    }
+  ],
+  "output": [
+    {
+      "name": "params",
+      "type": "params"
+    },
+    {
+      "name": "pathParams",
+      "type": "params"
+    },
+    {
+      "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "content",
+      "type": "object"
+    }
+  ],
+  "reply": [
+    {
+      "name": "code",
+      "type": "integer"
+    },
+    {
+      "name": "data",
+      "type": "object"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "method",
+        "type": "string",
+        "required" : true,
+        "allowed" : ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      },
+      {
+        "name": "path",
+        "type": "string",
+        "required" : true
+      },
+      {
+        "name": "autoIdReply",
+        "type": "boolean"
+      },
+      {
+        "name": "useReplyHandler",
+        "type": "boolean"
+      }
+    ]
+  }
+}

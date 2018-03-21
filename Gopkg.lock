@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/NodePrime/jsonpath"
-  packages = ["."]
-  revision = "ca9b3047327088b5f077121538284ac9bbf0e868"
-  version = "v0.3.1"
-
-[[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
   revision = "f7be6aa2bc7b2e38edf816b08b582782194a1c02"
@@ -35,54 +29,100 @@
 [[projects]]
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
+    "action/flow",
     "action/flow/definition",
-    "action/flow/linker",
+    "action/flow/extension",
+    "action/flow/instance",
     "action/flow/model",
-    "action/flow/model/simple",
+    "action/flow/provider",
+    "action/flow/script/fggos",
+    "action/flow/service",
     "action/flow/support",
     "action/flow/test",
-    "action/flow/util",
+    "action/flow/tester",
+    "activity/app",
+    "activity/awsiot",
+    "activity/coap",
+    "activity/counter",
+    "activity/error",
+    "activity/kafkapub",
+    "activity/lambda",
+    "activity/log",
+    "activity/reply",
+    "activity/rest",
+    "activity/twilio",
+    "activity/wsmessage",
+    "model/simple",
+    "trigger/cli",
+    "trigger/coap",
+    "trigger/kafkasub",
+    "trigger/lambda",
+    "trigger/mqtt",
+    "trigger/rest",
     "trigger/rest/cors"
   ]
-  revision = "8dea1ab327b9680cbc493657273eca60a061fe5e"
-  version = "v0.5.2-rc3"
+  revision = "757754f73368d90d8dcc4f7d1073d3200d037786"
+  version = "v0.5.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
-    "app/resource",
     "config",
     "core/action",
     "core/activity",
     "core/data",
     "core/mapper",
-    "core/mapper/exprmapper",
-    "core/mapper/exprmapper/expression",
-    "core/mapper/exprmapper/expression/direction",
-    "core/mapper/exprmapper/expression/expr",
-    "core/mapper/exprmapper/expression/function",
-    "core/mapper/exprmapper/expression/gocc/errors",
-    "core/mapper/exprmapper/expression/gocc/lexer",
-    "core/mapper/exprmapper/expression/gocc/parser",
-    "core/mapper/exprmapper/expression/gocc/token",
-    "core/mapper/exprmapper/funcexprtype",
-    "core/mapper/exprmapper/json",
-    "core/mapper/exprmapper/json/field",
-    "core/mapper/exprmapper/ref",
     "core/trigger",
+    "engine",
+    "engine/runner",
     "logger",
-    "util",
-    "util/managed"
+    "util"
   ]
-  revision = "f3988b95d914f98704fbeb9bb1c845ea21153b56"
+  revision = "2b805c0105ea1c260484a671b0afcafe3c7b83a5"
+  version = "v0.5.1"
 
 [[projects]]
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   revision = "327ebb6c2b6df8bf075da02ef45a2a034e9b79ba"
   version = "0.11.0"
+
+[[projects]]
+  name = "github.com/aws/aws-sdk-go"
+  packages = [
+    "aws",
+    "aws/awserr",
+    "aws/awsutil",
+    "aws/client",
+    "aws/client/metadata",
+    "aws/corehandlers",
+    "aws/credentials",
+    "aws/credentials/ec2rolecreds",
+    "aws/credentials/endpointcreds",
+    "aws/credentials/stscreds",
+    "aws/defaults",
+    "aws/ec2metadata",
+    "aws/endpoints",
+    "aws/request",
+    "aws/session",
+    "aws/signer/v4",
+    "internal/sdkio",
+    "internal/sdkrand",
+    "internal/shareddefaults",
+    "private/protocol",
+    "private/protocol/json/jsonutil",
+    "private/protocol/jsonrpc",
+    "private/protocol/query",
+    "private/protocol/query/queryutil",
+    "private/protocol/rest",
+    "private/protocol/restjson",
+    "private/protocol/xml/xmlutil",
+    "service/lambda",
+    "service/sts"
+  ]
+  revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
+  version = "v1.13.17"
 
 [[projects]]
   name = "github.com/callum-ramage/jsonconfig"
@@ -95,6 +135,33 @@
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/dlclark/regexp2"
+  packages = [
+    ".",
+    "syntax"
+  ]
+  revision = "487489b64fb796de2e55f4e8a4ad1e145f80e957"
+  version = "v1.1.6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dop251/goja"
+  packages = [
+    ".",
+    "ast",
+    "file",
+    "parser",
+    "token"
+  ]
+  revision = "9183045acc25574e0dd2ad37d5e7f978b1a4de12"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dustin/go-coap"
+  packages = ["."]
+  revision = "ddcc80675fa42611359d91a6dfa5aa57fb90e72b"
 
 [[projects]]
   name = "github.com/eapache/go-resiliency"
@@ -120,8 +187,8 @@
     ".",
     "packets"
   ]
-  revision = "aff15770515e3c57fc6109da73d42b0d46f7f483"
-  version = "v1.1.0"
+  revision = "36d01c2b4cbeb3d2a12063e4880ce30800af9560"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -130,10 +197,25 @@
   version = "v1.4.7"
 
 [[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "6333e38ac20b8949a8dd68baa3650f4dee8f39f0"
+  version = "v1.33.0"
+
+[[projects]]
   name = "github.com/go-logfmt/logfmt"
   packages = ["."]
   revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
   version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/go-sourcemap/sourcemap"
+  packages = [
+    ".",
+    "internal/base64vlq"
+  ]
+  revision = "b019cc30c1eaa584753491b0d8f8c1534bf1eb44"
+  version = "v2.1.2"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -177,6 +259,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/gorilla/websocket"
+  packages = ["."]
+  revision = "eb925808374e5ca90c83401a40d711dc08c0c0f6"
+
+[[projects]]
+  branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -193,9 +281,43 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/japm/goScript"
+  packages = ["."]
+  revision = "caab90145b05376536bbab332312f4812123e197"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/jeffreybozek/jsonpath"
+  packages = ["."]
+  revision = "b631f61225a86d0536ff26d530bd811ba83d56b6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/jeffreybozek/jsonschema"
+  packages = ["."]
+  revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
+
+[[projects]]
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  revision = "0b12d6b5"
+
+[[projects]]
+  branch = "master"
   name = "github.com/jtblin/go-ldap-client"
   packages = ["."]
   revision = "b73f66626b33ca4ac4fd6558efbb062c4fe4e52c"
+
+[[projects]]
+  name = "github.com/jteeuwen/go-bindata"
+  packages = ["."]
+  revision = "a0ff2567cfb70903282db057e799fd826784d41d"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/julienschmidt/httprouter"
+  packages = ["."]
+  revision = "d1898390779332322e6b5ca5011da4bf249bb056"
 
 [[projects]]
   branch = "master"
@@ -302,6 +424,12 @@
   revision = "8732c616f52954686704c8645fe1a9d59e9df7c1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/sfreiberg/gotwilio"
+  packages = ["."]
+  revision = "a0d4e5000ed679a67a69d2f92b62d06320bc5d09"
+
+[[projects]]
   name = "github.com/spf13/afero"
   packages = [
     ".",
@@ -392,8 +520,10 @@
 [[projects]]
   name = "golang.org/x/text"
   packages = [
+    "cases",
     "collate",
     "collate/build",
+    "internal",
     "internal/colltab",
     "internal/gen",
     "internal/tag",
@@ -480,6 +610,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4088a57cc6b93d24811710c2438a159acda2581a4c39933b5ebad6b6d6293887"
+  inputs-digest = "67dfa37af3a911bd55d0e10871f541fc524e765664854c45b4c9981146dd9d26"
   solver-name = "gps-cdcl"
   solver-version = 1

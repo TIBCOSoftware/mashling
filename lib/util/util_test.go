@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NodePrime/jsonpath"
+	"github.com/jeffreybozek/jsonpath"
 )
 
 const XML = `<?xml version="1.0"?>

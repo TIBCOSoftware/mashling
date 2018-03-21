@@ -1,0 +1,8 @@
+#!/bin/sh
+# Store as .git/hooks/pre-commit inside your repository to run before commits.
+# Make sure scripts in this directory have executable permissions.
+# Copy all scripts listed below into your .git/hooks directory via:
+# cp scripts/hooks/* .git/hooks
+
+$GIT_DIR/hooks/go-vet "$@"
+$GIT_DIR/hooks/go-fmt "$@"

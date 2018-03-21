@@ -203,9 +203,9 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"assets/banner.txt": assetsBannerTxt,
-	"assets/defGopkg.lock": assetsDefgopkgLock,
-	"assets/defGopkg.toml": assetsDefgopkgToml,
+	"assets/banner.txt":               assetsBannerTxt,
+	"assets/defGopkg.lock":            assetsDefgopkgLock,
+	"assets/defGopkg.toml":            assetsDefgopkgToml,
 	"schema/mashling_schema-0.2.json": schemaMashling_schema02Json,
 }
 
@@ -248,9 +248,10 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"assets": &bintree{nil, map[string]*bintree{
-		"banner.txt": &bintree{assetsBannerTxt, map[string]*bintree{}},
+		"banner.txt":    &bintree{assetsBannerTxt, map[string]*bintree{}},
 		"defGopkg.lock": &bintree{assetsDefgopkgLock, map[string]*bintree{}},
 		"defGopkg.toml": &bintree{assetsDefgopkgToml, map[string]*bintree{}},
 	}},
@@ -305,4 +306,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

@@ -93,7 +93,7 @@ const testConfigMulti string = `{
         "Topic": "topic1",
 				"group":"wcn"
       }
-    },    
+    },
 		{
       "actionId": "kafka_message_topic3",
       "settings": {
@@ -101,7 +101,7 @@ const testConfigMulti string = `{
 				"user":"wcn00",
 				"password":"sauron"
       }
-    },    
+    },
 		{
       "actionId": "kafka_message_topic3",
       "settings": {
@@ -154,7 +154,7 @@ func runTest(config *trigger.Config, expectSucceed bool, testName string, config
 	defer func() error {
 		if r := recover(); r != nil {
 			if expectSucceed {
-				log.Println("Test %s was expected to succeed but did not because: ", testName, r)
+				log.Printf("Test %s was expected to succeed but did not because: %s\n", testName, r)
 				return fmt.Errorf("%s", r)
 			}
 		}

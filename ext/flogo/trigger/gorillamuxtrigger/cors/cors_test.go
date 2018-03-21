@@ -2,18 +2,18 @@
 * Copyright © 2017. TIBCO Software Inc.
 * This file is subject to the license terms contained
 * in the license file that is distributed with this file.
-*/
+ */
 // Copyright (c) 2015 TIBCO Software Inc.
 // All Rights Reserved.
 package cors
 
 import (
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 const (
