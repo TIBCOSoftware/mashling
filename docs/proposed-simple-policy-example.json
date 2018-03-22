@@ -1,0 +1,92 @@
+{
+  "mashling_schema": "1.0",
+  "gateway": {
+    "name": "MyProxy",
+    "version": "1.0.0",
+    "description": "This is a simple proxy.",
+    "triggers": [
+      {
+        "name": "MyProxy",
+        "description": "Animals rest trigger - PUT animal details",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "port": "9096"
+        },
+        "handlers": [
+          {
+            "dispatch": "Pets"
+          }
+        ]
+      }
+    ],
+    "dispatches": [
+      {
+        "name": "Pets",
+        "routes": [
+          {
+            "policies": [
+              {
+                "policy": "GlobalRateLimiter",
+                "input": {
+                  "key": "${payload.ipAddress}"
+                }
+              },
+              {
+                "policy": "APIKeyAuth",
+                "input": {
+                  "key": "${payload.headers.APIKey}"
+                }
+              }
+            ],
+            "steps": [
+              {
+                "service": "MySpecialBackend",
+                "input": {
+                  "pathParams.id": "${payload.pathParams.petId}"
+                }
+              }
+            ],
+            "responses": [
+              {
+                "output": {
+                  "code": "${MySpecialBackend.response.code}",
+                  "format": "json",
+                  "body.pet": "${MySpecialBackend.response.body}",
+                  "body.inventory": "${MySpecialBackend.response.body}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "name": "MySpecialBackend",
+        "description": "Make calls to do stuff",
+        "type": "http",
+        "settings": {
+          "url": "http://petstore.swagger.io/v2/pet/:id"
+        }
+      }
+    ],
+    "policies": [
+      {
+        "name": "GlobalRateLimiter",
+        "description": "Rate limit all requests",
+        "type": "rateLimiter",
+        "settings": {
+          "perSecond": 100
+        }
+      },
+      {
+        "name": "APIKeyAuth",
+        "description": "Test API key.",
+        "type": "apiKeyAuth",
+        "settings": {
+          "url": "https://www.somewherespecial.com"
+        }
+      }
+    ]
+  }
+}
