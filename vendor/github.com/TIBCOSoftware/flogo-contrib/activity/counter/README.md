@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
-  "inputs":[
+  "input":[
     {
       "name": "counterName",
       "type": "string",
@@ -28,7 +28,7 @@ Inputs and Outputs:
       "type": "boolean"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "value",
       "type": "integer"

@@ -22,7 +22,7 @@ func NewContext(parentCtx context.Context, attrs []*data.Attribute) context.Cont
 }
 
 func NewInitialContext(attrs []*data.Attribute, config *HandlerConfig) context.Context {
-	return context.WithValue(context.Background(), ctxDataKey,  &ContextData{Attrs: attrs, HandlerCfg: config})
+	return context.WithValue(context.Background(), ctxDataKey, &ContextData{Attrs: attrs, HandlerCfg: config})
 }
 
 // NewContext returns a new Context that carries the trigger data.

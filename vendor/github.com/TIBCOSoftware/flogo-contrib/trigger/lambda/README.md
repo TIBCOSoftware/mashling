@@ -14,7 +14,7 @@ Settings, Outputs:
 {
   "settings": [
   ],
-  "outputs": [
+  "output": [
     {
       "name": "context",
       "type": "object"

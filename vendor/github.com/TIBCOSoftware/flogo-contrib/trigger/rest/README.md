@@ -18,13 +18,17 @@ Settings, Outputs and Endpoint:
       "type": "integer"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "pathParams",
       "type": "params"
     },
     {
       "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "header",
       "type": "params"
     },
     {
@@ -71,7 +75,7 @@ Configure the Trigger to handle a POST on /device
 {
   "triggers": [
     {
-      "name": "tibco-rest",
+      "name": "flogo-rest",
       "settings": {
         "port": "8080"
       },
@@ -97,7 +101,7 @@ Configure the Trigger to handle a GET on /device/:id
 {
   "triggers": [
     {
-      "name": "tibco-rest",
+      "name": "flogo-rest",
       "settings": {
         "port": "8080"
       },

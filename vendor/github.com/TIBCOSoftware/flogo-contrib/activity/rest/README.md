@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
-  "inputs":[
+  "input":[
     {
       "name": "method",
       "type": "string",
@@ -37,11 +37,15 @@ Inputs and Outputs:
       "type": "params"
     },
     {
+      "name": "header",
+      "type": "params"
+    },
+    {
       "name": "content",
       "type": "object"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "result",
       "type": "object"
@@ -56,6 +60,7 @@ Inputs and Outputs:
 | uri         | The uri of the resource   |
 | pathParams  | The path parameters |
 | queryParams | The query parameters |
+| header      | The header parameters |
 | content     | The message content |
 | params      | The path parameters (Deprecated) |
 Note: 

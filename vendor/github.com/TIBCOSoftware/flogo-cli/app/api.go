@@ -111,7 +111,11 @@ func doCreate(enviro env.Project, appJson, rootDir, appName, vendorDir, constrai
 	}
 
 	// Create initial files
-	deps := config.ExtractAllDependencies(appJson)
+	deps, err := config.ExtractAllDependencies(appJson)
+	if err != nil {
+		return err
+	}
+
 	createMainGoFile(appDir, "")
 	createImportsGoFile(appDir, deps)
 
@@ -208,8 +212,8 @@ func doPrepare(env env.Project, options *PrepareOptions) (err error) {
 
 		for _, value := range descriptor.Triggers {
 
-			fmt.Println("Id:", value.ID)
-			if value.ID == options.Shim {
+			fmt.Println("Id:", value.Id)
+			if value.Id == options.Shim {
 				triggerPath := filepath.Join(env.GetVendorSrcDir(), value.Ref, "trigger.json")
 
 				mdJson, err := fgutil.LoadLocalFile(triggerPath)
@@ -229,6 +233,16 @@ func doPrepare(env env.Project, options *PrepareOptions) (err error) {
 					shimFilePath := filepath.Join(env.GetVendorSrcDir(), value.Ref, dirShim, fileShimGo)
 					fmt.Println("Shim File:", shimFilePath)
 					fgutil.CopyFile(shimFilePath, filepath.Join(env.GetAppDir(), fileShimGo))
+					
+					// ensure deps after the shim.go has been copied to main.go...
+					depManager.Ensure()
+					
+					// This is a bit of a workaround, will resolve with a better solution in the future
+					// generate metadata again... ensure will remove it
+					err = generateGoMetadata(env)
+					if err != nil {
+						return err
+					}					
 
 					if metadata.Shim == "plugin" {
 						//look for Makefile and execute it

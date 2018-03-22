@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	//todo do we need a mutex, all currently loaded at startup
 	activitiesMu sync.Mutex
 	activities   = make(map[string]Activity)
 )
@@ -16,16 +17,16 @@ func Register(activity Activity) {
 	activitiesMu.Lock()
 	defer activitiesMu.Unlock()
 
-	logger.Debugf("Registering activity: '%s'", activity.Metadata().ID)
-
 	if activity == nil {
-		panic("activity.Register: activity is nil")
+		panic("cannot register 'nil' activity")
 	}
+
+	logger.Debugf("Registering activity: '%s'", activity.Metadata().ID)
 
 	id := activity.Metadata().ID
 
 	if _, dup := activities[id]; dup {
-		panic("activity.Register: activity already registered " + id)
+		panic("activity already registered: " + id)
 	}
 
 	// copy on write to avoid synchronization on access

@@ -15,7 +15,7 @@ Inputs and Outputs:
 
 ```json
 {
-"inputs":[
+"input":[
     {
       "name": "Server",
       "type": "string",
@@ -47,7 +47,7 @@ Inputs and Outputs:
       "value": ""
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "output",
       "type": "string"

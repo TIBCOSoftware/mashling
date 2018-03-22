@@ -1,10 +1,9 @@
 package app
 
-
 var propertyProvider *PropertyProvider
 
 func init() {
-	propertyProvider = &PropertyProvider{properties:make(map[string]interface{})}
+	propertyProvider = &PropertyProvider{properties: make(map[string]interface{})}
 }
 
 func GetPropertyProvider() *PropertyProvider {

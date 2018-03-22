@@ -7,7 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/definition"
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/instance"
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/model"
-	"github.com/TIBCOSoftware/flogo-contrib/action/flow/provider"
+	"github.com/TIBCOSoftware/flogo-contrib/action/flow/support"
 	"github.com/TIBCOSoftware/flogo-contrib/model/simple"
 	"github.com/TIBCOSoftware/flogo-lib/util"
 )
@@ -18,9 +18,9 @@ const (
 	ENV_SETTING_SR_HOST = "TESTER_SR_SERVER"
 )
 
-//Provider is the extension provider for the flow action
+//ExtensionProvider is the extension provider for the flow action
 type TesterProvider struct {
-	flowProvider  provider.Provider
+	flowProvider  definition.Provider
 	flowModel     *model.FlowModel
 	stateRecorder instance.StateRecorder
 	flowTester    *RestEngineTester
@@ -30,15 +30,15 @@ func NewExtensionProvider() *TesterProvider {
 	return &TesterProvider{}
 }
 
-func (fp *TesterProvider) GetFlowProvider() provider.Provider {
+func (fp *TesterProvider) GetFlowProvider() definition.Provider {
 	if fp.flowProvider == nil {
-		fp.flowProvider = provider.NewRemoteFlowProvider()
+		fp.flowProvider = &support.BasicRemoteFlowProvider{}
 	}
 
 	return fp.flowProvider
 }
 
-func (fp *TesterProvider) GetFlowModel() *model.FlowModel {
+func (fp *TesterProvider) GetDefaultFlowModel() *model.FlowModel {
 	if fp.flowModel == nil {
 		fp.flowModel = simple.New()
 	}

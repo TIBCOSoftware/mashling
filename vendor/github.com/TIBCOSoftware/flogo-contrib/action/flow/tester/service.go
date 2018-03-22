@@ -110,7 +110,7 @@ func (et *RestEngineTester) StartFlow(w http.ResponseWriter, r *http.Request, _ 
 
 			encoder := json.NewEncoder(w)
 			encoder.Encode(idResponse)
-		}  else {
+		} else {
 			logger.Error("Id not returned")
 			w.WriteHeader(http.StatusOK)
 		}
@@ -153,7 +153,7 @@ func (et *RestEngineTester) RestartFlow(w http.ResponseWriter, r *http.Request, 
 
 		idResponse := &instance.IDResponse{ID: idAttr.Value().(string)}
 
-		logger.Debugf("Restarted Instance [ID:%s] for %s", idResponse.ID, req.InitialState.FlowURI)
+		logger.Debugf("Restarted Instance [ID:%s] for %s", idResponse.ID, req.InitialState.FlowURI())
 
 		encoder := json.NewEncoder(w)
 		encoder.Encode(idResponse)
@@ -196,7 +196,7 @@ func (et *RestEngineTester) ResumeFlow(w http.ResponseWriter, r *http.Request, _
 
 		idResponse := &instance.IDResponse{ID: idAttr.Value().(string)}
 
-		logger.Debugf("Resumed Instance [ID:%s] for %s", idResponse.ID, req.State.FlowURI)
+		logger.Debugf("Resumed Instance [ID:%s] for %s", idResponse.ID, req.State.FlowURI())
 
 		encoder := json.NewEncoder(w)
 		encoder.Encode(idResponse)

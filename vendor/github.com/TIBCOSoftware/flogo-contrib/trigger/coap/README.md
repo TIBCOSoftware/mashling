@@ -17,7 +17,7 @@ Settings, Outputs and Endpoint:
     "type": "integer",
   }
 ],
-"outputs": [
+"output": [
   {
     "name": "payload",
     "type": "string"
@@ -61,7 +61,7 @@ Configure the Trigger to handle a CoAP POST message with path /device/refresh
 {
   "triggers": [
     {
-      "name": "tibco-coap",
+      "name": "flogo-coap",
       "settings": {},
       "endpoints": [
         {

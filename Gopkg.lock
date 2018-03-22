@@ -14,7 +14,6 @@
   version = "v1.0.4"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-cli"
   packages = [
     "app",
@@ -24,22 +23,23 @@
     "env",
     "util"
   ]
-  revision = "14872ccbb357378b90a1ec4ca08657979028ac32"
+  revision = "ef81ce0f77529aa17d58749979b9e4df19bdeb8c"
+  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
     "action/flow",
     "action/flow/definition",
-    "action/flow/extension",
     "action/flow/instance",
+    "action/flow/linker",
     "action/flow/model",
-    "action/flow/provider",
-    "action/flow/script/fggos",
+    "action/flow/model/simple",
     "action/flow/service",
     "action/flow/support",
     "action/flow/test",
     "action/flow/tester",
+    "action/flow/util",
     "activity/app",
     "activity/awsiot",
     "activity/coap",
@@ -53,6 +53,7 @@
     "activity/twilio",
     "activity/wsmessage",
     "model/simple",
+    "model/simple/behaviors",
     "trigger/cli",
     "trigger/coap",
     "trigger/kafkasub",
@@ -61,32 +62,57 @@
     "trigger/rest",
     "trigger/rest/cors"
   ]
-  revision = "757754f73368d90d8dcc4f7d1073d3200d037786"
-  version = "v0.5.1"
+  revision = "b9a1275df489a54ef85f1628949ceedefefd65c1"
+  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
+    "app/resource",
     "config",
     "core/action",
     "core/activity",
     "core/data",
     "core/mapper",
+    "core/mapper/exprmapper",
+    "core/mapper/exprmapper/expression",
+    "core/mapper/exprmapper/expression/direction",
+    "core/mapper/exprmapper/expression/expr",
+    "core/mapper/exprmapper/expression/function",
+    "core/mapper/exprmapper/expression/gocc/errors",
+    "core/mapper/exprmapper/expression/gocc/lexer",
+    "core/mapper/exprmapper/expression/gocc/parser",
+    "core/mapper/exprmapper/expression/gocc/token",
+    "core/mapper/exprmapper/funcexprtype",
+    "core/mapper/exprmapper/json",
+    "core/mapper/exprmapper/json/field",
+    "core/mapper/exprmapper/ref",
     "core/trigger",
     "engine",
     "engine/runner",
     "logger",
-    "util"
+    "util",
+    "util/managed"
   ]
-  revision = "2b805c0105ea1c260484a671b0afcafe3c7b83a5"
-  version = "v0.5.1"
+  revision = "14ecc2c23809d781ec0855fa72725fe4517f84c1"
+  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   revision = "327ebb6c2b6df8bf075da02ef45a2a034e9b79ba"
   version = "0.11.0"
+
+[[projects]]
+  name = "github.com/aws/aws-lambda-go"
+  packages = [
+    "lambda",
+    "lambda/messages",
+    "lambdacontext"
+  ]
+  revision = "fafa7e49388b8991caf99308e80655ba91816b72"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
@@ -278,12 +304,6 @@
     "json/token"
   ]
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/japm/goScript"
-  packages = ["."]
-  revision = "caab90145b05376536bbab332312f4812123e197"
 
 [[projects]]
   branch = "master"
@@ -610,6 +630,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "441c0dc3e6a16b336ee8c1eb63658c5696cbb251841b5da14579845b2e2eec35"
+  inputs-digest = "0eef15c80b8c50d1995dfac73bc63f7e981a3441bfa640effc6b8e7b71002403"
   solver-name = "gps-cdcl"
   solver-version = 1

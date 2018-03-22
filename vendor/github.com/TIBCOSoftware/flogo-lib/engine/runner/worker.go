@@ -5,9 +5,8 @@ import (
 	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // Based off: http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
@@ -29,10 +28,12 @@ type ActionWorkRequest struct {
 
 // ActionData action related data to pass along in a ActionWorkRequest
 type ActionData struct {
-	context        context.Context
-	action         action.Action
-	options        map[string]interface{}
-	arc            chan (*ActionResult)
+	context context.Context
+	action  action.Action
+	inputs  map[string]*data.Attribute
+	arc     chan *ActionResult
+
+	options map[string]interface{}
 }
 
 // ActionResult is a simple struct to hold the results for an Action
@@ -77,12 +78,12 @@ func (w ActionWorker) Start() {
 			select {
 			case work := <-w.Work:
 				// Receive a work request.
-				logger.Debugf("worker-%d: Received Request\n", w.ID)
+				logger.Debugf("Action-Worker-%d: Received Request", w.ID)
 
 				switch work.ReqType {
 				default:
 
-					err := fmt.Errorf("Unsupported work request type: '%d'", work.ReqType)
+					err := fmt.Errorf("unsupported work request type: '%d'", work.ReqType)
 					actionData := work.actionData
 					actionData.arc <- &ActionResult{err: err}
 
@@ -92,51 +93,46 @@ func (w ActionWorker) Start() {
 
 					handler := &AsyncResultHandler{result: make(chan *ActionResult), done: make(chan bool, 1)}
 
-					act := actionData.action
+					md := action.GetMetadata(actionData.action)
 
-					var ctxData *trigger.ContextData
-
-					if actionData.context != nil {
-						var exists bool
-						ctxData, exists = trigger.ExtractContextData(actionData.context)
-
-						if !exists {
-							logger.Warn("Trigger data not applied to context")
-						}
-					}
-
-					inputs := generateInputs(act, ctxData)
-
-					err := act.Run(actionData.context, inputs, actionData.options, handler)
-
-					if err != nil {
-						logger.Debugf("worker-%d: Action Run error: %s\n", w.ID, err.Error())
-						// error so just return
-						actionData.arc <- &ActionResult{err: err}
+					if !md.Async {
+						syncAct := actionData.action.(action.SyncAction)
+						results, err := syncAct.Run(actionData.context, actionData.inputs)
+						logger.Debugf("Action-Worker-%d: Received result: %v", w.ID, results)
+						actionData.arc <- &ActionResult{results: results, err: err}
 					} else {
-						done := false
-						//wait for reply
-						for !done {
-							select {
-							case result := <-handler.result:
-								logger.Debugf("*** Worker received result: %v\n", result)
-								result.results = generateOutputs(act, ctxData, result.results)
-								actionData.arc <- result
-							case <-handler.done:
-								if !handler.replied {
-									actionData.arc <- &ActionResult{}
+						asyncAct := actionData.action.(action.AsyncAction)
+
+						err := asyncAct.Run(actionData.context, actionData.inputs, handler)
+
+						if err != nil {
+							logger.Debugf("Action-Worker-%d: Action Run error: %s", w.ID, err.Error())
+							// error so just return
+							actionData.arc <- &ActionResult{err: err}
+						} else {
+							done := false
+							//wait for reply
+							for !done {
+								select {
+								case result := <-handler.result:
+									logger.Debugf("Action-Worker-%d: Received result: %#v", w.ID, result)
+									actionData.arc <- result
+								case <-handler.done:
+									if !handler.replied {
+										actionData.arc <- &ActionResult{}
+									}
+									done = true
 								}
-								done = true
 							}
 						}
 					}
 
-					logger.Debugf("worker-%d: Completed Request\n", w.ID)
+					logger.Debugf("Action-Worker-%d: Completed Request", w.ID)
 				}
 
 			case <-w.QuitChan:
 				// We have been asked to stop.
-				logger.Debugf("worker-%d stopping\n", w.ID)
+				logger.Debugf("Action-Worker-%d: Stopping", w.ID)
 				return
 			}
 		}

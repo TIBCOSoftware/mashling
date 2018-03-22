@@ -3,90 +3,107 @@ package app
 import (
 	"fmt"
 
+	"github.com/TIBCOSoftware/flogo-lib/app/resource"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
-//InstanceHelper helps to create the instances for a given id
-type InstanceHelper struct {
-	app        *Config
-	tFactories map[string]trigger.Factory
-	aFactories map[string]action.Factory
-}
+func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[string]trigger.Trigger, error) {
 
-//NewInstanceManager creates a new instance manager
-func NewInstanceHelper(app *Config, tFactories map[string]trigger.Factory, aFactories map[string]action.Factory) *InstanceHelper {
-	return &InstanceHelper{app: app, tFactories: tFactories, aFactories: aFactories}
-}
-
-//CreateTriggers creates new instances for triggers in the configuration
-func (h *InstanceHelper) CreateTriggers() (map[string]*trigger.TriggerInstance, error) {
-
-	// Get Trigger instances from configuration
-	tConfigs := h.app.Triggers
-
-	instances := make(map[string]*trigger.TriggerInstance, len(tConfigs))
-
+	triggers := make(map[string]trigger.Trigger)
 	for _, tConfig := range tConfigs {
-		if tConfig == nil {
-			continue
-		}
 
-		_, ok := instances[tConfig.Id]
-		if ok {
+		_, exists := triggers[tConfig.Id]
+		if exists {
 			return nil, fmt.Errorf("Trigger with id '%s' already registered, trigger ids have to be unique", tConfig.Id)
 		}
 
-		factory, ok := h.tFactories[tConfig.Ref]
-		if !ok {
+		triggerFactory := trigger.GetFactory(tConfig.Ref)
+
+		if triggerFactory == nil {
 			return nil, fmt.Errorf("Trigger Factory '%s' not registered", tConfig.Ref)
 		}
 
-		newInterface := factory.New(tConfig)
+		trg := triggerFactory.New(tConfig)
 
-		if newInterface == nil {
-			return nil, fmt.Errorf("Cannot create Trigger nil for id '%s'", tConfig.Id)
+		if trg == nil {
+			return nil, fmt.Errorf("cannot create Trigger nil for id '%s'", tConfig.Id)
 		}
 
-		tConfig.FixUp(newInterface.Metadata())
+		tConfig.FixUp(trg.Metadata())
 
-		instances[tConfig.Id] = &trigger.TriggerInstance{Config: tConfig, Interf: newInterface}
+		initCtx := &initContext{handlers: make([]*trigger.Handler, 0, len(tConfig.Handlers))}
+
+		var legacyRunner *trigger.LegacyRunner
+
+		newTrg, isNew := trg.(trigger.Initializable)
+
+		if !isNew {
+			legacyRunner = trigger.NewLegacyRunner(runner, trg.Metadata())
+		}
+
+		//create handlers for that trigger and init
+		for _, hConfig := range tConfig.Handlers {
+
+			//create the action
+			actionFactory := action.GetFactory(hConfig.Action.Ref)
+			if actionFactory == nil {
+				return nil, fmt.Errorf("Action Factory '%s' not registered", hConfig.Action.Ref)
+			}
+
+			act, err := actionFactory.New(hConfig.Action)
+			if err != nil {
+				return nil, err
+			}
+
+			handler := trigger.NewHandler(hConfig, act, trg.Metadata().Output, trg.Metadata().Reply, runner)
+			initCtx.handlers = append(initCtx.handlers, handler)
+
+			if !isNew {
+				action.Register(hConfig.ActionId, act)
+				legacyRunner.RegisterHandler(handler)
+			}
+		}
+
+		if isNew {
+			err := newTrg.Initialize(initCtx)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			oldTrg, isOld := trg.(trigger.InitOld)
+			if isOld {
+				oldTrg.Init(legacyRunner)
+			}
+		}
+
+		triggers[tConfig.Id] = trg
 	}
 
-	return instances, nil
+	return triggers, nil
 }
 
-//CreateActions creates new instances for actions in the configuration
-func (h *InstanceHelper) CreateActions() (map[string]action.Action, error) {
+func RegisterResources(rConfigs []*resource.Config) error {
 
-	// Get Action instances from configuration
-	aConfigs := h.app.Actions
-
-	actions := make(map[string]action.Action, len(aConfigs))
-
-	for _, aConfig := range aConfigs {
-		if aConfig == nil {
-			continue
-		}
-
-		_, ok := actions[aConfig.Id]
-		if ok {
-			return nil, fmt.Errorf("Action with id '%s' already registered, action ids have to be unique", aConfig.Id)
-		}
-
-		factory, ok := h.aFactories[aConfig.Ref]
-		if !ok {
-			return nil, fmt.Errorf("Action Factory '%s' not registered", aConfig.Ref)
-		}
-
-		newAction := factory.New(aConfig)
-
-		if newAction == nil {
-			return nil, fmt.Errorf("Cannot create Action nil for id '%s'", aConfig.Id)
-		}
-
-		actions[aConfig.Id] = newAction
+	if len(rConfigs) == 0 {
+		return nil
 	}
 
-	return actions, nil
+	for _, rConfig := range rConfigs {
+		err := resource.Load(rConfig)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+type initContext struct {
+	handlers []*trigger.Handler
+}
+
+func (ctx *initContext) GetHandlers() []*trigger.Handler {
+	return ctx.handlers
 }

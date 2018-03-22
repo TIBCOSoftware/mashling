@@ -1,5 +1,5 @@
 {
-  "name": "tibco-lambda",
+  "name": "flogo-lambda",
   "type": "flogo:trigger",
   "shim": "plugin",
   "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/lambda",

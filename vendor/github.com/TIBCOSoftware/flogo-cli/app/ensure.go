@@ -81,7 +81,7 @@ func (c *cmdEnsure) Exec(args []string) error {
 	if c.noVendor {
 		ensureArgs = append(ensureArgs, "-no-vendor")
 	} else if c.vendorOnly {
-		ensureArgs = append(ensureArgs, "vendor-only")
+		ensureArgs = append(ensureArgs, "-vendor-only")
 	}
 
 	depManager := dep.New(SetupExistingProjectEnv(rootDir))

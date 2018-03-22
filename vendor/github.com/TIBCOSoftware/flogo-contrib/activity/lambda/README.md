@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
-"inputs":[
+"input":[
     {
       "name": "arn",
       "type": "string",
@@ -40,7 +40,7 @@ Inputs and Outputs:
       "required" : true
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "value",
       "type": "any"

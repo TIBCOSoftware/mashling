@@ -15,10 +15,10 @@ import (
 // snapshots and steps of a Flow Instance
 type StateRecorder interface {
 	// RecordSnapshot records a Snapshot of the FlowInstance
-	RecordSnapshot(instance *Instance)
+	RecordSnapshot(instance *IndependentInstance)
 
 	// RecordStep records the changes for the current Step of the Flow Instance
-	RecordStep(instance *Instance)
+	RecordStep(instance *IndependentInstance)
 }
 
 // RemoteStateRecorder is an implementation of StateRecorder service
@@ -64,7 +64,7 @@ func (sr *RemoteStateRecorder) init(settings map[string]string) {
 	port, set := settings["port"]
 
 	if !set {
-		panic("RemoteStateRecorder: requried setting 'host' not set")
+		panic("RemoteStateRecorder: required setting 'host' not set")
 	}
 
 	if strings.Index(host, "http") != 0 {
@@ -73,16 +73,15 @@ func (sr *RemoteStateRecorder) init(settings map[string]string) {
 		sr.host = host + ":" + port
 	}
 
-	logger.Debugf("RemoteStateRecorder: StateRecoder Server = %s", sr.host)
+	logger.Debugf("RemoteStateRecorder: StateRecorder Server = %s", sr.host)
 }
 
 // RecordSnapshot implements instance.StateRecorder.RecordSnapshot
-func (sr *RemoteStateRecorder) RecordSnapshot(instance *Instance) {
+func (sr *RemoteStateRecorder) RecordSnapshot(instance *IndependentInstance) {
 
 	storeReq := &RecordSnapshotReq{
 		ID:           instance.StepID(),
 		FlowID:       instance.ID(),
-		State:        instance.State(),
 		Status:       int(instance.Status()),
 		SnapshotData: instance,
 	}
@@ -113,19 +112,19 @@ func (sr *RemoteStateRecorder) RecordSnapshot(instance *Instance) {
 }
 
 // RecordStep implements instance.StateRecorder.RecordStep
-func (sr *RemoteStateRecorder) RecordStep(instance *Instance) {
+func (sr *RemoteStateRecorder) RecordStep(instance *IndependentInstance) {
 
 	storeReq := &RecordStepReq{
 		ID:       instance.StepID(),
 		FlowID:   instance.ID(),
-		State:    instance.State(),
 		Status:   int(instance.Status()),
 		StepData: instance.ChangeTracker,
+		FlowURI:  instance.flowURI,
 	}
 
 	uri := sr.host + "/instances/steps"
 
-	logger.Debugf("POST Snapshot: %s\n", uri)
+	logger.Debugf("POST Step: %s\n", uri)
 
 	jsonReq, _ := json.Marshal(storeReq)
 
@@ -155,15 +154,19 @@ type RecordSnapshotReq struct {
 	State  int    `json:"state"`
 	Status int    `json:"status"`
 
-	SnapshotData *Instance `json:"snapshotData"`
+	SnapshotData *IndependentInstance `json:"snapshotData"`
 }
 
 // RecordStepReq serializable representation of the RecordStep request
 type RecordStepReq struct {
 	ID     int    `json:"id"`
 	FlowID string `json:"flowID"`
-	State  int    `json:"state"`
-	Status int    `json:"status"`
+
+	//todo should move to the "stepData"
+	State  int `json:"state"`
+	Status int `json:"status"`
+	//todo we should have initial "init" to associate flowURI with flowID, instead of at every step
+	FlowURI string `json:"flowURI"`
 
 	StepData *InstanceChangeTracker `json:"stepData"`
 }

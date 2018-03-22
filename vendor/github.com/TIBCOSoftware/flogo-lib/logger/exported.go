@@ -40,11 +40,19 @@ func SetLogLevel(level Level) {
 	GetDefaultLogger().SetLogLevel(level)
 }
 
+var defaultLoggerName = "flogo"
+
+func SetDefaultLogger(name string) {
+	defaultLoggerName = name
+}
+
 func GetDefaultLogger() Logger {
-	defLogger := GetLogger("engine")
+	defLogger := GetLogger(defaultLoggerName)
 	if defLogger == nil {
-		errorMsg := fmt.Sprintf("Engine: Error Getting engine Logger null")
+		errorMsg := fmt.Sprintf("error getting default logger '%s'", defaultLoggerName)
 		panic(errorMsg)
 	}
 	return defLogger
 }
+
+

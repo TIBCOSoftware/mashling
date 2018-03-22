@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
- "inputs":[
+ "input":[
     {
       "name": "BrokerUrls",
       "type": "string",
@@ -45,7 +45,7 @@ Inputs and Outputs:
       "required": false
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "partition",
       "type": "int"

@@ -11,61 +11,44 @@ type FlowContext interface {
 	// FlowDefinition returns the Flow definition associated with this context
 	FlowDefinition() *definition.Definition
 
-	//State gets the state of the Flow instance
-	State() int
+	// TaskInstances get the task instances
+	TaskInstances() []TaskInstance
 
-	//SetState sets the state of the Flow instance
-	SetState(state int)
+	// Status gets the state of the Flow instance
+	Status() FlowStatus
 }
 
 // TaskContext is the execution context of the Task when executing
 // a Task Behavior function
 type TaskContext interface {
 
-	// State gets the state of the Task instance
-	State() int
+	// Status gets the state of the Task instance
+	Status() TaskStatus
 
-	// SetState sets the state of the Task instance
-	SetState(state int)
+	// SetStatus sets the state of the Task instance
+	SetStatus(status TaskStatus)
 
 	// Task returns the Task associated with this context
 	Task() *definition.Task
 
-	// FromInstLinks returns the instances of predecessor Links of the current
-	// task.
-	FromInstLinks() []LinkInst
+	// GetFromLinkInstances returns the instances of predecessor Links of the current task.
+	GetFromLinkInstances() []LinkInstance
 
-	// ToInstLinks returns the instances of successor Links of the current
-	// task.
-	ToInstLinks() []LinkInst
-
-	// EnterLeadingChildren enters the set of child Tasks that
-	// do not have any incoming links.
-	// todo: should we allow cross-boundary links?
-	EnterLeadingChildren(enterCode int)
-
-	// EnterChildren enters the set of child Tasks specified,
-	// If single TaskEntry with nil Task is supplied,
-	// all the child tasks are entered with the specified code.
-	EnterChildren(taskEntries []*TaskEntry)
-
-	// ChildTaskInsts gets all the instances of child tasks of the
-	// current task
-	ChildTaskInsts() (taskInsts []TaskInst, hasChildTasks bool)
+	// GetToLinkInstances returns the instances of successor Links of the current task.
+	GetToLinkInstances() []LinkInstance
 
 	// EvalLink evaluates the specified link
 	EvalLink(link *definition.Link) (bool, error)
 
-	// HasActivity flag indicating if the task has an Activity
-	HasActivity() bool
-
 	// EvalActivity evaluates the Activity associated with the Task
 	EvalActivity() (done bool, err error)
 
-	// Failed marks the Activity as failed
-	Failed(err error)
+	// PostActivity does post evaluation of the Activity associated with the Task
+	PostEvalActivity() (done bool, err error)
 
-	GetSetting(setting string) (value interface{}, exists bool)
+	Resolve(toResolve string) (value interface{}, err error)
+
+	//todo  move to a mutable scope
 
 	AddWorkingData(attr *data.Attribute)
 
@@ -74,24 +57,24 @@ type TaskContext interface {
 	GetWorkingData(key string) (*data.Attribute, bool)
 }
 
-// LinkInst is the instance of a link
-type LinkInst interface {
+// LinkInstance is the instance of a link
+type LinkInstance interface {
 
 	// Link returns the Link associated with this Link Instance
 	Link() *definition.Link
 
-	// State gets the state of the Link instance
-	State() int
+	// Status gets the state of the Link instance
+	Status() LinkStatus
 
-	// SetState sets the state of the Link instance
-	SetState(state int)
+	// SetStatus sets the state of the Link instance
+	SetStatus(status LinkStatus)
 }
 
-type TaskInst interface {
+type TaskInstance interface {
 
 	// Task returns the Task associated with this Task Instance
 	Task() *definition.Task
 
-	// State gets the state of the Task instance
-	State() int
+	// Status gets the state of the Task instance
+	Status() TaskStatus
 }

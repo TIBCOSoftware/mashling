@@ -6,7 +6,7 @@
   "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub",
   "description": "Publish a message to a kafka topic",
   "author": "Wendell Nichols <wnichols@tibco.com>",
-  "inputs":[
+  "input":[
     {
       "name": "BrokerUrls",
       "type": "string",
@@ -38,7 +38,7 @@
       "required": false
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "partition",
       "type": "int"

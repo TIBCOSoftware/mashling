@@ -6,7 +6,7 @@
   "title": "Use Global Attribute",
   "description": "Simple Global App Activity",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/app",
-  "inputs":[
+  "input":[
     {
       "name": "attribute",
       "type": "string",
@@ -28,7 +28,7 @@
       "type": "any"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "value",
       "type": "any"

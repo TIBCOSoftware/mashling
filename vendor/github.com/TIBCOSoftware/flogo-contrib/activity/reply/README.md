@@ -12,7 +12,7 @@ Inputs and Outputs:
 
 ```json
 {
-  "inputs":[
+  "input":[
     {
       "name": "code",
       "type": "integer",
@@ -23,7 +23,7 @@ Inputs and Outputs:
       "type": "any"
     }
   ],
-  "outputs": [
+  "output": [
   ]
 }
 ```

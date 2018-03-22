@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
-  "inputs":[
+  "input":[
     {
       "name": "message",
       "type": "string",
@@ -30,7 +30,7 @@ Inputs and Outputs:
       "value": "false"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "message",
       "type": "string"

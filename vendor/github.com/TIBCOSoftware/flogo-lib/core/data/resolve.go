@@ -67,8 +67,23 @@ func (r *BasicResolver) Resolve(toResolve string, scope Scope) (value interface{
 			logger.Error(err.Error())
 			return "", err
 		}
+	case ".":
+		//Current scope resolution
+		attr, exists := scope.GetAttr(details.Property)
+		if !exists {
+			return nil, fmt.Errorf("failed to resolve current scope: '%s', not found in scope", details.Property)
+		}
+		value = attr.Value()
 	default:
 		return nil, fmt.Errorf("unsupported resolver: %s", details.ResolverName)
+	}
+
+	if details.Path != "" {
+		value, err = PathGetValue(value, details.Path)
+		if err != nil {
+			logger.Error(err.Error())
+			return nil, err
+		}
 	}
 
 	return value, nil
@@ -121,15 +136,19 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 	itemIdx := strings.Index(toResolve[:dotIdx], "[")
 
 	if itemIdx != -1 {
-		details.Item = toResolve[itemIdx+1:dotIdx-1]
+		details.Item = toResolve[itemIdx+1 : dotIdx-1]
 		details.ResolverName = toResolve[:itemIdx]
 	} else {
-		details.ResolverName = toResolve[:dotIdx]
-
+		//For the case to get current scope atribute data
+		if strings.HasPrefix(toResolve, "$.") || strings.HasPrefix(toResolve, ".") {
+			details.ResolverName = toResolve[:dotIdx+1]
+		} else {
+			details.ResolverName = toResolve[:dotIdx]
+		}
 		//special case for activity without brackets
 		if strings.HasPrefix(toResolve, "activity") {
 			nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-			details.Item = toResolve[dotIdx+1:nextDot]
+			details.Item = toResolve[dotIdx+1 : nextDot]
 			dotIdx = nextDot
 		}
 	}
@@ -139,7 +158,7 @@ func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 	if pathIdx != -1 {
 		pathStart := pathIdx + dotIdx + 1
 		details.Path = toResolve[pathStart:]
-		details.Property = toResolve[dotIdx+1:pathStart]
+		details.Property = toResolve[dotIdx+1 : pathStart]
 	} else {
 		details.Property = toResolve[dotIdx+1:]
 	}
@@ -169,10 +188,10 @@ func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 
 	if details.ResolverName == "activity" {
 		nextDot := strings.Index(toResolve[dotIdx+1:], ".") + dotIdx + 1
-		details.Item = toResolve[dotIdx+1:nextDot]
+		details.Item = toResolve[dotIdx+1 : nextDot]
 		dotIdx = nextDot
 	}
-	details.Property = toResolve[dotIdx+1:closeIdx]
+	details.Property = toResolve[dotIdx+1 : closeIdx]
 
 	if closeIdx+1 < len(toResolve) {
 		details.Path = toResolve[closeIdx+1:]
@@ -183,4 +202,39 @@ func GetResolutionDetailsOld(toResolve string) (*ResolutionDetails, error) {
 
 func isSep(r rune) bool {
 	return r == '.' || r == '['
+}
+
+func GetValueWithResolver(valueMap map[string]interface{}, key string) (interface{}, bool) {
+
+	val, exists := valueMap[key]
+
+	if !exists {
+		return nil, false
+	}
+
+	strVal, ok := val.(string)
+
+	if ok {
+		if strVal == "" {
+			return "", true
+		}
+
+		if strVal[0] == '$' {
+
+			v, err := GetBasicResolver().Resolve(strVal, nil)
+			if err != nil {
+				if strings.HasPrefix(err.Error(), "unsupported resolver") {
+					return val, true
+				}
+				//todo double check this case
+				return val, true
+			}
+
+			return v, true
+		} else {
+			return val, true
+		}
+	}
+
+	return val, true
 }

@@ -34,7 +34,7 @@ Settings, Outputs and Endpoint:
     }
 
   ],
-  "outputs": [
+  "output": [
     {
       "name": "message",
       "type": "string"

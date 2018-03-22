@@ -6,7 +6,7 @@
   "title": "Send WebSocket Message",
   "description": "This activity sends a message to a WebSocket enabled server like TIBCO eFTL",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/wsmessage",
-  "inputs":[
+  "input":[
     {
       "name": "Server",
       "type": "string",
@@ -38,7 +38,7 @@
       "value": ""
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "output",
       "type": "string"

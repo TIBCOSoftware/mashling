@@ -9,7 +9,7 @@ import (
 )
 
 // activityLog is the default logger for the Log Activity
-var activityLog = logger.GetLogger("activity-tibco-log")
+var activityLog = logger.GetLogger("activity-flogo-log")
 
 const (
 	ivMessage   = "message"
@@ -54,7 +54,7 @@ func (a *LogActivity) Eval(context activity.Context) (done bool, err error) {
 	if flowInfo {
 
 		msg = fmt.Sprintf("'%s' - FlowInstanceID [%s], Flow [%s], Task [%s]", msg,
-			context.FlowDetails().ID(), context.FlowDetails().Name(), context.TaskName())
+			context.ActivityHost().ID(), context.ActivityHost().Name(), context.Name())
 	}
 
 	activityLog.Info(msg)

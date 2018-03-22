@@ -6,7 +6,7 @@
   "title": "Update AWS Device Shadow",
   "description": "Simple AWS IoT",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/awsiot",
-  "inputs":[
+  "input":[
     {
       "name": "thingName",
       "type": "string",

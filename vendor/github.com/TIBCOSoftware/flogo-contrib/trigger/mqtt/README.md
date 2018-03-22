@@ -69,7 +69,7 @@ Configure the Trigger to start "myflow". "settings" "topic" is the topic it uses
 {
   "triggers": [
     {
-      "name": "tibco-mqtt",
+      "name": "flogo-mqtt",
       "settings": {
         "topic": "flogo/#",
         "broker": "tcp://192.168.1.12:1883",

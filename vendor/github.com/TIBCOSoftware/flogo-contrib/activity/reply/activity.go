@@ -2,6 +2,7 @@ package reply
 
 import (
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
@@ -16,6 +17,7 @@ const (
 // ReplyActivity is an Activity that is used to reply via the trigger
 // inputs : {method,uri,params}
 // outputs: {result}
+// Deprecated
 type ReplyActivity struct {
 	metadata *activity.Metadata
 }
@@ -38,22 +40,14 @@ func (a *ReplyActivity) Eval(ctx activity.Context) (done bool, err error) {
 
 	log.Debugf("Code :'%d', Data: '%+v'", replyCode, replyData)
 
-	replyHandler := ctx.FlowDetails().ReplyHandler()
-
-	//todo support replying with error
-
-	if replyHandler != nil {
-
-		replyHandler.Reply(replyCode, replyData, nil)
+	dataAttr, _ := data.NewAttribute("data", data.TypeAny, replyData)
+	codeAttr, _ := data.NewAttribute("code", data.TypeInteger, replyCode)
+	reply := map[string]*data.Attribute{
+		"data": dataAttr,
+		"code": codeAttr,
 	}
 
-	//reply := map[string]*data.Attribute{
-	//	"data": data.NewAttribute("data", data.OBJECT, replyData),
-	//	"code":data.NewAttribute("code", data.INTEGER, replyCode),
-	//}
-	//
-	//actionCtx := ctx.ActionContext()
-	//actionCtx.Reply(reply, nil)
+	ctx.ActivityHost().Reply(reply, nil)
 
 	return true, nil
 }

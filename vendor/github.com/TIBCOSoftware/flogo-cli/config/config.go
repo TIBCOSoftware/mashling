@@ -2,8 +2,15 @@ package config
 
 import (
 	"encoding/json"
-	"reflect"
-	"regexp"
+	"fmt"
+	"strings"
+
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
+	"io/ioutil"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
 type ContribType int
@@ -48,18 +55,54 @@ func ToContribType(name string) ContribType {
 
 // FlogoAppDescriptor is the descriptor for a Flogo application
 type FlogoAppDescriptor struct {
-	Name        string `json:"name"`
-	Type        string `json:"type"`
-	Version     string `json:"version"`
-	Description string `json:"description"`
-	AppModel    string `json:"appModel,omitempty"`
-	Triggers []*TriggerDescriptor `json:"triggers"`
+	Name        string                `json:"name"`
+	Type        string                `json:"type"`
+	Version     string                `json:"version"`
+	Description string                `json:"description"`
+	AppModel    string                `json:"appModel,omitempty"`
+	Triggers    []*trigger.Config     `json:"triggers"`
+	Resources   []*ResourceDescriptor `json:"resources"`
+	//deprecated
+	Actions []*ActionDescriptor `json:"actions"`
 }
 
-// TriggerDescriptor is the config descriptor for a Trigger
-type TriggerDescriptor struct {
-	ID  string `json:"id"`
-	Ref string `json:"ref"`
+type ResourceDescriptor struct {
+	ID         string          `json:"id"`
+	Compressed bool            `json:"compressed"`
+	Data       json.RawMessage `json:"data"`
+}
+
+type ResourceData struct {
+	Tasks        []*Task          `json:"tasks"`
+	Links        []*Task          `json:"links"`
+	ErrorHandler *ErrorHandlerRep `json:"errorHandler"`
+}
+
+// TaskOld is part of the flow structure
+type TaskOld struct {
+	Ref   string     `json:"activityRef"`
+	Tasks []*TaskOld `json:"tasks"`
+}
+
+type Task struct {
+	Activity *struct {
+		Ref string `json:"ref"`
+	} `json:"activity"`
+}
+
+type ErrorHandlerRep struct {
+	Tasks []*Task `json:"tasks"`
+}
+
+type ActionDescriptor struct {
+	ID   string `json:"id"`
+	Ref  string `json:"ref"`
+	Data *struct {
+		Flow *struct {
+			RootTask         *TaskOld `json:"rootTask"`
+			ErrorHandlerTask *TaskOld `json:"errorHandlerTask"`
+		} `json:"flow"`
+	} `json:"data"`
 }
 
 type TriggerMetadata struct {
@@ -115,45 +158,141 @@ func (d *Dependency) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type depHolder struct {
-	deps []*Dependency
+func ExtractAllDependencies(appjson string) ([]*Dependency, error) {
+	var deps []*Dependency
+
+	flogoApp := &FlogoAppDescriptor{}
+	jsonParser := json.NewDecoder(strings.NewReader(appjson))
+	err := jsonParser.Decode(&flogoApp)
+	if err != nil {
+		return deps, err
+	}
+	deps = append(deps, extractTrigersDependency(flogoApp.Triggers)...)
+	resourceDeps, err := extractResourceDependency(flogoApp.Resources)
+	if err != nil {
+		return deps, err
+	}
+	deps = append(deps, resourceDeps...)
+
+	deps = append(deps, ExtractDependenciesActionOld(flogoApp.Actions)...)
+	return deps, nil
 }
 
-func ExtractAllDependencies(appJson string) ([]*Dependency) {
-	dh := &depHolder{}
-	var descriptor interface{}
-	//Should be valid app json
-	json.Unmarshal([]byte(appJson), &descriptor)
-	//Find all "ref" values in the model
-	traverse(descriptor, dh)
-	return dh.deps
-}
+func extractTrigersDependency(triggers []*trigger.Config) []*Dependency {
+	var deps []*Dependency
 
-func traverse(data interface{}, dh *depHolder ) {
-	if reflect.ValueOf(data).Kind() == reflect.Slice {
-		d := reflect.ValueOf(data)
-		tmpData := make([]interface{}, d.Len())
-		for i := 0; i < d.Len(); i++ {
-			tmpData[i] = d.Index(i).Interface()
-		}
-		for _, v := range tmpData {
-			traverse(v, dh)
-		}
-	} else if reflect.ValueOf(data).Kind() == reflect.Map {
-		d := reflect.ValueOf(data)
-		for _, k := range d.MapKeys() {
-			match, _ := regexp.MatchString("(ref|activityRef)", k.String())
-			if match {
-				refVal := d.MapIndex(k).Interface()
-				dh.deps = append(dh.deps, &Dependency{ContribType: REF, Ref: refVal.(string)})
-			} else {
-				if d.MapIndex(k).Interface() != nil {
-					typeOfValue := reflect.TypeOf(d.MapIndex(k).Interface()).Kind()
-					if typeOfValue == reflect.Map || typeOfValue == reflect.Slice {
-						traverse(d.MapIndex(k).Interface(), dh)
+	if triggers != nil && len(triggers) > 0 {
+		for _, t := range triggers {
+			deps = append(deps, &Dependency{ContribType: TRIGGER, Ref: t.Ref})
+			if t.Handlers != nil {
+				for _, t := range t.Handlers {
+					if t.Action != nil {
+						deps = append(deps, &Dependency{ContribType: ACTION, Ref: t.Action.Ref})
 					}
 				}
 			}
 		}
 	}
+	return deps
+}
+func extractResourceDependency(resources []*ResourceDescriptor) ([]*Dependency, error) {
+	var deps []*Dependency
+
+	if resources != nil && len(resources) > 0 {
+		for _, t := range resources {
+			if t.Compressed {
+
+			}
+
+			var flowDefBytes []byte
+
+			if t.Compressed {
+				decodedBytes, err := decodeAndUnzip(string(t.Data))
+				if err != nil {
+					return deps, fmt.Errorf("error decoding compressed resource with id '%s', %s", t.ID, err.Error())
+				}
+
+				flowDefBytes = decodedBytes
+			} else {
+				flowDefBytes = t.Data
+			}
+
+			var defRep *ResourceData
+			err := json.Unmarshal(flowDefBytes, &defRep)
+			if err != nil {
+				return deps, fmt.Errorf("error marshalling flow resource with id '%s', %s", t.ID, err.Error())
+			}
+
+			if defRep.Tasks != nil {
+				for _, task := range defRep.Tasks {
+					deps = append(deps, &Dependency{ContribType: ACTIVITY, Ref: task.Activity.Ref})
+				}
+			}
+
+			//Error handler
+			if defRep.ErrorHandler != nil {
+				for _, task := range defRep.ErrorHandler.Tasks {
+					deps = append(deps, &Dependency{ContribType: ACTIVITY, Ref: task.Activity.Ref})
+				}
+			}
+
+		}
+	}
+	return deps, nil
+}
+
+type depHolder struct {
+	deps []*Dependency
+}
+
+// ExtractDependencies extracts dependencies from from application descriptor
+func ExtractDependenciesActionOld(actions []*ActionDescriptor) []*Dependency {
+	dh := &depHolder{}
+
+	for _, action := range actions {
+		dh.deps = append(dh.deps, &Dependency{ContribType: ACTION, Ref: action.Ref})
+
+		if action.Data != nil && action.Data.Flow != nil {
+			extractDepsFromTaskOld(action.Data.Flow.RootTask, dh)
+			//Error handle flow
+			if action.Data.Flow.ErrorHandlerTask != nil {
+				extractDepsFromTaskOld(action.Data.Flow.ErrorHandlerTask, dh)
+			}
+		}
+	}
+
+	return dh.deps
+}
+
+// extractDepsFromTask extract dependencies from a TaskOld and is children
+func extractDepsFromTaskOld(TaskOld *TaskOld, dh *depHolder) {
+
+	if TaskOld.Ref != "" {
+		dh.deps = append(dh.deps, &Dependency{ContribType: ACTIVITY, Ref: TaskOld.Ref})
+	}
+
+	for _, childTask := range TaskOld.Tasks {
+		extractDepsFromTaskOld(childTask, dh)
+	}
+}
+
+func decodeAndUnzip(encoded string) ([]byte, error) {
+
+	decoded, _ := base64.StdEncoding.DecodeString(encoded)
+	return unzip(decoded)
+}
+
+func unzip(compressed []byte) ([]byte, error) {
+
+	buf := bytes.NewBuffer(compressed)
+	r, err := gzip.NewReader(buf)
+	if err != nil {
+		return nil, err
+	}
+	jsonAsBytes, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return jsonAsBytes, nil
 }

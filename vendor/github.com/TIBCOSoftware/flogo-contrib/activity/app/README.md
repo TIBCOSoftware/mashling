@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
-  "inputs":[
+  "input":[
     {
       "name": "attribute",
       "type": "string",
@@ -35,7 +35,7 @@ Inputs and Outputs:
       "type": "any"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "value",
       "type": "any"

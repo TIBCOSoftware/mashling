@@ -1,5 +1,5 @@
 {
-  "name": "tibco-cli",
+  "name": "flogo-cli",
   "type": "flogo:trigger",
   "shim": "main",
   "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/cli",
@@ -16,7 +16,7 @@
   "reply": [
     {
       "name": "data",
-      "type": "object"
+      "type": "any"
     }
   ],
   "handler": {
@@ -27,7 +27,7 @@
       },
       {
         "name": "default",
-        "type": "bool"
+        "type": "boolean"
       }
     ]
   }

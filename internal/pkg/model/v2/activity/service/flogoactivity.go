@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/definition"
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
@@ -80,23 +79,22 @@ func (f *FlogoActivity) Execute() (err error) {
 
 // FlogoActivityContext is an activity context in a mashling flow.
 type FlogoActivityContext struct {
-	details     activity.FlowDetails
-	ACtx        *MashlingActionContext
-	TaskNameVal string
-	Attrs       map[string]*data.Attribute
+	details      activity.FlowDetails
+	activityHost activity.Host
+	TaskNameVal  string
+	Attrs        map[string]*data.Attribute
 
 	metadata *activity.Metadata
 	inputs   map[string]*data.Attribute
 	outputs  map[string]*data.Attribute
 }
 
-// MashlingActionContext is an action context in a mashling flow.
-type MashlingActionContext struct {
-	ActionID  string
-	ActionRef string
-	ActionMd  *action.ConfigMetadata
+type FlogoActivityHost struct {
+	HostID  string
+	HostRef string
 
-	ActionData    data.Scope
+	IoMetadata    *data.IOMetadata
+	HostData      data.Scope
 	ReplyData     map[string]interface{}
 	ReplyDataAttr map[string]*data.Attribute
 	ReplyErr      error
@@ -115,16 +113,17 @@ func NewFlogoActivityContext(metadata *activity.Metadata) *FlogoActivityContext 
 		FlowIDVal:   "1",
 		FlowNameVal: "Mashling Core",
 	}
-	input := []*data.Attribute{data.NewZeroAttribute("Input1", data.STRING)}
-	output := []*data.Attribute{data.NewZeroAttribute("Output1", data.STRING)}
+
+	input := map[string]*data.Attribute{"Input1": data.NewZeroAttribute("Input1", data.TypeString)}
+	output := map[string]*data.Attribute{"Output1": data.NewZeroAttribute("Output1", data.TypeString)}
 
 	tc := &FlogoActivityContext{
 		details: fd,
-		ACtx: &MashlingActionContext{
-			ActionID:   "1",
-			ActionRef:  "github.com/TIBCOSoftware/flogo-contrib/action/flow",
-			ActionMd:   &action.ConfigMetadata{Input: input, Output: output},
-			ActionData: data.NewSimpleScope(nil, nil),
+		activityHost: &FlogoActivityHost{
+			HostID:     "1",
+			HostRef:    "github.com/TIBCOSoftware/flogo-contrib/action/flow",
+			IoMetadata: &data.IOMetadata{Input: input, Output: output},
+			HostData:   data.NewSimpleScope(nil, nil),
 		},
 		TaskNameVal: "Mashling Core Flogo Activity",
 		Attrs:       make(map[string]*data.Attribute),
@@ -157,58 +156,70 @@ func (fd *MashlingFlowDetails) ReplyHandler() activity.ReplyHandler {
 	return nil
 }
 
+func (ac *FlogoActivityHost) Name() string {
+	return ""
+}
+
+func (ac *FlogoActivityHost) IOMetadata() *data.IOMetadata {
+	return nil
+}
+
+func (ac *FlogoActivityHost) ID() string {
+	return ac.HostID
+}
+
+func (ac *FlogoActivityHost) Ref() string {
+	return ac.HostRef
+}
+
+func (ac *FlogoActivityHost) Reply(data map[string]*data.Attribute, err error) {
+	//todo log reply
+	ac.ReplyDataAttr = data
+	ac.ReplyErr = err
+}
+
+func (ac *FlogoActivityHost) Return(data map[string]*data.Attribute, err error) {
+	//todo log reply
+	ac.ReplyDataAttr = data
+	ac.ReplyErr = err
+}
+
+func (ac *FlogoActivityHost) WorkingData() data.Scope {
+	return ac.HostData
+}
+
+func (ac *FlogoActivityHost) GetResolver() data.Resolver {
+	return definition.GetDataResolver()
+}
+
 // FlowDetails implements activity.Context.FlowDetails
 func (c *FlogoActivityContext) FlowDetails() activity.FlowDetails {
 	return c.details
 }
 
-// ID implements action.Context.ID
-func (ac *MashlingActionContext) ID() string {
-	return ac.ActionID
-}
-
-// Ref implements action.Context.Ref
-func (ac *MashlingActionContext) Ref() string {
-	return ac.ActionRef
-}
-
-// InstanceMetadata implements action.Context.InstanceMetadata
-func (ac *MashlingActionContext) InstanceMetadata() *action.ConfigMetadata {
-	return ac.ActionMd
-}
-
-// Reply implements action.Context.Reply
-func (ac *MashlingActionContext) Reply(data map[string]*data.Attribute, err error) {
-	//todo log reply
-	ac.ReplyDataAttr = data
-	ac.ReplyErr = err
-}
-
-// Return implements action.Context.Return
-func (ac *MashlingActionContext) Return(data map[string]*data.Attribute, err error) {
-	//todo log reply
-	ac.ReplyDataAttr = data
-	ac.ReplyErr = err
-}
-
-// WorkingData implements action.Context.WorkingData
-func (ac *MashlingActionContext) WorkingData() data.Scope {
-	return ac.ActionData
-}
-
-// GetResolver implements action.Context.GetResolver
-func (ac *MashlingActionContext) GetResolver() data.Resolver {
-	return definition.GetDataResolver()
-}
-
 // ActionContext implements activity.Context.FlowDetails
-func (c *FlogoActivityContext) ActionContext() action.Context {
-	return c.ACtx
+func (c *FlogoActivityContext) ActivityHost() activity.Host {
+	return c.activityHost
 }
 
 // TaskName implements activity.Context.TaskName
 func (c *FlogoActivityContext) TaskName() string {
 	return c.TaskNameVal
+}
+
+func (c *FlogoActivityContext) Name() string {
+	return c.TaskNameVal
+}
+
+// GetSetting implements activity.Context.GetSetting
+func (c *FlogoActivityContext) GetSetting(setting string) (value interface{}, exists bool) {
+
+	return nil, false
+}
+
+// GetInitValue implements activity.Context.GetInitValue
+func (c *FlogoActivityContext) GetInitValue(key string) (value interface{}, exists bool) {
+	return nil, false
 }
 
 // GetAttrType implements data.Scope.GetAttrType

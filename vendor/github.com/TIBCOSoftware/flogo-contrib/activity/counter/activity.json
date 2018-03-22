@@ -6,7 +6,7 @@
   "title": "Increment Counter",
   "description": "Simple Global Counter Activity",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/counter",
-  "inputs":[
+  "input":[
     {
       "name": "counterName",
       "type": "string",
@@ -21,7 +21,7 @@
       "type": "boolean"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "value",
       "type": "integer"

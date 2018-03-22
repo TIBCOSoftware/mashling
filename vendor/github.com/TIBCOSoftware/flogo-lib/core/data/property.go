@@ -1,6 +1,5 @@
 package data
 
-
 var propertyProvider PropertyProvider
 
 func init() {

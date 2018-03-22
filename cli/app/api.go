@@ -1042,7 +1042,10 @@ func doCreate(env env.Project, appJSON string, defaultAppFlag bool, rootDir, app
 	}
 
 	// Create initial files
-	deps := config.ExtractAllDependencies(appJSON)
+	deps, err := config.ExtractAllDependencies(appJSON)
+	if err != nil {
+		return err
+	}
 	CreateMainGoFile(appDir, "")
 	CreateImportsGoFile(appDir, deps)
 

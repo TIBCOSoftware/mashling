@@ -177,16 +177,14 @@ type FixedScope struct {
 }
 
 // NewFixedScope creates a new SimpleScope
-func NewFixedScope(metadata []*Attribute) *FixedScope {
+func NewFixedScope(metadata map[string]*Attribute) *FixedScope {
 
 	scope := &FixedScope{
 		metadata: make(map[string]*Attribute),
 		attrs:    make(map[string]*Attribute),
 	}
 
-	for _, attr := range metadata {
-		scope.metadata[attr.Name()] = attr
-	}
+	scope.metadata = metadata
 
 	return scope
 }
@@ -205,7 +203,18 @@ func NewFixedScopeFromMap(metadata map[string]*Attribute) *FixedScope {
 func (s *FixedScope) GetAttr(name string) (attr *Attribute, exists bool) {
 
 	attr, found := s.attrs[name]
-	return attr, found
+
+	if found {
+		return attr, true
+	} else {
+		metaAttr, found := s.metadata[name]
+		if found {
+			attr, _ := NewAttribute(name, metaAttr.Type(), metaAttr.value)
+			s.attrs[name] = attr
+			return attr, true
+		}
+	}
+	return nil, false
 }
 
 // GetAttrs gets the attributes set in the scope

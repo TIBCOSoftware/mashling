@@ -6,7 +6,7 @@
   "title": "Throw Error",
   "description": "Simple Error Activity",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/error",
-  "inputs":[
+  "input":[
     {
       "name": "message",
       "type": "string"
@@ -16,6 +16,6 @@
       "type": "object"
     }
   ],
-  "outputs": [
+  "output": [
   ]
 }

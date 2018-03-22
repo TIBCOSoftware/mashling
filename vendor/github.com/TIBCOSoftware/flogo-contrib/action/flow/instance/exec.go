@@ -16,7 +16,7 @@ type RunOptions struct {
 	Op           int
 	ReturnID     bool
 	FlowURI      string
-	InitialState *Instance
+	InitialState *IndependentInstance
 	ExecOptions  *ExecOptions
 }
 
@@ -33,20 +33,20 @@ type IDGenerator interface {
 }
 
 // ApplyExecOptions applies any execution options to the flow instance
-func ApplyExecOptions(instance *Instance, execOptions *ExecOptions) {
+func ApplyExecOptions(instance *IndependentInstance, execOptions *ExecOptions) {
 
 	if execOptions != nil {
 
 		if execOptions.Patch != nil {
 			logger.Infof("Instance [%s] has patch", instance.ID())
-			instance.Patch = execOptions.Patch
-			instance.Patch.Init()
+			instance.patch = execOptions.Patch
+			instance.patch.Init()
 		}
 
 		if execOptions.Interceptor != nil {
 			logger.Infof("Instance [%s] has interceptor", instance.ID())
-			instance.Interceptor = execOptions.Interceptor
-			instance.Interceptor.Init()
+			instance.interceptor = execOptions.Interceptor
+			instance.interceptor.Init()
 		}
 	}
 }

@@ -3,11 +3,13 @@ package util
 import (
 	"errors"
 	"sync"
+
+	"github.com/TIBCOSoftware/flogo-lib/util/managed"
 )
 
 // Service is an interface for defining/managing a service
 type Service interface {
-	Managed
+	managed.Managed
 
 	Name() string
 	Enabled() bool
@@ -112,7 +114,7 @@ func (sm *ServiceManager) Start() error {
 		for _, service := range services {
 
 			if service.Enabled() {
-				err := StartManaged(service.Name(), service)
+				err := managed.Start(service.Name(), service)
 
 				if err == nil {
 					sm.started = append(sm.started, service)
@@ -140,7 +142,7 @@ func (sm *ServiceManager) Stop() error {
 
 		for _, service := range sm.started {
 
-			err = StopManaged(service.Name(), service)
+			err = managed.Stop(service.Name(), service)
 
 			if err != nil {
 				notStopped = append(notStopped, service)

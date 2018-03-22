@@ -77,28 +77,31 @@ func (f *FlogoFlow) Execute() (err error) {
 		cfg.Id = f.Request.Definition["ref"].(string)
 		cfg.Ref = f.Request.Definition["ref"].(string)
 
-		ff := flow.FlowFactory{}
-		flowAction = ff.New(cfg)
+		ff := flow.ActionFactory{}
+		flowAction, err = ff.New(cfg)
+		if err != nil {
+			return err
+		}
 		flowActions.Store(f.Request.Definition["ref"].(string), flowAction)
 	} else {
 		flowAction = flowActionStored.(action.Action)
 	}
 
 	ctx := context.Background()
-
+	var attrs []*data.Attribute
+	mAttrs := make(map[string]*data.Attribute)
 	if f.Request.Inputs != nil {
 
-		var attrs []*data.Attribute
-
 		for k, v := range f.Request.Inputs {
-			attr, _ := data.NewAttribute(k, data.ANY, v)
+			attr, _ := data.NewAttribute(k, data.TypeAny, v)
 			attrs = append(attrs, attr)
+			mAttrs[k] = attr
 		}
 		ctx = trigger.NewContext(context.Background(), attrs)
 	}
 
 	r := runner.NewDirect()
-	outputData, err := r.RunAction(ctx, flowAction, nil)
+	outputData, err := r.Execute(ctx, flowAction, mAttrs)
 	outputs := make(map[string]interface{})
 	for _, v := range outputData {
 		outputs[v.Name()] = v.Value()

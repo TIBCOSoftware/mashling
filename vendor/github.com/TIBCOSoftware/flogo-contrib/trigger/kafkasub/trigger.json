@@ -1,5 +1,5 @@
 {
-  "name": "tibco-kafkasub",
+  "name": "flogo-kafkasub",
   "type": "flogo:trigger",
   "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub",
   "version": "0.0.1",
@@ -24,7 +24,7 @@
       "type": "string"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "message",
       "type": "string"
@@ -39,18 +39,15 @@
       },
       {
         "name": "partitions",
-        "type": "string",
-        "required": "false"
+        "type": "string"
       },
       {
         "name": "group",
-        "type": "string",
-        "required":"false"
+        "type": "string"
       },
       {
         "name": "offset",
-        "type": "int",
-        "required":"false"
+        "type": "int"
       }
     ]
   }

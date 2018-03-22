@@ -1,35 +1,33 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"reflect"
 
 	"github.com/TIBCOSoftware/flogo-lib/config"
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // log is the default package logger
-var log = logger.GetLogger("trigger-tibco-cli")
+var log = logger.GetLogger("trigger-flogo-cli")
 
 var singleton *CliTrigger
 
 // CliTrigger CLI trigger struct
 type CliTrigger struct {
-	metadata  *trigger.Metadata
-	runner    action.Runner
-	config    *trigger.Config
-	actions   []*actionInfo
-	defAction *actionInfo
+	metadata     *trigger.Metadata
+	config       *trigger.Config
+	handlerInfos []*handlerInfo
+	defHandler   *trigger.Handler
 }
 
-type actionInfo struct {
-	actionId   string
-	Invoke     bool
-	handlerCfg *trigger.HandlerConfig
+type handlerInfo struct {
+	Invoke  bool
+	handler *trigger.Handler
 }
 
 //NewFactory create a new Trigger factory
@@ -54,7 +52,7 @@ func (t *CliTrigger) Metadata() *trigger.Metadata {
 	return t.metadata
 }
 
-func (t *CliTrigger) Init(runner action.Runner) {
+func (t *CliTrigger) Initialize(ctx trigger.InitContext) error {
 
 	level, err := logger.GetLevelForName(config.GetLogLevel())
 
@@ -62,35 +60,35 @@ func (t *CliTrigger) Init(runner action.Runner) {
 		log.SetLogLevel(level)
 	}
 
-	if t.config.Settings == nil {
-		panic(fmt.Sprintf("No Settings found for trigger '%s'", t.config.Id))
+	//if len(t.config.Settings) == 0 {
+	//	return fmt.Errorf("no Settings found for trigger '%s'", t.config.Id)
+	//}
+
+	if len(ctx.GetHandlers()) == 0 {
+		return fmt.Errorf("no Handlers found for trigger '%s'", t.config.Id)
 	}
 
-	if len(t.config.Handlers) == 0 {
-		panic(fmt.Sprintf("No Handlers found for trigger '%s'", t.config.Id))
-	}
-
-	t.runner = runner
 	hasDefault := false
 
 	// Init handlers
-	for _, handlerCfg := range t.config.Handlers {
+	for _, handler := range ctx.GetHandlers() {
 
 		cmdString := "default"
 
-		aInfo := &actionInfo{actionId: handlerCfg.ActionId, Invoke: false, handlerCfg: handlerCfg}
-		if cmd, ok := handlerCfg.Settings["command"]; ok && cmd != nil {
+		aInfo := &handlerInfo{Invoke: false, handler: handler}
+
+		if cmd, ok := handler.GetSetting("command"); ok && cmd != nil {
 			cmdString = cmd.(string)
 		}
 
-		if cmd, set := handlerCfg.Settings["default"]; set {
+		if cmd, set := handler.GetSetting("default"); set {
 			if def, ok := cmd.(bool); ok && def {
-				t.defAction = aInfo
+				t.defHandler = handler
 				hasDefault = true
 			}
 		}
 
-		t.actions = append(t.actions, aInfo)
+		t.handlerInfos = append(t.handlerInfos, aInfo)
 
 		xv := reflect.ValueOf(aInfo).Elem()
 		addr := xv.FieldByName("Invoke").Addr().Interface()
@@ -101,9 +99,11 @@ func (t *CliTrigger) Init(runner action.Runner) {
 		}
 	}
 
-	if !hasDefault {
-		t.defAction = t.actions[0]
+	if !hasDefault && len(t.handlerInfos) > 0 {
+		t.defHandler = t.handlerInfos[0].handler
 	}
+
+	return nil
 }
 
 func (t *CliTrigger) Start() error {
@@ -120,34 +120,28 @@ func Invoke() (string, error) {
 	flag.Parse()
 	args := flag.Args()
 
-	for _, value := range singleton.actions {
+	for _, info := range singleton.handlerInfos {
 
-		if value.Invoke {
-			return singleton.Invoke(value.actionId, value.handlerCfg, args)
+		if info.Invoke {
+			return singleton.Invoke(info.handler, args)
 		}
 	}
 
-	return singleton.Invoke(singleton.defAction.actionId, singleton.defAction.handlerCfg, args)
+	return singleton.Invoke(singleton.defHandler, args)
 }
 
-func (t *CliTrigger) Invoke(actionId string, handlerCfg *trigger.HandlerConfig, args []string) (string, error) {
+func (t *CliTrigger) Invoke(handler *trigger.Handler, args []string) (string, error) {
 
-	log.Infof("CLI Trigger: Invoking action '%s'", actionId)
+	log.Infof("invoking handler '%s'", handler)
 
 	data := map[string]interface{}{
 		"args": args,
 	}
 
-	//todo handle error
-	startAttrs, _ := t.metadata.OutputsToAttrs(data, false)
-
-	act := action.Get(actionId)
-
-	ctx := trigger.NewInitialContext(startAttrs, handlerCfg)
-	results, err := t.runner.RunAction(ctx, act, nil)
+	results, err := handler.Handle(context.Background(), data)
 
 	if err != nil {
-		log.Debugf("CLI Trigger Error: %s", err.Error())
+		log.Debugf("error: %s", err.Error())
 		return "", err
 	}
 

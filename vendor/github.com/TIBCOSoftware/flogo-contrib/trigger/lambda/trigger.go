@@ -1,25 +1,27 @@
 package lambda
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
-
 	syslog "log"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+
+	// Import the aws-lambda-go. Required for dep to pull on app create
+	_ "github.com/aws/aws-lambda-go/lambda"
 )
 
 // log is the default package logger
-var log = logger.GetLogger("trigger-tibco-lambda")
+var log = logger.GetLogger("trigger-flogo-lambda")
 var singleton *LambdaTrigger
 
 // LambdaTrigger AWS Lambda trigger struct
 type LambdaTrigger struct {
 	metadata *trigger.Metadata
-	runner   action.Runner
 	config   *trigger.Config
+	handlers []*trigger.Handler
 }
 
 //NewFactory create a new Trigger factory
@@ -43,8 +45,9 @@ func (t *LambdaTrigger) Metadata() *trigger.Metadata {
 	return t.metadata
 }
 
-func (t *LambdaTrigger) Init(runner action.Runner) {
-	t.runner = runner
+func (t *LambdaTrigger) Initialize(ctx trigger.InitContext) error {
+	t.handlers = ctx.GetHandlers()
+	return nil
 }
 
 func Invoke() (interface{}, error) {
@@ -78,24 +81,15 @@ func Invoke() (interface{}, error) {
 	log.Debugf("Received ctx: '%+v'\n", lambdaCtx)
 	syslog.Printf("Received ctx: '%+v'\n", lambdaCtx)
 
-	actionId := singleton.config.Handlers[0].ActionId
-	log.Debugf("Calling actionid: '%s'\n", actionId)
+	//select handler, use 0th for now
+	handler := singleton.handlers[0]
 
 	data := map[string]interface{}{
 		"context": lambdaCtx,
 		"evt":     evt,
 	}
 
-	startAttrs, err := singleton.metadata.OutputsToAttrs(data, false)
-	if err != nil {
-		log.Errorf("After run error' %s'\n", err)
-		return nil, err
-	}
-
-	act := action.Get(actionId)
-
-	ctx := trigger.NewInitialContext(startAttrs, singleton.config.Handlers[0])
-	results, err := singleton.runner.RunAction(ctx, act, nil)
+	results, err := handler.Handle(context.Background(), data)
 
 	var replyData interface{}
 

@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
-  "inputs":[
+  "input":[
     {
       "name": "accountSID",
       "type": "string"
@@ -35,7 +35,7 @@ Inputs and Outputs:
       "type": "string"
     }  
   ],
-  "outputs": []
+  "output": []
 }
 ```
 ## Settings

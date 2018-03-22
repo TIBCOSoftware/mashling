@@ -1,5 +1,5 @@
 {
-  "name": "tibco-rest",
+  "name": "flogo-rest",
   "type": "flogo:trigger",
   "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
   "version": "0.0.1",
@@ -27,8 +27,12 @@
       "type": "params"
     },
     {
+      "name": "header",
+      "type": "params"
+    },
+    {
       "name": "content",
-      "type": "object"
+      "type": "any"
     }
   ],
   "reply": [
@@ -38,7 +42,7 @@
     },
     {
       "name": "data",
-      "type": "object"
+      "type": "any"
     }
   ],
   "handler": {
@@ -53,14 +57,6 @@
         "name": "path",
         "type": "string",
         "required" : true
-      },
-      {
-        "name": "autoIdReply",
-        "type": "boolean"
-      },
-      {
-        "name": "useReplyHandler",
-        "type": "boolean"
       }
     ]
   }

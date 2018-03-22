@@ -1,239 +1,57 @@
 package engine
 
 import (
-	"encoding/json"
-	"fmt"
 	"os"
+	"strconv"
 
-	"github.com/TIBCOSoftware/flogo-lib/config"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
-	"github.com/TIBCOSoftware/flogo-lib/util"
 )
 
-// Config is the configuration for the engine
-type Config struct {
-	LogLevel         string
-	RunnerConfig     *RunnerConfig
-	ValidateTriggers bool
-	Services         map[string]*util.ServiceConfig
-}
+const (
+	ENV_RUNNER_TYPE_KEY       = "FLOGO_RUNNER_TYPE"
+	RUNNER_TYPE_DEFAULT       = "POOLED"
+	ENV_RUNNER_WORKERS_KEY    = "FLOGO_RUNNER_WORKERS"
+	RUNNER_WORKERS_DEFAULT    = 5
+	ENV_RUNNER_QUEUE_SIZE_KEY = "FLOGO_RUNNER_QUEUE"
+	RUNNER_QUEUE_SIZE_DEFAULT = 50
+)
 
-type serEngineConfig struct {
-	LogLevel     string                `json:"loglevel"`
-	DtValidation bool                  `json:"disableTriggerValidation,omitempty"`
-	RunnerConfig *RunnerConfig         `json:"actionRunner"`
-	Services     []*util.ServiceConfig `json:"services"`
-}
-
-// RunnerConfig is the configuration for the engine level runner
-type RunnerConfig struct {
-	Type   string               `json:"type"`
-	Pooled *runner.PooledConfig `json:"pooled,omitempty"`
-}
-
-// TriggersConfig is the triggers configuration for the engine
-type TriggersConfig struct {
-	Triggers map[string]*trigger.Config
-}
-
-type serTriggersConfig struct {
-	Triggers []*trigger.Config `json:"triggers"`
-}
-
-// DefaultConfig returns the default engine configuration
-func DefaultConfig() *Config {
-
-	var engineConfig Config
-
-	engineConfig.LogLevel = config.GetLogLevel()
-	engineConfig.RunnerConfig = defaultRunnerConfig()
-
-	return &engineConfig
-}
-
-// DefaultTriggersConfig returns the default triggers configuration
-func DefaultTriggersConfig() *TriggersConfig {
-
-	var triggersConfig TriggersConfig
-	triggersConfig.Triggers = make(map[string]*trigger.Config)
-
-	return &triggersConfig
-}
-
-// MarshalJSON marshals the EngineConfig to JSON
-func (ec *Config) MarshalJSON() ([]byte, error) {
-
-	var services []*util.ServiceConfig
-
-	for _, value := range ec.Services {
-		services = append(services, value)
+//GetRunnerType returns the runner type
+func GetRunnerType() string {
+	runnerTypeEnv := os.Getenv(ENV_RUNNER_TYPE_KEY)
+	if len(runnerTypeEnv) > 0 {
+		return runnerTypeEnv
 	}
-
-	return json.Marshal(&serEngineConfig{
-		LogLevel:     ec.LogLevel,
-		DtValidation: !ec.ValidateTriggers,
-		RunnerConfig: ec.RunnerConfig,
-		Services:     services,
-	})
+	return RUNNER_TYPE_DEFAULT
 }
 
-// UnmarshalJSON unmarshals EngineConfog from JSON
-func (ec *Config) UnmarshalJSON(data []byte) error {
-
-	ser := &serEngineConfig{}
-	if err := json.Unmarshal(data, ser); err != nil {
-		return err
-	}
-
-	ec.LogLevel = ser.LogLevel
-	ec.ValidateTriggers = !ser.DtValidation
-
-	if ser.RunnerConfig != nil {
-		ec.RunnerConfig = ser.RunnerConfig
-	} else {
-		ec.RunnerConfig = defaultRunnerConfig()
-	}
-
-	if ser.Services != nil {
-		ec.Services = make(map[string]*util.ServiceConfig)
-
-		for _, value := range ser.Services {
-			ec.Services[value.Name] = value
+//GetRunnerWorkers returns the number of workers to use
+func GetRunnerWorkers() int {
+	numWorkers := RUNNER_WORKERS_DEFAULT
+	workersEnv := os.Getenv(ENV_RUNNER_WORKERS_KEY)
+	if len(workersEnv) > 0 {
+		i, err := strconv.Atoi(workersEnv)
+		if err == nil {
+			numWorkers = i
 		}
 	}
-
-	return nil
+	return numWorkers
 }
 
-// MarshalJSON marshals the EngineConfig to JSON
-func (tc *TriggersConfig) MarshalJSON() ([]byte, error) {
-
-	var triggers []*trigger.Config
-
-	for _, value := range tc.Triggers {
-		triggers = append(triggers, value)
-	}
-
-	return json.Marshal(&serTriggersConfig{
-		Triggers: triggers,
-	})
-}
-
-// UnmarshalJSON unmarshals EngineConfog from JSON
-func (tc *TriggersConfig) UnmarshalJSON(data []byte) error {
-
-	ser := &serTriggersConfig{}
-	if err := json.Unmarshal(data, ser); err != nil {
-		return err
-	}
-
-	tc.Triggers = make(map[string]*trigger.Config)
-
-	for _, value := range ser.Triggers {
-		tc.Triggers[value.Name] = value
-	}
-
-	return nil
-}
-
-// LoadConfigFromFile loads the engine Config from the specified JSON file
-func LoadConfigFromFile(fileName string) *Config {
-
-	if len(fileName) == 0 {
-		panic("file name cannot be empty")
-	}
-
-	configFile, _ := os.Open(fileName)
-
-	if configFile != nil {
-
-		engineConfig := &Config{}
-
-		decoder := json.NewDecoder(configFile)
-		decodeErr := decoder.Decode(engineConfig)
-		if decodeErr != nil {
-			err := fmt.Errorf("Error decoding %s - %s", fileName, decodeErr.Error())
-			panic(err)
+//GetRunnerQueueSize returns the runner queue size
+func GetRunnerQueueSize() int {
+	queueSize := RUNNER_QUEUE_SIZE_DEFAULT
+	queueSizeEnv := os.Getenv(ENV_RUNNER_QUEUE_SIZE_KEY)
+	if len(queueSizeEnv) > 0 {
+		i, err := strconv.Atoi(queueSizeEnv)
+		if err == nil {
+			queueSize = i
 		}
-
-		// Quick fix until we refactor the runnerConfig in flogo.json
-		if engineConfig.RunnerConfig != nil {
-			engineConfig.RunnerConfig.Pooled = NewPooledConfig()
-		}
-
-		engineConfig.LogLevel = config.GetLogLevel()
-
-		return engineConfig
 	}
-
-	return nil
+	return queueSize
 }
 
-// LoadConfigFromJSON loads the engine Config from the specified JSON file
-func LoadConfigFromJSON(configJSON string) *Config {
-
-	engineConfig := &Config{}
-	decodeErr := json.Unmarshal([]byte(configJSON), engineConfig)
-	if decodeErr != nil {
-		err := fmt.Errorf("Error decoding %s - %s", "engineConfig", decodeErr.Error())
-		panic(err)
-	}
-
-	// Quick fix until we refactor the runnerConfig in flogo.json
-	if engineConfig.RunnerConfig != nil {
-		engineConfig.RunnerConfig.Pooled = NewPooledConfig()
-	}
-
-	engineConfig.LogLevel = config.GetLogLevel()
-
-	return engineConfig
-}
-
-// LoadTriggersConfigFromFile loads the triggers Config from the specified JSON file
-func LoadTriggersConfigFromFile(fileName string) *TriggersConfig {
-
-	if len(fileName) == 0 {
-		panic("file name cannot be empty")
-	}
-
-	configFile, _ := os.Open(fileName)
-
-	if configFile != nil {
-
-		triggersConfig := &TriggersConfig{}
-
-		decoder := json.NewDecoder(configFile)
-		decodeErr := decoder.Decode(triggersConfig)
-		if decodeErr != nil {
-			err := fmt.Errorf("Error decoding %s - %s", fileName, decodeErr.Error())
-			panic(err)
-		}
-
-		return triggersConfig
-	}
-
-	return nil
-}
-
-// LoadTriggersConfigFromJSON loads the engine Config from the specified JSON file
-func LoadTriggersConfigFromJSON(configJSON string) *TriggersConfig {
-
-	triggersConfig := &TriggersConfig{}
-	decodeErr := json.Unmarshal([]byte(configJSON), triggersConfig)
-	if decodeErr != nil {
-		err := fmt.Errorf("Error decoding %s - %s", "triggersConfig", decodeErr.Error())
-		panic(err)
-	}
-
-	return triggersConfig
-}
-
-func defaultRunnerConfig() *RunnerConfig {
-	return &RunnerConfig{Type: "pooled", Pooled: NewPooledConfig()}
-}
-
-//NewPooledConfig creates a new Pooled config, looks for environment variables to override default values
-func NewPooledConfig() *runner.PooledConfig {
-	return &runner.PooledConfig{NumWorkers: config.GetRunnerWorkers(), WorkQueueSize: config.GetRunnerQueueSize()}
+//NewPooledRunnerConfig creates a new Pooled config, looks for environment variables to override default values
+func NewPooledRunnerConfig() *runner.PooledConfig {
+	return &runner.PooledConfig{NumWorkers: GetRunnerWorkers(), WorkQueueSize: GetRunnerQueueSize()}
 }

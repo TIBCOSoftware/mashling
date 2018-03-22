@@ -5,8 +5,6 @@ import (
 	"errors"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
@@ -31,95 +29,51 @@ func (runner *DirectRunner) Stop() error {
 	return nil
 }
 
-//Run
-//Deprecated
+// Deprecated: Use Execute() instead
 func (runner *DirectRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	if act == nil {
-		return 0, nil, errors.New("Action not specified")
-	}
-
-	newOptions := make(map[string]interface{})
-	newOptions["deprecated_options"] = options
-
-	handler := &SyncResultHandler{done: make(chan bool, 1)}
-
-	var ctxData *trigger.ContextData
-
-	if ctx != nil {
-		var exists bool
-		ctxData, exists = trigger.ExtractContextData(ctx)
-
-		if !exists {
-			logger.Warn("Trigger data not applied to context")
-		}
-	}
-
-	inputs := generateInputs(act, ctxData)
-
-	err = act.Run(ctx, inputs, newOptions, handler)
-
-	if err != nil {
-		return 0, nil, err
-	}
-
-	<-handler.done
-
-	ndata, err := handler.Result()
-
-	results := generateOutputs(act, ctxData, ndata)
-
-	if len(ndata) != 0 {
-		defData, ok := results["data"]
-		if ok {
-			data = defData.Value()
-		}
-		defCode, ok := results["code"]
-		if ok {
-			code = defCode.Value().(int)
-		}
-	}
-
-	return code, data, err
+	return 0, nil, errors.New("unsupported")
 }
 
-// Run the specified action
+// Deprecated: Use Execute() instead
 func (runner *DirectRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
+
+	return nil, errors.New("unsupported")
+}
+
+// Execute implements action.Runner.Execute
+func (runner *DirectRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")
 	}
 
-	handler := &SyncResultHandler{done: make(chan bool, 1)}
+	md := action.GetMetadata(act)
 
-	ctxData, exists := trigger.ExtractContextData(ctx)
+	if !md.Async {
+		syncAct := act.(action.SyncAction)
+		return syncAct.Run(ctx, inputs)
+	} else {
+		asyncAct := act.(action.AsyncAction)
 
-	if !exists {
-		logger.Warn("Trigger data not applied to context")
+		handler := &SyncResultHandler{done: make(chan bool, 1)}
+
+		err = asyncAct.Run(ctx, inputs, handler)
+
+		if err != nil {
+			return nil, err
+		}
+
+		<-handler.done
+
+		return handler.Result()
 	}
 
-	inputs := generateInputs(act, ctxData)
-
-	err = act.Run(ctx, inputs, options, handler)
-
-	if err != nil {
-		return nil, err
-	}
-
-	<-handler.done
-
-	actionOutput, err := handler.Result()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return generateOutputs(act, ctxData, actionOutput), nil
 }
 
 // SyncResultHandler simple result handler to use in synchronous case
 type SyncResultHandler struct {
-	done       chan (bool)
+	done       chan bool
 	resultData map[string]*data.Attribute
 	err        error
 	set        bool

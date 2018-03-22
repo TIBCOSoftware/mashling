@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var resolver = &FlowResolver{}
@@ -18,14 +18,14 @@ func GetDataResolver() data.Resolver {
 type FlowResolver struct {
 }
 
-func (r *FlowResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error){
+func (r *FlowResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
 
 	var details *data.ResolutionDetails
 
-	if strings.HasPrefix(toResolve,"${") {
-		details,err = data.GetResolutionDetailsOld(toResolve)
+	if strings.HasPrefix(toResolve, "${") {
+		details, err = data.GetResolutionDetailsOld(toResolve)
 	} else if strings.HasPrefix(toResolve, "$") {
-		details,err = data.GetResolutionDetails(toResolve[1:])
+		details, err = data.GetResolutionDetails(toResolve[1:])
 	} else {
 		return data.SimpleScopeResolve(toResolve, scope)
 	}
@@ -59,9 +59,15 @@ func (r *FlowResolver) Resolve(toResolve string, scope data.Scope) (value interf
 			return "", err
 		}
 	case "activity":
-		attr, exists := scope.GetAttr("_A." + details.Item + "." +details.Property)
+		attr, exists := scope.GetAttr("_A." + details.Item + "." + details.Property)
 		if !exists {
 			return nil, fmt.Errorf("failed to resolve activity attr: '%s', not found in flow", details.Property)
+		}
+		value = attr.Value()
+	case "error":
+		attr, exists := scope.GetAttr("_E." + details.Property)
+		if !exists {
+			return nil, fmt.Errorf("failed to resolve error attr: '%s', not found in flow", details.Property)
 		}
 		value = attr.Value()
 	case "trigger":

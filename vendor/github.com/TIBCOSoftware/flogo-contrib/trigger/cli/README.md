@@ -1,5 +1,5 @@
 # tibco-cli
-This trigger provides your flogo application the ability to start a flow via REST over HTTP
+This trigger provides your flogo application the ability to run as a CLI app, that is, accept input via the CLI & run once till completion and return the results to stdout.
 
 ## Installation
 
@@ -12,7 +12,7 @@ Settings, Outputs and Endpoint:
 
 ```json
 {
-  "outputs": [
+  "output": [
     {
       "name": "args",
       "type": "array"
@@ -26,7 +26,7 @@ Settings, Outputs and Endpoint:
       },
       {
         "name": "default",
-        "type": "bool"
+        "type": "boolean"
       }
     ]
   }

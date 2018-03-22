@@ -6,7 +6,7 @@
   "title": "Log Message",
   "description": "Simple Log Activity",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/log",
-  "inputs":[
+  "input":[
     {
       "name": "message",
       "type": "string",
@@ -23,7 +23,7 @@
       "value": "false"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "message",
       "type": "string"

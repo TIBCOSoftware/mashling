@@ -13,7 +13,7 @@ Inputs and Outputs:
 
 ```json
 {
-  "inputs":[
+  "input":[
     {
       "name": "uri",
       "type": "string",
@@ -45,7 +45,7 @@ Inputs and Outputs:
       "type": "string"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "response",
       "type": "string"

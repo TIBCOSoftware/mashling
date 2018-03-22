@@ -2,12 +2,12 @@ package coap
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net"
 	"net/url"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/dustin/go-coap"
@@ -21,7 +21,7 @@ const (
 )
 
 // log is the default package logger
-var log = logger.GetLogger("trigger-tibco-coap")
+var log = logger.GetLogger("trigger-flogo-coap")
 
 var validMethods = []string{methodGET, methodPOST, methodPUT, methodDELETE}
 
@@ -30,7 +30,6 @@ type StartFunc func(payload string) (string, bool)
 // CoapTrigger CoAP trigger struct
 type CoapTrigger struct {
 	metadata  *trigger.Metadata
-	runner    action.Runner
 	resources map[string]*CoapResource
 	server    *Server
 	config    *trigger.Config
@@ -39,7 +38,7 @@ type CoapTrigger struct {
 type CoapResource struct {
 	path     string
 	attrs    map[string]string
-	handlers map[string]string
+	handlers map[string]*trigger.Handler
 }
 
 //NewFactory create a new Trigger factory
@@ -62,7 +61,7 @@ func (t *CoapTrigger) Metadata() *trigger.Metadata {
 	return t.metadata
 }
 
-func (t *CoapTrigger) Init(runner action.Runner) {
+func (t *CoapTrigger) Initialize(ctx trigger.InitContext) error {
 
 	if t.config.Settings == nil {
 		panic(fmt.Sprintf("No Settings found for trigger '%s'", t.config.Id))
@@ -74,34 +73,33 @@ func (t *CoapTrigger) Init(runner action.Runner) {
 		panic(fmt.Sprintf("No Port found for trigger '%s' in settings", t.config.Id))
 	}
 
-	t.runner = runner
 	mux := coap.NewServeMux()
 	mux.Handle("/.well-known/core", coap.FuncHandler(t.handleDiscovery))
 
 	t.resources = make(map[string]*CoapResource)
 
 	// Init handlers
-	for _, handler := range t.config.Handlers {
+	for _, handler := range ctx.GetHandlers() {
 
 		if handlerIsValid(handler) {
-			method := strings.ToUpper(handler.GetSetting("method"))
-			path := handler.GetSetting("path")
+			method := strings.ToUpper(handler.GetStringSetting("method"))
+			path := handler.GetStringSetting("path")
 
-			log.Debugf("COAP Trigger: Registering handler [%s: %s] for Action Id: [%s]", method, path, handler.ActionId)
+			log.Debugf("Registering handler for [%s: %s] - %s", method, path, handler)
 
 			resource, exists := t.resources[path]
 
 			if !exists {
-				resource = &CoapResource{path: path, attrs: make(map[string]string), handlers: make(map[string]string)}
+				resource = &CoapResource{path: path, attrs: make(map[string]string), handlers: make(map[string]*trigger.Handler)}
 				t.resources[path] = resource
 			}
 
-			resource.handlers[method] = handler.ActionId
+			resource.handlers[method] = handler
 
-			mux.Handle(path, newActionHandler(t, resource))
+			mux.Handle(path, newActionHandler(resource))
 
 		} else {
-			panic(fmt.Sprintf("Invalid endpoint: %v", handler))
+			return fmt.Errorf("invalid endpoint: %v", handler)
 		}
 	}
 
@@ -109,6 +107,7 @@ func (t *CoapTrigger) Init(runner action.Runner) {
 
 	t.server = NewServer("udp", fmt.Sprintf(":%s", port), mux)
 
+	return nil
 }
 
 // Start implements trigger.Trigger.Start
@@ -177,7 +176,7 @@ func (t *CoapTrigger) handleDiscovery(conn *net.UDPConn, addr *net.UDPAddr, msg 
 	return res
 }
 
-func newActionHandler(rt *CoapTrigger, resource *CoapResource) coap.Handler {
+func newActionHandler(resource *CoapResource) coap.Handler {
 
 	return coap.FuncHandler(func(conn *net.UDPConn, addr *net.UDPAddr, msg *coap.Message) *coap.Message {
 
@@ -207,7 +206,7 @@ func newActionHandler(rt *CoapTrigger, resource *CoapResource) coap.Handler {
 			}
 		}
 
-		actionId, exists := resource.handlers[method]
+		handler, exists := resource.handlers[method]
 
 		if !exists {
 			res := &coap.Message{
@@ -220,16 +219,7 @@ func newActionHandler(rt *CoapTrigger, resource *CoapResource) coap.Handler {
 			return res
 		}
 
-		//todo handle error
-		startAttrs, _ := rt.metadata.OutputsToAttrs(data, false)
-
-		//rh := &AsyncReplyHandler{addr: addr.String(), msg: msg}
-		//rh.addr2 = addr
-		//rh.conn = conn
-
-		act := action.Get(actionId)
-		ctx := trigger.NewInitialContext(startAttrs, nil)
-		_, err := rt.runner.RunAction(ctx, act, nil)
+		_, err := handler.Handle(context.Background(), data)
 
 		if err != nil {
 			//todo determining if 404 or 500
@@ -238,13 +228,13 @@ func newActionHandler(rt *CoapTrigger, resource *CoapResource) coap.Handler {
 				Code:      coap.NotFound,
 				MessageID: msg.MessageID,
 				Token:     msg.Token,
-				Payload:   []byte(fmt.Sprintf("Flow '%s' not found", actionId)),
+				Payload:   []byte(fmt.Sprintf("Unable to execute handler '%s'", handler)),
 			}
 
 			return res
 		}
 
-		log.Debugf("Ran Action: %s", actionId)
+		log.Debugf("Ran: %s", handler)
 
 		if msg.IsConfirmable() {
 			res := &coap.Message{
@@ -266,16 +256,15 @@ func newActionHandler(rt *CoapTrigger, resource *CoapResource) coap.Handler {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Utils
 
-func handlerIsValid(handler *trigger.HandlerConfig) bool {
-	if handler.Settings == nil {
+func handlerIsValid(handler *trigger.Handler) bool {
+
+	method := handler.GetStringSetting("method")
+
+	if method == "" {
 		return false
 	}
 
-	if handler.Settings["method"] == "" {
-		return false
-	}
-
-	if !stringInList(strings.ToUpper(handler.GetSetting("method")), validMethods) {
+	if !stringInList(strings.ToUpper(method), validMethods) {
 		return false
 	}
 

@@ -7,7 +7,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/support"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
@@ -35,97 +34,103 @@ func NewRequestProcessor() *RequestProcessor {
 // generate an ID for the new FlowInstance and queue a StartRequest.
 func (rp *RequestProcessor) StartFlow(startRequest *StartRequest) (results map[string]*data.Attribute, err error) {
 
-	execOptions := &instance.ExecOptions{Interceptor: startRequest.Interceptor, Patch: startRequest.Patch}
-
-	attrs := startRequest.Attrs
-
-	dataLen := len(startRequest.Data)
-
-	// attrs, not supplied so attempt to create attrs from Data
-	if attrs == nil && dataLen > 0 {
-		attrs = make([]*data.Attribute, 0, dataLen)
-
-		for k, v := range startRequest.Data {
-
-			//todo handle error
-			t, _ := data.GetType(v)
-			attr,_ := data.NewAttribute(k, t, v)
-			attrs = append(attrs, attr)
-		}
-	}
+	logger.Debugf("Tester starting flow")
 
 	factory := action.GetFactory(FLOW_REF)
-	act := factory.New(&action.Config{Id: "flow"})
+	act, _ := factory.New(&action.Config{})
 
-	ctx := trigger.NewContext(context.Background(), attrs)
+	var inputs map[string]*data.Attribute
 
-	ro := &instance.RunOptions{Op: instance.OpStart, ReturnID: true,  FlowURI: startRequest.FlowURI, ExecOptions: execOptions}
-	newOptions := make(map[string]interface{})
-	newOptions["deprecated_options"] = ro
+	if len(startRequest.Attrs) > 0 {
 
-	return rp.runner.RunAction(ctx, act, newOptions)
+		logger.Debugf("Starting with flow attrs: %#v", startRequest.Attrs)
+
+		inputs = make(map[string]*data.Attribute, len(startRequest.Attrs)+1)
+		for _, attr := range startRequest.Attrs {
+			inputs[attr.Name()] = attr
+		}
+	} else if len(startRequest.Data) > 0 {
+
+		logger.Debugf("Starting with flow attrs: %#v", startRequest.Data)
+
+		inputs = make(map[string]*data.Attribute, len(startRequest.Data)+1)
+
+		for k, v := range startRequest.Data {
+			t, err := data.GetType(v)
+			if err != nil {
+				t = data.TypeAny
+			}
+			attr, _ := data.NewAttribute(k, t, v)
+			inputs[k] = attr
+		}
+	} else {
+		inputs = make(map[string]*data.Attribute, 1)
+	}
+
+	execOptions := &instance.ExecOptions{Interceptor: startRequest.Interceptor, Patch: startRequest.Patch}
+	ro := &instance.RunOptions{Op: instance.OpStart, ReturnID: true, FlowURI: startRequest.FlowURI, ExecOptions: execOptions}
+	attr, _ := data.NewAttribute("_run_options", data.TypeAny, ro)
+	inputs[attr.Name()] = attr
+
+	return rp.runner.Execute(context.Background(), act, inputs)
 }
 
 // RestartFlow handles a RestartRequest for a FlowInstance.  This will
 // generate an ID for the new FlowInstance and queue a RestartRequest.
-func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest)  (results map[string]*data.Attribute, err error) {
+func (rp *RequestProcessor) RestartFlow(restartRequest *RestartRequest) (results map[string]*data.Attribute, err error) {
 
-	execOptions := &instance.ExecOptions{Interceptor: restartRequest.Interceptor, Patch: restartRequest.Patch}
+	logger.Debugf("Tester restarting flow")
 
-	ctx := context.Background()
+	factory := action.GetFactory(FLOW_REF)
+	act, _ := factory.New(&action.Config{})
+
+	inputs := make(map[string]*data.Attribute, len(restartRequest.Data)+1)
 
 	if restartRequest.Data != nil {
 
 		logger.Debugf("Updating flow attrs: %v", restartRequest.Data)
-		attrs := make([]*data.Attribute, len(restartRequest.Data))
 
 		for k, v := range restartRequest.Data {
-			attr,_ := data.NewAttribute(k, data.ANY, v)
-			attrs = append(attrs,attr)
+			attr, _ := data.NewAttribute(k, data.TypeAny, v)
+			inputs[k] = attr
 		}
-
-		ctx = trigger.NewContext(context.Background(), attrs)
 	}
 
-	factory := action.GetFactory(FLOW_REF)
-	act := factory.New(&action.Config{Id: "flow"})
+	execOptions := &instance.ExecOptions{Interceptor: restartRequest.Interceptor, Patch: restartRequest.Patch}
+	ro := &instance.RunOptions{Op: instance.OpRestart, ReturnID: true, FlowURI: restartRequest.InitialState.FlowURI(), InitialState: restartRequest.InitialState, ExecOptions: execOptions}
+	attr, _ := data.NewAttribute("_run_options", data.TypeAny, ro)
+	inputs[attr.Name()] = attr
 
-	ro := &instance.RunOptions{Op: instance.OpRestart, ReturnID: true, FlowURI: restartRequest.InitialState.FlowURI, InitialState: restartRequest.InitialState, ExecOptions: execOptions}
-	newOptions := make(map[string]interface{})
-	newOptions["deprecated_options"] = ro
-
-	return rp.runner.RunAction(ctx, act, newOptions)
+	return rp.runner.Execute(context.Background(), act, inputs)
 }
 
 // ResumeFlow handles a ResumeRequest for a FlowInstance.  This will
 // queue a RestartRequest.
-func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest)  (results map[string]*data.Attribute, err error) {
+func (rp *RequestProcessor) ResumeFlow(resumeRequest *ResumeRequest) (results map[string]*data.Attribute, err error) {
 
-	execOptions := &instance.ExecOptions{Interceptor: resumeRequest.Interceptor, Patch: resumeRequest.Patch}
+	logger.Debugf("Tester resuming flow")
 
-	ctx := context.Background()
+	factory := action.GetFactory(FLOW_REF)
+	act, _ := factory.New(&action.Config{})
+
+	inputs := make(map[string]*data.Attribute, len(resumeRequest.Data)+1)
 
 	if resumeRequest.Data != nil {
 
 		logger.Debugf("Updating flow attrs: %v", resumeRequest.Data)
-		attrs := make([]*data.Attribute, len(resumeRequest.Data))
 
 		for k, v := range resumeRequest.Data {
-			attr,_ := data.NewAttribute(k, data.ANY, v)
-			attrs = append(attrs,attr)
+			attr, _ := data.NewAttribute(k, data.TypeAny, v)
+			inputs[k] = attr
 		}
-
-		ctx = trigger.NewContext(context.Background(), attrs)
 	}
 
-	factory := action.GetFactory(FLOW_REF)
-	act := factory.New(&action.Config{Id: "flow"})
+	execOptions := &instance.ExecOptions{Interceptor: resumeRequest.Interceptor, Patch: resumeRequest.Patch}
+	ro := &instance.RunOptions{Op: instance.OpResume, ReturnID: true, FlowURI: resumeRequest.State.FlowURI(), InitialState: resumeRequest.State, ExecOptions: execOptions}
+	attr, _ := data.NewAttribute("_run_options", data.TypeAny, ro)
+	inputs[attr.Name()] = attr
 
-	ro := &instance.RunOptions{Op: instance.OpResume, ReturnID: true, FlowURI:resumeRequest.State.FlowURI, InitialState : resumeRequest.State, ExecOptions: execOptions}
-	newOptions := make(map[string]interface{})
-	newOptions["deprecated_options"] = ro
-
-	return rp.runner.RunAction(ctx, act, newOptions)
+	return rp.runner.Execute(context.Background(), act, inputs)
 }
 
 // StartRequest describes a request for starting a FlowInstance
@@ -141,17 +146,17 @@ type StartRequest struct {
 // RestartRequest describes a request for restarting a FlowInstance
 // todo: can be merged into StartRequest
 type RestartRequest struct {
-	InitialState *instance.Instance     `json:"initialState"`
-	Data         map[string]interface{} `json:"data"`
-	Interceptor  *support.Interceptor   `json:"interceptor"`
-	Patch        *support.Patch         `json:"patch"`
+	InitialState *instance.IndependentInstance `json:"initialState"`
+	Data         map[string]interface{}        `json:"data"`
+	Interceptor  *support.Interceptor          `json:"interceptor"`
+	Patch        *support.Patch                `json:"patch"`
 }
 
 // ResumeRequest describes a request for resuming a FlowInstance
 //todo: Data for resume request should be directed to waiting task
 type ResumeRequest struct {
-	State       *instance.Instance     `json:"state"`
-	Data        map[string]interface{} `json:"data"`
-	Interceptor *support.Interceptor   `json:"interceptor"`
-	Patch       *support.Patch         `json:"patch"`
+	State       *instance.IndependentInstance `json:"state"`
+	Data        map[string]interface{}        `json:"data"`
+	Interceptor *support.Interceptor          `json:"interceptor"`
+	Patch       *support.Patch                `json:"patch"`
 }

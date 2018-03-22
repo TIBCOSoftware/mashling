@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // PooledRunner is a action runner that queues and runs a action in a worker pool
@@ -95,47 +95,20 @@ func (runner *PooledRunner) Stop() error {
 	return nil
 }
 
-//Deprecated
+// Deprecated: Use Execute() instead
 func (runner *PooledRunner) Run(ctx context.Context, act action.Action, uri string, options interface{}) (code int, data interface{}, err error) {
 
-	if act == nil {
-		return 0, nil, errors.New("Action not specified")
-	}
-
-	newOptions := make(map[string]interface{})
-	newOptions["deprecated_options"] = options
-
-	if runner.active {
-
-		actionData := &ActionData{context: ctx, action: act, options: newOptions, arc: make(chan *ActionResult, 1)}
-		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
-
-		runner.workQueue <- work
-		reply := <-actionData.arc
-
-		ndata := reply.results
-		err := reply.err
-		//return reply.results, reply.err
-
-		if len(ndata) != 0 {
-			defData, ok := ndata["data"]
-			if ok {
-				data = defData.Value()
-			}
-			defCode, ok := ndata["code"]
-			if ok && defCode.Value() != nil {
-				code = defCode.Value().(int)
-			}
-		}
-
-		return code, data, err
-	}
-
-	return 0, nil, errors.New("Runner not active")
+	return 0, nil, errors.New("unsupported")
 }
 
-// Run implements action.Runner.Run
+// Deprecated: Use Execute() instead
 func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
+
+	return nil, errors.New("unsupported")
+}
+
+// Execute implements action.Runner.Execute
+func (runner *PooledRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 
 	if act == nil {
 		return nil, errors.New("Action not specified")
@@ -143,14 +116,16 @@ func (runner *PooledRunner) RunAction(ctx context.Context, act action.Action, op
 
 	if runner.active {
 
-		data := &ActionData{context: ctx, action: act, options: options, arc: make(chan *ActionResult, 1)}
-		work := ActionWorkRequest{ReqType: RtRun, actionData: data}
+		actionData := &ActionData{context: ctx, action: act, inputs: inputs, arc: make(chan *ActionResult, 1)}
+		work := ActionWorkRequest{ReqType: RtRun, actionData: actionData}
+
+		md := action.GetMetadata(act)
 
 		runner.workQueue <- work
-		logger.Debugf("Run Action '%s' queued", act.Config().Id)
+		logger.Debugf("Action '%s' queued", md.ID)
 
-		reply := <-data.arc
-		logger.Debugf("Run Action '%s' complete", act.Config().Id)
+		reply := <-actionData.arc
+		logger.Debugf("Action '%s' returned", md.ID)
 
 		return reply.results, reply.err
 	}

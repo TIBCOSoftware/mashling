@@ -1,30 +1,33 @@
 package model
 
 import (
+	"github.com/TIBCOSoftware/flogo-contrib/action/flow/util"
 	"sync"
 )
 
 var (
-	modelsMu sync.RWMutex
-	models   = make(map[string]*FlowModel)
+	modelsMu     sync.RWMutex
+	models       = make(map[string]*FlowModel)
+	defaultModel *FlowModel
 )
 
 // Register registers the specified flow model
-func Register(model *FlowModel) {
+func Register(flowModel *FlowModel) {
 	modelsMu.Lock()
 	defer modelsMu.Unlock()
 
-	if model == nil {
+	if flowModel == nil {
 		panic("model.Register: model cannot be nil")
 	}
 
-	id := model.Name()
+	id := flowModel.Name()
 
 	if _, dup := models[id]; dup {
 		panic("model.Register: model " + id + " already registered")
 	}
 
-	models[id] = model
+	models[id] = flowModel
+	util.RegisterModelValidator(id, flowModel)
 }
 
 // Registered gets all the registered flow models
@@ -45,4 +48,26 @@ func Registered() []*FlowModel {
 // Get gets specified FlowModel
 func Get(id string) *FlowModel {
 	return models[id]
+}
+
+// Register registers the specified flow model
+func RegisterDefault(model *FlowModel) {
+	modelsMu.Lock()
+	defer modelsMu.Unlock()
+
+	if model == nil {
+		panic("model.RegisterDefault: model cannot be nil")
+	}
+
+	id := model.Name()
+
+	if _, dup := models[id]; !dup {
+		models[id] = model
+	}
+
+	defaultModel = model
+}
+
+func Default() *FlowModel {
+	return defaultModel
 }
