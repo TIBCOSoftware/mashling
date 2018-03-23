@@ -22,7 +22,17 @@ func LoadFlogoFlow(reference string) (action json.RawMessage, err error) {
 	if strings.HasPrefix(reference, "github.com") || strings.HasPrefix(reference, "http://") || strings.HasPrefix(reference, "https://") {
 		// Load remote JSON. Special handling for Github
 		if strings.HasPrefix(reference, "github.com") {
-			ref := util.ReplaceNth(reference, "/", "/master/", 3)
+			// Special handling for # specifying a branch, tag, or revision to use.
+			var ref string
+			if strings.Contains(reference, "#") {
+				split := strings.Split(reference, "#")
+				reference = split[0]
+				commit := split[1]
+				ref = util.ReplaceNth(reference, "/", "/"+commit+"/", 3)
+			} else {
+				ref = util.ReplaceNth(reference, "/", "/master/", 3)
+			}
+
 			reference = strings.Replace(ref, "github.com", githubRawContent, 1)
 		}
 		response, rerr := http.Get(reference)

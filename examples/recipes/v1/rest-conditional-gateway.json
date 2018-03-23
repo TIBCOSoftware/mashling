@@ -3,8 +3,8 @@
   "gateway": {
     "name": "demoRestGw",
     "version": "1.0.0",
-    "display_name":"Rest Conditional Gateway",
-    "display_image":"displayImage.svg",
+    "display_name": "Rest Conditional Gateway",
+    "display_image": "displayImage.svg",
     "description": "This is the rest based microgateway app",
     "configurations": [
       {
@@ -24,8 +24,8 @@
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "PUT",
-		      "path": "/pets",
-          "optimize":"true"
+          "path": "/pets",
+          "optimize": "true"
         }
       },
       {
@@ -35,8 +35,8 @@
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "GET",
-		      "path": "/pets/{petId}",
-          "optimize":"true"
+          "path": "/pets/{petId}",
+          "optimize": "true"
         }
       }
     ],
@@ -64,7 +64,9 @@
     ],
     "event_links": [
       {
-        "triggers": ["animals_rest_trigger"],
+        "triggers": [
+          "animals_rest_trigger"
+        ],
         "dispatches": [
           {
             "if": "${trigger.content.name in (ELEPHANT,CAT)}",
@@ -80,7 +82,9 @@
         ]
       },
       {
-        "triggers": ["get_animals_rest_trigger"],
+        "triggers": [
+          "get_animals_rest_trigger"
+        ],
         "dispatches": [
           {
             "handler": "animals_get_handler"
