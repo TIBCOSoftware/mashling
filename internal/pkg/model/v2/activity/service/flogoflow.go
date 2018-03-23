@@ -86,20 +86,29 @@ func (f *FlogoFlow) Execute() (err error) {
 	} else {
 		flowAction = flowActionStored.(action.Action)
 	}
-
-	ctx := context.Background()
+	f.Response = FlogoFlowResponse{}
 	var attrs []*data.Attribute
 	mAttrs := make(map[string]*data.Attribute)
 	if f.Request.Inputs != nil {
 
 		for k, v := range f.Request.Inputs {
-			attr, _ := data.NewAttribute(k, data.TypeAny, v)
+			attr, dErr := data.NewAttribute(k, data.TypeAny, v)
+			if dErr != nil {
+				f.Response.Error = dErr.Error()
+				return dErr
+			}
 			attrs = append(attrs, attr)
 			mAttrs[k] = attr
+			attr, dErr = data.NewAttribute("_T."+k, data.TypeAny, v)
+			if dErr != nil {
+				f.Response.Error = dErr.Error()
+				return dErr
+			}
+			attrs = append(attrs, attr)
+			mAttrs["_T."+k] = attr
 		}
-		ctx = trigger.NewContext(context.Background(), attrs)
 	}
-
+	ctx := trigger.NewContext(context.Background(), attrs)
 	r := runner.NewDirect()
 	outputData, err := r.Execute(ctx, flowAction, mAttrs)
 	outputs := make(map[string]interface{})

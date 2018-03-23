@@ -324,7 +324,6 @@ func resolveConfigurationReference(configDefinitions map[string]types.Config, tr
 func GetLocalTriggerMetadata(gitHubPath string) (*ftrigger.Metadata, error) {
 	// Look for local first
 	triggerPath := strings.Replace(gitHubPath, "github.com/TIBCOSoftware/mashling/", "", 1) + "/trigger.json"
-	fmt.Println(triggerPath)
 	data, err := triggers.Asset(triggerPath)
 	if err != nil {
 		// Look in vendor now
