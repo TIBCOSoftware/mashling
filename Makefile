@@ -162,6 +162,7 @@ assets: .GOPATH/.ok ; $(info $(M) running asset generation…) @ ## Run asset ge
 		$(GOBINDATA) -pkg actions -o internal/app/gateway/flogo/registry/actions/actions.go $$actions ;\
 	fi;\
 	$(GOBINDATA) -prefix internal/app/gateway/assets/ -pkg assets -o internal/app/gateway/assets/assets.go $$assets ;\
+	$(GOBINDATA) -prefix cli/ -pkg assets -o cli/assets/assets.go cli/assets/banner.txt cli/assets/defGopkg.lock cli/assets/defGopkg.toml cli/schema/mashling_schema-0.2.json ; \
 }
 
 .PHONY: cliassets
