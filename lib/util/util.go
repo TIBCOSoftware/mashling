@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -18,54 +18,22 @@ import (
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
-const tempRepoName = "sampleRepo"
-
-func doGitClone(path, ref string) error {
-	cmd := exec.Command("git", "clone", "https://"+ref, tempRepoName)
-	cmd.Dir = path
-	return cmd.Run()
-}
+var githubRawContent = "https://raw.githubusercontent.com"
 
 //GetGithubResource used to get github files present in given path
 func GetGithubResource(gitHubPath string, resourceFile string) ([]byte, error) {
-
-	tmp, err := ioutil.TempDir("", "github_resource")
-	if err != nil {
-		return nil, err
+	ref := ReplaceNth(gitHubPath+"/"+resourceFile, "/", "/master/", 3)
+	remoteFile := strings.Replace(ref, "github.com", githubRawContent, 1)
+	response, rerr := http.Get(remoteFile)
+	if rerr != nil {
+		return nil, rerr
 	}
-	defer os.RemoveAll(tmp)
-
-	tokens := strings.Split(gitHubPath, "/")
-	gitRepoPath := gitHubPath
-	gitCloneFlag := false
-
-	if len(tokens) == 0 {
-		fmt.Println("Invalid github path")
-		return nil, nil
+	responseData, resperr := ioutil.ReadAll(response.Body)
+	if resperr != nil {
+		return nil, resperr
 	}
 
-	for i := 0; i < len(tokens); i++ {
-		err := doGitClone(tmp, gitRepoPath)
-		if err == nil {
-			gitCloneFlag = true
-			break
-		}
-		index := strings.LastIndex(gitRepoPath, "/")
-		if index < 0 {
-			gitCloneFlag = false
-			break
-		}
-		gitRepoPath = gitRepoPath[0:index]
-	}
-
-	if !gitCloneFlag {
-		fmt.Println("Provided github refference is Invalid ", gitHubPath)
-		return nil, nil
-	}
-
-	resourceFilePath := strings.Replace(gitHubPath, gitRepoPath, "", -1)
-
-	return ioutil.ReadFile(filepath.Join(tmp, tempRepoName, resourceFilePath, resourceFile))
+	return responseData, nil
 }
 
 //GetTriggerMetadata returns trigger.json for supplied trigger github path
@@ -197,4 +165,21 @@ type PingDataDet struct {
 	FlogolibRev         string
 	MashlingRev         string
 	AppDescrption       string
+}
+
+// ReplaceNth Replaces the nth occurrence of old in s by new.
+func ReplaceNth(s, old, new string, n int) string {
+	i := 0
+	for m := 1; m <= n; m++ {
+		x := strings.Index(s[i:], old)
+		if x < 0 {
+			break
+		}
+		i += x
+		if m == n {
+			return s[:i] + new + s[i+len(old):]
+		}
+		i += len(old)
+	}
+	return s
 }
