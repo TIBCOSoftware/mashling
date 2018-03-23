@@ -80,10 +80,10 @@ func TestInit(t *testing.T) {
 		t.Error(err)
 	}
 	tgr := f.New(config)
-
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	tgr.Metadata()
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
 }
 
 func TestGetLocalIP(t *testing.T) {
@@ -105,10 +105,9 @@ func TestConfigureTracer(t *testing.T) {
 		t.Error(err)
 	}
 	tgr := f.New(config)
-
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
 
 	mqtt := tgr.(*MqttTrigger)
 	mqtt.config.Settings[settingTracer] = TracerZipKin
@@ -142,10 +141,9 @@ func TestEndpoint(t *testing.T) {
 		t.Error(err)
 	}
 	tgr := f.New(config)
-
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
 
 	tgr.Start()
 	defer tgr.Stop()
@@ -319,10 +317,9 @@ func TestConstructStartRequest(t *testing.T) {
 		t.Error(err)
 	}
 	tgr := f.New(config)
-
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
 
 	request := tgr.(*MqttTrigger).constructStartRequest(testMessage, span)
 	params := request.Data["params"]

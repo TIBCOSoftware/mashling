@@ -163,13 +163,14 @@ func runTest(config *trigger.Config, expectSucceed bool, testName string, config
 	f := &KafkasubFactory{}
 	tgr := f.New(config)
 	log.Printf("\t%s trigger created\n", testName)
-	runner := &TestRunner{}
-	tgr.Init(runner)
-	log.Printf("\t%s trigger initialized \n", testName)
-	if configOnly {
-		log.Printf("Test %s complete\n", testName)
-		return nil
-	}
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{}
+	// tgr.Init(runner)
+	// log.Printf("\t%s trigger initialized \n", testName)
+	// if configOnly {
+	// 	log.Printf("Test %s complete\n", testName)
+	// 	return nil
+	// }
 	defer tgr.Stop()
 	error := tgr.Start()
 	if !expectSucceed {

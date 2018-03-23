@@ -17,11 +17,16 @@ temp = $(subst /, ,$@)
 os = $(word 1, $(temp))
 arch = $(word 2, $(temp))
 
+# Support legacy v1 builds
+GITBRANCH:=$(shell git rev-parse --abbrev-ref --symbolic-full-name @{u})
+MASHLINGLOCALGITREV=`git rev-parse HEAD`
+MASHLINGMASTERGITREV=`git rev-parse ${GITBRANCH}`
+
 .PHONY: build
-build: .GOPATH/.ok ; $(info $(M) building gateway executable…) @ ## Build program binary
-	$Q $(GO) install \
-		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
-		$(IMPORT_PATH)/cmd/mashling-gateway
+build: buildgateway buildcli ## Build gateway and cli binaries
+
+.PHONY: all
+all: allgateway allcli ## Create assets, run go generate, fmt, vet, and then build then gateway and cli binaries
 
 PRIMARYGOPATH = $(CURDIR)/.GOPATH
 SECONDAYGOPATH = $(CURDIR)/.GOPATH/vendor
@@ -54,14 +59,31 @@ GOBINDATA = go run pkg/assets/bindata.go
 	$Q ln -s ../bin .GOPATH/bin
 	$Q touch $@
 
-.PHONY: all
-all: assets generate fmt vet build ## Satisfy pre-build requirements and then build the binary
+.PHONY: buildgateway
+buildgateway: .GOPATH/.ok ; $(info $(M) building gateway executable…) @ ## Build gateway binary
+	$Q $(GO) install \
+		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
+		$(IMPORT_PATH)/cmd/mashling-gateway
 
-.PHONY: cli
-cli: .GOPATH/.ok cligenerate cliassets fmt vet; $(info $(M) building CLI executable…) @ ## Build program binary
+.PHONY: allgateway
+allgateway: assets generate fmt vet buildgateway ## Satisfy pre-build requirements and then build the gateway binary
+
+.PHONY: buildcli
+buildcli: .GOPATH/.ok; $(info $(M) building CLI executable…) @ ## Build CLI binary
 	$Q $(GO) install \
 		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
 		$(IMPORT_PATH)/cmd/mashling-cli
+
+.PHONY: allcli
+allcli: cligenerate cliassets fmt vet buildcli ## Satisfy pre-build requirements and then build the cli binary
+
+.PHONY: buildlegacy
+buildlegacy: .GOPATH/.ok; $(info $(M) legacy CLI executable...) @ ## Build legacy CLI binary
+	$Q $(GO) install \
+		-ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.MashlingMasterGitRev=${MASHLINGMASTERGITREV} \
+		-X github.com/TIBCOSoftware/mashling/cli/app.MashlingLocalGitRev=${MASHLINGLOCALGITREV}  \
+		-X github.com/TIBCOSoftware/mashling/cli/app.GitBranch=${GITBRANCH}" \
+		$(IMPORT_PATH)/cli/cmd/mashling
 
 .PHONY: release
 release: .GOPATH/.ok $(PLATFORMS); @ ## Build all executables for release against all targets

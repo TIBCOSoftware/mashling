@@ -102,11 +102,12 @@ func TestInitOk(t *testing.T) {
 
 	config := trigger.Config{}
 	tgr := f.New(&config)
-
-	runner := &TestRunner{}
+	tgr.Metadata()
 
 	json.Unmarshal([]byte(testConfig), &config)
-	tgr.Init(runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{}
+	// tgr.Init(runner)
 }
 
 //Run the specified Action
@@ -126,10 +127,11 @@ func TestHandlerOk(t *testing.T) {
 
 	config := trigger.Config{}
 	tgr := f.New(&config)
-	runner := &TestRunner{}
-	json.Unmarshal([]byte(testConfig), &config)
 
-	tgr.Init(runner)
+	json.Unmarshal([]byte(testConfig), &config)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{}
+	// tgr.Init(runner)
 	tgr.Start()
 	defer tgr.Stop()
 
@@ -158,10 +160,11 @@ func BenchmarkHandlerOk(b *testing.B) {
 
 	config := trigger.Config{}
 	tgr := f.New(&config)
-	runner := &TestRunner{}
-	json.Unmarshal([]byte(testConfig), &config)
 
-	tgr.Init(runner)
+	json.Unmarshal([]byte(testConfig), &config)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{}
+	// tgr.Init(runner)
 	tgr.Start()
 	defer tgr.Stop()
 
