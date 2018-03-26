@@ -18,7 +18,7 @@ os = $(word 1, $(temp))
 arch = $(word 2, $(temp))
 
 # Support legacy v1 builds
-GITBRANCH:=$(shell git rev-parse --abbrev-ref --symbolic-full-name @{u})
+GITBRANCH:=$(shell git rev-parse --abbrev-ref --symbolic-full-name HEAD)
 MASHLINGLOCALGITREV=`git rev-parse HEAD`
 MASHLINGMASTERGITREV=`git rev-parse ${GITBRANCH}`
 
