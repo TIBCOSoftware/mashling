@@ -67,26 +67,25 @@ func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options 
 func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 	return nil, nil
 }
+func TestInit(t *testing.T) {
+	jsonMetadata := getJsonMetadata()
 
-// func TestInit(t *testing.T) {
-// 	jsonMetadata := getJsonMetadata()
+	// New  factory
+	md := trigger.NewMetadata(jsonMetadata)
+	f := NewFactory(md)
 
-// 	// New  factory
-// 	//md := trigger.NewMetadata(jsonMetadata)
-// 	//f := NewFactory(md)
+	// New Trigger
+	config := &trigger.Config{}
+	err := json.Unmarshal([]byte(testConfig), config)
+	if err != nil {
+		t.Error(err)
+	}
+	tgr := f.New(config)
 
-// 	// New Trigger
-// 	config := &trigger.Config{}
-// 	err := json.Unmarshal([]byte(testConfig), config)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	//tgr := f.New(config)
+	runner := &TestRunner{t: t}
 
-// 	//runner := &TestRunner{t: t}
-
-// 	//tgr.Init(runner)
-// }
+	tgr.Init(config, runner)
+}
 
 func TestGetLocalIP(t *testing.T) {
 	ip := getLocalIP()
@@ -110,9 +109,9 @@ func TestConfigureTracer(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	//runner := &TestRunner{t: t}
+	runner := &TestRunner{t: t}
 
-	//tgr.Init(runner)
+	tgr.Init(runner)
 
 	eftl := tgr.(*Trigger)
 	eftl.config.Settings[settingTracer] = TracerZipKin
@@ -148,9 +147,9 @@ func TestEndpoint(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	//runner := &TestRunner{t: t}
+	runner := &TestRunner{t: t}
 
-	//tgr.Init(runner)
+	tgr.Init(runner)
 
 	tgr.Start()
 	defer tgr.Stop()
@@ -319,9 +318,9 @@ func TestConstructJSONStartRequest(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	//runner := &TestRunner{t: t}
+	runner := &TestRunner{t: t}
 
-	//tgr.Init(runner)
+	tgr.Init(runner)
 
 	replyTo, params := tgr.(*Trigger).constructStartRequest([]byte(testJSONMessage), span)
 	if params == nil {
@@ -398,9 +397,9 @@ func TestConstructXMLStartRequest(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	//runner := &TestRunner{t: t}
+	runner := &TestRunner{t: t}
 
-	//tgr.Init(runner)
+	tgr.Init(runner)
 
 	replyTo, params := tgr.(*Trigger).constructStartRequest([]byte(testXMLMessage), span)
 	if params == nil {

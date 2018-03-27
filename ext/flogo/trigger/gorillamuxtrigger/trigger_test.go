@@ -29,63 +29,63 @@ func getJSONMetadata() string {
 }
 
 const testConfig string = `{
-		"name": "animals_rest_trigger",
-		"id": "animals_rest_trigger",
-		"ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-		"settings": {
-			"port": "9096"
-		},
-		"output": null,
-		"handlers": [
-			{
-				"actionId": "mammals_handler",
-				"settings": {
-					"Condition": "${trigger.content.name in (ELEPHANT,CAT)}",
-					"autoIdReply": "false",
-					"method": "PUT",
-					"path": "/pets",
-					"useReplyHandler": "false"
-				},
-				"output": null,
-				"outputs": null
-			},
-			{
-				"actionId": "birds_handler",
-				"settings": {
-					"Condition": "${trigger.content.name == SPARROW}",
-					"autoIdReply": "false",
-					"method": "PUT",
-					"path": "/pets",
-					"useReplyHandler": "false"
-				},
-				"output": null,
-				"outputs": null
-			},
-			{
-				"actionId": "animals_handler",
-				"settings": {
-					"autoIdReply": "false",
-					"method": "PUT",
-					"path": "/pets",
-					"useReplyHandler": "false"
-				},
-				"output": null,
-				"outputs": null
-			},
-			{
-				"actionId": "animals_get_handler",
-				"settings": {
-					"autoIdReply": "false",
-					"method": "GET",
-					"path": "/pets/{petId}",
-					"useReplyHandler": "false"
-				},
-				"output": null,
-				"outputs": null
-			}
-		],
-		"outputs": null
-	}`
+	  "name": "animals_rest_trigger",
+	  "id": "animals_rest_trigger",
+	  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+	  "settings": {
+		  "port": "9096"
+	  },
+	  "output": null,
+	  "handlers": [
+		  {
+			  "actionId": "mammals_handler",
+			  "settings": {
+				  "Condition": "${trigger.content.name in (ELEPHANT,CAT)}",
+				  "autoIdReply": "false",
+				  "method": "PUT",
+				  "path": "/pets",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  },
+		  {
+			  "actionId": "birds_handler",
+			  "settings": {
+				  "Condition": "${trigger.content.name == SPARROW}",
+				  "autoIdReply": "false",
+				  "method": "PUT",
+				  "path": "/pets",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  },
+		  {
+			  "actionId": "animals_handler",
+			  "settings": {
+				  "autoIdReply": "false",
+				  "method": "PUT",
+				  "path": "/pets",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  },
+		  {
+			  "actionId": "animals_get_handler",
+			  "settings": {
+				  "autoIdReply": "false",
+				  "method": "GET",
+				  "path": "/pets/{petId}",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  }
+	  ],
+	  "outputs": null
+  }`
 
 type TestRunner struct {
 }
@@ -96,18 +96,18 @@ func (tr *TestRunner) Run(context context.Context, action action.Action, uri str
 	return 0, nil, nil
 }
 
-// func TestInitOk(t *testing.T) {
-// 	// New  factory
-// 	f := &RestFactory{}
+func TestInitOk(t *testing.T) {
+	// New  factory
+	f := &RestFactory{}
 
-// 	config := trigger.Config{}
-// 	tgr := f.New(&config)
+	config := trigger.Config{}
+	tgr := f.New(&config)
 
-// 	runner := &TestRunner{}
+	runner := &TestRunner{}
 
-// 	json.Unmarshal([]byte(testConfig), &config)
-// 	tgr.Init(runner)
-// }
+	json.Unmarshal([]byte(testConfig), &config)
+	tgr.Init(runner)
+}
 
 //Run the specified Action
 func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options map[string]interface{}) (results map[string]*data.Attribute, err error) {
@@ -126,10 +126,10 @@ func TestHandlerOk(t *testing.T) {
 
 	config := trigger.Config{}
 	tgr := f.New(&config)
-	//runner := &TestRunner{}
+	runner := &TestRunner{}
 	json.Unmarshal([]byte(testConfig), &config)
 
-	//tgr.Init(runner)
+	tgr.Init(runner)
 	tgr.Start()
 	defer tgr.Stop()
 
@@ -158,10 +158,10 @@ func BenchmarkHandlerOk(b *testing.B) {
 
 	config := trigger.Config{}
 	tgr := f.New(&config)
-	//runner := &TestRunner{}
+	runner := &TestRunner{}
 	json.Unmarshal([]byte(testConfig), &config)
 
-	//tgr.Init(runner)
+	tgr.Init(runner)
 	tgr.Start()
 	defer tgr.Stop()
 
