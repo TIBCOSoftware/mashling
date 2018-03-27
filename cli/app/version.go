@@ -31,7 +31,7 @@ var MashlingMasterGitRev = "not set"
 var MashlingLocalGitRev = "not set"
 
 //FlogoGitRev is flogo-lib git tag
-var FlogoGitRev = "f3988b95d914f98704fbeb9bb1c845ea21153b56"
+var FlogoGitRev = "14ecc2c23809d781ec0855fa72725fe4517f84c1"
 
 //SchemaVersion is mashling schema version
 var supportedSchemaVersions = GetAllSupportedSchemas()

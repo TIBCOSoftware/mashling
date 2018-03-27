@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-cli/util"
@@ -61,6 +62,9 @@ func TestSampleGateways(t *testing.T) {
 
 		currentDir, err := os.Getwd()
 		assert.NoError(t, err, "Error: Error getting working dir '%v'", err)
+
+		CopyFile(strings.Replace(file, filepath.Base(file), "Gopkg.lock", 1), filepath.Join(currentDir, "Gopkg.lock"))
+		CopyFile(strings.Replace(file, filepath.Base(file), "Gopkg.toml", 1), filepath.Join(currentDir, "Gopkg.toml"))
 
 		gatewayName := "Sample" + strconv.Itoa(index)
 		appDir := filepath.Join(currentDir, gatewayName)

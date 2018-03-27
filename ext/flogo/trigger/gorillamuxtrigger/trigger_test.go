@@ -29,63 +29,63 @@ func getJSONMetadata() string {
 }
 
 const testConfig string = `{
-	 "name": "animals_rest_trigger",
-	 "id": "animals_rest_trigger",
-	 "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-	 "settings": {
-		 "port": "9096"
-	 },
-	 "output": null,
-	 "handlers": [
-		 {
-			 "actionId": "mammals_handler",
-			 "settings": {
-				 "Condition": "${trigger.content.name in (ELEPHANT,CAT)}",
-				 "autoIdReply": "false",
-				 "method": "PUT",
-				 "path": "/pets",
-				 "useReplyHandler": "false"
-			 },
-			 "output": null,
-			 "outputs": null
-		 },
-		 {
-			 "actionId": "birds_handler",
-			 "settings": {
-				 "Condition": "${trigger.content.name == SPARROW}",
-				 "autoIdReply": "false",
-				 "method": "PUT",
-				 "path": "/pets",
-				 "useReplyHandler": "false"
-			 },
-			 "output": null,
-			 "outputs": null
-		 },
-		 {
-			 "actionId": "animals_handler",
-			 "settings": {
-				 "autoIdReply": "false",
-				 "method": "PUT",
-				 "path": "/pets",
-				 "useReplyHandler": "false"
-			 },
-			 "output": null,
-			 "outputs": null
-		 },
-		 {
-			 "actionId": "animals_get_handler",
-			 "settings": {
-				 "autoIdReply": "false",
-				 "method": "GET",
-				 "path": "/pets/{petId}",
-				 "useReplyHandler": "false"
-			 },
-			 "output": null,
-			 "outputs": null
-		 }
-	 ],
-	 "outputs": null
- }`
+	  "name": "animals_rest_trigger",
+	  "id": "animals_rest_trigger",
+	  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+	  "settings": {
+		  "port": "9096"
+	  },
+	  "output": null,
+	  "handlers": [
+		  {
+			  "actionId": "mammals_handler",
+			  "settings": {
+				  "Condition": "${trigger.content.name in (ELEPHANT,CAT)}",
+				  "autoIdReply": "false",
+				  "method": "PUT",
+				  "path": "/pets",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  },
+		  {
+			  "actionId": "birds_handler",
+			  "settings": {
+				  "Condition": "${trigger.content.name == SPARROW}",
+				  "autoIdReply": "false",
+				  "method": "PUT",
+				  "path": "/pets",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  },
+		  {
+			  "actionId": "animals_handler",
+			  "settings": {
+				  "autoIdReply": "false",
+				  "method": "PUT",
+				  "path": "/pets",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  },
+		  {
+			  "actionId": "animals_get_handler",
+			  "settings": {
+				  "autoIdReply": "false",
+				  "method": "GET",
+				  "path": "/pets/{petId}",
+				  "useReplyHandler": "false"
+			  },
+			  "output": null,
+			  "outputs": null
+		  }
+	  ],
+	  "outputs": null
+  }`
 
 type TestRunner struct {
 }
