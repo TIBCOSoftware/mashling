@@ -14,7 +14,6 @@
   version = "v1.0.5"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
     "action/flow",
@@ -32,10 +31,10 @@
     "model/simple/behaviors",
     "trigger/rest/cors"
   ]
-  revision = "968da3d044d97cbec4b74ff49b10901524fa511e"
+  revision = "b9a1275df489a54ef85f1628949ceedefefd65c1"
+  version = "v0.5.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
@@ -65,8 +64,9 @@
     "util",
     "util/managed"
   ]
-  revision = "91299c201c9b461d126bd5605b51bc88e7acbdfe"
-
+  revision = "14ecc2c23809d781ec0855fa72725fe4517f84c1"
+  version = "v0.5.2"
+  
 [[projects]]
   name = "github.com/TIBCOSoftware/mashling"
   packages = [

@@ -34,7 +34,6 @@
   version = "v0.5.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
@@ -64,8 +63,9 @@
     "util",
     "util/managed"
   ]
-  revision = "91299c201c9b461d126bd5605b51bc88e7acbdfe"
-
+  revision = "14ecc2c23809d781ec0855fa72725fe4517f84c1"
+  version = "v0.5.2"
+  
 [[projects]]
   name = "github.com/TIBCOSoftware/mashling"
   packages = [
