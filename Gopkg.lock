@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/jeffreybozek/jsonpath"
-  packages = ["."]
-  revision = "b631f61225a86d0536ff26d530bd811ba83d56b6"
-
-[[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
   revision = "f7be6aa2bc7b2e38edf816b08b582782194a1c02"
@@ -16,11 +10,10 @@
 [[projects]]
   name = "github.com/Sirupsen/logrus"
   packages = ["."]
-  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
-  version = "v1.0.4"
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-cli"
   packages = [
     "app",
@@ -30,7 +23,8 @@
     "env",
     "util"
   ]
-  revision = "14872ccbb357378b90a1ec4ca08657979028ac32"
+  revision = "ef81ce0f77529aa17d58749979b9e4df19bdeb8c"
+  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/TIBCOSoftware/flogo-contrib"
@@ -44,11 +38,10 @@
     "action/flow/util",
     "trigger/rest/cors"
   ]
-  revision = "8dea1ab327b9680cbc493657273eca60a061fe5e"
-  version = "v0.5.2-rc3"
+  revision = "b9a1275df489a54ef85f1628949ceedefefd65c1"
+  version = "v0.5.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
@@ -76,7 +69,8 @@
     "util",
     "util/managed"
   ]
-  revision = "f3988b95d914f98704fbeb9bb1c845ea21153b56"
+  revision = "14ecc2c23809d781ec0855fa72725fe4517f84c1"
+  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/apache/thrift"
@@ -99,8 +93,8 @@
 [[projects]]
   name = "github.com/eapache/go-resiliency"
   packages = ["breaker"]
-  revision = "6800482f2c813e689c88b7ed3282262385011890"
-  version = "v1.0.0"
+  revision = "ea41b0fad31007accc7f806884dcdf3da98b79ce"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -120,8 +114,8 @@
     ".",
     "packets"
   ]
-  revision = "aff15770515e3c57fc6109da73d42b0d46f7f483"
-  version = "v1.1.0"
+  revision = "36d01c2b4cbeb3d2a12063e4880ce30800af9560"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -176,10 +170,10 @@
   version = "v1.6.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/gorilla/websocket"
   packages = ["."]
-  revision = "eb925808374e5ca90c83401a40d711dc08c0c0f6"
+  revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -188,6 +182,7 @@
     ".",
     "hcl/ast",
     "hcl/parser",
+    "hcl/printer",
     "hcl/scanner",
     "hcl/strconv",
     "hcl/token",
@@ -195,13 +190,19 @@
     "json/scanner",
     "json/token"
   ]
-  revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
+  revision = "f40e974e75af4e271d97ce0fc917af5898ae7bda"
 
 [[projects]]
   branch = "master"
+  name = "github.com/jeffreybozek/jsonpath"
+  packages = ["."]
+  revision = "b631f61225a86d0536ff26d530bd811ba83d56b6"
+
+[[projects]]
   name = "github.com/jtblin/go-ldap-client"
   packages = ["."]
-  revision = "b73f66626b33ca4ac4fd6558efbb062c4fe4e52c"
+  revision = "ad9f2ea47a83452873c01f1dc6960aedb9ff7e0e"
+  version = "0.0.3"
 
 [[projects]]
   branch = "master"
@@ -337,8 +338,8 @@
 [[projects]]
   name = "github.com/spf13/viper"
   packages = ["."]
-  revision = "25b30aa063fc18e48662b86996252eabdcf2f0c7"
-  version = "v1.0.0"
+  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -368,7 +369,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "85f98707c97e11569271e4d9b3d397e079c4f4d0"
+  revision = "88942b9c40a4c9d203b82b3731787b672d6e809b"
 
 [[projects]]
   branch = "master"
@@ -384,7 +385,7 @@
     "trace",
     "websocket"
   ]
-  revision = "07e8617a6db2368fa55d4616f371ee1b1403c817"
+  revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
 
 [[projects]]
   branch = "master"
@@ -393,7 +394,7 @@
     "unix",
     "windows"
   ]
-  revision = "349b81fb5c64ec1734eb6ee148df25459ea48517"
+  revision = "13d03a9a82fba647c21a0ef8fba44a795d0f0835"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -423,7 +424,7 @@
     "googleapis/api/annotations",
     "googleapis/rpc/status"
   ]
-  revision = "df60624c1e9b9d2973e889c7a1cff73155da81c4"
+  revision = "ab0870e398d5dd054b868c0db1481ab029b9a9f2"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -470,8 +471,8 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
-  version = "v2.1.1"
+  revision = "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb"
+  version = "v2.2.0"
 
 [[projects]]
   branch = "master"
@@ -486,6 +487,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8847fc368fe8ef05d8f807ceb794e1ea3cc577aa31fe31e9bea0f2d2d7c6ac0a"
+  inputs-digest = "a9aaaae1cf8f4ade817d3a86e3b4cb4b7833bbc0cea16e5089a1a1f1c588ae67"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1048,7 +1048,11 @@ func doCreate(env env.Project, appJSON string, defaultAppFlag bool, rootDir, app
 	}
 
 	// Create initial files
-	deps := config.ExtractAllDependencies(appJSON)
+	deps, err := config.ExtractAllDependencies(appJSON)
+	if err != nil {
+		return err
+	}
+
 	CreateMainGoFile(appDir, "")
 	CreateImportsGoFile(appDir, deps)
 
@@ -1096,7 +1100,7 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 }
 
 /*
-  appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
+   appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
 */
 func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
 
