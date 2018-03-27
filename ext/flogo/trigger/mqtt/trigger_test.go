@@ -67,24 +67,25 @@ func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options 
 func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 	return nil, nil
 }
-func TestInit(t *testing.T) {
 
-	// New  factory
-	md := trigger.NewMetadata(jsonMetadata)
-	f := NewFactory(md)
+// func TestInit(t *testing.T) {
 
-	// New Trigger
-	config := &trigger.Config{}
-	err := json.Unmarshal([]byte(testConfig), config)
-	if err != nil {
-		t.Error(err)
-	}
-	tgr := f.New(config)
+// 	// New  factory
+// 	md := trigger.NewMetadata(jsonMetadata)
+// 	f := NewFactory(md)
 
-	runner := &TestRunner{t: t}
+// 	// New Trigger
+// 	config := &trigger.Config{}
+// 	err := json.Unmarshal([]byte(testConfig), config)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	tgr := f.New(config)
 
-	tgr.Init(runner)
-}
+// 	runner := &TestRunner{t: t}
+
+// 	tgr.Init(runner)
+// }
 
 func TestGetLocalIP(t *testing.T) {
 	ip := getLocalIP()
@@ -106,9 +107,9 @@ func TestConfigureTracer(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
+	//runner := &TestRunner{t: t}
 
-	tgr.Init(runner)
+	//tgr.Init(runner)
 
 	mqtt := tgr.(*MqttTrigger)
 	mqtt.config.Settings[settingTracer] = TracerZipKin
@@ -143,9 +144,9 @@ func TestEndpoint(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
+	//runner := &TestRunner{t: t}
 
-	tgr.Init(runner)
+	//tgr.Init(runner)
 
 	tgr.Start()
 	defer tgr.Stop()
@@ -320,9 +321,9 @@ func TestConstructStartRequest(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
+	//runner := &TestRunner{t: t}
 
-	tgr.Init(runner)
+	//tgr.Init(runner)
 
 	request := tgr.(*MqttTrigger).constructStartRequest(testMessage, span)
 	params := request.Data["params"]

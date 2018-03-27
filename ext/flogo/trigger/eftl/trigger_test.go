@@ -31,22 +31,22 @@ func getJsonMetadata() string {
 }
 
 const testConfig string = `{
-   "name": "tibco-eftl",
-   "settings": {
-	 "url": "ws://localhost:9191/channel",
-	 "id": "eftl",
-	 "user": "",
-	 "password": ""
-   },
-   "handlers": [
-	 {
-	   "actionId": "test",
-	   "settings": {
-		 "dest": "test_start"
-	   }
-	 }
-   ]
- }`
+	"name": "tibco-eftl",
+	"settings": {
+	  "url": "ws://localhost:9191/channel",
+	  "id": "eftl",
+	  "user": "",
+	  "password": ""
+	},
+	"handlers": [
+	  {
+		"actionId": "test",
+		"settings": {
+		  "dest": "test_start"
+		}
+	  }
+	]
+  }`
 
 var _ action.Runner = &TestRunner{}
 
@@ -67,25 +67,26 @@ func (tr *TestRunner) RunAction(ctx context.Context, act action.Action, options 
 func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map[string]*data.Attribute) (results map[string]*data.Attribute, err error) {
 	return nil, nil
 }
-func TestInit(t *testing.T) {
-	jsonMetadata := getJsonMetadata()
 
-	// New  factory
-	md := trigger.NewMetadata(jsonMetadata)
-	f := NewFactory(md)
+// func TestInit(t *testing.T) {
+// 	jsonMetadata := getJsonMetadata()
 
-	// New Trigger
-	config := &trigger.Config{}
-	err := json.Unmarshal([]byte(testConfig), config)
-	if err != nil {
-		t.Error(err)
-	}
-	tgr := f.New(config)
+// 	// New  factory
+// 	//md := trigger.NewMetadata(jsonMetadata)
+// 	//f := NewFactory(md)
 
-	runner := &TestRunner{t: t}
+// 	// New Trigger
+// 	config := &trigger.Config{}
+// 	err := json.Unmarshal([]byte(testConfig), config)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	//tgr := f.New(config)
 
-	tgr.Init(runner)
-}
+// 	//runner := &TestRunner{t: t}
+
+// 	//tgr.Init(runner)
+// }
 
 func TestGetLocalIP(t *testing.T) {
 	ip := getLocalIP()
@@ -109,9 +110,9 @@ func TestConfigureTracer(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
+	//runner := &TestRunner{t: t}
 
-	tgr.Init(runner)
+	//tgr.Init(runner)
 
 	eftl := tgr.(*Trigger)
 	eftl.config.Settings[settingTracer] = TracerZipKin
@@ -147,9 +148,9 @@ func TestEndpoint(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
+	//runner := &TestRunner{t: t}
 
-	tgr.Init(runner)
+	//tgr.Init(runner)
 
 	tgr.Start()
 	defer tgr.Stop()
@@ -229,35 +230,35 @@ func TestHandler(t *testing.T) {
 }
 
 const testCreateHandlersConfig string = `{
-   "name": "tibco-mqtt",
-   "settings": {
-	 "url": "ws://localhost:9191/channel",
-	 "id": "eftl",
-	 "user": "",
-	 "password": ""
-   },
-   "handlers": [
-	 {
-	   "actionId": "action_1",
-	   "settings": {
-		 "dest": "topic_1"
-	   }
-	 },
-		 {
-	   "actionId": "action_2",
-	   "settings": {
-		 "dest": "topic_1",
-				 "Condition": "${trigger.content.value == A}"
-	   }
-	 },
-		 {
-	   "actionId": "action_3",
-	   "settings": {
-		 "dest": "topic_2"
-	   }
-	 }
-   ]
- }`
+	"name": "tibco-mqtt",
+	"settings": {
+	  "url": "ws://localhost:9191/channel",
+	  "id": "eftl",
+	  "user": "",
+	  "password": ""
+	},
+	"handlers": [
+	  {
+		"actionId": "action_1",
+		"settings": {
+		  "dest": "topic_1"
+		}
+	  },
+		  {
+		"actionId": "action_2",
+		"settings": {
+		  "dest": "topic_1",
+				  "Condition": "${trigger.content.value == A}"
+		}
+	  },
+		  {
+		"actionId": "action_3",
+		"settings": {
+		  "dest": "topic_2"
+		}
+	  }
+	]
+  }`
 
 func TestCreateHandlers(t *testing.T) {
 	jsonMetadata := getJsonMetadata()
@@ -289,14 +290,14 @@ func TestCreateHandlers(t *testing.T) {
 }
 
 const testJSONMessage = `{
-	 "replyTo": "abc123",
-	 "pathParams": {
-		 "param": "a"
-	 },
-	 "queryParams": {
-		 "param": "b"
-	 }
- }`
+	  "replyTo": "abc123",
+	  "pathParams": {
+		  "param": "a"
+	  },
+	  "queryParams": {
+		  "param": "b"
+	  }
+  }`
 
 func TestConstructJSONStartRequest(t *testing.T) {
 	tracer := &opentracing.NoopTracer{}
@@ -318,9 +319,9 @@ func TestConstructJSONStartRequest(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
+	//runner := &TestRunner{t: t}
 
-	tgr.Init(runner)
+	//tgr.Init(runner)
 
 	replyTo, params := tgr.(*Trigger).constructStartRequest([]byte(testJSONMessage), span)
 	if params == nil {
@@ -364,18 +365,18 @@ func TestConstructJSONStartRequest(t *testing.T) {
 }
 
 const testXMLMessage = `<?xml version="1.0"?>
- 
- <test replyTo="abc123">
-  <message>hello world</message>
-  <pathParams>
-   <item key="param" value="a"/>
-  </pathParams>
-  <message>hello world</message>
-  <queryParams>
-   <item key="param" value="b"/>
-  </queryParams>
-  <message>hello world</message>
- </test>`
+  
+  <test replyTo="abc123">
+   <message>hello world</message>
+   <pathParams>
+	<item key="param" value="a"/>
+   </pathParams>
+   <message>hello world</message>
+   <queryParams>
+	<item key="param" value="b"/>
+   </queryParams>
+   <message>hello world</message>
+  </test>`
 
 func TestConstructXMLStartRequest(t *testing.T) {
 	tracer := &opentracing.NoopTracer{}
@@ -397,9 +398,9 @@ func TestConstructXMLStartRequest(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
+	//runner := &TestRunner{t: t}
 
-	tgr.Init(runner)
+	//tgr.Init(runner)
 
 	replyTo, params := tgr.(*Trigger).constructStartRequest([]byte(testXMLMessage), span)
 	if params == nil {
