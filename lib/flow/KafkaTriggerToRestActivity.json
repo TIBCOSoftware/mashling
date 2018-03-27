@@ -82,13 +82,13 @@
                     "type": "any"
                   }
                 ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "{T.message}",
-                                        "mapTo": "content"
-                                    }
-                                ]
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{T.message}",
+                    "mapTo": "content"
+                  }
+                ]
               },
               {
                 "id": "log_3",
@@ -223,7 +223,7 @@
                 "from": "rest_2",
                 "to": "log_3",
                 "type": 1,
-                "value": "$activity[rest_2].status>=200 && $activity[rest_2].status<300"
+                "value": "($activity[rest_2].status>=200) && ($activity[rest_2].status<300)"
               },
               {
                 "id": 2,
