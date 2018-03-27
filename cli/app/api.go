@@ -1093,7 +1093,7 @@ func PublishToConsul(gatewayJSON string, addFlag bool, consulToken string, consu
 }
 
 /*
-  appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
+   appendPingFuncionality appends ping triggers, handlers & event_links to given descriptor.
 */
 func appendPingDescriptor(pingPort string, descriptor *types.Microgateway) (*types.Microgateway, error) {
 
