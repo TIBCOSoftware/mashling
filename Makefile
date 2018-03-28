@@ -101,7 +101,7 @@ $(PLATFORMS): ; $(info $(M) building package executable for $@)
 
 .PHONY: docker
 docker: .GOPATH/.ok linux/amd64 ; $(info $(M) building a docker image containing the mashling-gateway binary) @ ## Build a minimal docker image containing the gateway binary
-	$Q type -p docker >/dev/null 2>&1 && docker build . -t mashling-gateway || echo "Docker not found, please visit https://www.docker.com to install for your platform."
+	$Q type -p docker >/dev/null 2>&1 && docker build -f dockerfiles/run/Dockerfile . -t mashling-gateway || echo "Docker not found, please visit https://www.docker.com to install for your platform."
 
 .PHONY: setup
 setup: clean .GOPATH/.ok gitignoregopath $(GOLINT) $(GODEP) hooks ## Setup the dev environment

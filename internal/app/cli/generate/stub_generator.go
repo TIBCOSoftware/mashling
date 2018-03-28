@@ -25,8 +25,8 @@ func main() {
 
 	defer os.RemoveAll(destDir)
 
-	directories := []string{"cmd/mashling-gateway", "internal/app/gateway", "internal/pkg", "pkg", "scripts", "vendor"}
-	topLevelFiles := []string{"Dockerfile", "Gopkg.lock", "Gopkg.toml", "Makefile"}
+	directories := []string{"cmd/mashling-gateway", "internal/app/gateway", "internal/pkg", "pkg", "scripts", "vendor", "dockerfiles"}
+	topLevelFiles := []string{"Gopkg.lock", "Gopkg.toml", "Makefile"}
 
 	// Copy directories into temp directory.
 	for _, dir := range directories {
