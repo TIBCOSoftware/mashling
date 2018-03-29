@@ -22,48 +22,68 @@
   name = "github.com/TIBCOSoftware/flogo-cli"
   packages = [
     "env",
-    "util"
+    "util",
+    "config"
   ]
-  revision = "b3863a308988827a218160861c3f2ed77b8a5b1e"
+  revision = "ef81ce0f77529aa17d58749979b9e4df19bdeb8c"
+  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
     "action/flow",
     "action/flow/definition",
-    "action/flow/extension",
     "action/flow/instance",
+    "action/flow/linker",
     "action/flow/model",
-    "action/flow/provider",
-    "action/flow/script/fggos",
+    "action/flow/model/simple",
     "action/flow/service",
     "action/flow/support",
     "action/flow/tester",
+    "action/flow/util",
     "activity/log",
     "activity/reply",
     "activity/rest",
     "model/simple",
+    "model/simple/behaviors",
+    "trigger/rest",
     "trigger/rest/cors"
   ]
-  revision = "f3d47d0c7954dec155dc00e8c6348f89faa500a9"
+  revision = "b9a1275df489a54ef85f1628949ceedefefd65c1"
+  version = "v0.5.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
+    "app/resource",
     "config",
     "core/action",
     "core/activity",
     "core/data",
     "core/mapper",
+    "core/mapper/exprmapper",
+    "core/mapper/exprmapper/expression",
+    "core/mapper/exprmapper/expression/direction",
+    "core/mapper/exprmapper/expression/expr",
+    "core/mapper/exprmapper/expression/function",
+    "core/mapper/exprmapper/expression/gocc/errors",
+    "core/mapper/exprmapper/expression/gocc/lexer",
+    "core/mapper/exprmapper/expression/gocc/parser",
+    "core/mapper/exprmapper/expression/gocc/token",
+    "core/mapper/exprmapper/funcexprtype",
+    "core/mapper/exprmapper/json",
+    "core/mapper/exprmapper/json/field",
+    "core/mapper/exprmapper/ref",
     "core/trigger",
     "engine",
     "engine/runner",
     "logger",
-    "util"
+    "util",
+    "util/managed"
   ]
-  revision = "2b1f7ceb4becc2a3bde3fe5e97e4c6aa33b2c10b"
+  revision = "14ecc2c23809d781ec0855fa72725fe4517f84c1"
+  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/TIBCOSoftware/mashling"
@@ -73,7 +93,7 @@
     "lib/conditions",
     "lib/util"
   ]
-  revision = "302419fb6fcf996bfa4ab2bc54d01fb29a2c412f"
+  revision = "68697665b343bf3f753b868d1600b7253650f36f"
 
 [[projects]]
   name = "github.com/apache/thrift"
@@ -323,6 +343,30 @@
   ]
   revision = "f9a4336c02542ebbfa01c37949bd7152fb0f659c"
 
+[[projects]]
+  name = "gopkg.in/asn1-ber.v1"
+  packages = ["."]
+  revision = "379148ca0225df7a432012b8df0355c2a2063ac0"
+  version = "v1.2"
+
+[[projects]]
+  name = "gopkg.in/ldap.v2"
+  packages = ["."]
+  revision = "bb7a9ca6e4fbc2129e3db588a34bc970ffe811a9"
+  version = "v2.5.1"
+
+[[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
+  version = "v2.1.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/jtblin/go-ldap-client"
+  packages = ["."]
+  revision = "b73f66626b33ca4ac4fd6558efbb062c4fe4e52c"
+  
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
