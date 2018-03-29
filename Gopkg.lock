@@ -330,11 +330,6 @@
   version = "0.0.3"
 
 [[projects]]
-  name = "github.com/jteeuwen/go-bindata"
-  packages = ["."]
-  revision = "a0ff2567cfb70903282db057e799fd826784d41d"
-
-[[projects]]
   branch = "master"
   name = "github.com/julienschmidt/httprouter"
   packages = ["."]
@@ -631,6 +626,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9fbcae2c9ce9322942c6a64abac6b29de8a1f9133603f4ccdb6a13c01baf6580"
+  inputs-digest = "6195bd47dcbd0df31f09b66d9ea44bad54059404d9c7d1db46fef156d282c076"
   solver-name = "gps-cdcl"
   solver-version = 1

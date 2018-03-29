@@ -1,5 +1,5 @@
 //go:generate go run generate/schema_generator.go
-//go:generate go run ../../../../../pkg/assets/bindata.go -pkg schema -o assets.go schema.json
+//go:generate go-bindata -pkg schema -o assets.go schema.json
 
 package schema
 

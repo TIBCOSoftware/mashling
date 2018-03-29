@@ -109,10 +109,6 @@
   branch = "master"
   name = "github.com/dop251/goja"
 
-[[constraint]]
-  name = "github.com/jteeuwen/go-bindata"
-  revision = "a0ff2567cfb70903282db057e799fd826784d41d"
-
 [prune]
   go-tests = true
   unused-packages = true

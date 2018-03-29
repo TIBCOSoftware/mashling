@@ -48,7 +48,9 @@ GOMETALINTER = $(BIN)/gometalinter
 $(BIN)/gometalinter: | ; $(info $(M) building gometalinter…)
 	$Q go get github.com/alecthomas/gometalinter && gometalinter --install
 
-GOBINDATA = go run pkg/assets/bindata.go
+GOBINDATA = $(BIN)/go-bindata
+$(BIN)/go-bindata: | ; $(info $(M) building go-bindata…)
+	$Q go get github.com/jeffreybozek/go-bindata/...
 
 .GOPATH/.ok:
 	$Q mkdir -p "$(dir .GOPATH/src/$(IMPORT_PATH))"
@@ -104,7 +106,8 @@ docker: .GOPATH/.ok linux/amd64 ; $(info $(M) building a docker image containing
 	$Q type -p docker >/dev/null 2>&1 && docker build -f dockerfiles/run/Dockerfile . -t mashling-gateway || echo "Docker not found, please visit https://www.docker.com to install for your platform."
 
 .PHONY: setup
-setup: clean .GOPATH/.ok gitignoregopath $(GOLINT) $(GODEP) hooks ## Setup the dev environment
+setup: clean .GOPATH/.ok $(GODEP) $(GOBINDATA) ## Setup the dev environment
+#oldsetup: clean .GOPATH/.ok gitignoregopath $(GOLINT) $(GODEP) $(GOBINDATA) hooks ## Setup the dev environment
 
 gitignoregopath:
 	@if ! grep "/.GOPATH" .gitignore > /dev/null 2>&1; then \
@@ -147,7 +150,7 @@ cligenerate: .GOPATH/.ok ; $(info $(M) running CLI go generate…) @ ## Run go g
 	$(GO) generate ./internal/app/cli/...
 
 .PHONY: assets
-assets: .GOPATH/.ok ; $(info $(M) running asset generation…) @ ## Run asset generation
+assets: .GOPATH/.ok $(GOBINDATA) ; $(info $(M) running asset generation…) @ ## Run asset generation
 	$Q { \
 	set activities = "" ;\
 	set triggers = "" ;\
@@ -188,7 +191,7 @@ assets: .GOPATH/.ok ; $(info $(M) running asset generation…) @ ## Run asset ge
 }
 
 .PHONY: cliassets
-cliassets: .GOPATH/.ok ; $(info $(M) running asset generation…) @ ## Run asset generation for CLI
+cliassets: .GOPATH/.ok $(GOBINDATA); $(info $(M) running asset generation…) @ ## Run asset generation for CLI
 	$Q { \
 	set assets = "" ;\
 	for file in $$(find internal/app/cli/assets/ -not -name "*.go" -type f); do \
