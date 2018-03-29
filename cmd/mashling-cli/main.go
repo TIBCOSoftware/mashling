@@ -25,6 +25,8 @@ var (
 	envVarName  string
 	loadFromEnv bool
 	name        string
+	native      bool
+	targetOS    string
 )
 
 func init() {
@@ -32,6 +34,8 @@ func init() {
 	flag.StringVar(&envVarName, "env-var-name", "MASHLING_CONFIG", "name of the environment variable that contain sthe base64 encoded mashling gateway configuration")
 	flag.BoolVar(&loadFromEnv, "load-from-env", false, "load the mashling gateway configuration from an environment variable")
 	flag.StringVar(&name, "name", "mashling-custom", "customized mashling-gateway name")
+	flag.BoolVar(&native, "native", false, "build the customized binary natively instead of using Docker")
+	flag.StringVar(&targetOS, "os", "", "target OS to build for (default is the host OS, valid values are windows, darwin, and linux)")
 }
 
 func main() {
@@ -72,7 +76,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = command.Create(filepath.Join(pwd, name), deps)
+	err = command.Create(filepath.Join(pwd, name), deps, native, targetOS)
 	if err != nil {
 		log.Println(err.Error())
 		os.Exit(1)

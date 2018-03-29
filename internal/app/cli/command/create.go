@@ -4,6 +4,7 @@ package command
 
 import (
 	"bytes"
+	"errors"
 	"log"
 	"os"
 	"os/exec"
@@ -15,9 +16,17 @@ import (
 	"github.com/TIBCOSoftware/mashling/pkg/strings"
 )
 
+var supportedTargetOS = map[string]bool{"windows": true, "darwin": true, "linux": true}
+
 // Create builds a custom mashling-gateway project directory populated with
 // dependencies listed in the provided Mashling config file.
-func Create(name string, deps []string) (err error) {
+func Create(name string, deps []string, native bool, targetOS string) (err error) {
+	if targetOS == "" {
+		targetOS = runtime.GOOS
+	}
+	if _, ok := supportedTargetOS[targetOS]; !ok {
+		return errors.New("invalid target OS type specified")
+	}
 	if _, err = os.Stat(name); os.IsNotExist(err) {
 		err = os.MkdirAll(name, 0755)
 		if err != nil {
@@ -35,9 +44,10 @@ func Create(name string, deps []string) (err error) {
 
 	var cmd *exec.Cmd
 	var dockerCmd string
-	if dockerCmd, err = exec.LookPath("docker"); err != nil {
+	if dockerCmd, err = exec.LookPath("docker"); native || err != nil {
 		// Docker does not exist, try native toolchain.
-		log.Println("Docker not found, using make natively...")
+		log.Println("Docker not found or native option specified, using make natively...")
+		dockerCmd = ""
 	} else {
 		log.Println("Docker found, using it to build...")
 	}
@@ -79,7 +89,7 @@ func Create(name string, deps []string) (err error) {
 	if dockerCmd != "" {
 		cmd = exec.Command(dockerCmd, "run", "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make assets generate fmt")
 	} else {
-		cmd = exec.Command("make", "assets generate fmt")
+		cmd = exec.Command("make", "assets", "generate", "fmt")
 	}
 	cmd.Dir = name
 	output, cErr = cmd.CombinedOutput()
@@ -88,12 +98,14 @@ func Create(name string, deps []string) (err error) {
 		return cErr
 	}
 	// Run make build target to build for appropriate OS
-	targetOS := runtime.GOOS
 	log.Println("Building customized Mashling binary...")
 	if dockerCmd != "" {
 		cmd = exec.Command(dockerCmd, "run", "-e", "GOOS="+targetOS, "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make buildgateway")
 	} else {
 		cmd = exec.Command("make", "buildgateway")
+		env := os.Environ()
+		env = append(env, "GOOS="+targetOS)
+		cmd.Env = env
 	}
 	cmd.Dir = name
 	output, cErr = cmd.CombinedOutput()
