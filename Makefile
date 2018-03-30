@@ -4,6 +4,7 @@ IGNORED_PACKAGES := /vendor/
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat $(CURDIR)/.version 2> /dev/null || echo v0)
+LDFLAGS= -X $(IMPORT_PATH)/internal/app/version.Version=$(VERSION) -X $(IMPORT_PATH)/internal/app/version.BuildDate=$(DATE)
 
 GO      = go
 GOFMT   = gofmt
@@ -16,11 +17,6 @@ M = $(shell printf "\033[34;1m▶\033[0m")
 temp = $(subst /, ,$@)
 os = $(word 1, $(temp))
 arch = $(word 2, $(temp))
-
-# Support legacy v1 builds
-GITBRANCH:=$(shell git rev-parse --abbrev-ref --symbolic-full-name HEAD)
-MASHLINGLOCALGITREV=`git rev-parse HEAD`
-MASHLINGMASTERGITREV=`git rev-parse ${GITBRANCH}`
 
 .PHONY: build
 build: buildgateway buildcli ## Build gateway and cli binaries
@@ -64,7 +60,7 @@ $(BIN)/go-bindata: | ; $(info $(M) building go-bindata…)
 .PHONY: buildgateway
 buildgateway: .GOPATH/.ok ; $(info $(M) building gateway executable…) @ ## Build gateway binary
 	$Q $(GO) install \
-		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
+		-ldflags "$(LDFLAGS)" \
 		$(IMPORT_PATH)/cmd/mashling-gateway
 
 .PHONY: allgateway
@@ -73,19 +69,11 @@ allgateway: assets generate fmt vet buildgateway ## Satisfy pre-build requiremen
 .PHONY: buildcli
 buildcli: .GOPATH/.ok; $(info $(M) building CLI executable…) @ ## Build CLI binary
 	$Q $(GO) install \
-		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
+		-ldflags "$(LDFLAGS)" \
 		$(IMPORT_PATH)/cmd/mashling-cli
 
 .PHONY: allcli
 allcli: cligenerate cliassets fmt vet buildcli ## Satisfy pre-build requirements and then build the cli binary
-
-.PHONY: buildlegacy
-buildlegacy: .GOPATH/.ok; $(info $(M) legacy CLI executable...) @ ## Build legacy CLI binary
-	$Q $(GO) install \
-		-ldflags "-X github.com/TIBCOSoftware/mashling/cli/app.MashlingMasterGitRev=${MASHLINGMASTERGITREV} \
-		-X github.com/TIBCOSoftware/mashling/cli/app.MashlingLocalGitRev=${MASHLINGLOCALGITREV}  \
-		-X github.com/TIBCOSoftware/mashling/cli/app.GitBranch=${GITBRANCH}" \
-		$(IMPORT_PATH)/cli/cmd/mashling
 
 .PHONY: release
 release: .GOPATH/.ok $(PLATFORMS); @ ## Build all executables for release against all targets
@@ -93,11 +81,11 @@ release: .GOPATH/.ok $(PLATFORMS); @ ## Build all executables for release agains
 $(PLATFORMS): ; $(info $(M) building package executable for $@)
 	$Q GOOS=$(os) GOARCH=$(arch) $(GO) build \
 		-tags release \
-		-ldflags '-s -w -X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
+		-ldflags '-s -w $(LDFLAGS)' \
 		-o release/mashling-gateway-$(os)-$(arch) $(IMPORT_PATH)/cmd/mashling-gateway && \
 		GOOS=$(os) GOARCH=$(arch) $(GO) build \
 			-tags release \
-			-ldflags '-s -w -X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
+			-ldflags '-s -w $(LDFLAGS)' \
 			-o release/mashling-cli-$(os)-$(arch) $(IMPORT_PATH)/cmd/mashling-cli
 		(type -p upx >/dev/null 2>&1 && ( upx release/mashling-gateway-$(os)-$(arch) release/mashling-cli-$(os)-$(arch) ) || echo "UPX not found, skipping compression (please visit https://upx.github.io to install)...")
 
@@ -187,7 +175,6 @@ assets: .GOPATH/.ok $(GOBINDATA) ; $(info $(M) running asset generation…) @ ##
 		$(GOBINDATA) -pkg actions -o internal/app/gateway/flogo/registry/actions/actions.go $$actions ;\
 	fi;\
 	$(GOBINDATA) -prefix internal/app/gateway/assets/ -pkg assets -o internal/app/gateway/assets/assets.go $$assets ;\
-	$(GOBINDATA) -prefix cli/ -pkg assets -o cli/assets/assets.go cli/assets/banner.txt cli/assets/defGopkg.lock cli/assets/defGopkg.toml cli/schema/mashling_schema-0.2.json ; \
 }
 
 .PHONY: cliassets

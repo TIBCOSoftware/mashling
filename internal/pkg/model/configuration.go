@@ -7,25 +7,32 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/TIBCOSoftware/mashling/internal/pkg/consul"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	v1 "github.com/TIBCOSoftware/mashling/internal/pkg/model/v1"
 	v2 "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2"
 )
 
+// Gateway represents an instance of a specific version of a Gateway.
 type Gateway interface {
 	Init() error
 	Start() error
 	Stop() error
 	Version() string
 	AppVersion() string
+	Name() string
 	Description() string
 	Errors() []gwerrors.Error
+	Configuration() interface{}
+	Swagger(hostname string, triggerName string) ([]byte, error)
+	ConsulServiceDefinition() ([]consul.ServiceDefinition, error)
 }
 
 type schema struct {
 	Version string `json:"mashling_schema"`
 }
 
+// LoadFromFile loads a Gateway configuration from the specified file.
 func LoadFromFile(file string) (Gateway, error) {
 	configuration, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -34,6 +41,7 @@ func LoadFromFile(file string) (Gateway, error) {
 	return Load(configuration)
 }
 
+// LoadFromEnv loads a Gateway configuration from the specified environment variable.
 func LoadFromEnv(envVarName string) (Gateway, error) {
 	var configuration []byte
 	b64GatewayJSON := os.Getenv(envVarName)
@@ -47,6 +55,7 @@ func LoadFromEnv(envVarName string) (Gateway, error) {
 	return Load(configuration)
 }
 
+// Load loads a Gateway configuration from the provided byte array.
 func Load(configuration []byte) (Gateway, error) {
 	schemaVersion, err := version(configuration)
 	if err != nil {

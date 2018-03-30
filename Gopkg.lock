@@ -307,6 +307,12 @@
   revision = "f40e974e75af4e271d97ce0fc917af5898ae7bda"
 
 [[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/jeffreybozek/jsonpath"
   packages = ["."]
@@ -459,6 +465,12 @@
   packages = ["."]
   revision = "8965335b8c7107321228e3e3702cab9832751bac"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "a1f051bc3eba734da4772d60e2d677f47cf93ef4"
+  version = "v0.0.2"
 
 [[projects]]
   branch = "master"
@@ -626,6 +638,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6195bd47dcbd0df31f09b66d9ea44bad54059404d9c7d1db46fef156d282c076"
+  inputs-digest = "d53466ce3b57e5f68fff22d10307a8247d4cbf9266b1532b2ac10cbd4f7f535b"
   solver-name = "gps-cdcl"
   solver-version = 1

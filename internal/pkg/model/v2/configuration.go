@@ -18,8 +18,9 @@ import (
 )
 
 // LoadGateway loads a V2 Gateway app instance.
-func LoadGateway(configuration []byte) (*v1.Gateway, error) {
-	gw := &v1.Gateway{}
+func LoadGateway(configuration []byte) (*Gateway, error) {
+	gw := &Gateway{}
+	gateway := &types.Schema{}
 	gw.SchemaVersion = Version
 	var flogoJSON []byte
 	key, err := files.ChecksumContents(configuration)
@@ -31,6 +32,10 @@ func LoadGateway(configuration []byte) (*v1.Gateway, error) {
 		if err != nil {
 			return gw, err
 		}
+		err = json.Unmarshal(configuration, gateway)
+		if err != nil {
+			return gw, err
+		}
 		log.Println("[mashling] Post processed configuration contents found in cache")
 	} else {
 		log.Println("[mashling] Post processed configuration contents *not* found in cache, processing now...")
@@ -38,7 +43,6 @@ func LoadGateway(configuration []byte) (*v1.Gateway, error) {
 		if err != nil {
 			return gw, err
 		}
-		gateway := &types.Schema{}
 		err = json.Unmarshal(configuration, gateway)
 		if err != nil {
 			return gw, err
@@ -78,6 +82,7 @@ func LoadGateway(configuration []byte) (*v1.Gateway, error) {
 			log.Println("[mashling] Post processed configuration contents written to cache")
 		}
 	}
+	gw.MashlingConfig = *gateway
 	jsonParser := json.NewDecoder(bytes.NewReader(flogoJSON))
 	gw.FlogoApp = app.Config{}
 	err = jsonParser.Decode(&gw.FlogoApp)

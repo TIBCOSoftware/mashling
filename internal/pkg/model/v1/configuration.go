@@ -8,10 +8,10 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
-	mashling "github.com/TIBCOSoftware/mashling/cli/app"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo/registry"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/cache"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v1/schema"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/pkg/files"
 )
@@ -23,6 +23,7 @@ var (
 // LoadGateway loads a V1 Gateway app instance.
 func LoadGateway(configuration []byte) (*Gateway, error) {
 	gw := &Gateway{}
+	mashed := &types.Microgateway{}
 	gw.SchemaVersion = Version
 	var flogoJSON []byte
 	key, err := files.ChecksumContents(configuration)
@@ -34,18 +35,18 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 		if err != nil {
 			return gw, err
 		}
+		err = json.Unmarshal(configuration, mashed)
+		if err != nil {
+			return gw, err
+		}
 		log.Println("[mashling] Post processed configuration contents found in cache")
 	} else {
 		log.Println("[mashling] Post processed configuration contents *not* found in cache, processing now...")
-		isValidJSON, verr := mashling.IsValidGateway(string(configuration))
-		if verr != nil {
-			return gw, verr
-		}
-		if !isValidJSON {
-			return gw, errors.New("invalid gateway schema")
+		err = schema.Validate(configuration)
+		if err != nil {
+			return gw, err
 		}
 
-		mashed := &types.Microgateway{}
 		err = json.Unmarshal(configuration, mashed)
 		if err != nil {
 			return gw, err
@@ -83,7 +84,7 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 			log.Println("[mashling] Post processed configuration contents written to cache")
 		}
 	}
-
+	gw.MashlingConfig = *mashed
 	jsonParser := json.NewDecoder(bytes.NewReader(flogoJSON))
 	gw.FlogoApp = app.Config{}
 	err = jsonParser.Decode(&gw.FlogoApp)
