@@ -182,21 +182,6 @@ Pull requests are also welcome. If you would like to submit one, please follow t
 
 Please submit a github issue if you would like to propose a significant change or request a new feature.
 
-### Build Mashling from source
-```
-$go get github.com/TIBCOSoftware/mashling/cli/...
-
-$cd $GOPATH/src/github.com/TIBCOSoftware/mashling/cli
-
-[optional, only if building from branch]
-$git checkout my_branch
-
-[need to manually go get all dependencies for example:]
-$go get github.com/xeipuuv/gojsonschema
-
-$go install ./...
-```
-
 ## License
 Mashling is licensed under a BSD-type license. See license text [here](https://github.com/TIBCOSoftware/mashling/blob/master/TIBCO%20LICENSE.txt).
 
