@@ -13,7 +13,6 @@ Project Mashling consists of the following open source repos:
 * [mashling](http://github.com/TIBCOSoftware/mashling): This is the main repo that includes the below components
   - A mashling-cli to build customized Mashling apps
   - A mashling-gateway to run supported features out of the box
-  - A legacy mashling cli to build one-off v1 model gateways
   - Mashling triggers and activities
   - Library to build Mashling extensions
 
@@ -51,77 +50,6 @@ Again, in depth configuration and usage documentation can be found [here](docs/R
 The `mashling-cli` binary is used to create customized `mashling-gateway` binaries that contain triggers, actions, and activities not included in the default `mashling-gateway`. Much like the default binary, once your customized binary is built it can be reused with any `mashling.json` configuration file that has its dependencies satisfied by this new customized binary.
 
 Because the `mashling-cli` is building custom binaries there are a few extra dependencies that need to be installed for it to work. The easiest is to just have [Docker](https://www.docker.com) installed on your local machine and let the `mashling-cli` binary use the local Docker install to run all the build commands through a pre-built Docker image. The other option is to [satisfy the prerequisite dependencies listed below in the development section](#prerequisites).
-
-### Legacy mashling cli
-**This tool only works for the v1 configuration model. This will go away once the v2 model work is merged into master and officially released.**
-
-The **Legacy** Mashling CLI tool is used to create one-off Mashling microgateways. The tool can be used to create a gateway from an existing *mashling.json* or to create a simple base gateway to get you started.  In this example we will walk you through creating the base/sample gateway.
-
-To create the base gateway, which consists of a REST trigger and a simple event handler flow with a log activity, you use the following commands.
-
-```bash
-mashling create myApp
-```
-
-```bash
-cd myApp/bin folder
-./myapp
-```
-
-- Mashling will start a REST server
-- Test it by sending sample HTTP events eg: http://localhost:9096/pets/2
-
-The built in sample microgateway is based off the following mashling.json.  This file can be modified to add additional triggers and event handlers.
-
-```json
-{
-	"mashling_schema": "0.2",
-	"gateway": {
-		"name": "demo",
-		"version": "1.0.0",
-		"description": "This is the first microgateway app",
-		"configurations": [],
-		"triggers": [
-			{
-				"name": "rest_trigger",
-				"description": "The trigger on 'pets' endpoint",
-				"type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-				"settings": {
-					"port": "9096",
-					"method": "GET",
-					"path": "/pets/{petId}"
-				}
-			}
-		],
-		"event_handlers": [
-			{
-				"name": "get_pet_success_handler",
-				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
-				"params": {
-					"uri": "petstore.swagger.io/v2/pet/3"
-				}
-			}
-		],
-		"event_links": [
-			{
-				"triggers": [
-					"rest_trigger"
-				],
-				"dispatches": [
-					{
-						"handler": "get_pet_success_handler"
-					}
-				]
-			}
-		]
-	}
-}
-```
-
-For more details about the REST Trigger go [here](https://github.com/TIBCOSoftware/mashling/tree/master/ext/flogo/trigger/gorillamuxtrigger)
-
-For additional documentation on the **legacy** Mashling CLI tool, go [here](https://github.com/TIBCOSoftware/mashling/blob/master/cli/README.md)
 
 ## Development and Building from Source
 With the new v2 model this section only applies if you are actively making changes to the Mashling source code or trying to build customized `mashling-gateway` binaries using the `mashling-cli` tool **without** using Docker.
