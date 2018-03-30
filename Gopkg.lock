@@ -14,19 +14,6 @@
   version = "v1.0.5"
 
 [[projects]]
-  name = "github.com/TIBCOSoftware/flogo-cli"
-  packages = [
-    "app",
-    "cli",
-    "config",
-    "dep",
-    "env",
-    "util"
-  ]
-  revision = "ef81ce0f77529aa17d58749979b9e4df19bdeb8c"
-  version = "v0.5.2"
-
-[[projects]]
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
     "action/flow",
@@ -149,12 +136,6 @@
   ]
   revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
   version = "v1.13.17"
-
-[[projects]]
-  name = "github.com/callum-ramage/jsonconfig"
-  packages = ["."]
-  revision = "5c98f50e768c4c34a52ee10ffe8cd0c44011c8c7"
-  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -290,23 +271,6 @@
   revision = "eb925808374e5ca90c83401a40d711dc08c0c0f6"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/hcl"
-  packages = [
-    ".",
-    "hcl/ast",
-    "hcl/parser",
-    "hcl/printer",
-    "hcl/scanner",
-    "hcl/strconv",
-    "hcl/token",
-    "json/parser",
-    "json/scanner",
-    "json/token"
-  ]
-  revision = "f40e974e75af4e271d97ce0fc917af5898ae7bda"
-
-[[projects]]
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
@@ -360,18 +324,6 @@
   version = "v0.15.2"
 
 [[projects]]
-  name = "github.com/magiconair/properties"
-  packages = ["."]
-  revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
-  version = "v1.7.6"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/mitchellh/mapstructure"
-  packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
-
-[[projects]]
   branch = "master"
   name = "github.com/opentracing-contrib/go-observer"
   packages = ["."]
@@ -410,12 +362,6 @@
   version = "v0.3.3"
 
 [[projects]]
-  name = "github.com/pelletier/go-toml"
-  packages = ["."]
-  revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
-  version = "v1.1.0"
-
-[[projects]]
   name = "github.com/pierrec/lz4"
   packages = ["."]
   revision = "2fcda4cb7018ce05a25959d2fe08c83e3329f169"
@@ -452,43 +398,16 @@
   revision = "a0d4e5000ed679a67a69d2f92b62d06320bc5d09"
 
 [[projects]]
-  name = "github.com/spf13/afero"
-  packages = [
-    ".",
-    "mem"
-  ]
-  revision = "bb8f1927f2a9d3ab41c9340aa034f6b803f4359c"
-  version = "v1.0.2"
-
-[[projects]]
-  name = "github.com/spf13/cast"
-  packages = ["."]
-  revision = "8965335b8c7107321228e3e3702cab9832751bac"
-  version = "v1.2.0"
-
-[[projects]]
   name = "github.com/spf13/cobra"
   packages = ["."]
   revision = "a1f051bc3eba734da4772d60e2d677f47cf93ef4"
   version = "v0.0.2"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/spf13/jwalterweatherman"
-  packages = ["."]
-  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
-
-[[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/spf13/viper"
-  packages = ["."]
-  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
-  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -620,12 +539,6 @@
   version = "v2.5.1"
 
 [[projects]]
-  name = "gopkg.in/yaml.v2"
-  packages = ["."]
-  revision = "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb"
-  version = "v2.2.0"
-
-[[projects]]
   branch = "master"
   name = "sourcegraph.com/sourcegraph/appdash"
   packages = [
@@ -638,6 +551,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d53466ce3b57e5f68fff22d10307a8247d4cbf9266b1532b2ac10cbd4f7f535b"
+  inputs-digest = "adb680e6784dbfb4b7bb1edbaad5bf93c5e24b38d5857b9471a07f72403c03a8"
   solver-name = "gps-cdcl"
   solver-version = 1

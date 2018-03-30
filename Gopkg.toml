@@ -30,10 +30,6 @@
   version = "1.16.0"
 
 [[constraint]]
-  name = "github.com/TIBCOSoftware/flogo-cli"
-  version = "=0.5.2"
-
-[[constraint]]
   name = "github.com/TIBCOSoftware/flogo-contrib"
   version = "=0.5.2"
 
@@ -74,10 +70,6 @@
   version = "0.8.0"
 
 [[constraint]]
-  name = "github.com/spf13/viper"
-  version = "1.0.2"
-
-[[constraint]]
   name = "github.com/stretchr/testify"
   version = "1.2.1"
 
@@ -109,10 +101,10 @@
   branch = "master"
   name = "github.com/dop251/goja"
 
-[prune]
-  go-tests = true
-  unused-packages = true
-
 [[constraint]]
   name = "github.com/spf13/cobra"
   version = "0.0.2"
+
+[prune]
+  go-tests = true
+  unused-packages = true
