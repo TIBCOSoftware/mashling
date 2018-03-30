@@ -18,6 +18,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	createCommand.Flags().StringVarP(&name, "name", "n", "mashling-custom", "customized mashling-gateway name")
+	createCommand.Flags().BoolVarP(&native, "native", "N", false, "build the customized binary natively instead of using Docker")
+	createCommand.Flags().StringVarP(&targetOS, "os", "O", "", "target OS to build for (default is the host OS, valid values are windows, darwin, and linux)")
+	cliCommand.AddCommand(createCommand)
+}
+
 var (
 	name              string
 	native            bool
@@ -30,13 +37,6 @@ var createCommand = &cobra.Command{
 	Short: "Creates a customized mashling-gateway",
 	Long:  `Create a reusable customized mashling-gateway binary based off of the dependencies listed in your mashling.json configuration file`,
 	Run:   create,
-}
-
-func init() {
-	createCommand.Flags().StringVarP(&name, "name", "n", "mashling-custom", "customized mashling-gateway name")
-	createCommand.Flags().BoolVarP(&native, "native", "N", false, "build the customized binary natively instead of using Docker")
-	createCommand.Flags().StringVarP(&targetOS, "os", "O", "", "target OS to build for (default is the host OS, valid values are windows, darwin, and linux)")
-	rootCommand.AddCommand(createCommand)
 }
 
 // Create builds a custom mashling-gateway project directory populated with

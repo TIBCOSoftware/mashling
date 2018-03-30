@@ -7,6 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	cliCommand.PersistentFlags().StringVarP(&config, "config", "c", "mashling.json", "mashling gateway configuration")
+	cliCommand.PersistentFlags().StringVarP(&envVarName, "env-var-name", "e", "MASHLING_CONFIG", "name of the environment variable that contain sthe base64 encoded mashling gateway configuration")
+	cliCommand.PersistentFlags().BoolVarP(&loadFromEnv, "load-from-env", "l", false, "load the mashling gateway configuration from an environment variable")
+}
+
 var (
 	config      string
 	envVarName  string
@@ -14,21 +20,15 @@ var (
 	gateway     model.Gateway
 )
 
-var rootCommand = &cobra.Command{
+var cliCommand = &cobra.Command{
 	Use:   "mashling-cli",
 	Short: "mashling-cli is a CLI to help build mashling-gateway instances",
 	Long:  "A CLI to build custom mashling-gateway instances, publish configurations to Mashery, and more. Complete documentation is available at https://github.com/TIBCOSoftware/mashling",
 }
 
-func init() {
-	rootCommand.PersistentFlags().StringVarP(&config, "config", "c", "mashling.json", "mashling gateway configuration")
-	rootCommand.PersistentFlags().StringVarP(&envVarName, "env-var-name", "e", "MASHLING_CONFIG", "name of the environment variable that contain sthe base64 encoded mashling gateway configuration")
-	rootCommand.PersistentFlags().BoolVarP(&loadFromEnv, "load-from-env", "l", false, "load the mashling gateway configuration from an environment variable")
-}
-
 // Execute executes registered commands.
 func Execute() {
-	if err := rootCommand.Execute(); err != nil {
+	if err := cliCommand.Execute(); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -9,6 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	swaggerCommand.Flags().StringVarP(&host, "host", "H", "localhost", "the hostname where this mashling will be deployed")
+	swaggerCommand.Flags().StringVarP(&trigger, "trigger", "t", "", "the trigger name to target (default is all))")
+	swaggerCommand.Flags().StringVarP(&output, "output", "o", "", "the output file to write the swagger.json to (default is stdout)")
+	cliCommand.AddCommand(swaggerCommand)
+}
+
 var (
 	host    string
 	trigger string
@@ -20,13 +27,6 @@ var swaggerCommand = &cobra.Command{
 	Short: "Creates a swagger 2.0 doc",
 	Long:  `Creates a swagger 2.0 doc based off of the HTTP triggers in the mashling.json configuration file`,
 	Run:   swagger,
-}
-
-func init() {
-	swaggerCommand.Flags().StringVarP(&host, "host", "H", "localhost", "the hostname where this mashling will be deployed")
-	swaggerCommand.Flags().StringVarP(&trigger, "trigger", "t", "", "the trigger name to target (default is all))")
-	swaggerCommand.Flags().StringVarP(&output, "output", "o", "", "the output file to write the swagger.json to (default is stdout)")
-	rootCommand.AddCommand(swaggerCommand)
 }
 
 func swagger(command *cobra.Command, args []string) {

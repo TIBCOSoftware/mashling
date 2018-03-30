@@ -9,27 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	apiKey      string
-	apiSecret   string
-	username    string
-	password    string
-	areaID      string
-	areaDomain  string
-	mock        bool
-	mHost       string
-	iodocs      bool
-	testplan    bool
-	apiTemplate string
-)
-
-var masheryCommand = &cobra.Command{
-	Use:   "mashery",
-	Short: "Publishes to Mashery",
-	Long:  `Publishes the details of the mashling.json configuration file Mashery`,
-	Run:   masheryPublish,
-}
-
 func init() {
 	masheryCommand.Flags().StringVarP(&apiKey, "apiKey", "k", "", "the API key")
 	masheryCommand.Flags().StringVarP(&apiSecret, "secretKey", "s", "", "the secret key")
@@ -50,6 +29,27 @@ func init() {
 	masheryCommand.MarkFlagRequired("areaID")
 	masheryCommand.MarkFlagRequired("host")
 	publishCommand.AddCommand(masheryCommand)
+}
+
+var (
+	apiKey      string
+	apiSecret   string
+	username    string
+	password    string
+	areaID      string
+	areaDomain  string
+	mock        bool
+	mHost       string
+	iodocs      bool
+	testplan    bool
+	apiTemplate string
+)
+
+var masheryCommand = &cobra.Command{
+	Use:   "mashery",
+	Short: "Publishes to Mashery",
+	Long:  `Publishes the details of the mashling.json configuration file Mashery`,
+	Run:   masheryPublish,
 }
 
 func masheryPublish(command *cobra.Command, args []string) {

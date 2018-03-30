@@ -6,15 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	cliCommand.AddCommand(validateCommand)
+}
+
 var validateCommand = &cobra.Command{
 	Use:   "validate",
 	Short: "Validates a mashling.json configuration file",
 	Long:  `Validates a provided mashling.json configuration file based off of the supported Mashling schema versions`,
 	Run:   validate,
-}
-
-func init() {
-	rootCommand.AddCommand(validateCommand)
 }
 
 func validate(command *cobra.Command, args []string) {

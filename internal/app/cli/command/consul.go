@@ -7,6 +7,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	consulCommand.Flags().StringVarP(&consulToken, "consulToken", "t", "", "consul agent security token")
+	consulCommand.Flags().StringVarP(&consulDefDir, "consulDefDir", "D", "", "service definition folder")
+	consulCommand.Flags().StringVarP(&cHost, "host", "H", "", "the hostname where consul is running (e.g. hostip:port)")
+	consulCommand.Flags().BoolVarP(&consulRegister, "consulRegister", "r", true, "register services with consul (required -a & -r mutually exclusive)")
+	consulCommand.Flags().BoolVarP(&consulDeRegister, "consulDeRegister", "d", false, "de-register services with consul (required -a & -r mutually exclusive)")
+	consulCommand.MarkFlagRequired("consulToken")
+	publishCommand.AddCommand(consulCommand)
+}
+
 var (
 	consulToken      string
 	consulRegister   bool
@@ -20,16 +30,6 @@ var consulCommand = &cobra.Command{
 	Short: "Publishes to Consul",
 	Long:  `Publishes the details of the mashling.json configuration file Consul`,
 	Run:   consulReg,
-}
-
-func init() {
-	consulCommand.Flags().StringVarP(&consulToken, "consulToken", "t", "", "consul agent security token")
-	consulCommand.Flags().StringVarP(&consulDefDir, "consulDefDir", "D", "", "service definition folder")
-	consulCommand.Flags().StringVarP(&cHost, "host", "H", "", "the hostname where consul is running (e.g. hostip:port)")
-	consulCommand.Flags().BoolVarP(&consulRegister, "consulRegister", "r", true, "register services with consul (required -a & -r mutually exclusive)")
-	consulCommand.Flags().BoolVarP(&consulDeRegister, "consulDeRegister", "d", false, "de-register services with consul (required -a & -r mutually exclusive)")
-	consulCommand.MarkFlagRequired("consulToken")
-	publishCommand.AddCommand(consulCommand)
 }
 
 func consulReg(command *cobra.Command, args []string) {
