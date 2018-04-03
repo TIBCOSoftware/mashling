@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/TIBCOSoftware/mashling/pkg/strings"
@@ -103,6 +104,13 @@ func NewVM(defaults map[string]interface{}) (vm *VM, err error) {
 			vm.vm.Set(k, v)
 		}
 	}
+	// Add ENV to the VM
+	vmEnv := make(map[string]string)
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		vmEnv[pair[0]] = pair[1]
+	}
+	vm.vm.Set("env", vmEnv)
 	return vm, err
 }
 
