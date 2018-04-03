@@ -9,14 +9,22 @@ Project Mashling highlights include:
 * Complements Service Meshes
 * Co-exists with API management platforms in a federated API Gateway model
 
-Project Mashling consists of the following open source repos:
-* [mashling](http://github.com/TIBCOSoftware/mashling): This is the main repo that includes the below components
+Project Mashling consists of the following components:
+
+* [mashling](http://github.com/TIBCOSoftware/mashling): This is the main repo that includes the below components:
   - A mashling-cli to build customized Mashling apps
   - A mashling-gateway to run supported features out of the box
   - Mashling triggers and activities
   - Library to build Mashling extensions
 
-* [mashling-recipes](http://github.com/TIBCOSoftware/mashling-recipes): This is the repo that includes recipes that illustrate configuration of common microgateway patterns. These recipes are curated and searchable via [mashling.io](http://mashling.io)
+* [mashling-recipes](http://github.com/TIBCOSoftware/mashling-recipes): This is the repo that includes recipes that illustrate configuration of common microgateway patterns. These recipes are curated and searchable via [mashling.io](http://mashling.io).
+
+* [mashling.io](http://mashling.io): Project Mashling also comes with a searchable collection of curated recipes for common microgateway patterns. To get started:
+
+  - Find a recipe that is of interest to you
+  - Browse the details on the recipe
+  - Use the "Try it now" button to download the corresponding pre-created Mashling application
+  - Each recipe comes with detailed usage instruction. A recipe README file, as an example [here](https://github.com/TIBCOSoftware/mashling-recipes/blob/master/recipes/event-dispatcher-router-mashling/README.md)
 
 Additional developer tooling is included in below open source repo that contains the VSCode plugin for Mashling configuration:
 * [VSCode Plugin for Mashling](https://github.com/TIBCOSoftware/vscode-extension-mashling)
@@ -30,12 +38,12 @@ The `mashling-gateway` is a static runtime for Mashling instances that provides 
 
 The `mashling-gateway` binary is what does the actual processing of requests and events according to the rules you've outlined in your `mashling.json` file.
 
-Detailed usage information, documentation, and examples can be found in the [mashling-gateway documentation](docs/README.md).
+Detailed usage information, documentation, and examples can be found in the [mashling-gateway documentation](docs/gateway/README.md).
 
 A simple usage example is:
 
 ```
-./mashling-gateway -config <path-to-mashling-config>
+./mashling-gateway -c <path-to-mashling-config>
 ```
 
 The default value of the `config` argument is `mashling.json`.
@@ -44,12 +52,26 @@ Any of the bundled configurations in the `examples/recipes/` folder will work. R
 
 The intent of this binary is to be used with *any* of these configuration files without re-compiling the source of this project.
 
-Again, in depth configuration and usage documentation can be found [here](docs/README.md).
+Again, in depth configuration and usage documentation for the gateway can be found [here](docs/gateway/README.md).
 
 ### mashling-cli
 The `mashling-cli` binary is used to create customized `mashling-gateway` binaries that contain triggers, actions, and activities not included in the default `mashling-gateway`. Much like the default binary, once your customized binary is built it can be reused with any `mashling.json` configuration file that has its dependencies satisfied by this new customized binary.
 
 Because the `mashling-cli` is building custom binaries there are a few extra dependencies that need to be installed for it to work. The easiest is to just have [Docker](https://www.docker.com) installed on your local machine and let the `mashling-cli` binary use the local Docker install to run all the build commands through a pre-built Docker image. The other option is to [satisfy the prerequisite dependencies listed below in the development section](#prerequisites).
+
+Detailed usage information, documentation, and examples can be found in the [mashling-cli documentation](docs/cli/README.md).
+
+A simple usage example is:
+
+```
+./mashling-cli create -c <path-to-mashling-config-with-custom-dependencies>
+```
+
+By default this will use `Docker` on your local machine, if detected, to perform all of the custom asset identification, packaging, and compilation.
+
+A simple custom Flogo trigger example that works with the above command can be found [here](examples/recipes/v2/customized-simple-synchronous-pattern.json).
+
+Again, in depth configuration and usage documentation for the CLI can be found [here](docs/cli/README.md).
 
 ## Development and Building from Source
 With the new v2 model this section only applies if you are actively making changes to the Mashling source code or trying to build customized `mashling-gateway` binaries using the `mashling-cli` tool **without** using Docker.
@@ -128,7 +150,15 @@ docker run -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash
 ```
 These commands will build both the `mashling-gateway` and `mashling-cli` and place them under the `/bin` folder in the root of the mashling repository.
 
-To build a binary for a specific operating system, like Windows, use the following command:
+**To build a binary for a specific operating system**, like Windows, use the **two** following commands.
+
+**First**, run:
+
+```bash
+docker run -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make setup assets generate fmt"
+```
+
+**Then**, run:
 
 ```bash
 docker run -e="GOOS=windows" -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make"
