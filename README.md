@@ -84,7 +84,7 @@ The easiest way to use the CLI or build from source locally is to have Docker in
 If you download the source code from Github using Git, please make sure Git is installed.
 
 ```bash
-git clone -b master --single-branch https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
+git clone -b feature-v2-model --single-branch https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
 cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 ```
 
