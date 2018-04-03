@@ -15,8 +15,6 @@
 
 ## <a name="overview"></a>Overview
 
-**This is a rough draft.**
-
 The mashling-gateway powers the core event driven routing engine of the Mashling project. This core binary can run all versions of the mashling schema to date, however for the purposes of this document, we will focus on the `1.0` configuration schema.
 
 ## <a name="usage"></a>Usage
@@ -25,33 +23,43 @@ The gateway binary has the following command line arguments available to setup a
 
 They can be found by running:
 
-```
+```bash
 ./mashling-gateway -h
 ```
 
-The flags are:
+The output and flags are:
 
-```
-Usage of ./bin/mashling-gateway:
-  -config string
-    	mashling gateway configuration (default "mashling.json")
-  -config-cache string
-    	location of the configuration artifacts cache (default ".cache")
-  -config-cache-enabled
-    	cache post-processed configuration artifacts locally (default true)
-  -dev
-    	run mashling in dev mode
-  -env-var-name string
-    	name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
-  -load-from-env
-    	load the mashling gateway configuration from an environment variable
+```bash
+A static binary that executes Mashling gateway logic defined in a mashling.json configuration file. Complete documentation is available at https://github.com/TIBCOSoftware/mashling
+
+Version: v0.3.3-internal-29-gf6c81fd-dirty
+Build Date: 2018-04-03T10:11:33-0400
+
+Usage:
+  mashling-gateway [flags]
+  mashling-gateway [command]
+
+Available Commands:
+  help        Help about any command
+  version     Prints the mashling-gateway version
+
+Flags:
+  -c, --config string          mashling gateway configuration (default "mashling.json")
+  -C, --config-cache string    location of the configuration artifacts cache (default ".cache")
+  -E, --config-cache-enabled   cache post-processed configuration artifacts locally (default true)
+  -d, --dev                    run mashling in dev mode
+  -e, --env-var-name string    name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -h, --help                   help for mashling-gateway
+  -l, --load-from-env          load the mashling gateway configuration from an environment variable
+
+Use "mashling-gateway [command] --help" for more information about a command.
 ```
 
-Right now, `dev` mode just reloads the running gateway instance when a change is detected in the `mashling.json` file.
+Right now, `dev` mode just reloads the running gateway instance when a change is detected in the `mashling.json` file but the behavior is inconsistent between triggers.
 
 ## <a name="configuration"></a>Configuration
 
-The `mashling.json` configuration file is what contains all details related to the runtime behavior of a mashling-gateway instance. The file can be named anything and pointed to via the `-config` flag.
+The `mashling.json` configuration file is what contains all details related to the runtime behavior of a mashling-gateway instance. The file can be named anything and pointed to via the `-c` or `--config` flag.
 
 A mashling configuration file specifies the appropriate schema version to load and validate against via the `mashling_schema` key. This is located at the top level of the configuration JSON schema. All other components specifying runtime behavior are contained within a `gateway` key and will be explained in detail below.
 

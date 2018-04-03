@@ -1,141 +1,130 @@
-# Mashling CLI
-> Details on Mashling gateway projects and associated CLI commands.
+## Table of Contents
 
-## Commands
-#### create
-This command is used to create a Mashling gateway project.
+- [Overview](#overview)
+- [Usage](#usage)
+- [Commands](#commands)
+	* [Create](#create)
+	* [Swagger](#swagger)
+	* [Publish](#publish)
+		* [Mashery](#mashery)
+	  * [Consul](#consul)
 
-*Create the base sample project with a specific name.*
+## <a name="overview"></a>Overview
 
-	mashling create my_app
+The mashling-cli powers all non-runtime functionality associated with a Mashling configuration file. These are actions like constructing a customized Mashling binary, generating Swagger docs, publishing to Mashery, and more. This core binary can run all versions of the mashling schema to date (v1 and v2).
 
-*Create a Mashling gateway project from an existing Mashling gateway descriptor.*
+## <a name="usage"></a>Usage
 
-	mashling create -f myapp.json my_app
+The cli binary has the following command line arguments available to specify commands and operation.
 
-Usage:
+They can be found by running:
 
-	mashling create
-
-**options**
-
-- *-f* : specify the Mashling json (default is mashling.json).
-- *-pingport* : specify the mashling ping port (default is 9090).
-
-Example using default mashling.json :
-
-	mashling create my_gw_app
-
-
-Example using recipe rest-gateway-with-tracing.json:
-
-	mashling create -f rest-gateway-with-tracing.json  my_rest_gw_app
-
-Example using pingport flag:
-
-	mashling create -pingport 9095 my_gw_app
-
-Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled. For more information on ping fucntionality click [here](https://github.com/TIBCOSoftware/mashling/blob/master/docs/pingfunctionality.md) 
-
-**dependencies versioning**
-
-By default a new dep based dependency files(gopkg.toml and gopkg.lock) are created in the vendor folder of the gateway project.
-If gopkg.toml and gopkg.lock files exists in the current working directory, that is used to restore the vendor folder.
-The default mashling created by 'mashling create app' uses a default gopkg.toml and gopkg.lock files built into the mashling binary.
-
-### build
-This command is used to build the created Mashling gateway.
-
-*Build the created project*
-
-	mashling build
-
-Usage:
-
-	mashling build
-
-**options**
-
-- *-pingport* : specify the mashling ping port (default is 9090).
-
-Example using pingport flag:
-
-	mashling build -pingport 9095
-
-Ping functionality can be enabled by setting environment variable MASHLING_PING_ENABLE value to TRUE. By default this feature is disabled. For more information on ping fucntionality click [here](https://github.com/TIBCOSoftware/mashling/blob/master/docs/pingfunctionality.md) 
-
-### help
-This command is used to display help on a particular command
-
-	mashling help create
-
-### list
-This command is used to display components of a Mashling gateway
-
-	mashling help list
-
-### swagger
-This command is used to generater Swagger 2.0 docs for HTTP triggers in your mashling.json file.
-
-Usage:
-
-	mashling swagger
-
-**options**
-
-- *-f* : specify the Mashling json (default is mashling.json).
-- *-h* : the hostname where this Mashling will be deployed (default is localhost).
-- *-t* : the trigger name to target (default is all).
-- *-o* : the output file to write the swagger.json to (default is stdout).
-
-Example using a mashling.json with a single HTTP trigger:
-
-	mashling swagger -f reference-gateway.json
-
-Output:
-```json
-{
-    "host": "localhost",
-    "info": {
-        "description": "This is the first microgateway app",
-        "title": "demo",
-        "version": "1.0.0"
-    },
-    "paths": {
-        "/pets/{petId}": {
-            "get": {
-                "description": "The trigger on 'pets' endpoint",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "petId",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The trigger on 'pets' endpoint"
-                    },
-                    "default": {
-                        "description": "error"
-                    }
-                },
-                "tags": [
-                    "rest_trigger"
-                ]
-            }
-        }
-    },
-    "swagger": "2.0"
-}
+```bash
+./mashling-cli -h
 ```
 
-Example using a more complex conditional gateway:
+The output and flags are:
 
-	mashling swagger -f rest-conditional-gateway.json
+```bash
+A CLI to build custom mashling-gateway instances, publish configurations to Mashery, and more. Complete documentation is available at https://github.com/TIBCOSoftware/mashling
 
-Output:
+Usage:
+  mashling-cli [command]
+
+Available Commands:
+  create      Creates a customized mashling-gateway
+  help        Help about any command
+  publish     Publishes to supported platforms
+  swagger     Creates a swagger 2.0 doc
+  validate    Validates a mashling.json configuration file
+  version     Prints the mashling-cli version
+
+Flags:
+  -c, --config string         mashling gateway configuration (default "mashling.json")
+  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -h, --help                  help for mashling-cli
+  -l, --load-from-env         load the mashling gateway configuration from an environment variable
+
+Use "mashling-cli [command] --help" for more information about a command.
+```
+
+## <a name="commands"></a>Commands
+Below are a list of the currently support commands via the `mashling-cli` binary.
+
+### <a name="create"></a>Create
+Create allows you to build cutomized `mashling-gateway` binaries that are re-usable and contain all of your custom dependencies.
+
+The command details are as follows:
+
+
+```bash
+./mashling-cli create -h
+```
+
+```bash
+Create a reusable customized mashling-gateway binary based off of the dependencies listed in your mashling.json configuration file
+
+Usage:
+  mashling-cli create [flags]
+
+Flags:
+  -h, --help          help for create
+  -n, --name string   customized mashling-gateway name (default "mashling-custom")
+  -N, --native        build the customized binary natively instead of using Docker
+  -O, --os string     target OS to build for (default is the host OS, valid values are windows, darwin, and linux)
+
+Global Flags:
+  -c, --config string         mashling gateway configuration (default "mashling.json")
+  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -l, --load-from-env         load the mashling gateway configuration from an environment variable
+```
+
+A simple example usage is:
+
+```bash
+./mashling-cli create -c examples/recipes/v2/customized-simple-synchronous-patter.json
+```
+
+By default all of the build commands will run through `Docker` so as to simplify the setup required on your development machine. You can run these commands natively (assuming your development environment is setup correclty), by passing the `-N` flag to the `create` command.
+
+You can also specify which target OS to build the customized binary for via the `-O` flag. Supported values are `windows`, `darwin` (for macOS), and `linux`. The default value is whatever the host operating system is at the time the `create` command is executed.
+
+### <a name="swagger"></a>Swagger
+Swagger allows you to generate a Swagger 2.0 document based off of the provided `mashling.json` configuration file. Currently it only works with HTTP based triggers.
+
+The command details are as follows:
+
+
+```bash
+./mashling-cli swagger -h
+```
+
+```bash
+Creates a swagger 2.0 doc based off of the HTTP triggers in the mashling.json configuration file
+
+Usage:
+  mashling-cli swagger [flags]
+
+Flags:
+  -h, --help             help for swagger
+  -H, --host string      the hostname where this mashling will be deployed (default "localhost")
+  -o, --output string    the output file to write the swagger.json to (default is stdout)
+  -t, --trigger string   the trigger name to target (default is all))
+
+Global Flags:
+  -c, --config string         mashling gateway configuration (default "mashling.json")
+  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -l, --load-from-env         load the mashling gateway configuration from an environment variable
+```
+
+A simple example usage is:
+
+```bash
+./mashling-cli swagger -c examples/recipes/v1/rest-conditional-gateway.json
+```
+
+The resulting output is:
+
 ```json
 {
     "host": "localhost",
@@ -191,315 +180,123 @@ Output:
 }
 ```
 
-Example specifying a trigger:
+You can override the published hostname via the `-H` flag.
 
-	mashling swagger -f rest-conditional-gateway.json -t get_animals_rest_trigger
-
-Output:
-```json
-{
-    "host": "localhost",
-    "info": {
-        "description": "This is the rest based microgateway app",
-        "title": "demoRestGw",
-        "version": "1.0.0"
-    },
-    "paths": {
-        "/pets/{petId}": {
-            "get": {
-                "description": "Animals rest trigger - get animal details",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "petId",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Animals rest trigger - get animal details"
-                    },
-                    "default": {
-                        "description": "error"
-                    }
-                },
-                "tags": [
-                    "get_animals_rest_trigger"
-                ]
-            }
-        }
-    },
-    "swagger": "2.0"
-}
-```
-
-Example sending output to a file instead of STDOUT:
-
-	mashling swagger -f rest-conditional-gateway.json -o swagger.json
-
-For more details please use:
-
-	mashling help swagger
-
-### publish
+### <a name="publish"></a>Publish
 This command is used to publish HTTP triggers in your mashling.json file
-to Mashery or Consul.
+to the currently supported publish targets, namely Mashery and Consul.
 
-#### Publish to Mashery Usage:
+Details are:
 
-    mashling publish -k key -s secret_key  -u username -p password -uuid  uuid -portal mashery_portal -h petstore.swagger.io
-
-**options**
-
-- *-f*      : specify the Mashling json (default is mashling.json).
-- *-k*      : the api key (required)
-- *-s*      : the api secret key (required)
-- *-u*      : username (required)
-- *-p*      : password (required)
-- *-portal* : the portal (required)
-- *-uuid*   : the proxy uuid (required)
-- *-h*			: the publicly available hostname where this Mashling will be deployed (required)
-- *-mock*		: true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery (default is false).
-
-
-
-Example (display transformed swagger doc only):
-
-    mashling publish -k 12345  -s 6789  -u foo -p bar -uuid  xxxyyy -portal "tibcobanqio.api.mashery.com" -mock true  -h petstore.swagger.io
-
-Example (publish to Mashery):
-
-    mashling publish -k 12345  -s 6789  -u foo -p bar -uuid  xxxyyy -portal "tibcobanqio.api.mashery.com"  -h petstore.swagger.io
-
-For more details please use:
-
-    mashling help publish
-
-
-#### Publish to Consul Usage:
-
-Register service with consul:
-
-    mashling publish -consul -a -f <GATEWAY JSON FILE PATH> -t <TOKEN> -h <HOSTIP:PORT>
-
-De-Register service with consul:
-
-    mashling publish -consul -r -f <GATEWAY JSON FILE PATH> -t <TOKEN> -h <HOSTIP:PORT>
-
-Register service with consul using -config-dir:
-
-    mashling publish -consul -a -f <GATEWAY JSON FILE PATH> -t <TOKEN> -d <CONFIG DIR PATH>
-
-De-Register service with consul using -config-dir:
-
-    mashling publish -consul -r -f <GATEWAY JSON FILE PATH> -t <TOKEN> -d <CONFIG DIR PATH>
-
-**options**
-
-- *-a*		: register services with consul (required -a & -r mutually exclusive)
-- *-r*		: de-register services with consul (required -a & -r mutually exclusive)
-- *-f*      : specify the Mashling json (default is mashling.json).
-- *-t*		: consul agent security token (required)
-- *-d*		: service definition folder (required)
-- *-h*		: the publicly available consul agent hostname and port where this Mashling will be deployed (required)
-
-Example (Register service with consul):
-
-    mashling publish -consul -a -f mashling-gateway-consul.json -t abcd1234 -h 192.45.32.31:8500
-
-Example (Register service with consul using -config-dir):
-
-    mashling publish -consul -a -f mashling-gateway-consul.json -t abcd1234 -d /etc/consul/configfiles/
-
-For more details please use:
-
-    mashling help publish
-
-#####
-
-## Gateway Project
-
-### Structure
-
-The create command creates a basic structure and files for a gateway.
-
-
-	my_app/
-		mashling.json
-		src/
-			my_app/
-				imports.go
-				main.go
-		vendor/
-
-**files**
-
-- *mashling.json* : Mashling gateway configuration descriptor file
-- *imports.go* : contains go imports for contributions (activities, triggers and models) used by the gateway
-- *main.go* : main file for the engine.
-
-**directories**
-
-- *vendor* : go libraries
-
-
-## Gateway Configuration
-
-### Gateway
-
-
-The *mashling.json* file is the metadata describing the gateway project.
-
-```json
-{
-	"gateway": {
-		"name": "demo",
-		"version": "1.0.0",
-		"description": "This is the first microgateway app",
-		"configurations": [],
-		"triggers": [
-			{
-				"name": "rest_trigger",
-				"description": "The trigger on 'pets' endpoint",
-				"type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-				"settings": {
-					"port": "9096",
-					"method": "GET",
-					"path": "/pets/{petId}"
-				}
-			}
-		],
-		"event_handlers": [
-			{
-				"name": "get_pet_success_handler",
-				"description": "Handle the user access",
-				"reference": "github.com/TIBCOSoftware/mashling/lib/flow/flogo.json",
-				"params": {
-					"uri": "petstore.swagger.io/v2/pet/3"
-				}
-			}
-		],
-		"event_links": [
-			{
-				"triggers": [
-					"rest_trigger"
-				],
-				"dispatches": [
-					{
-						"handler": "get_pet_success_handler"
-					}
-				]
-			}
-		]
-	}
-}
+```bash
+./mashling-cli publish -h
 ```
-### Steps to create and run a Mashling app using mashling.json: ###
 
-The mashling.json can be modified accordingly and new app can be created using the below command.
+```bash
+Publishes details of the mashling.json configuration file to various support platforms (currently Mashery and Consul)
 
-mashling create -f mashling.json gatewayname
+Usage:
+  mashling-cli publish [command]
 
-Using command : "mashling create -f mashling.json mygateway" , mygateway will be created.
+Available Commands:
+  consul      Publishes to Consul
+  mashery     Publishes to Mashery
 
-cd mygateway/bin
+Flags:
+  -h, --help   help for publish
 
-Run the App mygateway.exe
+Global Flags:
+  -c, --config string         mashling gateway configuration (default "mashling.json")
+  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -l, --load-from-env         load the mashling gateway configuration from an environment variable
 
-The below is the sample mashling.json:
+Use "mashling-cli publish [command] --help" for more information about a command.
+```
+
+#### <a name="mashery"></a>Mashery
+Publishing to Mashery will take the HTTP triggers defined in your `mashling.json` configuration file and push them to your Mashery account. These account details are provided via command line arguments.
+
+Details are:
+
+```bash
+./mashling-cli publish mashery -h
+```
 
 ```
-{
-  "mashling_schema": "0.2",
-  "gateway": {
-    "name": "demoRestGw",
-    "version": "1.0.0",
-    "display_name":"Rest Conditional Gateway",
-    "description": "This is the rest based microgateway app",
-    "configurations": [
-      {
-        "name": "restConfig",
-        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-        "description": "Configuration for rest trigger",
-        "settings": {
-          "port": "9096"
-        }
-      }
-    ],
-    "triggers": [
-      {
-        "name": "animals_rest_trigger",
-        "description": "Animals rest trigger - PUT animal details",
-        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-        "settings": {
-          "config": "${configurations.restConfig}",
-          "method": "PUT",
-		      "path": "/pets",
-          "optimize":"true"
-        }
-      }
-    ],
-    "event_handlers": [
-      {
-        "name": "mammals_handler",
-        "description": "Handle mammals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
-      },
-      {
-        "name": "birds_handler",
-        "description": "Handle birds",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
-      },
-      {
-        "name": "animals_handler",
-        "description": "Handle other animals",
-        "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestPutActivity.json"
-      }
-    ],
-    "event_links": [
-      {
-        "triggers": ["animals_rest_trigger"],
-        "dispatches": [
-          {
-            "if": "${trigger.content.name in (ELEPHANT,CAT)}",
-            "handler": "mammals_handler"
-          },
-          {
-            "if": "${trigger.content.name == SPARROW}",
-            "handler": "birds_handler"
-          },
-          {
-            "handler": "animals_handler"
-          }
-        ]
-      }
-    ]
-  }
-}
+Publishes the details of the mashling.json configuration file Mashery
+
+Usage:
+  mashling-cli publish mashery [flags]
+
+Flags:
+  -k, --apiKey string        the API key
+  -T, --apiTemplate string   json file that contains defaults for api/endpoint settings in mashery
+  -d, --areaDomain string    the public domain of the Mashery gateway
+  -i, --areaID string        the Mashery area id
+  -h, --help                 help for mashery
+  -H, --host string          the publicly available hostname where this mashling will be deployed (e.g. hostip:port)
+  -I, --iodocs               true to create iodocs
+  -m, --mock                 true to mock, where it will simply display the transformed swagger doc; false to actually publish to Mashery
+  -p, --password string      password
+  -s, --secretKey string     the secret key
+  -t, --testplan             true to create package, plan and test app/key
+  -u, --username string      username
+
+Global Flags:
+  -c, --config string         mashling gateway configuration (default "mashling.json")
+  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
-#### Dispatch Conditions
 
-In the above example the condition is content based. The below formats can be used for content and header based routing.
+Example mock usage that displays transformed swagger doc only:
 
-| Condition Prefix | Description | Example |
-|:----------|:-----------|:-------|
-| trigger.content | Trigger content / payload based condition | trigger.content.name == CAT |
-| trigger.header | HTTP trigger's header based condition | trigger.header.Accept == text/plain |
+```bash
+./mashling-cli publish mashery -k 12345 -s 6789 -u foo -p bar -i xxxyyy -d "tibcobanqio.api.mashery.com" -m true -H petstore.swagger.io
+```
 
-##### Preconditions:
+Example usage that actually publishes to Mashery:
 
-For content based routing the content of the trigger should be a valid json.
+```bash
+./mashling-cli publish mashery -k 12345 -s 6789 -u foo -p bar -i xxxyyy -d "tibcobanqio.api.mashery.com" -H petstore.swagger.io
+```
 
-##### Example conditions:
+#### <a name="consul"></a>Consul
+Publishing to Consul will register and de-register services with the Consul server. This command will take the HTTP triggers defined in your `mashling.json` configuration file and push them to the Consul server specified by the command line arguments.
 
-When the json is {"name": "CAT"} the following condition can be used trigger.content.name == CAT.
+Details are:
 
-When the json is {"name": "CAT","details":{"color":"white"}} the following condition can be used trigger.content.details.color == white.
+```bash
+./mashling-cli publish consul -h
+```
 
-When the json is {"names":[{"nickname":"blackie"},{"nickname":"doggie"}]} the following condition can be used trigger.content.names[1].nickname == doggie
+```bash
+Publishes the details of the mashling.json configuration file Consul
 
-For Header based routing the condition will always be trigger.header.headername == headervalue
+Usage:
+  mashling-cli publish consul [flags]
 
-Also the following operators are supported and can be used in conditions:
-==(equals),>(greater than),in,<(less than),!=(notequals) and notin.
+Flags:
+  -d, --consulDeRegister      de-register services with consul (required -a & -r mutually exclusive)
+  -D, --consulDefDir string   service definition folder
+  -r, --consulRegister        register services with consul (required -a & -r mutually exclusive) (default true)
+  -t, --consulToken string    consul agent security token
+  -h, --help                  help for consul
+  -H, --host string           the hostname where consul is running (e.g. hostip:port)
+
+Global Flags:
+  -c, --config string         mashling gateway configuration (default "mashling.json")
+  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -l, --load-from-env         load the mashling gateway configuration from an environment variable
+```
+
+Example registering a service with Consul:
+
+```bash
+./mashling-cli publish consul -r -c mashling-gateway-consul.json -t abcd1234 -H 192.45.32.31:8500
+```
+
+Example registering a service with Consul using the service definition folder:
+
+```bash
+./mashling-cli publish consul -r -c mashling-gateway-consul.json -t abcd1234 -D /etc/consul/configfiles/
+```
