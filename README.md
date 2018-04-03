@@ -33,6 +33,20 @@ Additional developer tooling is included in below open source repo that contains
 
 Starting with the v0.4.0 release both the `mashling-cli` and `mashling-gateway` binaries can be used by downloading them from the release page. Be sure to select the appropriate binary for your operating system.
 
+For now you can download pre-built binaries from these links:
+
+#### Linux
+  - [mashling-gateway](https://s3.amazonaws.com/downloads.mashling.io/mashling-gateway-linux-amd64)
+  - [mashling-cli](https://s3.amazonaws.com/downloads.mashling.io/mashling-cli-linux-amd64)
+
+#### macOS
+  - [mashling-gateway](https://s3.amazonaws.com/downloads.mashling.io/mashling-gateway-darwin-amd64)
+  - [mashling-cli](https://s3.amazonaws.com/downloads.mashling.io/mashling-cli-darwin-amd64)
+
+#### Windows
+  - [mashling-gateway](https://s3.amazonaws.com/downloads.mashling.io/mashling-gateway-windows-amd64)
+  - [mashling-cli](https://s3.amazonaws.com/downloads.mashling.io/mashling-cli-windows-amd64)
+
 ### mashling-gateway
 The `mashling-gateway` is a static runtime for Mashling instances that provides the ability to load the mashling v2.0 modeling while also being backwards compatible for the original schema. It contains all the necessary dependencies to run existing recipes.
 
