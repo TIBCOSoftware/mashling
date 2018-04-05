@@ -33,6 +33,7 @@
       "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow",
       "data": {
         "flow": {
+          "type": 1,
           "name": "my simple flow",
           "explicitReply": true,
           "attributes": [],
@@ -48,7 +49,8 @@
                 "attributes": [
                   {
                     "name": "tracing",
-                    "value": null
+                    "value": null,
+                    "type": "any"
                   }
                 ],
                 "inputMappings": [
@@ -80,7 +82,8 @@
                 "attributes": [
                   {
                     "name": "span",
-                    "value": null
+                    "value": null,
+                    "type": "any"
                   }
                 ],
                 "inputMappings": [
