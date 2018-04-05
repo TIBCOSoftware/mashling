@@ -40,17 +40,17 @@
                 }
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status == 'available'",
+                "if": "PetStorePets.response.body.status == 'available'",
                 "service": "PetStoreInventory",
                 "input": {
                   "method": "GET"
                 }
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status == 'available'",
+                "if": "PetStorePets.response.body.status == 'available'",
                 "service": "JSCalc",
                 "input": {
-                  "parameters.num": "${JSON.parse(PetStoreInventory.response.body).available}"
+                  "parameters.num": "${PetStoreInventory.response.body.available}"
                 }
               }
             ],
@@ -65,7 +65,7 @@
                 }
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status != 'available'",
+                "if": "PetStorePets.response.body.status != 'available'",
                 "error": true,
                 "output": {
                   "code": 403,
@@ -74,7 +74,7 @@
                 }
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status == 'available'",
+                "if": "PetStorePets.response.body.status == 'available'",
                 "error": false,
                 "output": {
                   "code": 200,

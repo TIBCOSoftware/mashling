@@ -51,7 +51,7 @@
                 }
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status == 'available'",
+                "if": "PetStorePets.response.body.status == 'available'",
                 "service": "PetStoreInventory",
                 "input": {
                   "method": "GET"
