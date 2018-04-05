@@ -180,6 +180,16 @@ docker run -e="GOOS=windows" -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling
 
 The supported `GOOS` values are `windows`, `linux`, and `darwin`.
 
+You can also specify a target architecture. This can be done via:
+
+```bash
+docker run -e="GOOS=linux" -e="GOARCH=amd64" -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make"
+```
+
+The supported `GOARCH` values are `amd64` and `arm64`. `arm64` is only supported for `linux`.
+
+On most systems `amd64` will be the default architecture.
+
 The `make help` output shown above lists all the other commands that are available.
 
 ### Using a Native Toolchain
