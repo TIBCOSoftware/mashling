@@ -1,9 +1,11 @@
 package services
 
 import (
+	"errors"
 	"io"
-	"log"
+	"net"
 	"net/http"
+	"strings"
 
 	"github.com/TIBCOSoftware/mashling/lib/util"
 )
@@ -23,6 +25,8 @@ func GetPingService() PingService {
 
 //PingServiceConfig holds ping related variables
 type PingServiceConfig struct {
+	*http.Server
+	listener     net.Listener
 	pingPort     string
 	pingResponse string
 }
@@ -35,6 +39,9 @@ func (p *PingServiceConfig) Init(pingPort, pingResponse string) error {
 		p.pingPort = util.Mashling_Default_Ping_Port_Val
 	}
 	p.pingResponse = pingResponse
+
+	p.Server = &http.Server{Addr: ":" + p.pingPort}
+
 	return nil
 }
 
@@ -42,12 +49,32 @@ func (p *PingServiceConfig) Init(pingPort, pingResponse string) error {
 func (p *PingServiceConfig) Start() error {
 	http.HandleFunc("/ping", p.PingSimpleServer)
 	http.HandleFunc("/ping/details", p.PingDetailedServer)
+
+	if p.listener != nil {
+		return errors.New("Server already started")
+	}
+
+	addr := p.Addr
+	if addr == "" {
+		addr = ":http"
+	}
+
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	p.listener = listener
+
 	go func() {
-		err := http.ListenAndServe(":"+p.pingPort, nil)
+		err := p.Serve(listener)
 		if err != nil {
-			log.Println("error occured while running ping functionality :", err)
+			if strings.Contains(err.Error(), "use of closed network connection") {
+				return
+			}
 		}
 	}()
+
 	return nil
 }
 
@@ -64,5 +91,14 @@ func (p *PingServiceConfig) PingDetailedServer(w http.ResponseWriter, req *http.
 //Stop handles nullifying configured port
 func (p *PingServiceConfig) Stop() error {
 	p.pingPort = ""
+	if p.listener == nil {
+		return errors.New("Server not started")
+	}
+
+	err := p.listener.Close()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
