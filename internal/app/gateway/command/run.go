@@ -159,6 +159,7 @@ func run(command *cobra.Command, args []string) {
 
 	// Try to gracefully shutdown
 	gateway.Stop()
+	pingService.Stop()
 
 	os.Exit(code)
 }
@@ -219,6 +220,15 @@ func reloadGatewayFromConfigurationFile() {
 	if err != nil {
 		log.Println("[mashling] error stopping gateway:", err)
 	}
+	pingData := PingData{gateway.Version(), gateway.AppVersion(), gateway.Description()}
+	pingDataBytes, err := json.Marshal(pingData)
+	if err != nil {
+		log.Println("[mashling] ping data formation error")
+	}
+
+	pingService := services.GetPingService()
+	pingService.Stop()
+
 	flogo.ResetGlobalContext()
 	gateway, err = model.LoadFromFile(config)
 	if err != nil {
@@ -228,14 +238,6 @@ func reloadGatewayFromConfigurationFile() {
 	if err != nil {
 		log.Println("[mashling] error re-initializing gateway:", err)
 	}
-
-	pingData := PingData{gateway.Version(), gateway.AppVersion(), gateway.Description()}
-	pingDataBytes, err := json.Marshal(pingData)
-	if err != nil {
-		log.Println("[mashling] ping data formation error")
-	}
-
-	pingService := services.GetPingService()
 
 	pingService.Init(pingPort, string(pingDataBytes))
 	pingService.Start()
