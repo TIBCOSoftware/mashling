@@ -106,6 +106,7 @@ func (g *Gateway) Swagger(hostname string, triggerName string) ([]byte, error) {
 
 // ConsulServiceDefinition returns Consul compatible service definitions.
 func (g *Gateway) ConsulServiceDefinition() ([]consul.ServiceDefinition, error) {
+
 	gConf := g.MashlingConfig.(types.Microgateway)
 	var consulServiceDefinitions []consul.ServiceDefinition
 	for _, trigger := range gConf.Gateway.Triggers {
@@ -122,7 +123,10 @@ func (g *Gateway) ConsulServiceDefinition() ([]consul.ServiceDefinition, error) 
 				return nil, err
 			}
 			consulServiceDefinition.Name = trigger.Name
+			consulServiceDefinitions = append(consulServiceDefinitions, consulServiceDefinition)
 		}
+
 	}
+
 	return consulServiceDefinitions, nil
 }
