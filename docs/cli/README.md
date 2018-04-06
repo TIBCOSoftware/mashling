@@ -68,6 +68,7 @@ Usage:
   mashling-cli create [flags]
 
 Flags:
+  -A, --arch string   target architecture to build for (default is amd64, arm64 is only compatible with Linux)
   -h, --help          help for create
   -n, --name string   customized mashling-gateway name (default "mashling-custom")
   -N, --native        build the customized binary natively instead of using Docker
@@ -88,6 +89,8 @@ A simple example usage is:
 By default all of the build commands will run through `Docker` so as to simplify the setup required on your development machine. You can run these commands natively (assuming your development environment is setup correclty), by passing the `-N` flag to the `create` command.
 
 You can also specify which target OS to build the customized binary for via the `-O` flag. Supported values are `windows`, `darwin` (for macOS), and `linux`. The default value is whatever the host operating system is at the time the `create` command is executed.
+
+A target architecture to build the customized binary for can be specified via the `-A` flag. Supported values are `amd64`, and `arm64`. The default value is `amd64` and will suffice for the vast majority of use cases. Linux is the only compatible target OS for `arm64` architectures.
 
 ### <a name="swagger"></a>Swagger
 Swagger allows you to generate a Swagger 2.0 document based off of the provided `mashling.json` configuration file. Currently it only works with HTTP based triggers.
