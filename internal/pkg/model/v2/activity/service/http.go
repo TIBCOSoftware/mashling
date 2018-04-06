@@ -3,13 +3,17 @@ package service
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
+
+const defaultTimeout = 5
 
 // HTTP is an HTTP service.
 type HTTP struct {
@@ -26,20 +30,24 @@ type HTTPRequest struct {
 	Body       string                 `json:"body"`
 	Headers    map[string]interface{} `json:"headers"`
 	Query      map[string]string      `json:"query"`
+	Timeout    int                    `json:"timeout"`
 }
 
 // HTTPResponse is an http service response.
 type HTTPResponse struct {
 	StatusCode int                    `json:"statusCode"`
-	Body       string                 `json:"body"`
+	Body       interface{}            `json:"body"`
 	Headers    map[string]interface{} `json:"headers"`
 }
 
 // Execute invokes this HTTP service.
 func (h *HTTP) Execute() (err error) {
 	h.Response = HTTPResponse{}
-	client := &http.Client{}
-	body := bytes.NewReader([]byte(h.Response.Body))
+	if h.Request.Timeout == 0 {
+		h.Request.Timeout = defaultTimeout
+	}
+	client := &http.Client{Timeout: time.Duration(h.Request.Timeout) * time.Second}
+	body := bytes.NewReader([]byte(h.Request.Body))
 
 	req, err := http.NewRequest(h.Request.Method, h.Request.CompleteURL(), body)
 	if err != nil {
@@ -61,12 +69,15 @@ func (h *HTTP) Execute() (err error) {
 		}
 	}
 	defer bodyReader.Close()
-
-	respbody, err := ioutil.ReadAll(bodyReader)
-	if err != nil {
-		return err
+	if resp.Header.Get("Content-Type") == "application/json" {
+		err = json.NewDecoder(bodyReader).Decode(&h.Response.Body)
+	} else {
+		respbody, err := ioutil.ReadAll(bodyReader)
+		if err != nil {
+			return err
+		}
+		h.Response.Body = string(respbody)
 	}
-	h.Response.Body = string(respbody)
 	return err
 }
 

@@ -24,6 +24,7 @@ type FlogoFlow struct {
 // FlogoFlowRequest is a flogo flow service request.
 type FlogoFlowRequest struct {
 	Definition map[string]interface{} `json:"definition"`
+	Reference  string                 `json:"reference"`
 	Inputs     map[string]interface{} `json:"inputs"`
 }
 
@@ -47,6 +48,12 @@ func InitializeFlogoFlow(settings map[string]interface{}) (flogoFlowService *Flo
 				return flogoFlowService, errors.New("invalid type for definition")
 			}
 			req.Definition = definition
+		case "reference":
+			reference, ok := v.(string)
+			if !ok {
+				return flogoFlowService, errors.New("invalid type for reference")
+			}
+			req.Reference = reference
 		case "inputs":
 			inputs, ok := v.(map[string]interface{})
 			if !ok {
@@ -65,7 +72,7 @@ func InitializeFlogoFlow(settings map[string]interface{}) (flogoFlowService *Flo
 func (f *FlogoFlow) Execute() (err error) {
 	// Ignore IDs and do everything by ref?
 	var flowAction action.Action
-	flowActionStored, exists := flowActions.Load(f.Request.Definition["ref"].(string))
+	flowActionStored, exists := flowActions.Load(f.Request.Reference)
 	if !exists {
 		cfg := &action.Config{}
 		f.Response = FlogoFlowResponse{}
@@ -74,7 +81,7 @@ func (f *FlogoFlow) Execute() (err error) {
 			return err
 		}
 		cfg.Data = rawData
-		cfg.Id = f.Request.Definition["ref"].(string)
+		cfg.Id = f.Request.Reference
 		cfg.Ref = f.Request.Definition["ref"].(string)
 
 		ff := flow.ActionFactory{}
@@ -82,7 +89,7 @@ func (f *FlogoFlow) Execute() (err error) {
 		if err != nil {
 			return err
 		}
-		flowActions.Store(f.Request.Definition["ref"].(string), flowAction)
+		flowActions.Store(f.Request.Reference, flowAction)
 	} else {
 		flowAction = flowActionStored.(action.Action)
 	}

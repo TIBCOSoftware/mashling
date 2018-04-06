@@ -30,6 +30,7 @@ export GOPATH := $(PRIMARYGOPATH):$(SECONDAYGOPATH)
 unexport GOBIN
 BIN = $(PRIMARYGOPATH)/bin
 export PATH := $(PATH):$(BIN)
+export CGO_ENABLED := 0
 
 # Tools
 GOLINT = $(BIN)/golint
@@ -95,7 +96,6 @@ docker: .GOPATH/.ok linux/amd64 ; $(info $(M) building a docker image containing
 
 .PHONY: setup
 setup: clean .GOPATH/.ok $(GODEP) $(GOBINDATA) ## Setup the dev environment
-#oldsetup: clean .GOPATH/.ok gitignoregopath $(GOLINT) $(GODEP) $(GOBINDATA) hooks ## Setup the dev environment
 
 gitignoregopath:
 	@if ! grep "/.GOPATH" .gitignore > /dev/null 2>&1; then \
