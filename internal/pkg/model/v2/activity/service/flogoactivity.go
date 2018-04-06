@@ -7,6 +7,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/definition"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/imdario/mergo"
 )
 
 // FlogoActivity is a Flogo activity service.
@@ -33,26 +34,14 @@ func InitializeFlogoActivity(settings map[string]interface{}) (flogoActivityServ
 	flogoActivityService = &FlogoActivity{}
 	req := FlogoActivityRequest{}
 	req.Inputs = make(map[string]interface{})
-	for k, v := range settings {
-		switch k {
-		case "ref":
-			ref, ok := v.(string)
-			if !ok {
-				return flogoActivityService, errors.New("invalid type for ref")
-			}
-			req.Ref = ref
-		case "inputs":
-			inputs, ok := v.(map[string]interface{})
-			if !ok {
-				return flogoActivityService, errors.New("invalid type for inputs")
-			}
-			req.Inputs = inputs
-		default:
-			// ignore and move on.
-		}
-		flogoActivityService.Request = req
-	}
+	flogoActivityService.Request = req
+	err = flogoActivityService.setRequestValues(settings)
 	return flogoActivityService, err
+}
+
+// UpdateRequest updates a request on an existing FlogoActivity service instance with new values.
+func (f *FlogoActivity) UpdateRequest(values map[string]interface{}) (err error) {
+	return f.setRequestValues(values)
 }
 
 // Execute invokes this FlogoActivity service.
@@ -75,6 +64,30 @@ func (f *FlogoActivity) Execute() (err error) {
 	}
 	f.Response.Outputs = actContext.GetOutputs()
 	return err
+}
+
+func (f *FlogoActivity) setRequestValues(settings map[string]interface{}) (err error) {
+	for k, v := range settings {
+		switch k {
+		case "ref":
+			ref, ok := v.(string)
+			if !ok {
+				return errors.New("invalid type for ref")
+			}
+			f.Request.Ref = ref
+		case "inputs":
+			inputs, ok := v.(map[string]interface{})
+			if !ok {
+				return errors.New("invalid type for inputs")
+			}
+			if err := mergo.Merge(&f.Request.Inputs, inputs, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge inputs values")
+			}
+		default:
+			// ignore and move on.
+		}
+	}
+	return nil
 }
 
 // FlogoActivityContext is an activity context in a mashling flow.
