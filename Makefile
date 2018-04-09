@@ -162,7 +162,7 @@ assets: .GOPATH/.ok $(GOBINDATA) ; $(info $(M) running asset generation…) @ ##
 	    actions="$$actions $$file" ;\
 	  fi ;\
 	done ;\
-	for file in $$(find internal/app/gateway/assets/ -not -name "*.go" -type f); do \
+	for file in $$(find internal/app/assets/ -not -name "*.go" -type f); do \
 		assets="$$assets $$file" ;\
 	done ;\
 	if [[ ! -z "$$activities" ]]; then \
@@ -174,7 +174,7 @@ assets: .GOPATH/.ok $(GOBINDATA) ; $(info $(M) running asset generation…) @ ##
 	if [[ ! -z "$$actions" ]]; then \
 		$(GOBINDATA) -pkg actions -o internal/app/gateway/flogo/registry/actions/actions.go $$actions ;\
 	fi;\
-	$(GOBINDATA) -prefix internal/app/gateway/assets/ -pkg assets -o internal/app/gateway/assets/assets.go $$assets ;\
+	$(GOBINDATA) -prefix internal/app/assets/ -pkg assets -o internal/app/assets/assets.go $$assets ;\
 }
 
 .PHONY: cliassets

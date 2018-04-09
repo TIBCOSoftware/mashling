@@ -1,15 +1,13 @@
 package service
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 
-	"github.com/TIBCOSoftware/mashling/pkg/strings"
 	"github.com/dop251/goja"
+	"github.com/imdario/mergo"
 )
 
 // JS is a JS service.
@@ -64,26 +62,38 @@ func InitializeJS(settings map[string]interface{}) (j *JS, err error) {
 	j = &JS{}
 	req := JSRequest{}
 	req.Parameters = make(map[string]interface{})
+	j.Request = req
+	err = j.setRequestValues(settings)
+	return j, err
+}
+
+// UpdateRequest updates a request on an existing JS service instance with new values.
+func (j *JS) UpdateRequest(values map[string]interface{}) (err error) {
+	return j.setRequestValues(values)
+}
+
+func (j *JS) setRequestValues(settings map[string]interface{}) (err error) {
 	for k, v := range settings {
 		switch k {
 		case "script":
 			script, ok := v.(string)
 			if !ok {
-				return j, errors.New("invalid type for script")
+				return errors.New("invalid type for script")
 			}
-			req.Script = script
+			j.Request.Script = script
 		case "parameters":
 			parameters, ok := v.(map[string]interface{})
 			if !ok {
-				return j, errors.New("invalid type for headers")
+				return errors.New("invalid type for headers")
 			}
-			req.Parameters = parameters
+			if err := mergo.Merge(&j.Request.Parameters, parameters, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge parameters values")
+			}
 		default:
 			// ignore and move on.
 		}
-		j.Request = req
 	}
-	return j, err
+	return nil
 }
 
 // VM represents a VM object.
@@ -95,10 +105,6 @@ type VM struct {
 func NewVM(defaults map[string]interface{}) (vm *VM, err error) {
 	vm = &VM{}
 	vm.vm = goja.New()
-	_, err = vm.vm.RunScript("AssignFunc", objectAssignFunc)
-	if err != nil {
-		return vm, err
-	}
 	for k, v := range defaults {
 		if v != nil {
 			vm.vm.Set(k, v)
@@ -169,48 +175,3 @@ func (vm *VM) GetFromVM(name string, object interface{}) (err error) {
 func (vm *VM) SetPrimitiveInVM(name string, primitive interface{}) {
 	vm.vm.Set(name, primitive)
 }
-
-// RunTranslationMappings maps objects in the VM to new values that may be
-// literals or other data already in the VM.
-func (vm *VM) RunTranslationMappings(objectRoot string, mappings map[string]interface{}) (err error) {
-	if len(mappings) == 0 {
-		return err
-	}
-	assignObjFmt := "assign(%s, \"%s\", %s);\n"
-	assignStrFmt := "assign(%s, \"%s\", \"%s\");\n"
-	var transformation bytes.Buffer
-	for k, v := range mappings {
-		switch value := v.(type) {
-		case string:
-			if strings.HasPrefix(value, "${") && strings.HasSuffix(value, "}") {
-				// this is a variable
-				value = strings.Replace(value, "${", "", 1)
-				value = util.TrimSuffix(value, "}")
-				transformation.WriteString(fmt.Sprintf(assignObjFmt, objectRoot, k, value))
-			} else {
-				transformation.WriteString(fmt.Sprintf(assignStrFmt, objectRoot, k, value))
-			}
-		default:
-			// convert to raw JSON and insert.
-			valueJSON, jerr := json.Marshal(value)
-			if jerr != nil {
-				return jerr
-			}
-			transformation.WriteString(fmt.Sprintf(assignObjFmt, objectRoot, k, string(valueJSON)))
-		}
-	}
-	_, err = vm.vm.RunScript(objectRoot+"Translations", transformation.String())
-	return err
-}
-
-const objectAssignFunc = `function assign(obj, keyPath, value) {
-   keyPath = keyPath.split('.');
-   lastKeyIndex = keyPath.length-1;
-   for (var i = 0; i < lastKeyIndex; ++ i) {
-     key = keyPath[i];
-     if (!(key in obj))
-       obj[key] = {}
-     obj = obj[key];
-   }
-   obj[keyPath[lastKeyIndex]] = value;
-}`

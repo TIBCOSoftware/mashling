@@ -164,7 +164,7 @@ A simple response looks like:
 
 ```json
 {
-  "if": "JSON.parse(PetStorePets.response.body).status == 'available'",
+  "if": "PetStorePets.response.body.status == 'available'",
   "error": false,
   "complex": false,
   "output": {
@@ -398,7 +398,7 @@ A complex configuration file that has a contrived example using all of the hooks
                 "interrupt": "PetStorePets.response.error == true"
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status == 'available'",
+                "if": "PetStorePets.response.body.status == 'available'",
                 "policies": {
                   "beforeStep": [
                     {
@@ -432,7 +432,7 @@ A complex configuration file that has a contrived example using all of the hooks
                 }
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status != 'available'",
+                "if": "PetStorePets.response.body.status != 'available'",
                 "error": true,
                 "output": {
                   "code": 403,
@@ -441,7 +441,7 @@ A complex configuration file that has a contrived example using all of the hooks
                 }
               },
               {
-                "if": "JSON.parse(PetStorePets.response.body).status == 'available'",
+                "if": "PetStorePets.response.body.status == 'available'",
                 "error": false,
                 "output": {
                   "code": 200,

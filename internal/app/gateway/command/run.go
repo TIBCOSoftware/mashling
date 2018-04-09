@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/TIBCOSoftware/mashling/internal/app/cli/assets"
+	"github.com/TIBCOSoftware/mashling/internal/app/assets"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo"
 	"github.com/TIBCOSoftware/mashling/internal/app/version"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model"

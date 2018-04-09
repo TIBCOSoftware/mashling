@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/imdario/mergo"
 )
 
 const defaultTimeout = 5
@@ -88,44 +90,64 @@ func InitializeHTTP(settings map[string]interface{}) (httpService *HTTP, err err
 	req.PathParams = make(map[string]interface{})
 	req.Headers = make(map[string]interface{})
 	req.Query = make(map[string]string)
+	httpService.Request = req
+	err = httpService.setRequestValues(settings)
+	return httpService, err
+}
+
+// UpdateRequest updates a request on an existing HTTP service instance with new values.
+func (h *HTTP) UpdateRequest(values map[string]interface{}) (err error) {
+	return h.setRequestValues(values)
+}
+
+func (h *HTTP) setRequestValues(settings map[string]interface{}) (err error) {
 	for k, v := range settings {
 		switch k {
 		case "url":
 			url, ok := v.(string)
 			if !ok {
-				return httpService, errors.New("invalid type for url")
+				return errors.New("invalid type for url")
 			}
-			req.URL = url
+			h.Request.URL = url
 		case "method":
 			method, ok := v.(string)
 			if !ok {
-				return httpService, errors.New("invalid type for method")
+				return errors.New("invalid type for method")
 			}
-			req.Method = method
+			h.Request.Method = method
 		case "path":
 			path, ok := v.(string)
 			if !ok {
-				return httpService, errors.New("invalid type for path")
+				return errors.New("invalid type for path")
 			}
-			req.Path = path
+			h.Request.Path = path
 		case "headers":
 			headers, ok := v.(map[string]interface{})
 			if !ok {
-				return httpService, errors.New("invalid type for headers")
+				return errors.New("invalid type for headers")
 			}
-			req.Headers = headers
+			if err := mergo.Merge(&h.Request.Headers, headers, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge header values")
+			}
 		case "query":
 			query, ok := v.(map[string]string)
 			if !ok {
-				return httpService, errors.New("invalid type for query")
+				return errors.New("invalid type for query")
 			}
-			req.Query = query
+			h.Request.Query = query
+		case "pathParams":
+			pathParams, ok := v.(map[string]interface{})
+			if !ok {
+				return errors.New("invalid type for pathParams")
+			}
+			if err := mergo.Merge(&h.Request.PathParams, pathParams, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge pathParams values")
+			}
 		default:
 			// ignore and move on.
 		}
-		httpService.Request = req
 	}
-	return httpService, err
+	return nil
 }
 
 // AddHeaders adds the headers in headers to headers.
