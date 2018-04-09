@@ -11,6 +11,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/engine/runner"
+	"github.com/imdario/mergo"
 )
 
 var flowActions sync.Map
@@ -40,32 +41,44 @@ func InitializeFlogoFlow(settings map[string]interface{}) (flogoFlowService *Flo
 	flogoFlowService = &FlogoFlow{}
 	req := FlogoFlowRequest{}
 	req.Inputs = make(map[string]interface{})
+	flogoFlowService.Request = req
+	err = flogoFlowService.setRequestValues(settings)
+	return flogoFlowService, err
+}
+
+// UpdateRequest updates a request on an existing FlogoFlow service instance with new values.
+func (f *FlogoFlow) UpdateRequest(values map[string]interface{}) (err error) {
+	return f.setRequestValues(values)
+}
+
+func (f *FlogoFlow) setRequestValues(settings map[string]interface{}) (err error) {
 	for k, v := range settings {
 		switch k {
 		case "definition":
 			definition, ok := v.(map[string]interface{})
 			if !ok {
-				return flogoFlowService, errors.New("invalid type for definition")
+				return errors.New("invalid type for definition")
 			}
-			req.Definition = definition
+			f.Request.Definition = definition
 		case "reference":
 			reference, ok := v.(string)
 			if !ok {
-				return flogoFlowService, errors.New("invalid type for reference")
+				return errors.New("invalid type for reference")
 			}
-			req.Reference = reference
+			f.Request.Reference = reference
 		case "inputs":
 			inputs, ok := v.(map[string]interface{})
 			if !ok {
-				return flogoFlowService, errors.New("invalid type for inputs")
+				return errors.New("invalid type for inputs")
 			}
-			req.Inputs = inputs
+			if err := mergo.Merge(&f.Request.Inputs, inputs, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge inputs values")
+			}
 		default:
 			// ignore and move on.
 		}
-		flogoFlowService.Request = req
 	}
-	return flogoFlowService, err
+	return nil
 }
 
 // Execute invokes this FlogoActivity service.

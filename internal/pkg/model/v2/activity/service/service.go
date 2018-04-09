@@ -9,6 +9,7 @@ import (
 // Service encapsulates everything necessary to execute a step against a target.
 type Service interface {
 	Execute() (err error)
+	UpdateRequest(values map[string]interface{}) (err error)
 }
 
 // Initialize sets up the service based off of the service definition.

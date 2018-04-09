@@ -22,14 +22,17 @@ func init() {
 	createCommand.Flags().StringVarP(&name, "name", "n", "mashling-custom", "customized mashling-gateway name")
 	createCommand.Flags().BoolVarP(&native, "native", "N", false, "build the customized binary natively instead of using Docker")
 	createCommand.Flags().StringVarP(&targetOS, "os", "O", "", "target OS to build for (default is the host OS, valid values are windows, darwin, and linux)")
+	createCommand.Flags().StringVarP(&targetArch, "arch", "A", "", "target architecture to build for (default is amd64, arm64 is only compatible with Linux)")
 	cliCommand.AddCommand(createCommand)
 }
 
 var (
-	name              string
-	native            bool
-	targetOS          string
-	supportedTargetOS = map[string]bool{"windows": true, "darwin": true, "linux": true}
+	name                string
+	native              bool
+	targetOS            string
+	targetArch          string
+	supportedTargetOS   = map[string]bool{"windows": true, "darwin": true, "linux": true}
+	supportedTargetArch = map[string]bool{"amd64": true, "arm64": true}
 )
 
 var createCommand = &cobra.Command{
@@ -72,8 +75,17 @@ func create(command *cobra.Command, args []string) {
 	if targetOS == "" {
 		targetOS = runtime.GOOS
 	}
+	if targetArch == "" {
+		targetArch = "amd64"
+	}
 	if _, ok := supportedTargetOS[targetOS]; !ok {
 		log.Fatal("invalid target OS type specified")
+	}
+	if _, ok := supportedTargetArch[targetArch]; !ok {
+		log.Fatal("invalid target architecture type specified")
+	}
+	if targetArch == "arm64" && targetOS != "linux" {
+		log.Fatal("arm64 architecture is only valid with linux")
 	}
 	if _, err = os.Stat(name); os.IsNotExist(err) {
 		err = os.MkdirAll(name, 0755)
@@ -148,11 +160,12 @@ func create(command *cobra.Command, args []string) {
 	// Run make build target to build for appropriate OS
 	log.Println("Building customized Mashling binary...")
 	if dockerCmd != "" {
-		cmd = exec.Command(dockerCmd, "run", "-e", "GOOS="+targetOS, "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make buildgateway")
+		cmd = exec.Command(dockerCmd, "run", "-e", "GOOS="+targetOS, "-e", "GOARCH="+targetArch, "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make buildgateway")
 	} else {
 		cmd = exec.Command("make", "buildgateway")
 		env := os.Environ()
 		env = append(env, "GOOS="+targetOS)
+		env = append(env, "GOARCH="+targetArch)
 		cmd.Env = env
 	}
 	cmd.Dir = name
