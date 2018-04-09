@@ -279,9 +279,9 @@ Usage:
   mashling-cli publish consul [flags]
 
 Flags:
-  -d, --consulDeRegister      de-register services with consul (required -a & -r mutually exclusive)
+  -d, --consulDeRegister      de-register services with consul (required -d & -r mutually exclusive)
   -D, --consulDefDir string   service definition folder
-  -r, --consulRegister        register services with consul (required -a & -r mutually exclusive) (default true)
+  -r, --consulRegister        register services with consul (required -d & -r mutually exclusive) (default true)
   -t, --consulToken string    consul agent security token
   -h, --help                  help for consul
   -H, --host string           the hostname where consul is running (e.g. hostip:port)
