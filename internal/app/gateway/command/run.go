@@ -1,7 +1,6 @@
 package command
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -15,7 +14,6 @@ import (
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/cache"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
-	"github.com/TIBCOSoftware/mashling/internal/pkg/services"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 )
@@ -48,13 +46,6 @@ var gatewayCommand = &cobra.Command{
 	Long: "A static binary that executes Mashling gateway logic defined in a mashling.json configuration file. Complete documentation is available at https://github.com/TIBCOSoftware/mashling\n\n" +
 		"Version: " + version.Version + "\nBuild Date: " + version.BuildDate + "\n",
 	Run: run,
-}
-
-//PingData is to hold ping response
-type PingData struct {
-	Version        string
-	Appversion     string
-	Appdescription string
 }
 
 // Execute executes registered commands.
@@ -138,19 +129,7 @@ func run(command *cobra.Command, args []string) {
 	log.Println("[mashling] App Version: ", gateway.AppVersion())
 	log.Println("[mashling] App Description: ", gateway.Description())
 
-	// Startup the configured gateway instance.
-	pingData := PingData{gateway.Version(), gateway.AppVersion(), gateway.Description()}
-	pingDataBytes, err := json.Marshal(pingData)
-	if err != nil {
-		log.Println("[mashling] ping data formation error")
-	}
-
-	pingService := services.GetPingService()
-
-	pingService.Init(pingPort, string(pingDataBytes))
-	pingService.Start()
-
-	gateway.Init()
+	gateway.Init(pingPort)
 	gateway.Start()
 
 	exitChan := setupSignalHandling()
@@ -159,7 +138,6 @@ func run(command *cobra.Command, args []string) {
 
 	// Try to gracefully shutdown
 	gateway.Stop()
-	pingService.Stop()
 
 	os.Exit(code)
 }
@@ -220,27 +198,16 @@ func reloadGatewayFromConfigurationFile() {
 	if err != nil {
 		log.Println("[mashling] error stopping gateway:", err)
 	}
-	pingData := PingData{gateway.Version(), gateway.AppVersion(), gateway.Description()}
-	pingDataBytes, err := json.Marshal(pingData)
-	if err != nil {
-		log.Println("[mashling] ping data formation error")
-	}
-
-	pingService := services.GetPingService()
-	pingService.Stop()
 
 	flogo.ResetGlobalContext()
 	gateway, err = model.LoadFromFile(config)
 	if err != nil {
 		log.Println("[mashling] error re-loading gateway from file:", err)
 	}
-	err = gateway.Init()
+	err = gateway.Init(pingPort)
 	if err != nil {
 		log.Println("[mashling] error re-initializing gateway:", err)
 	}
-
-	pingService.Init(pingPort, string(pingDataBytes))
-	pingService.Start()
 
 	err = gateway.Start()
 	if err != nil {

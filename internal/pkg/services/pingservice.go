@@ -1,8 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -12,7 +14,7 @@ import (
 
 //PingService interface for ping services
 type PingService interface {
-	Init(string, string) error
+	Init(string, string, string, string) error
 	Start() error
 	Stop() error
 }
@@ -26,19 +28,33 @@ func GetPingService() PingService {
 //PingServiceConfig holds ping related variables
 type PingServiceConfig struct {
 	*http.Server
-	listener     net.Listener
-	pingPort     string
-	pingResponse string
+	listener   net.Listener
+	pingPort   string
+	pingResVal string
+}
+
+//PingResponse is to hold ping response
+type PingResponse struct {
+	Version        string
+	Appversion     string
+	Appdescription string
 }
 
 //Init intialises pingport if not configured
-func (p *PingServiceConfig) Init(pingPort, pingResponse string) error {
+func (p *PingServiceConfig) Init(pingPort, version, appVersion, description string) error {
 	if len(pingPort) != 0 {
 		p.pingPort = pingPort
 	} else {
 		p.pingPort = util.Mashling_Default_Ping_Port_Val
 	}
-	p.pingResponse = pingResponse
+
+	pingRes := PingResponse{version, appVersion, description}
+	pingDataBytes, err := json.Marshal(pingRes)
+	if err != nil {
+		log.Println("[mashling] ping data formation error")
+	}
+
+	p.pingResVal = string(pingDataBytes)
 
 	p.Server = &http.Server{Addr: ":" + p.pingPort}
 
@@ -47,8 +63,8 @@ func (p *PingServiceConfig) Init(pingPort, pingResponse string) error {
 
 //Start starts ping  server on configured port
 func (p *PingServiceConfig) Start() error {
-	http.HandleFunc("/ping", p.PingSimpleServer)
-	http.HandleFunc("/ping/details", p.PingDetailedServer)
+	http.HandleFunc("/ping", p.PingResponseHandlerShort)
+	http.HandleFunc("/ping/details", p.PingResponseHandlerDetail)
 
 	if p.listener != nil {
 		return errors.New("Server already started")
@@ -78,14 +94,14 @@ func (p *PingServiceConfig) Start() error {
 	return nil
 }
 
-//PingSimpleServer handles simple response
-func (p *PingServiceConfig) PingSimpleServer(w http.ResponseWriter, req *http.Request) {
+//PingResponseHandlerShort handles simple response
+func (p *PingServiceConfig) PingResponseHandlerShort(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "{\"response\":\"Ping successful\"}\n")
 }
 
-//PingDetailedServer handles simple response
-func (p *PingServiceConfig) PingDetailedServer(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, p.pingResponse+"\n")
+//PingResponseHandlerDetail handles simple response
+func (p *PingServiceConfig) PingResponseHandlerDetail(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, p.pingResVal+"\n")
 }
 
 //Stop handles nullifying configured port
