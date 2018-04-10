@@ -27,7 +27,7 @@ func (g *Gateway) Init(pingPort string) error {
 	log.Println("[mashling] Initializing Flogo engine...")
 
 	g.PingService = services.GetPingService()
-	g.PingService.Init(pingPort, g.Version(), g.AppVersion(), g.Description())
+	g.PingService.Init(pingPort, services.PingResponse{g.Version(), g.AppVersion(), g.Description()})
 
 	return g.FlogoEngine.Init(true)
 }

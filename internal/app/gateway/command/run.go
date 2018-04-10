@@ -129,6 +129,7 @@ func run(command *cobra.Command, args []string) {
 	log.Println("[mashling] App Version: ", gateway.AppVersion())
 	log.Println("[mashling] App Description: ", gateway.Description())
 
+	// Startup the configured gateway instance.
 	gateway.Init(pingPort)
 	gateway.Start()
 

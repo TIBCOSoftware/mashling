@@ -12,7 +12,7 @@
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
     * [Complex Policy](#complex-policy)
-
+- [Gateway Health Status](#GatewayHealthStatus)
 ## <a name="overview"></a>Overview
 
 The mashling-gateway powers the core event driven routing engine of the Mashling project. This core binary can run all versions of the mashling schema to date, however for the purposes of this document, we will focus on the `1.0` configuration schema.
@@ -512,3 +512,29 @@ A complex configuration file that has a contrived example using all of the hooks
   }
 }
 ```
+
+## <a name="GatewayHealthStatus"></a>Gateway Health Status
+
+Ping service is used to know whether gateway is alive and healthy over the network.
+
+Ping port can be set in two ways i.e by setting environment variable "MASHLING_PING_PORT" OR by using mashling-gateway command flag - "-p". CLI flag gets more priority than environment variable. If user doesn't provide ping port, default value 9090 will be used.
+
+###Testing:
+
+Run below command: 
+```bash
+  ./mashling-gateway -c <path to mashling json> -p <ping port value>
+```
+
+Use below command to check gateway service:
+
+curl http://<GATEWAY IP>:<PING-PORT>/ping
+Expected Result:
+
+{"response":"Ping successful"}
+Use below command to check gateway service with additional details:
+
+curl  http://<GATEWAY IP>:<PING-PORT>/ping/details
+Expected Result:
+
+{"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}

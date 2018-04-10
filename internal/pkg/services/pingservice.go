@@ -14,7 +14,7 @@ import (
 
 //PingService interface for ping services
 type PingService interface {
-	Init(string, string, string, string) error
+	Init(string, PingResponse) error
 	Start() error
 	Stop() error
 }
@@ -41,14 +41,13 @@ type PingResponse struct {
 }
 
 //Init intialises pingport if not configured
-func (p *PingServiceConfig) Init(pingPort, version, appVersion, description string) error {
+func (p *PingServiceConfig) Init(pingPort string, pingRes PingResponse) error {
 	if len(pingPort) != 0 {
 		p.pingPort = pingPort
 	} else {
 		p.pingPort = util.Mashling_Default_Ping_Port_Val
 	}
 
-	pingRes := PingResponse{version, appVersion, description}
 	pingDataBytes, err := json.Marshal(pingRes)
 	if err != nil {
 		log.Println("[mashling] ping data formation error")
