@@ -517,24 +517,25 @@ A complex configuration file that has a contrived example using all of the hooks
 
 Ping service is used to know whether gateway is alive and healthy over the network.
 
-Ping port can be set in two ways i.e by setting environment variable "MASHLING_PING_PORT" OR by using mashling-gateway command flag - "-p". CLI flag gets more priority than environment variable. If user doesn't provide ping port, default value 9090 will be used.
-
-###Testing:
-
-Run below command: 
+### Run gateway
 ```bash
-  ./mashling-gateway -c <path to mashling json> -p <ping port value>
+./mashling-gateway -c <path to mashling json> -p <ping port value>
 ```
 
-Use below command to check gateway service:
-
+### Simple ping request:
+```bash
 curl http://<GATEWAY IP>:<PING-PORT>/ping
+```
 Expected Result:
-
+```json
 {"response":"Ping successful"}
-Use below command to check gateway service with additional details:
+```
 
+### Ping request for additional details:
+```bash
 curl  http://<GATEWAY IP>:<PING-PORT>/ping/details
+```
 Expected Result:
-
+```json
 {"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}
+```

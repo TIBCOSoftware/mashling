@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -76,6 +77,9 @@ func (p *PingServiceConfig) Start() error {
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
+		if strings.Contains(err.Error(), "Only one usage of each socket address") {
+			return fmt.Errorf("Port <%s> used by other application, please use different port for Mashling gateway ping service", p.pingPort)
+		}
 		return err
 	}
 

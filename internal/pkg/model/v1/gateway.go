@@ -2,7 +2,9 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
@@ -36,8 +38,17 @@ func (g *Gateway) Init(pingPort string) error {
 // Start starts the Gateway.
 func (g *Gateway) Start() error {
 	log.Println("[mashling] Starting Flogo engine...")
-	g.PingService.Start()
-	return g.FlogoEngine.Start()
+	err := g.FlogoEngine.Start()
+	if err != nil {
+		return err
+	}
+	err = g.PingService.Start()
+	if err != nil {
+		g.Stop()
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return nil
 }
 
 // Stop stops the Gateway.
