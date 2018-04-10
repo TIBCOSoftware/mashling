@@ -429,10 +429,17 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			queryParams[key] = strings.Join(value, ",")
 		}
 
+		//get headers
+		header := make(map[string]string, len(r.Header))
+		for key, value := range r.Header {
+			header[key] = strings.Join(value, ",")
+		}
+
 		data := map[string]interface{}{
 			"params":      pathParams,
 			"pathParams":  pathParams,
 			"queryParams": queryParams,
+			"header":      header,
 			"content":     content,
 			"tracing":     ctx,
 		}

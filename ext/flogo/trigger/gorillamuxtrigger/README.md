@@ -107,6 +107,10 @@ settings, outputs and handler:
       "name": "queryParams",
       "type": "params"
     },
+     {
+      "name": "header",
+      "type": "params"
+    },
     {
       "name": "content",
       "type": "any"
@@ -175,6 +179,7 @@ settings, outputs and handler:
 | params | HTTP request params |
 | pathParams | HTTP request path params |
 | queryParams | HTTP request query params |
+| header | HTTP request header params |
 | content | HTTP request paylod |
 | tracing | Tracing context |
 
