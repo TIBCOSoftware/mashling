@@ -16,6 +16,7 @@ const (
 	deRegisterURI = "/v1/agent/service/deregister/"
 )
 
+//ServiceDefinition holds service information
 type ServiceDefinition struct {
 	Name    string `json:"Name"`
 	Port    string `json:"port"`
