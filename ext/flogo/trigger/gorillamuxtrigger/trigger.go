@@ -430,9 +430,15 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		}
 
 		//get headers
-		header := make(map[string]string, len(r.Header))
+		header := make(map[string]interface{})
 		for key, value := range r.Header {
-			header[key] = strings.Join(value, ",")
+			//If header has single value, then add to map as a string
+			//otherwise add as an array
+			if len(value) == 1 {
+				header[key] = value[0]
+			} else {
+				header[key] = value
+			}
 		}
 
 		data := map[string]interface{}{
