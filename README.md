@@ -120,7 +120,7 @@ If you have docker installed you can get started right away after downloading th
 From the root of the Mashling repository, run the following command to verify everything is working as expected:
 
 ```bash
-docker run -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make help"
+docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make help"
 ```
 
 You should see the following output:
@@ -154,13 +154,13 @@ clean           Cleanup everything
 Now building the project from source is as easy as:
 
 ```bash
-docker run -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make"
+docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make"
 ```
 
 To regenerate all the assets and then rebuild, run the following:
 
 ```bash
-docker run -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make all"
+docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make all"
 ```
 These commands will build both the `mashling-gateway` and `mashling-cli` and place them under the `/bin` folder in the root of the mashling repository.
 
@@ -169,13 +169,13 @@ These commands will build both the `mashling-gateway` and `mashling-cli` and pla
 **First**, run:
 
 ```bash
-docker run -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make setup assets generate fmt"
+docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make setup assets generate fmt"
 ```
 
 **Then**, run:
 
 ```bash
-docker run -e="GOOS=windows" -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make"
+docker run -e="GOOS=windows" -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make"
 ```
 
 The supported `GOOS` values are `windows`, `linux`, and `darwin`.
@@ -183,7 +183,7 @@ The supported `GOOS` values are `windows`, `linux`, and `darwin`.
 You can also specify a target architecture. This can be done via:
 
 ```bash
-docker run -e="GOOS=linux" -e="GOARCH=amd64" -v "$(PWD):/mashling" --rm -t jeffreybozek/mashling:compile /bin/bash -c "make"
+docker run -e="GOOS=linux" -e="GOARCH=amd64" -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make"
 ```
 
 The supported `GOARCH` values are `amd64` and `arm64`. `arm64` is only supported for `linux`.
