@@ -114,7 +114,7 @@ func create(command *cobra.Command, args []string) {
 	// Setup environment
 	log.Println("Setting up project...")
 	if dockerCmd != "" {
-		cmd = exec.Command(dockerCmd, "run", "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make setup")
+		cmd = exec.Command(dockerCmd, "run", "-v", name+":/mashling", "--rm", "-t", "mashling/mashling-compile", "/bin/bash", "-c", "make setup")
 	} else {
 		cmd = exec.Command("make", "setup")
 	}
@@ -133,7 +133,7 @@ func create(command *cobra.Command, args []string) {
 		buffer.WriteString(strings.Join(util.UniqueStrings(deps), " "))
 		buffer.WriteString("\"")
 		if dockerCmd != "" {
-			cmd = exec.Command(dockerCmd, "run", "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make depadd "+buffer.String())
+			cmd = exec.Command(dockerCmd, "run", "-v", name+":/mashling", "--rm", "-t", "mashling/mashling-compile", "/bin/bash", "-c", "make depadd "+buffer.String())
 		} else {
 			cmd = exec.Command("make", "depadd", buffer.String())
 		}
@@ -147,7 +147,7 @@ func create(command *cobra.Command, args []string) {
 	// Run make targets to generate appropriate code
 	log.Println("Generating assets for customized Mashling...")
 	if dockerCmd != "" {
-		cmd = exec.Command(dockerCmd, "run", "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make assets generate fmt")
+		cmd = exec.Command(dockerCmd, "run", "-v", name+":/mashling", "--rm", "-t", "mashling/mashling-compile", "/bin/bash", "-c", "make assets generate fmt")
 	} else {
 		cmd = exec.Command("make", "assets", "generate", "fmt")
 	}
@@ -160,7 +160,7 @@ func create(command *cobra.Command, args []string) {
 	// Run make build target to build for appropriate OS
 	log.Println("Building customized Mashling binary...")
 	if dockerCmd != "" {
-		cmd = exec.Command(dockerCmd, "run", "-e", "GOOS="+targetOS, "-e", "GOARCH="+targetArch, "-v", name+":/mashling", "--rm", "-t", "jeffreybozek/mashling:compile", "/bin/bash", "-c", "make buildgateway")
+		cmd = exec.Command(dockerCmd, "run", "-e", "GOOS="+targetOS, "-e", "GOARCH="+targetArch, "-v", name+":/mashling", "--rm", "-t", "mashling/mashling-compile", "/bin/bash", "-c", "make buildgateway")
 	} else {
 		cmd = exec.Command("make", "buildgateway")
 		env := os.Environ()
