@@ -520,7 +520,7 @@ Ping service is used to know whether gateway is alive and healthy over the netwo
 
 ### Run gateway
 ```bash
-./mashling-gateway -c <path to mashling json> -p <ping port value>
+./mashling-gateway -c <path to mashling json> -P <ping port value>
 ```
 
 ### Simple ping request:
