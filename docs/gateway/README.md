@@ -51,7 +51,8 @@ Flags:
   -e, --env-var-name string    name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -h, --help                   help for mashling-gateway
   -l, --load-from-env          load the mashling gateway configuration from an environment variable
-  -p, --ping-port string       configure mashling gateway ping service port (default "9090")
+  -p, --ping-enabled           enable gateway ping service (default true)
+  -P, --ping-port string       configure mashling gateway ping service port (default "9090")
 
 Use "mashling-gateway [command] --help" for more information about a command.
 ```
