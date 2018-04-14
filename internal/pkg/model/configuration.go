@@ -15,7 +15,7 @@ import (
 
 // Gateway represents an instance of a specific version of a Gateway.
 type Gateway interface {
-	Init(string) error
+	Init(bool, string) error
 	Start() error
 	Stop() error
 	Version() string

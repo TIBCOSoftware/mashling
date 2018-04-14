@@ -3,12 +3,11 @@ package services
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
-	"strings"
+	"os"
 
 	"github.com/TIBCOSoftware/mashling/lib/util"
 )
@@ -63,6 +62,7 @@ func (p *PingServiceConfig) Init(pingPort string, pingRes PingResponse) error {
 
 //Start starts ping  server on configured port
 func (p *PingServiceConfig) Start() error {
+	log.Println("[mashling-ping-service] Ping service Starting...")
 	http.HandleFunc("/ping", p.PingResponseHandlerShort)
 	http.HandleFunc("/ping/details", p.PingResponseHandlerDetail)
 
@@ -77,10 +77,8 @@ func (p *PingServiceConfig) Start() error {
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		if strings.Contains(err.Error(), "Only one usage of each socket address") {
-			return fmt.Errorf("Port <%s> used by other application, please use different port for Mashling gateway ping service", p.pingPort)
-		}
-		return err
+		log.Printf("[mashling-ping-service] failed to start Ping service due to error [%v]", err)
+		os.Exit(1)
 	}
 
 	p.listener = listener
@@ -88,11 +86,11 @@ func (p *PingServiceConfig) Start() error {
 	go func() {
 		err := p.Serve(listener)
 		if err != nil {
-			if strings.Contains(err.Error(), "use of closed network connection") {
-				return
-			}
+			log.Printf("[mashling-ping-service] failed to start Ping service due to error [%v]", err)
+			os.Exit(1)
 		}
 	}()
+	log.Println("[mashling-ping-service] Ping service Started")
 
 	return nil
 }
@@ -118,6 +116,7 @@ func (p *PingServiceConfig) Stop() error {
 	if err != nil {
 		return err
 	}
+	log.Printf("[mashling-ping-service] Ping service Stoped")
 
 	return nil
 }
