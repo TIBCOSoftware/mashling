@@ -23,6 +23,7 @@ git:
 # Do a github login using token
 before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
+  - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\""
 install:
   - go get -u github.com/golang/dep/cmd/dep
   - go get -u github.com/ains/go-test-html 
