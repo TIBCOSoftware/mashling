@@ -6,6 +6,7 @@
 package util
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -101,6 +102,14 @@ const JSON = `{
  ]
 }`
 
+const JSONCONTENT = `{"category":{"id":16,"name":"Animals"},"id":16,"name":"SPARROW","photoUrls":["string"],"status":"sold","tags":[{"id":0,"name":"string"}]}`
+
+func TestJSONPath(t *testing.T) {
+	res, _ := JsonPathEval(JSONCONTENT, "$.name")
+	if strings.Compare(*res, "SPARROW") != 0 {
+		t.Fatal("Values should be same")
+	}
+}
 func TestXMLUnmarshal(t *testing.T) {
 	var output map[string]interface{}
 	err := XMLUnmarshal([]byte(XML), &output)
