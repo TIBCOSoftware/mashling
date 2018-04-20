@@ -253,7 +253,6 @@ func GetConditionOperationAndExpressionType(expressionStr string) (*Condition, E
 
 	if strings.HasPrefix(expressionStr, contentRoot) {
 		//update lhs
-		// Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
 		lhs = strings.Replace(lhs, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
 		//update expression type
 		exprType = EXPR_TYPE_CONTENT
