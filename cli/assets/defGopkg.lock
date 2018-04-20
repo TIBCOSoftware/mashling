@@ -93,7 +93,7 @@
     "lib/conditions",
     "lib/util"
   ]
-  revision = "68697665b343bf3f753b868d1600b7253650f36f"
+  revision = "f1dbdd9bde6fdfcea794c9f63f8678d6dc4f8892"
 
 [[projects]]
   name = "github.com/apache/thrift"
