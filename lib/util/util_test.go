@@ -6,11 +6,8 @@
 package util
 
 import (
-	"encoding/json"
-	"strings"
+	"fmt"
 	"testing"
-
-	"github.com/jeffreybozek/jsonpath"
 )
 
 const XML = `<?xml version="1.0"?>
@@ -105,6 +102,13 @@ const JSON = `{
  ]
 }`
 
+const JSONCONTENT = `{"category":{"id":16,"name":"Animals"},"id":16,"name":"SPARROW","photoUrls":["string"],"status":"sold","tags":[{"id":0,"name":"string"}]}`
+
+func TestJSONPath(t *testing.T) {
+	res, err := JsonPathEval(JSONCONTENT, "$.name")
+	fmt.Println("res", *res)
+	fmt.Println("err", err)
+}
 func TestXMLUnmarshal(t *testing.T) {
 	var output map[string]interface{}
 	err := XMLUnmarshal([]byte(XML), &output)
@@ -145,69 +149,4 @@ func TestXMLMarshal(t *testing.T) {
 	if len(data) != len([]byte(XML)) {
 		t.Fatal("length of input is not same as the length of output")
 	}
-}
-
-func TestMarshal(t *testing.T) {
-	test := func(mime string, input []byte, short bool) {
-		t.Log("mime=", "'"+mime+"'")
-		var output map[string]interface{}
-		err := Unmarshal(mime, input, &output)
-		if (err == ErrorXMLRequired || err == ErrorJSONRequired) && len(input) == 0 {
-			return
-		}
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		data, err := Marshal(output)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(data) != len(input) {
-			t.Fatal("Unparse failed", string(data))
-		}
-		t.Log("'"+string(input)+"'", "=", "'"+string(data)+"'")
-
-		if short {
-			return
-		}
-
-		data, err = json.Marshal(output)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		paths, err := jsonpath.ParsePaths("$._body[*]?(@._type == \"Element\")._type+")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		eval, err := jsonpath.EvalPathsInBytes(data, paths)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if result, ok := eval.Next(); ok {
-			value := string(result.Value)
-			value = strings.TrimPrefix(value, "\"")
-			value = strings.TrimSuffix(value, "\"")
-			if value != "Element" {
-				t.Fatal("the value should be Element not", value)
-			}
-		} else {
-			t.Fatal("there should be a value Element")
-		}
-		if eval.Error != nil {
-			t.Fatal(eval.Error)
-		}
-	}
-	test("application/xml", []byte(XML), false)
-	test("application/xml", []byte{}, false)
-	test("", []byte(XML), false)
-	test("application/json", []byte(JSON), false)
-	test("application/json", []byte{}, false)
-	test("", []byte(JSON), false)
-	test("", []byte{}, true)
-	test("blah", []byte("abc123"), true)
-	test("blah", []byte{}, true)
-	test("", []byte("abc123"), true)
 }
