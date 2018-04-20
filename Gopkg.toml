@@ -54,10 +54,6 @@
   version = "1.2.0"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/jeffreybozek/jsonpath"
-
-[[constraint]]
   name = "github.com/jtblin/go-ldap-client"
   version = "0.0.3"
 
@@ -100,3 +96,7 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/oliveagle/jsonpath"

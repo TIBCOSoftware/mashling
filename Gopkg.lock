@@ -193,12 +193,6 @@
   revision = "f40e974e75af4e271d97ce0fc917af5898ae7bda"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/jeffreybozek/jsonpath"
-  packages = ["."]
-  revision = "b631f61225a86d0536ff26d530bd811ba83d56b6"
-
-[[projects]]
   name = "github.com/jtblin/go-ldap-client"
   packages = ["."]
   revision = "ad9f2ea47a83452873c01f1dc6960aedb9ff7e0e"
@@ -233,6 +227,12 @@
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/oliveagle/jsonpath"
+  packages = ["."]
+  revision = "46faf33da13527c9ef82205c0ee188f6fc98b13e"
 
 [[projects]]
   branch = "master"
@@ -487,6 +487,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a9aaaae1cf8f4ade817d3a86e3b4cb4b7833bbc0cea16e5089a1a1f1c588ae67"
+  inputs-digest = "a572273b346595ce994af5765f10757e0807c7af119bd1c72e3899c81cd73b30"
   solver-name = "gps-cdcl"
   solver-version = 1

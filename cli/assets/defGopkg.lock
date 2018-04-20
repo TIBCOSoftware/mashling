@@ -3,9 +3,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/jeffreybozek/jsonpath"
+  name = "github.com/oliveagle/jsonpath"
   packages = ["."]
-  revision = "b631f61225a86d0536ff26d530bd811ba83d56b6"
+  revision = "46faf33da13527c9ef82205c0ee188f6fc98b13e"
 
 [[projects]]
   name = "github.com/Shopify/sarama"
