@@ -152,7 +152,7 @@ func extFlogoTriggerGorillamuxtriggerTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/gorillamuxtrigger/trigger.json", size: 2725, mode: os.FileMode(493), modTime: time.Unix(1523549399, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/gorillamuxtrigger/trigger.json", size: 2725, mode: os.FileMode(493), modTime: time.Unix(1524572758, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
