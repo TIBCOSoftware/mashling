@@ -52,6 +52,8 @@ const (
 	MIMEUnknown = "application/octet-stream"
 	// MIMEForm is a form MIME type
 	MIMEForm = "application/x-www-form-urlencoded"
+	// MIMETextPlain is the text/plain MIME type
+	MIMETextPlain = "text/plain"
 
 	// MetaMIME the meta MIME key
 	MetaMIME = "___mime___"
@@ -342,7 +344,7 @@ func Unmarshal(mime string, data []byte, v interface{}) error {
 			return err
 		}
 		parsed = true
-	case MIMEForm, "":
+	case MIMEForm, MIMETextPlain, "":
 		decoder := json.NewDecoder(bytes.NewReader(data))
 		decoder.UseNumber()
 		err := decoder.Decode(v)
