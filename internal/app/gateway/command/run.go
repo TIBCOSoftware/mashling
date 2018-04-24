@@ -133,7 +133,11 @@ func run(command *cobra.Command, args []string) {
 
 	// Startup the configured gateway instance.
 	gateway.Init(pingEnabled, pingPort)
-	gateway.Start()
+	err = gateway.Start()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
 
 	exitChan := setupSignalHandling()
 

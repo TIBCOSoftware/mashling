@@ -2,15 +2,14 @@ package services
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 	"net"
 	"net/http"
-	"os"
-
-	"github.com/TIBCOSoftware/mashling/lib/util"
 )
+
+// DefaultPort is the default port for Ping service
+const DefaultPort = "9090"
 
 //PingService interface for ping services
 type PingService interface {
@@ -28,8 +27,6 @@ func GetPingService() PingService {
 //PingServiceConfig holds ping related variables
 type PingServiceConfig struct {
 	*http.Server
-	listener   net.Listener
-	pingPort   string
 	pingResVal string
 }
 
@@ -41,56 +38,47 @@ type PingResponse struct {
 }
 
 //Init intialises pingport if not configured
-func (p *PingServiceConfig) Init(pingPort string, pingRes PingResponse) error {
-	if len(pingPort) != 0 {
-		p.pingPort = pingPort
-	} else {
-		p.pingPort = util.Mashling_Default_Ping_Port_Val
+func (p *PingServiceConfig) Init(port string, pingRes PingResponse) error {
+	if len(port) == 0 {
+		port = DefaultPort
 	}
 
 	pingDataBytes, err := json.Marshal(pingRes)
 	if err != nil {
-		log.Println("[mashling] ping data formation error")
+		log.Println("[mashling-ping-service] Ping service data formation error")
 	}
 
 	p.pingResVal = string(pingDataBytes)
 
-	p.Server = &http.Server{Addr: ":" + p.pingPort}
+	p.Server = &http.Server{Addr: ":" + port}
 
 	return nil
 }
 
 //Start starts ping  server on configured port
 func (p *PingServiceConfig) Start() error {
-	log.Println("[mashling-ping-service] Ping service Starting...")
+	log.Println("[mashling-ping-service] Ping service starting...")
 	http.HandleFunc("/ping", p.PingResponseHandlerShort)
 	http.HandleFunc("/ping/details", p.PingResponseHandlerDetail)
 
-	if p.listener != nil {
-		return errors.New("Server already started")
-	}
-
-	addr := p.Addr
-	if addr == "" {
-		addr = ":http"
-	}
-
-	listener, err := net.Listen("tcp", addr)
+	listener, err := net.Listen("tcp", p.Server.Addr)
 	if err != nil {
-		log.Printf("[mashling-ping-service] failed to start Ping service due to error [%v]", err)
-		os.Exit(1)
+		log.Println("[mashling-ping-service] Ping service failed to start due to error:", err)
+		return err
 	}
 
-	p.listener = listener
+	err = listener.Close()
+	if err != nil {
+		log.Println("[mashling-ping-service] Ping service failed to start due to error:", err)
+		return err
+	}
 
 	go func() {
-		err := p.Serve(listener)
-		if err != nil {
-			log.Printf("[mashling-ping-service] failed to start Ping service due to error [%v]", err)
-			os.Exit(1)
+		if err := p.ListenAndServe(); err != http.ErrServerClosed {
+			log.Println("[mashling-ping-service] Ping service err:", err)
 		}
 	}()
-	log.Println("[mashling-ping-service] Ping service Started")
+	log.Println("[mashling-ping-service] Ping service started")
 
 	return nil
 }
@@ -107,16 +95,11 @@ func (p *PingServiceConfig) PingResponseHandlerDetail(w http.ResponseWriter, req
 
 //Stop handles nullifying configured port
 func (p *PingServiceConfig) Stop() error {
-	p.pingPort = ""
-	if p.listener == nil {
-		return errors.New("Server not started")
-	}
-
-	err := p.listener.Close()
-	if err != nil {
+	if err := p.Shutdown(nil); err != nil {
+		log.Println("[mashling-ping-service] Ping service error when stopping:", err)
 		return err
 	}
-	log.Printf("[mashling-ping-service] Ping service Stoped")
+	log.Println("[mashling-ping-service] Ping service stopped")
 
 	return nil
 }

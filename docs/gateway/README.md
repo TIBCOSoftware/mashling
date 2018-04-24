@@ -2,6 +2,7 @@
 
 - [Overview](#overview)
 - [Usage](#usage)
+  * [Health Check](#healthcheck)
 - [Configuration](#configuration)
   * [Triggers](#triggers)
   * [Dispatches](#dispatches)
@@ -12,7 +13,7 @@
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
     * [Complex Policy](#complex-policy)
-- [Gateway Health Status](#GatewayHealthStatus)
+
 ## <a name="overview"></a>Overview
 
 The mashling-gateway powers the core event driven routing engine of the Mashling project. This core binary can run all versions of the mashling schema to date, however for the purposes of this document, we will focus on the `1.0` configuration schema.
@@ -58,6 +59,31 @@ Use "mashling-gateway [command] --help" for more information about a command.
 ```
 
 Right now, `dev` mode just reloads the running gateway instance when a change is detected in the `mashling.json` file but the behavior is inconsistent between triggers.
+
+### <a name="healthcheck"></a>Health Check
+
+An integrated ping service is used to know if a gateway instance is alive and healthy.
+
+The health check ping service is enabled by default and configured to run on port `9090`. You can specify a different port at startup time via:
+
+```bash
+./mashling-gateway -c <path to mashling json> -P <ping port value>
+```
+
+You can also disable the ping service via:
+```bash
+./mashling-gateway -c <path to mashling json> -p=false
+```
+
+The health check endpoint is available at `http://<GATEWAY IP>:<PING-PORT>/ping` with an expected result of:
+```json
+{"response":"Ping successful"}
+```
+
+A more detailed health check response is available at `http://<GATEWAY IP>:<PING-PORT>/ping/details` with an example result of:
+```json
+{"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}
+```
 
 ## <a name="configuration"></a>Configuration
 
@@ -512,31 +538,4 @@ A complex configuration file that has a contrived example using all of the hooks
     ]
   }
 }
-```
-
-## <a name="GatewayHealthStatus"></a>Gateway Health Status
-
-Ping service is used to know whether gateway is alive and healthy over the network.
-
-### Run gateway
-```bash
-./mashling-gateway -c <path to mashling json> -P <ping port value>
-```
-
-### Simple ping request:
-```bash
-curl http://<GATEWAY IP>:<PING-PORT>/ping
-```
-Expected Result:
-```json
-{"response":"Ping successful"}
-```
-
-### Ping request for additional details:
-```bash
-curl  http://<GATEWAY IP>:<PING-PORT>/ping/details
-```
-Expected Result:
-```json
-{"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}
 ```
