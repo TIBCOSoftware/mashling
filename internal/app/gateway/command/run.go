@@ -25,6 +25,8 @@ func init() {
 	gatewayCommand.PersistentFlags().BoolVarP(&dev, "dev", "d", false, "run mashling in dev mode")
 	gatewayCommand.PersistentFlags().StringVarP(&configCache, "config-cache", "C", ".cache", "location of the configuration artifacts cache")
 	gatewayCommand.PersistentFlags().BoolVarP(&configCacheEnabled, "config-cache-enabled", "E", true, "cache post-processed configuration artifacts locally")
+	gatewayCommand.PersistentFlags().BoolVarP(&pingEnabled, "ping-enabled", "p", true, "enable gateway ping service")
+	gatewayCommand.PersistentFlags().StringVarP(&pingPort, "ping-port", "P", "9090", "configure mashling gateway ping service port")
 }
 
 var (
@@ -36,6 +38,8 @@ var (
 	dev                bool
 	configCache        string
 	configCacheEnabled bool
+	pingEnabled        bool
+	pingPort           string
 )
 
 var gatewayCommand = &cobra.Command{
@@ -128,8 +132,12 @@ func run(command *cobra.Command, args []string) {
 	log.Println("[mashling] App Description: ", gateway.Description())
 
 	// Startup the configured gateway instance.
-	gateway.Init()
-	gateway.Start()
+	gateway.Init(pingEnabled, pingPort)
+	err = gateway.Start()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
 
 	exitChan := setupSignalHandling()
 
@@ -197,15 +205,17 @@ func reloadGatewayFromConfigurationFile() {
 	if err != nil {
 		log.Println("[mashling] error stopping gateway:", err)
 	}
+
 	flogo.ResetGlobalContext()
 	gateway, err = model.LoadFromFile(config)
 	if err != nil {
 		log.Println("[mashling] error re-loading gateway from file:", err)
 	}
-	err = gateway.Init()
+	err = gateway.Init(pingEnabled, pingPort)
 	if err != nil {
 		log.Println("[mashling] error re-initializing gateway:", err)
 	}
+
 	err = gateway.Start()
 	if err != nil {
 		log.Println("[mashling] error re-starting gateway:", err)
