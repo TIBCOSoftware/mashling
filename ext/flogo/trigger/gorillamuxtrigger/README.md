@@ -179,7 +179,7 @@ settings, outputs and handler:
 | params | HTTP request params |
 | pathParams | HTTP request path params |
 | queryParams | HTTP request query params |
-| header | HTTP request header params |
+| header | HTTP request header params. Header key gets converted in to canonical format, i.e. the first letter and any letter following a hyphen to upper case, the rest are converted to lowercase. For example, the canonical key for "accept-encoding" and "host" are "Accept-Encoding" and "Host" respectively|
 | content | HTTP request paylod |
 | tracing | Tracing context |
 
