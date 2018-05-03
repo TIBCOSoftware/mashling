@@ -3,7 +3,6 @@
 package command
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +16,13 @@ import (
 	"github.com/TIBCOSoftware/mashling/pkg/files"
 	"github.com/TIBCOSoftware/mashling/pkg/strings"
 	"github.com/spf13/cobra"
+)
+
+const (
+	// ImportPath is the root import path regardless of location.
+	ImportPath = "github.com/TIBCOSoftware/mashling"
+	// DockerImage is the Docker image used to run the creation process.
+	DockerImage = "mashling/mashling-compile:0.4.0"
 )
 
 func init() {
@@ -72,6 +78,11 @@ func create(command *cobra.Command, args []string) {
 	}
 
 	name = filepath.Join(pwd, name)
+	fullPathName := filepath.Join(name, "src", ImportPath)
+
+	Env := os.Environ()
+	Env = append(Env, "GOPATH="+name)
+	Env = append(Env, "PATH="+os.Getenv("PATH")+":"+filepath.Join(name, "bin"))
 
 	if targetOS == "" {
 		targetOS = runtime.GOOS
@@ -88,8 +99,14 @@ func create(command *cobra.Command, args []string) {
 	if targetArch == "arm64" && targetOS != "linux" {
 		log.Fatal("arm64 architecture is only valid with linux")
 	}
-	if _, err = os.Stat(name); os.IsNotExist(err) {
-		err = os.MkdirAll(name, 0755)
+	if _, err = os.Stat(fullPathName); os.IsNotExist(err) {
+		err = os.MkdirAll(fullPathName, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if _, err = os.Stat(filepath.Join(name, "bin")); os.IsNotExist(err) {
+		err = os.MkdirAll(filepath.Join(name, "bin"), 0755)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -98,7 +115,7 @@ func create(command *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = files.UnpackBytes(stub, name)
+	err = files.UnpackBytes(stub, fullPathName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,7 +128,9 @@ func create(command *cobra.Command, args []string) {
 		dockerCmd = ""
 	} else {
 		log.Println("Docker found, using it to build...")
-		cmd = exec.Command(dockerCmd, "run", "--rm", "-d", "-t", "mashling/mashling-compile")
+		cmd = exec.Command(dockerCmd, "run", "--rm", "-d", "-t", DockerImage)
+		cmd.Dir = name
+		cmd.Env = Env
 		output, cErr := cmd.Output()
 		if cErr != nil {
 			log.Println(string(output))
@@ -123,6 +142,7 @@ func create(command *cobra.Command, args []string) {
 			// Stop running container.
 			cmd = exec.Command(dockerCmd, "stop", dockerContainerID)
 			cmd.Dir = name
+			cmd.Env = Env
 			output, cErr = cmd.CombinedOutput()
 			if cErr != nil {
 				log.Println(string(output))
@@ -133,6 +153,7 @@ func create(command *cobra.Command, args []string) {
 		// Copy default source into container.
 		cmd = exec.Command(dockerCmd, "cp", name+"/.", dockerContainerID+":/mashling/")
 		cmd.Dir = name
+		cmd.Env = Env
 		output, cErr = cmd.CombinedOutput()
 		if cErr != nil {
 			log.Println(string(output))
@@ -146,7 +167,8 @@ func create(command *cobra.Command, args []string) {
 	} else {
 		cmd = exec.Command("go", "run", "build.go", "setup")
 	}
-	cmd.Dir = name
+	cmd.Dir = fullPathName
+	cmd.Env = Env
 	output, cErr := cmd.CombinedOutput()
 	if cErr != nil {
 		log.Println(string(output))
@@ -156,16 +178,14 @@ func create(command *cobra.Command, args []string) {
 	if len(deps) > 0 {
 		// Turn deps into a string
 		log.Println("Installing missing dependencies...")
-		var buffer bytes.Buffer
-		buffer.WriteString("-newdeps=\"")
-		buffer.WriteString(strings.Join(util.UniqueStrings(deps), " "))
-		buffer.WriteString("\"")
+		depString := strings.Join(util.UniqueStrings(deps), " ")
 		if dockerCmd != "" {
-			cmd = exec.Command(dockerCmd, "exec", dockerContainerID, "/bin/bash", "-c", "go run build.go depadd "+buffer.String())
+			cmd = exec.Command(dockerCmd, "exec", dockerContainerID, "/bin/bash", "-c", "dep ensure -add "+depString)
 		} else {
-			cmd = exec.Command("go", "run", "build.go", "depadd", buffer.String())
+			cmd = exec.Command("dep", "ensure", "-add", depString)
 		}
-		cmd.Dir = name
+		cmd.Dir = fullPathName
+		cmd.Env = Env
 		output, cErr = cmd.CombinedOutput()
 		if cErr != nil {
 			log.Println(string(output))
@@ -179,7 +199,8 @@ func create(command *cobra.Command, args []string) {
 	} else {
 		cmd = exec.Command("go", "run", "build.go", "allgatewayprep")
 	}
-	cmd.Dir = name
+	cmd.Dir = fullPathName
+	cmd.Env = Env
 	output, cErr = cmd.CombinedOutput()
 	if cErr != nil {
 		log.Println(string(output))
@@ -192,7 +213,8 @@ func create(command *cobra.Command, args []string) {
 	} else {
 		cmd = exec.Command("go", "run", "build.go", "releasegateway", "-os="+targetOS, "-arch="+targetArch)
 	}
-	cmd.Dir = name
+	cmd.Dir = fullPathName
+	cmd.Env = Env
 	output, cErr = cmd.CombinedOutput()
 	if cErr != nil {
 		log.Println(string(output))
@@ -201,12 +223,27 @@ func create(command *cobra.Command, args []string) {
 	if dockerCmd != "" {
 		log.Println("Copying out created source code and binary from container...")
 		// Copy out created source directory from running container.
-		cmd = exec.Command(dockerCmd, "cp", dockerContainerID+":/mashling/.", name)
+		cmd = exec.Command(dockerCmd, "cp", dockerContainerID+":/mashling/src/"+ImportPath+"/.", filepath.Join(name, "src", ImportPath))
 		cmd.Dir = name
+		cmd.Env = Env
 		output, cErr = cmd.CombinedOutput()
 		if cErr != nil {
 			log.Println(string(output))
 			log.Fatal(cErr)
 		}
+	}
+	// Copy release folder contents to top level
+	err = filepath.Walk(filepath.Join(name, "src", ImportPath, "release"), func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			err = files.CopyFile(path, filepath.Join(name, info.Name()))
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Fatal(err)
 	}
 }

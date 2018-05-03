@@ -22,6 +22,10 @@ const (
 	Go = "go"
 	// GoFmt is the gofmt executable.
 	GoFmt = "gofmt"
+	// GoBinData represents the go-bindata executable.
+	GoBinData = "go-bindata"
+	// GoDep represents the dep executable.
+	GoDep = "dep"
 )
 
 var (
@@ -36,16 +40,6 @@ var (
 	Date = time.Now().Format("2006-01-02T15:04:05-0700")
 	// Version is the default build version to use if no other is found.
 	Version = "v0.4.0"
-	// Primary represents the primary path for the build context.
-	Primary string
-	// Secondary represents the secondary path for the build context.
-	Secondary string
-	// Bin is the location of the /bin folder to use.
-	Bin string
-	// GoBinData represents the go-bindata executable.
-	GoBinData string
-	// GoDep represents the dep executable.
-	GoDep string
 	// V represents verbosity for the build context.
 	V = "0"
 	// Env represents the environment for the build context.
@@ -54,8 +48,6 @@ var (
 	TargetOS string
 	// TargetArch is the target platform architecture for the build context.
 	TargetArch string
-	// NewDeps is the list of new deps to add to the project.
-	NewDeps string
 	// UPX is the UPX executable
 	UPX string
 
@@ -89,37 +81,8 @@ func init() {
 		Version = strings.TrimSpace(string(output))
 	}
 
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	Primary = fmt.Sprintf("%s/.GOPATH", wd)
-	Secondary = fmt.Sprintf("%s/.GOPATH/vendor", wd)
-	gopath := fmt.Sprintf("%s:%s", Primary, Secondary)
-	err = os.Setenv("GOPATH", gopath)
-	if err != nil {
-		panic(err)
-	}
-	Env = append(Env, fmt.Sprintf("GOPATH=%s", gopath))
-
-	err = os.Unsetenv("GOBIN")
-	if err != nil {
-		panic(err)
-	}
-
-	Bin = fmt.Sprintf("%s/bin", Primary)
-	path := os.Getenv("PATH")
-	path = fmt.Sprintf("%s:%s", path, Bin)
-	err = os.Setenv("PATH", path)
-	if err != nil {
-		panic(err)
-	}
-	Env = append(Env, fmt.Sprintf("PATH=%s", path))
+	Env = os.Environ()
 	Env = append(Env, "CGO_ENABLED=0")
-
-	GoBinData = fmt.Sprintf("%s/go-bindata", Bin)
-	GoDep = fmt.Sprintf("%s/dep", Bin)
 
 	v := os.Getenv("V")
 	if v != "" {
@@ -158,7 +121,7 @@ func Dir(file string) string {
 
 // List lists all go files within the build context and applies a function.
 func List(path string, processFiles func(files []string) error) error {
-	path = filepath.Join(Primary, "src", ImportPath, path)
+	// path = filepath.Join(Primary, "src", ImportPath, path)
 	var process func(path string) error
 	process = func(path string) error {
 		dir, err := os.Open(path)
@@ -169,7 +132,7 @@ func List(path string, processFiles func(files []string) error) error {
 		entries, err := dir.Readdir(256)
 		for err == nil {
 			for _, entry := range entries {
-				if entry.Name() == "vendor" || entry.Name() == ".GOPATH" || entry.Mode()&os.ModeSymlink != 0 {
+				if entry.Name() == "vendor" || strings.HasPrefix(entry.Name(), ".") || entry.Mode()&os.ModeSymlink != 0 {
 					continue
 				} else if entry.IsDir() {
 					er := process(filepath.Join(path, entry.Name()))
@@ -197,7 +160,6 @@ func Exec(name string, arg ...string) error {
 	}
 	cmd := exec.Command(name, arg...)
 	cmd.Env = Env
-	cmd.Dir = filepath.Join(Primary, "src", ImportPath)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%v: %s", err, string(output))
@@ -220,7 +182,6 @@ func main() {
 	buildSet := flag.NewFlagSet("", flag.ExitOnError)
 	buildSet.StringVar(&TargetOS, "os", "", "target OS")
 	buildSet.StringVar(&TargetArch, "arch", "", "target ARCH")
-	buildSet.StringVar(&NewDeps, "newdeps", "", "new go dependencies to add for go dep")
 	if len(os.Args) > 2 {
 		buildSet.Parse(os.Args[2:])
 	}
@@ -282,10 +243,6 @@ func main() {
 			Resolve(gatewayassets)
 		case "cliassets":
 			Resolve(cliassets)
-		case "dep":
-			Resolve(dep)
-		case "depadd":
-			Resolve(depadd)
 		case "clean":
 			Resolve(clean)
 		case "version":
@@ -305,7 +262,6 @@ func build() error {
 }
 
 func buildgateway() error {
-	Resolve(gopath)
 	Print("building gateway executable...")
 
 	err := Exec(Go, "install", "-ldflags",
@@ -319,7 +275,6 @@ func buildgateway() error {
 }
 
 func buildcli() error {
-	Resolve(gopath)
 	Print("building CLI executable...")
 
 	err := Exec(Go, "install", "-ldflags",
@@ -370,7 +325,6 @@ func allcliprep() error {
 }
 
 func releaseall() error {
-	Resolve(gopath)
 	Resolve(platforms)
 	Resolve(upx)
 
@@ -398,7 +352,6 @@ func releaseall() error {
 }
 
 func releasegateway() error {
-	Resolve(gopath)
 	Resolve(platforms)
 	Resolve(upx)
 
@@ -426,7 +379,6 @@ func releasegateway() error {
 }
 
 func releasecli() error {
-	Resolve(gopath)
 	Resolve(platforms)
 	Resolve(upx)
 
@@ -499,8 +451,6 @@ func platforms() error {
 }
 
 func gofmt() error {
-	Resolve(gopath)
-
 	Print("running gofmt…")
 
 	err := List(".", func(files []string) error {
@@ -520,8 +470,6 @@ func gofmt() error {
 }
 
 func vet() error {
-	Resolve(gopath)
-
 	Print("running go vet…")
 
 	err := List(".", func(files []string) error {
@@ -541,8 +489,6 @@ func vet() error {
 }
 
 func generate() error {
-	Resolve(gopath)
-
 	Print("running go generate…")
 
 	err := Exec(Go, "generate", "./...")
@@ -554,8 +500,6 @@ func generate() error {
 }
 
 func cligenerate() error {
-	Resolve(gopath)
-
 	Print("running CLI go generate…")
 
 	err := Exec(Go, "generate", "./internal/app/cli/...")
@@ -567,7 +511,6 @@ func cligenerate() error {
 }
 
 func gatewayassets() error {
-	Resolve(gopath)
 	Resolve(gobindata)
 
 	Print("running asset generation…")
@@ -650,7 +593,6 @@ func gatewayassets() error {
 }
 
 func cliassets() error {
-	Resolve(gopath)
 	Resolve(gobindata)
 
 	Print("running CLI asset generation…")
@@ -678,32 +620,8 @@ func cliassets() error {
 	return nil
 }
 
-func dep() error {
-	Resolve(gopath)
-	Resolve(godep)
-	err := Exec(GoDep, "ensure")
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func depadd() error {
-	Resolve(gopath)
-	Resolve(godep)
-	if NewDeps == "" {
-		return fmt.Errorf("newdeps is empty")
-	}
-	err := Exec(GoDep, "ensure", "-add", NewDeps)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func setup() error {
 	Resolve(clean)
-	Resolve(gopath)
 	Resolve(godep)
 	Resolve(gobindata)
 	return nil
@@ -711,15 +629,7 @@ func setup() error {
 
 func clean() error {
 	Print("cleaning...")
-	err := os.RemoveAll("./bin")
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll("./release")
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll("./.GOPATH")
+	err := os.RemoveAll("./release")
 	if err != nil {
 		return err
 	}
@@ -727,20 +637,18 @@ func clean() error {
 }
 
 func version() error {
-	Resolve(gopath)
 	Print(Version)
 	return nil
 }
 
 func docker() error {
-	Resolve(gopath)
 	Resolve(platforms)
 
 	Print("building a docker image containing the mashling-gateway binary")
 
 	docker, err := exec.LookPath("docker")
 	if err != nil {
-		return errors.New("luls")
+		return errors.New("docker not found")
 	}
 
 	err = Exec(docker, "build", "-f", "dockerfiles/run/Dockerfile", ".", "-t", "mashling-gateway")
@@ -751,51 +659,8 @@ func docker() error {
 	return nil
 }
 
-func gopath() error {
-	_, err := os.Stat(".GOPATH/.ok")
-	if err == nil {
-		return nil
-	}
-
-	err = os.MkdirAll(fmt.Sprintf(".GOPATH/src/%s", Dir(ImportPath)), 0775)
-	if err != nil {
-		return err
-	}
-
-	err = os.Symlink("../../../..", fmt.Sprintf(".GOPATH/src/%s", ImportPath))
-	if err != nil {
-		return err
-	}
-
-	err = os.MkdirAll(".GOPATH/vendor/", 0775)
-	if err != nil {
-		return err
-	}
-
-	err = os.Symlink("../../vendor", ".GOPATH/vendor/src")
-	if err != nil {
-		return err
-	}
-
-	err = os.MkdirAll("bin", 0775)
-	if err != nil {
-		return err
-	}
-
-	err = os.Symlink("../bin", ".GOPATH/bin")
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(".GOPATH/.ok")
-	if err != nil {
-		return err
-	}
-	return file.Close()
-}
-
 func gobindata() error {
-	_, err := os.Stat(GoBinData)
+	_, err := exec.LookPath(GoBinData)
 	if err == nil {
 		return nil
 	}
@@ -811,7 +676,7 @@ func gobindata() error {
 }
 
 func godep() error {
-	_, err := os.Stat(GoDep)
+	_, err := exec.LookPath(GoDep)
 	if err == nil {
 		return nil
 	}
@@ -830,6 +695,7 @@ func upx() error {
 	var err error
 	UPX, err = exec.LookPath("upx")
 	if err != nil {
+		UPX = ""
 		fmt.Println("UPX not found, skipping compression (please visit https://upx.github.io to install)...")
 	}
 	return nil
