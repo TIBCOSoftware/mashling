@@ -83,7 +83,7 @@ Global Flags:
 A simple example usage is:
 
 ```bash
-./mashling-cli create -c examples/recipes/v2/customized-simple-synchronous-patter.json
+./mashling-cli create -c examples/recipes/v2/customized-simple-synchronous-pattern.json
 ```
 
 By default all of the build commands will run through `Docker` so as to simplify the setup required on your development machine. You can run these commands natively (assuming your development environment is setup correclty), by passing the `-N` flag to the `create` command.
