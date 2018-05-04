@@ -149,7 +149,7 @@ go run build.go setup
 You can then build your binaries using the automated build targets we have provided using:
 
 ```
-go run build.go setup
+go run build.go all
 ```
 
 This will regenerate any `go` generated files, search for Flogo activities and triggers as binary assets, rebundle the CLI assets, format the generated code, vet the code, and then build the `mashling-gateway` and `mashling-cli` binaries. These will be available in your `$GOPATH/bin`.
