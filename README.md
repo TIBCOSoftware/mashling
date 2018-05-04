@@ -71,7 +71,19 @@ Again, in depth configuration and usage documentation for the gateway can be fou
 ### mashling-cli
 The `mashling-cli` binary is used to create customized `mashling-gateway` binaries that contain triggers, actions, and activities not included in the default `mashling-gateway`. Much like the default binary, once your customized binary is built it can be reused with any `mashling.json` configuration file that has its dependencies satisfied by this new customized binary.
 
-Because the `mashling-cli` is building custom binaries there are a few extra dependencies that need to be installed for it to work. The easiest is to just have [Docker](https://www.docker.com) installed on your local machine and let the `mashling-cli` binary use the local Docker install to run all the build commands through a pre-built Docker image. The other option is to [satisfy the prerequisite dependencies listed below in the development section](#prerequisites).
+#### <a name="prerequisites"></a>Prerequisites
+
+Because the `mashling-cli` is building custom binaries there are a few extra dependencies that need to be installed for it to work. You have two options:
+
+1 - Use Go natively, which requires the following:
+* The Go programming language 1.10 or later should be [installed](https://golang.org/doc/install).
+* Set GOPATH environment variable on your system.
+
+2 - Install [Docker](https://www.docker.com).
+
+If Docker is installed locally the `mashling-cli` binary will use the local Docker install to run all the build commands through a pre-built Docker image.
+
+If Docker is not installed but Go is then the CLI will attempt to use your native Go installation.
 
 Detailed usage information, documentation, and examples can be found in the [mashling-cli documentation](docs/cli/README.md).
 
@@ -88,138 +100,86 @@ A simple custom Flogo trigger example that works with the above command can be f
 Again, in depth configuration and usage documentation for the CLI can be found [here](docs/cli/README.md).
 
 ## Development and Building from Source
-With the new v2 model this section only applies if you are actively making changes to the Mashling source code or trying to build customized `mashling-gateway` binaries using the `mashling-cli` tool **without** using Docker.
+With the new v2 model this section only applies if you are actively making changes to the Mashling source code. There is no need to build from source if you just want to get started using the `mashling-gateway` or `mashling-cli` tools. Those can be downloaded for your desired platform and run immediately.
 
-The easiest way to use the CLI or build from source locally is to have Docker installed locally and let that do the heavily lifting related to configuration and setup of all the development dependencies. Either way, first you need to get the source.
+### <a name="prerequisites"></a>Prerequisites
+* The Go programming language 1.10 or later should be [installed](https://golang.org/doc/install).
+* Set GOPATH environment variable on your system.
 
-### Downloading the Mashling Source Code
+#### Getting Started
 
-#### Using Git
-If you download the source code from Github using Git, please make sure Git is installed.
-
-```bash
-git clone -b feature-v2-model --single-branch https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
-cd $GOPATH/src/github.com/TIBCOSoftware/mashling
-```
+Start by pulling the repository down to your local machine using one of the approaches following approaches.
 
 #### Using Go
-If you get the Mashling source using Go commands, please make sure Go 1.10 is installed.
+You can pull the Mashling source code using default Go commands.
 
 ```bash
 go get -u github.com/TIBCOSoftware/mashling/...
 ```
 
-If go is installed correctly this command will also build the mashling binary targets and install them into your `$GOPATH`.
+If Go is installed correctly this command will also build the mashling binary targets and install them into your `$GOPATH`. You should be able to run `mashling-gateway` and `mashling-cli` immediately if your `PATH` environment variable includes `$GOPATH/bin`.
 
-#### Using Github's Zip file downloads
-Visit the [Mashling repository on Github](https://github.com/TIBCOSoftware/mashling) and click `Clone or download` and choose `Downlaod ZIP`. This is a useful shortcut if you are just using Docker to run your build commands and do not plan on contributing back to the repository or tracking your changes.
-
-### Using Docker
-If you have docker installed you can get started right away after downloading the Mashling source code.
-
-From the root of the Mashling repository, run the following command to verify everything is working as expected:
+#### Using Git
+If you decide to download the source code from Github using Git, please make sure Git is installed.
 
 ```bash
-docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make help"
+git clone -b feature-v2-model --single-branch https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
+cd $GOPATH/src/github.com/TIBCOSoftware/mashling
+go install ./...
 ```
 
-You should see the following output:
-
-```bash
-build           Build gateway and cli binaries
-all             Create assets, run go generate, fmt, vet, and then build then gateway and cli binaries
-buildgateway    Build gateway binary
-allgateway      Satisfy pre-build requirements and then build the gateway binary
-buildcli        Build CLI binary
-allcli          Satisfy pre-build requirements and then build the cli binary
-buildlegacy     Build legacy CLI binary
-release         Build all executables for release against all targets
-docker          Build a minimal docker image containing the gateway binary
-setup           Setup the dev environment
-hooks           Setup the git commit hooks
-lint            Run golint
-metalinter      Run gometalinter
-fmt             Run gofmt on all source files
-vet             Run go vet on all source files
-generate        Run go generate on source
-cligenerate     Run go generate on CLI source
-assets          Run asset generation
-cliassets       Run asset generation for CLI
-list            List packages
-dep             Make sure dependencies are vendored
-depadd          Add new dependencies
-clean           Cleanup everything
-```
-
-Now building the project from source is as easy as:
-
-```bash
-docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make"
-```
-
-To regenerate all the assets and then rebuild, run the following:
-
-```bash
-docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make all"
-```
-These commands will build both the `mashling-gateway` and `mashling-cli` and place them under the `/bin` folder in the root of the mashling repository.
-
-**To build a binary for a specific operating system**, like Windows, use the **two** following commands.
-
-**First**, run:
-
-```bash
-docker run -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make setup assets generate fmt"
-```
-
-**Then**, run:
-
-```bash
-docker run -e="GOOS=windows" -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make"
-```
-
-The supported `GOOS` values are `windows`, `linux`, and `darwin`.
-
-You can also specify a target architecture. This can be done via:
-
-```bash
-docker run -e="GOOS=linux" -e="GOARCH=amd64" -v "$(PWD):/mashling" --rm -t mashling/mashling-compile /bin/bash -c "make"
-```
-
-The supported `GOARCH` values are `amd64` and `arm64`. `arm64` is only supported for `linux`.
-
-On most systems `amd64` will be the default architecture.
-
-The `make help` output shown above lists all the other commands that are available.
-
-### Using a Native Toolchain
-
-#### <a name="prerequisites"></a>Prerequisites
-* The Go programming language 1.10 or later should be [installed](https://golang.org/doc/install).
-* Set GOPATH environment variable on your system.
-* Mashling uses `make` for asset generation, packing, and building of both the gateway and cli targets. The `make` tool come by default with Windows, it can be downloaded from [here](https://sourceforge.net/projects/gnuwin32/files/make/).
-
-#### Getting Started
-
-Start by pulling the repository down to your local machine using one of the approaches described above. This project uses Go and `make` by default. All dependencies are either bundled into the repository under the `vendor` folder or pulled on demand by the appropriate make target.
+If Go is installed correctly the `go install ./...` command will also build the mashling binary targets and install them into your `$GOPATH`. You should be able to run `mashling-gateway` and `mashling-cli` immediately if your `PATH` environment variable includes `$GOPATH/bin`.
 
 #### Building
 
-You can build the default target, assuming all dependencies are satisfied with (the default target is `build`):
+You can build the default target, assuming all dependencies are satisfied, with the default `go` commands, for instance:
 
 ```
-make
+go install ./...
 ```
 
-This will compile the contents of the `cmd/mashling-gateway/` and `cmd/mashling-cli/` directory and put the resulting binary into the `bin/` directory.
+This will compile and install the binaries into your `$GOPATH/bin`.
 
-If you have added new dependencies or file assets, please make sure to run:
+If you are making significant changes to the source code and have added new dependencies or file assets, please make sure to run the `setup` command from the root of your `mashling` directory:
 
 ```
-make all
+go run build.go setup
 ```
 
-This will check your `vendor/` directory for any new triggers, activities, or flows and make sure the appropriate Flogo factory registrations take place on startup of the compiled binary. This command will also pull any non `*.go` files in the `internal/app/gateway/assets/` directory into the compiled binary.
+You can then build your binaries using the automated build targets we have provided using:
+
+```
+go run build.go setup
+```
+
+This will regenerate any `go` generated files, search for Flogo activities and triggers as binary assets, rebundle the CLI assets, format the generated code, vet the code, and then build the `mashling-gateway` and `mashling-cli` binaries. These will be available in your `$GOPATH/bin`.
+
+You can build your binaries for release by doing the following:
+
+```
+go run build.go releaseall
+```
+
+This will build your binaries for all supported platforms and then compress them. The result of the `releaseall` process will be available in the `release/` folder of your `mashling` directory.
+
+To build for a specific target platform, you can run the following command to build the gateway:
+
+```
+go run build.go releasegateway -os=windows -arch=amd64
+```
+
+Similarly, to build the CLI, run the following:
+
+```
+go run build.go releasecli -os=windows -arch=amd64
+```
+
+Supported platforms are:
+
+- darwin/amd64
+- linux/amd64
+- linux/arm64
+- windows/amd64
 
 ## Contributing and support
 

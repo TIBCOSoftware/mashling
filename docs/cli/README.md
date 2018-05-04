@@ -54,6 +54,20 @@ Below are a list of the currently support commands via the `mashling-cli` binary
 ### <a name="create"></a>Create
 Create allows you to build cutomized `mashling-gateway` binaries that are re-usable and contain all of your custom dependencies.
 
+#### <a name="prerequisites"></a>Prerequisites
+
+Because the `mashling-cli` is building custom binaries there are a few extra dependencies that need to be installed for it to work. You have two options:
+
+1 - Use Go natively, which requires the following:
+* The Go programming language 1.10 or later should be [installed](https://golang.org/doc/install).
+* Set GOPATH environment variable on your system.
+
+2 - Install [Docker](https://www.docker.com).
+
+If Docker is installed locally the `mashling-cli` binary will use the local Docker install to run all the build commands through a pre-built Docker image.
+
+If Docker is not installed but Go is then the CLI will attempt to use your native Go installation.
+
 The command details are as follows:
 
 
