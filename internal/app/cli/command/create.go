@@ -124,7 +124,7 @@ func create(command *cobra.Command, args []string) {
 	var dockerCmd, dockerContainerID string
 	if dockerCmd, err = exec.LookPath("docker"); native || err != nil {
 		// Docker does not exist, try native toolchain.
-		log.Println("Docker not found or native option specified, using make natively...")
+		log.Println("Docker not found or native option specified, using go natively...")
 		dockerCmd = ""
 	} else {
 		log.Println("Docker found, using it to build...")
