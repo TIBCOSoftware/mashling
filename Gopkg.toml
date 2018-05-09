@@ -91,7 +91,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/jeffreybozek/jsonpath"
+  name = "github.com/oliveagle/jsonpath"
 
 [[constraint]]
   name = "github.com/fsnotify/fsnotify"

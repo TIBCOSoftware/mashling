@@ -59,6 +59,13 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 				}
 				service.Settings["definition"] = action
 				gateway.Gateway.Services[index] = service
+			} else if definition, ok := service.Settings["definition"].(map[string]interface{}); ok {
+				rawAction, jerr := json.Marshal(definition)
+				if jerr != nil {
+					return gw, jerr
+				}
+				service.Settings["definition"] = json.RawMessage(rawAction)
+				gateway.Gateway.Services[index] = service
 			}
 		}
 		gerrs, ferr := validateConfigurationContents(gateway)

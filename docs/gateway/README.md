@@ -2,6 +2,7 @@
 
 - [Overview](#overview)
 - [Usage](#usage)
+  * [Health Check](#healthcheck)
 - [Configuration](#configuration)
   * [Triggers](#triggers)
   * [Dispatches](#dispatches)
@@ -51,11 +52,38 @@ Flags:
   -e, --env-var-name string    name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -h, --help                   help for mashling-gateway
   -l, --load-from-env          load the mashling gateway configuration from an environment variable
+  -p, --ping-enabled           enable gateway ping service (default true)
+  -P, --ping-port string       configure mashling gateway ping service port (default "9090")
 
 Use "mashling-gateway [command] --help" for more information about a command.
 ```
 
 Right now, `dev` mode just reloads the running gateway instance when a change is detected in the `mashling.json` file but the behavior is inconsistent between triggers.
+
+### <a name="healthcheck"></a>Health Check
+
+An integrated ping service is used to know if a gateway instance is alive and healthy.
+
+The health check ping service is enabled by default and configured to run on port `9090`. You can specify a different port at startup time via:
+
+```bash
+./mashling-gateway -c <path to mashling json> -P <ping port value>
+```
+
+You can also disable the ping service via:
+```bash
+./mashling-gateway -c <path to mashling json> -p=false
+```
+
+The health check endpoint is available at `http://<GATEWAY IP>:<PING-PORT>/ping` with an expected result of:
+```json
+{"response":"Ping successful"}
+```
+
+A more detailed health check response is available at `http://<GATEWAY IP>:<PING-PORT>/ping/details` with an example result of:
+```json
+{"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}
+```
 
 ## <a name="configuration"></a>Configuration
 

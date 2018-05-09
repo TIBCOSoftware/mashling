@@ -8,6 +8,7 @@ import (
 	"github.com/TIBCOSoftware/mashling/internal/pkg/consul"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/services"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/swagger"
 )
 
@@ -18,23 +19,57 @@ type Gateway struct {
 	MashlingConfig interface{}
 	SchemaVersion  string
 	ErrorDetails   []gwerrors.Error
+	pingEnabled    bool
+	PingService    services.PingService
 }
 
 // Init initializes the Gateway.
-func (g *Gateway) Init() error {
+func (g *Gateway) Init(pingEnabled bool, pingPort string) error {
 	log.Println("[mashling] Initializing Flogo engine...")
+
+	g.pingEnabled = pingEnabled
+	//Initialize ping service if it is enabled
+	if g.pingEnabled {
+		//construct ping response
+		pingResponse := services.PingResponse{
+			Version:        g.Version(),
+			Appversion:     g.AppVersion(),
+			Appdescription: g.Description()}
+
+		g.PingService = services.GetPingService()
+		g.PingService.Init(pingPort, pingResponse)
+	}
+
 	return g.FlogoEngine.Init(true)
 }
 
 // Start starts the Gateway.
 func (g *Gateway) Start() error {
 	log.Println("[mashling] Starting Flogo engine...")
-	return g.FlogoEngine.Start()
+	err := g.FlogoEngine.Start()
+	if err != nil {
+		return err
+	}
+
+	//Start ping service if it is enabled
+	if g.pingEnabled {
+		log.Println("[mashling] Starting Ping service...")
+		err = g.PingService.Start()
+		if err != nil {
+			g.Stop()
+			return err
+		}
+	}
+	return nil
 }
 
 // Stop stops the Gateway.
 func (g *Gateway) Stop() error {
 	log.Println("[mashling] Stoppping Flogo engine...")
+	if g.pingEnabled {
+		log.Println("[mashling] Stoppping Ping service...")
+		g.PingService.Stop()
+	}
 	return g.FlogoEngine.Stop()
 }
 
