@@ -643,6 +643,9 @@ func version() error {
 
 func docker() error {
 	Resolve(platforms)
+	TargetOS = "linux"
+	TargetArch = "amd64"
+	Resolve(releasegateway)
 
 	Print("building a docker image containing the mashling-gateway binary")
 
