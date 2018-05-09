@@ -11,7 +11,7 @@ branches:
     - master
     - develop
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - feature-v2-model-cicd
+    - feature-v2-model
     
 cache:
   bundler: false
@@ -23,18 +23,18 @@ git:
 # Do a github login using token
 before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
-  - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\""
 install:
-  - go get -u github.com/golang/dep/cmd/dep
   - go get -u github.com/ains/go-test-html 
-  
+  - go get github.com/spf13/hugo
+
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - git clone -b feature-v2-model-cicd https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
   - git clone -b feature-v2-model-cicd https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
-  - cd mashling
+  - cd mashling/docs/web && hugo
+  - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
-  - make
+  - go run build.go buildgateway
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - pushd mashling-cicd/sample-recipes/scripts
   - chmod ugo+x ./init.sh ./get-mashling-release-candidate.sh
@@ -47,13 +47,19 @@ after_script:
   - "[ -f \"${HOME}/.aws\" ] && rm -f ${HOME}/.aws"
 
 deploy:
-  provider: releases
-  api_key: "$GITHUB_USER_TOKEN"
-  file_glob: true
-  file: $GOPATH/src/github.com/TIBCOSoftware/mashling/artifacts/*
-  skip_cleanup: true
-  on:
-    tags: true
+  - provider: releases
+    api_key: "$GITHUB_USER_TOKEN"
+    file_glob: true
+    file: $GOPATH/src/github.com/TIBCOSoftware/mashling/artifacts/*
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: pages
+    skip_cleanup: true
+    local-dir: docs/web/public
+    github_token: $GITHUB_USER_TOKEN
+    on:
+      branch: feature-v2-model
 
 notifications: 
   email: 
