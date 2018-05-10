@@ -9,7 +9,9 @@ services:
 branches:
   only:
     - master
+    - develop
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
+    - feature-v2-model
     
 cache:
   bundler: false
@@ -21,44 +23,44 @@ git:
 # Do a github login using token
 before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
-  - pip install --user awscli
 install:
-  - go get -u github.com/golang/dep/cmd/dep
   - go get -u github.com/ains/go-test-html 
-  
+  - go get github.com/spf13/hugo
+
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
-  - cd mashling
-  - dep ensure -vendor-only
+  - git clone -b feature-v2-model-cicd https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
+  - git clone -b feature-v2-model-cicd https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
+  - cd mashling/docs/web && hugo
+  - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
-  - make all
-  - mashling help
+  - go run build.go buildgateway
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - pushd mashling-cicd/sample-recipes
-  - rm -rf builds
-  - mkdir -p builds/latest
-  - chmod ugo+x ./build-recipes.sh ./sanity.sh ./gotestreport.sh
-  - ./gotestreport.sh
-  - ./build-recipes.sh
-  - ./sanity.sh
-  - popd
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then    
-    pushd mashling-cicd/docker/mashling;
-    chmod ugo+x ./build-mashling.sh ;
-    ./build-mashling.sh ;
-    popd ;
-    fi  
+  - pushd mashling-cicd/sample-recipes/scripts
+  - chmod ugo+x ./init.sh ./get-mashling-release-candidate.sh
+  - ./get-mashling-release-candidate.sh
+  - ./init.sh
+  - popd  
     
 after_script:
   - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
   - "[ -f \"${HOME}/.aws\" ] && rm -f ${HOME}/.aws"
 
-after_success:
-  - "docker login -u=\"${DOCKER_USERNAME}\" -p=\"${DOCKER_PASSWORD}\" tibdocker.tibco.com"
-  - source $GOPATH/src/github.com/TIBCOSoftware/mashling-cicd/scripts/init.sh
-  - mashling::module::postbuild mashling mashling
-  
+deploy:
+  - provider: releases
+    api_key: "$GITHUB_USER_TOKEN"
+    file_glob: true
+    file: $GOPATH/src/github.com/TIBCOSoftware/mashling/artifacts/*
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: pages
+    skip_cleanup: true
+    local-dir: docs/web/public
+    github_token: $GITHUB_USER_TOKEN
+    on:
+      branch: feature-v2-model
+
 notifications: 
   email: 
     on_failure: always
