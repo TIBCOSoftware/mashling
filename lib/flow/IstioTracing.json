@@ -48,7 +48,8 @@
                 "attributes": [
                   {
                     "name": "tracing",
-                    "value": null
+                    "value": null,
+                    "type":"any"
                   }
                 ],
                 "inputMappings": [
@@ -80,7 +81,8 @@
                 "attributes": [
                   {
                     "name": "span",
-                    "value": null
+                    "value": null,
+                    "type":"any"
                   }
                 ],
                 "inputMappings": [
