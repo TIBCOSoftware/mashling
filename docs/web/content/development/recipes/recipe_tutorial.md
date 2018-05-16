@@ -63,23 +63,24 @@ Add a dispatches section:
               {
                 "service": "GetPet",
                 "input": {
-                  "inputs.pathParams": "${payload.pathParams}"
+                  "method": "GET",
+                  "pathParams.id": "${payload.pathParams.petId}"
                 }
               }
             ],
             "responses": [
               {
-                "if": "JSON.parse(GetPet.response.outputs.code) != 200",
+                "if": "GetPet.response.body.status != 'available'",
                 "error": true,
                 "output": {
                   "error": "Pet is not available."
                 }
               },
               {
-                "if": "JSON.parse(GetPet.response.outputs.code) == 200",
+                "if": "GetPet.response.body.status == 'available'",
                 "error": false,
                 "output": {
-                  "result": "${GetPet.response.outputs.data}"
+                  "result": "${GetPet.response.body}"
                 }
               }
             ]
@@ -104,7 +105,7 @@ Add a dispatches section:
                 "if": "PutPet.response.outputs.code != 200",
                 "error": true,
                 "output": {
-                  "error": "Pet is not added."
+                  "error": "Pet is not registered."
                 }
               },
               {
@@ -148,10 +149,10 @@ Add the services section below, which defines each service reference used in the
     "services": [
       {
         "name": "GetPet",
-        "description": "Make GET calls against a remote HTTP service using a Flogo flow.",
-        "type": "flogoFlow",
+        "description": "Make GET calls against a remote HTTP service using http endpoint.",
+        "type": "http",
         "settings": {
-          "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestGetActivity.json"
+          "url": "http://petstore.swagger.io/v2/pet/:id"
         }
       },
       {
@@ -175,7 +176,8 @@ Add the services section below, which defines each service reference used in the
 }
 ```
 
-The first two services invoke a flogo flow to execute the pet store backend API. InvalidAnimal service executes a javascript service to produce a message that the request is invalid. This avoids invoking the backend API if the request is invalid.
+The services section above illustrates 3 different types of service suported.
+The first service which handles the GET request invokes https endpoint directly. The second service invokes a flogo flow to execute the pet store backend API to handle the PUT request. InvalidAnimal service executes a javascript service to produce a message that the request is invalid. This avoids invoking the backend API if the request is invalid.
 
 Save the recipe file created and validate it with mashling-cli in a terminal:
 ```
@@ -196,7 +198,7 @@ curl -X PUT "http://localhost:9096/pets" -H "Content-Type: application/json" -d 
 Now, retrieve the pet data with
 
 ```
-curl -request GET http://localhost:9096/pets/16
+curl -X GET http://localhost:9096/pets/16
 ```
 
 The pet data just registered should be returned.
