@@ -4,9 +4,9 @@ weight: 4110
 pre: "<i class=\"fa fa-asterisk\" aria-hidden=\"true\"></i> "
 ---
 
-The mashling.json configuration file is what contains all details related to the runtime behavior of a mashling-gateway instance. The file can be named anything and pointed to via the -c or --config flag.
+A gateway configuration file is what contains all details related to the runtime behavior of a mashling-gateway instance. The file can be named anything and pointed to via the -c or --config flag.
 
-A mashling configuration file specifies the appropriate schema version to load and validate against via the mashling_schema key. This is located at the top level of the configuration JSON schema. All other components specifying runtime behavior are contained within a gateway key and will be explained in detail below.
+A gateway configuration specifies the appropriate schema version to load and validate against via the mashling_schema key. This is located at the top level of the configuration JSON schema. All other components specifying runtime behavior are contained within a gateway key and will be explained in detail below.
 
 Example configuration files for the 1.0 schema version can be found in the example recipes folder. The corresponding schema can be found here.
 
