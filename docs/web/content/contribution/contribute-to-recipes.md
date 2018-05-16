@@ -29,7 +29,7 @@ Gopkg.lock and Gopkg.toml contains the specific dependent library versions to be
 
 #### Publishing a Recipe
 
-[recipe_registry.json](https://github.com/TIBCOSoftware/mashling-recipes/blob/master/recipe_registry.json) contains the list of recipe providers and the recipes to publish. The recipe folder name should be added to the "publish" field for the recipe to be made available in mashling.io. For example, "event-dispatcher-router-mashling" and "rest-conditional-gateway" recipes binaries are built and made downloadable from mashling.io given the following recipe_registry.json. Setting "featured" to "true" adds the recipe to the featured recipe list in mashling.io.
+[recipe_registry.json](https://github.com/TIBCOSoftware/mashling-recipes/blob/master/recipe_registry.json) contains the list of recipe providers and the recipes to publish. The recipe folder name should be added to the publish field for the recipe to be made available in mashling.io. For example, "event-dispatcher-router-mashling" and "rest-conditional-gateway" recipes binaries are built and made downloadable from mashling.io given the following recipe_registry.json. Setting "featured" to "true" adds the recipe to the featured recipe list in mashling.io.
 
 ```
 {  

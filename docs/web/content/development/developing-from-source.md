@@ -23,7 +23,7 @@ You can pull the Mashling source code using default Go commands.
 go get -u github.com/TIBCOSoftware/mashling/...
 ```
 
-If Go is installed correctly this command will also build the mashling binary targets and install them into your **$GOPATH**. You should be able to run **mashling-gateway** and **mashling-cli** immediately if your **PATH** environment variable includes **$GOPATH/bin**.
+If Go is installed correctly, this command will also build the mashling binary targets and install them into your **$GOPATH**. You should be able to run **mashling-gateway** and **mashling-cli** immediately if your **PATH** environment variable includes **$GOPATH/bin**.
 
 #### Using Git
 If you decide to download the source code from Github using Git, please make sure Git is installed.
@@ -34,7 +34,7 @@ cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 go install ./...
 ```
 
-If Go is installed correctly the **go install ./...** command will also build the mashling binary targets and install them into your **$GOPATH**. You should be able to run **mashling-gateway** and **mashling-cli** immediately if your **PATH** environment variable includes **$GOPATH/bin**.
+If Go is installed correctly, the **go install ./...** command will also build the mashling binary targets and install them into your **$GOPATH**. You should be able to run **mashling-gateway** and **mashling-cli** immediately if your **PATH** environment variable includes **$GOPATH/bin**.
 
 #### Building
 
