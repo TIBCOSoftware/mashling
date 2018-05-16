@@ -5,7 +5,7 @@ pre: "<i class=\"fa fa-asterisk\" aria-hidden=\"true\"></i> "
 ---
 
 In this example we will create a mashling gateway recipe that conditionally invokes a PetStore API.
-The recipe will either register or retrieve pet data. The scenario assumes that only pets with a category name of `dog` or `cat` are supported. If an attempt is made to register any other kind of pet the gateway responds with an error message without hitting the PetStore backend.
+The recipe will either register or retrieve pet data. The scenario assumes that only pets with a category name of **DOG** or **CAT** are supported. If an attempt is made to register any other kind of pet the gateway responds with an error message without hitting the PetStore backend.
 
 
 Open an editor and define event triggers like the following:
@@ -140,8 +140,8 @@ Add a dispatches section:
     ],
 ```
 
-Both `Retrieve` and `Register` routes have their own steps and their own response handling defined. Note that `Register` has a step which is executed only when a dog or cat is registered.
-If no condition is defined for a set of steps it is considered the default route. Only one route is executed. Thus, in the `Register` route, the InvalidAnimal service is executed only when the request is for an animal other than a dog or a cat.
+Both **Retrieve** and **Register** routes have their own steps and their own response handling defined. Note that **Register** has a step which is executed only when a dog or cat is registered.
+If no condition is defined for a set of steps it is considered the default route. Only one route is executed. Thus, in the **Register** route, the InvalidAnimal service is executed only when the request is for an animal other than a dog or a cat.
 
 Add the services section below, which defines each service reference used in the dispatch section above:
 
