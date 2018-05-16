@@ -46,7 +46,7 @@ Flags:
 Use "mashling-gateway [command] --help" for more information about a command.
 ```
 
-Right now, **dev** mode just reloads the running gateway instance when a change is detected in the *mashling.json* file but the behavior is inconsistent between triggers.
+Currently, **dev** mode just reloads the running gateway instance when a change is detected in the *mashling.json* file.
 
 #### Health Check
 An integrated ping service is used to determine if a gateway instance is up and running.

@@ -12,4 +12,4 @@ To get started:
 
 1. Find a recipe that you like. (You can browse the details on each recipe.)
 1. Download and run the recipe. (Use the **Try Now** button to download the pre-made Mashling application. Each recipe comes with a README with detailed usage instructions.)
-1. Customize your recipe and download and build your own Mashling application.
+1. Customize your recipe and download and run your own Mashling application.

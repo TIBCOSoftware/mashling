@@ -6,4 +6,4 @@ pre: "<i class=\"fa fa-shopping-cart\" aria-hidden=\"true\"></i> "
 
 ## Recipes
 
-Mashling recipes are pre-compiled binaries, along with the JSON files. Each recipe uses the same binary.
+A recipe is a pre-configured Mashling JSON file which can be customized or used as is for a specific gateway use case. It is based on the mashling gateway model schema.
