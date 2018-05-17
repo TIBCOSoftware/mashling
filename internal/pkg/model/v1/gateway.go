@@ -142,12 +142,39 @@ func (g *Gateway) Swagger(hostname string, triggerName string) ([]byte, error) {
 func (g *Gateway) ConsulServiceDefinition() ([]consul.ServiceDefinition, error) {
 
 	gConf := g.MashlingConfig.(types.Microgateway)
+
+	//load the configuration, if provided.
+	configNamedMap := make(map[string]types.Config)
+	for _, config := range gConf.Gateway.Configurations {
+		configNamedMap[config.Name] = config
+	}
+
 	var consulServiceDefinitions []consul.ServiceDefinition
 	for _, trigger := range gConf.Gateway.Triggers {
 		if trigger.Type == "github.com/TIBCOSoftware/flogo-contrib/trigger/rest" || trigger.Type == "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger" {
 			var consulServiceDefinition consul.ServiceDefinition
 
-			settings, err := json.MarshalIndent(&trigger.Settings, "", "    ")
+			var mtSettings interface{}
+			if err := json.Unmarshal([]byte(trigger.Settings), &mtSettings); err != nil {
+				return nil, err
+			}
+
+			//resolve any configuration references if the "config" param is set in the settings
+			mashTriggerSettings := mtSettings.(map[string]interface{})
+			mashTriggerSettingsUsable := mtSettings.(map[string]interface{})
+			for k, v := range mashTriggerSettings {
+				mashTriggerSettingsUsable[k] = v
+			}
+
+			if configNamedMap != nil && len(configNamedMap) > 0 {
+				//inherit the configuration settings if the trigger uses configuration reference
+				err := resolveConfigurationReference(configNamedMap, trigger, mashTriggerSettingsUsable)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			settings, err := json.MarshalIndent(&mashTriggerSettingsUsable, "", "    ")
 			if err != nil {
 				return nil, err
 			}
