@@ -235,7 +235,7 @@ func create(command *cobra.Command, args []string) {
 	// Copy release folder contents to top level
 	err = filepath.Walk(filepath.Join(name, "src", ImportPath, "release"), func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			err = files.CopyFile(path, filepath.Join(name, "bin", info.Name()))
+			err = files.CopyFile(path, filepath.Join(name, info.Name()))
 			if err != nil {
 				log.Fatal(err)
 			}
