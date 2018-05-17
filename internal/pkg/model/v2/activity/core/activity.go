@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -93,6 +94,13 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 		vmDefaults["payload"] = payload
 	}
 	vmDefaults["async"] = false
+	// Add ENV flags to the vmDefaults
+	envFlags := make(map[string]string)
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		envFlags[pair[0]] = pair[1]
+	}
+	vmDefaults["env"] = envFlags
 	vm, err := mservice.NewVM(vmDefaults)
 	if err != nil {
 		return false, err
@@ -111,9 +119,11 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 			break
 		}
 	}
-	// Contains all elements of request: right now just payload and service instances.
+	// Contains all elements of request: right now just payload, environment flags and service instances.
 	executionContext := make(map[string]interface{})
 	executionContext["payload"] = &payload
+	executionContext["env"] = envFlags
+
 	// Execute the identified route if it exists and handle the async option.
 	if routeToExecute != nil {
 		if routeToExecute.Async {
