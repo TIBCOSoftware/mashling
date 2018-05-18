@@ -9,6 +9,10 @@
   * [Routes](#routes)
   * [Steps](#steps)
   * [Services](#services)
+    * [HTTP](#services-http)
+    * [JS](#services-js)
+    * [Flogo Activity](#services-flogo-activity)
+    * [Flogo Flow](#services-flogo-flow)
   * [Responses](#responses)
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
@@ -169,9 +173,34 @@ As you can see above, a step consists of a simple condition, a service reference
 
 ### <a name="services"></a>Services
 
-A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, and `flogoActivity`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
+A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, `flogoActivity`, and `flogoFlow`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
 
-A simple `http` service looks like:
+#### <a name="services-http"></a>HTTP
+
+The `http` service type executes an HTTP request against a specified target `url` and returns a response.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| path | string | The path of the URL |
+| pathParams | JSON object | Key/value pairs representing parameters to interpolate in the URL and path  |
+| method | string | The method to use when invoking the HTTP request (GET, PUT, POST, PATCH, DELETE)|
+| url | string | The target URL of the HTTP request |
+| body | string | Body of the HTTP request |
+| headers | JSON object | Key/value pairs representing headers to send to the HTTP target|
+| query | JSON object | Key/value pairs representing query parameters that are appended to the URL |
+| timeout | integer | Timeout in seconds for this HTTP request (default is 5 seconds) |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| statusCode | integer | The HTTP status code of the response |
+| body | JSON object | The response body |
+| headers | JSON object | The key/value pairs representing the headers returned from the HTTP target |
+
+A sample `service` definition is:
 
 ```json
 {
@@ -180,6 +209,220 @@ A simple `http` service looks like:
   "type": "http",
   "settings": {
     "url": "http://petstore.swagger.io/v2/pet/:id"
+  }
+}
+```
+
+An example `step` that invokes the above `PetStorePets` service using `pathParams` is:
+
+```json
+{
+  "service": "PetStorePets",
+  "input": {
+    "method": "GET",
+    "pathParams.id": "${payload.pathParams.petId}"
+  }
+}
+```
+
+Utilizing and extracting the response values can be seen in both a conditional evaluation:
+
+```json
+{"if": "PetStorePets.response.body.status == 'available'"}
+```
+
+and a response handler:
+
+```json
+{
+  "if": "PetStorePets.response.body.status == 'available'",
+  "error": false,
+  "output": {
+    "code": 200,
+    "format": "json",
+    "body.pet": "${PetStorePets.response.body}",
+    "body.inventory": "${PetStoreInventory.response.body}"
+  }
+}
+```
+
+#### <a name="services-js"></a>JS
+
+The `js` service type evaluates a javascript `script` along with provided `parameters` and returns the result as the response.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| script | string | The javascript code to evaluate |
+| parameters | JSON object | Key/value pairs representing parameters to evaluate within the context of the script  |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| error | bool | The HTTP status code of the response |
+| errorMessage | string | The error message |
+| result | JSON object | The result object from the javascript code  |
+
+A sample `service` definition is:
+
+```json
+{
+  "name": "JSCalc",
+  "description": "Make calls to a JS calculator",
+  "type": "js",
+  "settings": {
+    "script": "result.total = parameters.num * 2;"
+  }
+}
+```
+
+An example `step` that invokes the above `JSCalc` service using `parameters` is:
+
+```json
+{
+  "if": "PetStorePets.response.body.status == 'available'",
+  "service": "JSCalc",
+  "input": {
+    "parameters.num": "${PetStoreInventory.response.body.available}"
+  }
+}
+```
+
+Utilizing the response values can be seen in a response handler:
+
+```json
+{
+  "if": "PetStorePets.response.body.status == 'available'",
+  "error": false,
+  "output": {
+    "code": 200,
+    "format": "json",
+    "body.pet": "${PetStorePets.response.body}",
+    "body.inventory": "${PetStoreInventory.response.body}",
+    "body.availableTimesTwo": "${JSCalc.response.result.total}"
+  }
+}
+```
+
+#### <a name="services-flogo-activity"></a>Flogo Activity
+
+The `flogoActivity` service type executes a Flogo Activity defined by `ref` with the provided `inputs` values.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| ref | string | The URI representing the Flogo Activity |
+| inputs | JSON object | Key/value pairs representing inputs to pass to the Flogo Activity execution context  |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| done | bool | If the activity is done |
+| error | string | An error message if a message occurred |
+| outputs | JSON object | The output of this activity execution |
+
+Input keys nested under the `inputs` key are specific to the type of Flogo Activity that is referenced.
+
+A sample `service` definition is:
+
+```json
+{
+  "name": "PetStorePets",
+  "description": "Get pets by ID from the petsore.",
+  "type": "flogoActivity",
+  "settings": {
+    "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+    "inputs": {
+      "uri": "http://petstore.swagger.io/v2/pet/:petId",
+      "method": "GET"
+    }
+  }
+}
+```
+
+An example `step` that invokes the above `PetStorePets` service using `inputs` is:
+
+```json
+{
+  "service": "PetStorePets",
+  "input": {
+    "inputs.pathParams": "${payload.pathParams}"
+  }
+}
+```
+
+Utilizing the response values can be seen in a response handler:
+
+```json
+{
+  "error": false,
+  "output": {
+    "code": 200,
+    "format": "json",
+    "body": "${PetStorePets.response.outputs.result}"
+  }
+}
+```
+
+#### <a name="services-flogo-flow"></a>Flogo Flow
+
+The `flogoFlow` service type executes a complete Flogo Flow defined by `reference` or `definition` with the provided `inputs` values.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| reference | string | The URI representing the location of a Flogo Flow (Github, URL, local file) |
+| definition | JSON object | A complete Flogo Flow defined inline |
+| inputs | JSON object | Key/value pairs representing inputs to pass to the Flogo Flow execution context  |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| done | bool | If the flow is done |
+| error | string | An error message if a message occurred |
+| outputs | JSON object | The output of this flow execution |
+
+Input keys nested under the `inputs` key are specific to the expectations of the specific Flogo Flow.
+
+A sample `service` definition is:
+
+```json
+{
+  "name": "FlogoRestGetFlow",
+  "description": "Make GET calls against a remote HTTP service using a Flogo flow.",
+  "type": "flogoFlow",
+  "settings": {
+    "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestGetActivity.json"
+  }
+}
+```
+
+An example `step` that invokes the above `FlogoRestGetFlow` service using `inputs` is:
+
+```json
+{
+  "service": "FlogoRestGetFlow",
+  "input": {
+    "inputs.pathParams": "${payload.pathParams}"
+  }
+}
+```
+
+Utilizing the response values can be seen in a response handler:
+
+```json
+{
+  "error": false,
+  "output": {
+    "code": 200,
+    "format": "json",
+    "body": "${FlogoRestGetFlow.response.outputs.data}"
   }
 }
 ```
