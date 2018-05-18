@@ -9,7 +9,7 @@
     "configurations": [
       {
         "name": "restConfig",
-        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "type": "github.com/jeffreybozek/mashling-extras/triggers/gorillamuxtrigger",
         "description": "Configuration for rest trigger",
         "settings": {
           "port": "9096"
@@ -20,7 +20,7 @@
       {
         "name": "animals_rest_trigger",
         "description": "Animals rest trigger - PUT animal details",
-        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "type": "github.com/jeffreybozek/mashling-extras/triggers/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "PUT",
@@ -31,7 +31,7 @@
       {
         "name": "get_animals_rest_trigger",
         "description": "Animals rest trigger - get animal details",
-        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "type": "github.com/jeffreybozek/mashling-extras/triggers/gorillamuxtrigger",
         "settings": {
           "config": "${configurations.restConfig}",
           "method": "GET",
