@@ -53,8 +53,9 @@
                 "error": true,
                 "output": {
                   "code": 404,
-                  "format": "json",
-                  "body": "petId is invalid"
+                  "data": {
+                    "error": "petId is invalid"
+                  }
                 }
               },
               {
@@ -62,8 +63,9 @@
                 "error": true,
                 "output": {
                   "code": 403,
-                  "format": "json",
-                  "body": "Pet is unavailable."
+                  "data": {
+                    "error": "Pet is unavailable."
+                  }
                 }
               },
               {
@@ -71,9 +73,10 @@
                 "error": false,
                 "output": {
                   "code": 200,
-                  "format": "json",
-                  "body.pet": "${PetStorePets.response.body}",
-                  "body.inventory": "${PetStoreInventory.response.body}"
+                  "data": {
+                    "pet": "${PetStorePets.response.body}",
+                    "inventory": "${PetStoreInventory.response.body}"
+                  }
                 }
               }
             ]

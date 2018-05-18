@@ -43,8 +43,7 @@
                 "error": false,
                 "output": {
                   "code": 200,
-                  "format": "json",
-                  "body": "${FlogoFlowFromLocalFile.response.outputs.data}"
+                  "data": "${FlogoFlowFromLocalFile.response.outputs.data}"
                 }
               }
             ]
