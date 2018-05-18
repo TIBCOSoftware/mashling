@@ -177,7 +177,7 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 				if ok && code != 0 {
 					log.Info("Code identified in response output: ", code)
 				} else {
-					log.Info("Code contents is not found or not an integer, default response is 200")
+					log.Info("Code contents is not found or not an integer, default response code is 200")
 					code = 200
 				}
 				// Translate data mappings

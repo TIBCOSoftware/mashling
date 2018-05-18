@@ -108,7 +108,6 @@
         },
         "Output": {
             "required": [
-                "code",
                 "data"
             ],
             "properties": {

@@ -59,7 +59,7 @@ type Response struct {
 
 // Output defines response output values back to a trigger event.
 type Output struct {
-	Code int         `json:"code" jsonschema:"required"`
+	Code int         `json:"code,omitempty"`
 	Data interface{} `json:"data" jsonschema:"additionalProperties"`
 }
 
