@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
-	"github.com/jeffreybozek/jsonschema"
+	"github.com/mashling-support/jsonschema"
 )
 
 func main() {
