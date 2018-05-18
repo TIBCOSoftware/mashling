@@ -106,6 +106,31 @@
             "additionalProperties": false,
             "type": "object"
         },
+        "Output": {
+            "required": [
+                "code",
+                "data"
+            ],
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "additionalProperties": true,
+                    "type": [
+                        "array",
+                        "boolean",
+                        "integer",
+                        "number",
+                        "null",
+                        "object",
+                        "string"
+                    ]
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
         "Policy": {
             "required": [
                 "name",
@@ -147,9 +172,6 @@
                 "error"
             ],
             "properties": {
-                "complex": {
-                    "type": "boolean"
-                },
                 "error": {
                     "type": "boolean"
                 },
@@ -157,21 +179,8 @@
                     "type": "string"
                 },
                 "output": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
+                    "$schema": "http://json-schema.org/draft-04/schema#",
+                    "$ref": "#/definitions/Output"
                 }
             },
             "additionalProperties": false,
@@ -274,23 +283,6 @@
                     "type": "string"
                 },
                 "input": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
-                },
-                "output": {
                     "patternProperties": {
                         ".*": {
                             "additionalProperties": true,

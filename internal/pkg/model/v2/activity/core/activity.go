@@ -155,7 +155,7 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 				continue
 			}
 			if truthiness {
-				output, oErr := translateMappings(&executionContext, response.Output)
+				output, oErr := translateMappings(&executionContext, map[string]interface{}{"code": response.Output.Code})
 				if oErr != nil {
 					return false, oErr
 				}
@@ -176,11 +176,29 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 				}
 				if ok && code != 0 {
 					log.Info("Code identified in response output: ", code)
-					replyHandler.Reply(code, output, nil)
 				} else {
 					log.Info("Code contents is not found or not an integer, default response is 200")
-					replyHandler.Reply(200, output, nil)
+					code = 200
 				}
+				// Translate data mappings
+				var data interface{}
+				nestedData, ok := response.Output.Data.(map[string]interface{})
+				if ok {
+					data, oErr = translateMappings(&executionContext, nestedData)
+					if oErr != nil {
+						return false, oErr
+					}
+				} else {
+					interimData, dErr := translateMappings(&executionContext, map[string]interface{}{"data": response.Output.Data})
+					if dErr != nil {
+						return false, dErr
+					}
+					data, ok = interimData["data"]
+					if !ok {
+						return false, errors.New("cannot extract data from response output")
+					}
+				}
+				replyHandler.Reply(code, data, nil)
 				return true, err
 			}
 		}
@@ -197,7 +215,7 @@ func executeRoute(route *types.Route, services map[string]types.Service, executi
 			return err
 		}
 		if truthiness {
-			err = invokeService(services[step.Service], executionContext, step.Input, step.Output, vm)
+			err = invokeService(services[step.Service], executionContext, step.Input, vm)
 			if err != nil {
 				return err
 			}
@@ -220,7 +238,7 @@ func evaluateTruthiness(condition string, vm *mservice.VM) (truthy bool, err err
 	return truthy, err
 }
 
-func invokeService(serviceDef types.Service, executionContext *map[string]interface{}, input map[string]interface{}, output map[string]interface{}, vm *mservice.VM) (err error) {
+func invokeService(serviceDef types.Service, executionContext *map[string]interface{}, input map[string]interface{}, vm *mservice.VM) (err error) {
 	log.Info("invoking service type: ", serviceDef.Type)
 	serviceInstance, err := mservice.Initialize(serviceDef)
 	if err != nil {
