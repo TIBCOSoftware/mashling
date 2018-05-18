@@ -11,7 +11,6 @@ branches:
     - master
     - develop
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - feature-v2-model
     
 cache:
   bundler: false
@@ -29,8 +28,8 @@ install:
 
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - git clone -b feature-v2-model https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
-  - git clone -b feature-v2-model https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
+  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
+  - git clone https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
   - cd mashling/docs/web && hugo
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
@@ -59,7 +58,7 @@ deploy:
     local-dir: docs/web/public
     github_token: $GITHUB_USER_TOKEN
     on:
-      branch: feature-v2-model
+      branch: master
 
 notifications: 
   email: 
