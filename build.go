@@ -670,7 +670,7 @@ func gobindata() error {
 
 	Print("building go-bindata…")
 
-	err = Exec(Go, "get", "github.com/jeffreybozek/go-bindata/...")
+	err = Exec(Go, "get", "github.com/mashling-support/go-bindata/...")
 	if err != nil {
 		return err
 	}
