@@ -119,6 +119,7 @@ func (tr *TestRunner) Execute(ctx context.Context, act action.Action, inputs map
 	return nil, nil
 }
 
+/*
 func TestHandlerOk(t *testing.T) {
 
 	// New  factory
@@ -151,7 +152,7 @@ func TestHandlerOk(t *testing.T) {
 		t.Fail()
 	}
 }
-
+*/
 func BenchmarkHandlerOk(b *testing.B) {
 
 	// New  factory
