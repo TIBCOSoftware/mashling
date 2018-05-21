@@ -41,7 +41,7 @@ Available Commands:
 
 Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -h, --help                  help for mashling-cli
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 
@@ -52,7 +52,7 @@ Use "mashling-cli [command] --help" for more information about a command.
 Below are a list of the currently support commands via the `mashling-cli` binary.
 
 ### <a name="create"></a>Create
-Create allows you to build cutomized `mashling-gateway` binaries that are re-usable and contain all of your custom dependencies.
+Create allows you to build customized `mashling-gateway` binaries that are re-usable and contain all of your custom dependencies.
 
 #### <a name="prerequisites"></a>Prerequisites
 
@@ -90,7 +90,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 
@@ -100,7 +100,7 @@ A simple example usage is:
 ./mashling-cli create -c examples/recipes/v2/customized-simple-synchronous-pattern.json
 ```
 
-By default all of the build commands will run through `Docker` so as to simplify the setup required on your development machine. You can run these commands natively (assuming your development environment is setup correclty), by passing the `-N` flag to the `create` command.
+By default all of the build commands will run through `Docker` so as to simplify the setup required on your development machine. You can run these commands natively (assuming your development environment is setup correctly), by passing the `-N` flag to the `create` command.
 
 You can also specify which target OS to build the customized binary for via the `-O` flag. Supported values are `windows`, `darwin` (for macOS), and `linux`. The default value is whatever the host operating system is at the time the `create` command is executed.
 
@@ -130,7 +130,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 
@@ -224,7 +224,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 
 Use "mashling-cli publish [command] --help" for more information about a command.
@@ -261,7 +261,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 
@@ -302,7 +302,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 

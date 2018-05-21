@@ -53,7 +53,7 @@ Flags:
   -C, --config-cache string    location of the configuration artifacts cache (default ".cache")
   -E, --config-cache-enabled   cache post-processed configuration artifacts locally (default true)
   -d, --dev                    run mashling in dev mode
-  -e, --env-var-name string    name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string    name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -h, --help                   help for mashling-gateway
   -l, --load-from-env          load the mashling gateway configuration from an environment variable
   -p, --ping-enabled           enable gateway ping service (default true)
@@ -95,7 +95,7 @@ The `mashling.json` configuration file is what contains all details related to t
 
 A mashling configuration file specifies the appropriate schema version to load and validate against via the `mashling_schema` key. This is located at the top level of the configuration JSON schema. All other components specifying runtime behavior are contained within a `gateway` key and will be explained in detail below.
 
-Example configuration files for the `1.0` schema version can be found in the [V2 example recipes folder](../examples/recipes/v2). The corresponding schema can be found [here](../internal/pkg/model/v2/schema/schema.json).
+Example configuration files for the `1.0` schema version can be found in the [V2 example recipes folder](../../examples/recipes/v2). The corresponding schema can be found [here](../../internal/pkg/model/v2/schema/schema.json).
 
 ### <a name="triggers"></a>Triggers
 
@@ -140,7 +140,7 @@ Dispatches are used to map trigger invocation with a set of possible execution r
 
 ### <a name="routes"></a>Routes
 
-Routes define the actual exection logic of a dispatch. Each route in a dispatch comes with a condition value in the `if` key. The mashling engine will evaluate this condition within the trigger context. The first route with a condition to evaulate to `true` will then be the route executed. Only **one** route is executed per triggered flow. Once a route is selected by the mashling engine the steps defined therein will be evaluated and executed in the order in which they are defined. If a route is marked as `"async": true` then the execution will be asynchronous and the trigger will immediately be returned a response.
+Routes define the actual execution logic of a dispatch. Each route in a dispatch comes with a condition value in the `if` key. The mashling engine will evaluate this condition within the trigger context. The first route with a condition to evaluate to `true` will then be the route executed. Only **one** route is executed per triggered flow. Once a route is selected by the mashling engine the steps defined therein will be evaluated and executed in the order in which they are defined. If a route is marked as `"async": true` then the execution will be asynchronous and the trigger will immediately be returned a response.
 
 A simple route looks like:
 
@@ -429,7 +429,7 @@ Utilizing the response values can be seen in a response handler:
 
 ### <a name="responses"></a>Responses
 
-Each route has an optional set of responses that can be evaluated and returned to the invoking trigger. Much like routes, the first response with an `if` condition evaluating to true is the reponse that gets executed and returned. A response contains an `if` condition, an `error` boolean, a `complex` boolean, and an `output` object. The `error` boolean dictates whether or not an error should be returned to the engine. The `complex` boolean dictates whether to use the `Reply` or `ReplyWithData` function. A value of `true` causes the `ReplyWithData` function to be used when sending the response back to the trigger. The `output` is evaluated within the context of the execution and then sent back to the trigger as well.
+Each route has an optional set of responses that can be evaluated and returned to the invoking trigger. Much like routes, the first response with an `if` condition evaluating to true is the response that gets executed and returned. A response contains an `if` condition, an `error` boolean, a `complex` boolean, and an `output` object. The `error` boolean dictates whether or not an error should be returned to the engine. The `complex` boolean dictates whether to use the `Reply` or `ReplyWithData` function. A value of `true` causes the `ReplyWithData` function to be used when sending the response back to the trigger. The `output` is evaluated within the context of the execution and then sent back to the trigger as well.
 
 A simple response looks like:
 
@@ -451,9 +451,9 @@ A simple response looks like:
 
 Policies are called out in the JSON Schema and the types for the V2 package, however, they are not yet implemented. This section of the document outlines the third iteration of a proposed policy design. This has been reworked following feedback from two previous sessions with the team.
 
-The new proposed implementation is to treat policies as distinct entities from services and to make each policy invocation atomic. The notion of hooks for policies are also introducted in this design. As with most entities in the model, a conditional expression is optional and is mostly useful for `after` policy hooks and for feedback into a policy that is invoked in the corresponding `before` hook. Lifecycle hook specification is optional. If it is omitted the behavior for all policies specified under that `policies` key is the same as if the `before` hook was used.
+The new proposed implementation is to treat policies as distinct entities from services and to make each policy invocation atomic. The notion of hooks for policies are also introduced in this design. As with most entities in the model, a conditional expression is optional and is mostly useful for `after` policy hooks and for feedback into a policy that is invoked in the corresponding `before` hook. Lifecycle hook specification is optional. If it is omitted the behavior for all policies specified under that `policies` key is the same as if the `before` hook was used.
 
-This iteration of the policy design adds a policy block to `dispatches` and also expands the schema definition of the policy invocation blocks to introduce the notion of hooks. These hooks look like `beforeRoute`, `afterRoute`, `beforeStep`, `afterStep`, etc... and dictate the invocation order for the included policies. The ability to add a one off lower level invocation can be achieived by adding the policy to the `policies` key in that lower level entity.
+This iteration of the policy design adds a policy block to `dispatches` and also expands the schema definition of the policy invocation blocks to introduce the notion of hooks. These hooks look like `beforeRoute`, `afterRoute`, `beforeStep`, `afterStep`, etc... and dictate the invocation order for the included policies. The ability to add a one off lower level invocation can be achieved by adding the policy to the `policies` key in that lower level entity.
 
 Unlike the previous proposals, an interrupt is not required to achieve any of the example policies outlined below. An interrupt is left in the example below simply because it is a useful flow construct, but it is not required for policies to function.
 
