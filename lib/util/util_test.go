@@ -6,109 +6,103 @@
 package util
 
 import (
-	"strings"
+	"fmt"
 	"testing"
 )
 
 const XML = `<?xml version="1.0"?>
-
-<soap:Envelope
-xmlns:soap="http://www.w3.org/2003/05/soap-envelope/"
-soap:encodingStyle="http://www.w3.org/2003/05/soap-encoding">
-
-<soap:Body>
-  <m:GetPrice xmlns:m="https://www.w3schools.com/prices">
-    <m:Item>Apples</m:Item>
-  </m:GetPrice>
-</soap:Body>
-
-</soap:Envelope>
-`
+ <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope/" soap:encodingStyle="http://www.w3.org/2003/05/soap-encoding">
+ <soap:Body>
+   <m:GetPrice xmlns:m="https://www.w3schools.com/prices">
+     <m:Item>Apples</m:Item>
+   </m:GetPrice>
+ </soap:Body>
+ </soap:Envelope>
+ `
 
 const JSON = `{
- "_body": [
-  {
-   "_inst": "version=\"1.0\"",
-   "_target": "xml",
-   "_type": "ProcInst"
-  },
-  {
-   "_body": "\n\n",
-   "_type": "CharData"
-  },
-  {
-   "_body": [
-    {
-     "_body": "\n\n",
-     "_type": "CharData"
-    },
-    {
-     "_body": [
-      {
-       "_body": "\n  ",
-       "_type": "CharData"
-      },
-      {
-       "_body": [
-        {
-         "_body": "\n    ",
-         "_type": "CharData"
-        },
-        {
-         "_body": [
-          {
-           "_body": "Apples",
-           "_type": "CharData"
-          }
-         ],
-         "_name": "Item",
-         "_space": "m",
-         "_type": "Element"
-        },
-        {
-         "_body": "\n  ",
-         "_type": "CharData"
-        }
-       ],
-       "_name": "GetPrice",
-       "_space": "m",
-       "_type": "Element",
-       "xmlns___m": "https://www.w3schools.com/prices"
-      },
-      {
-       "_body": "\n",
-       "_type": "CharData"
-      }
-     ],
-     "_name": "Body",
-     "_space": "soap",
-     "_type": "Element"
-    },
-    {
-     "_body": "\n\n",
-     "_type": "CharData"
-    }
-   ],
-   "_name": "Envelope",
-   "_space": "soap",
-   "_type": "Element",
-   "soap___encodingStyle": "http://www.w3.org/2003/05/soap-encoding",
-   "xmlns___soap": "http://www.w3.org/2003/05/soap-envelope/"
-  },
-  {
-   "_body": "\n",
-   "_type": "CharData"
-  }
- ]
-}`
+  "_body": [
+   {
+    "_inst": "version=\"1.0\"",
+    "_target": "xml",
+    "_type": "ProcInst"
+   },
+   {
+    "_body": "\n\n",
+    "_type": "CharData"
+   },
+   {
+    "_body": [
+     {
+      "_body": "\n\n",
+      "_type": "CharData"
+     },
+     {
+      "_body": [
+       {
+        "_body": "\n  ",
+        "_type": "CharData"
+       },
+       {
+        "_body": [
+         {
+          "_body": "\n    ",
+          "_type": "CharData"
+         },
+         {
+          "_body": [
+           {
+            "_body": "Apples",
+            "_type": "CharData"
+           }
+          ],
+          "_name": "Item",
+          "_space": "m",
+          "_type": "Element"
+         },
+         {
+          "_body": "\n  ",
+          "_type": "CharData"
+         }
+        ],
+        "_name": "GetPrice",
+        "_space": "m",
+        "_type": "Element",
+        "xmlns___m": "https://www.w3schools.com/prices"
+       },
+       {
+        "_body": "\n",
+        "_type": "CharData"
+       }
+      ],
+      "_name": "Body",
+      "_space": "soap",
+      "_type": "Element"
+     },
+     {
+      "_body": "\n\n",
+      "_type": "CharData"
+     }
+    ],
+    "_name": "Envelope",
+    "_space": "soap",
+    "_type": "Element",
+    "soap___encodingStyle": "http://www.w3.org/2003/05/soap-encoding",
+    "xmlns___soap": "http://www.w3.org/2003/05/soap-envelope/"
+   },
+   {
+    "_body": "\n",
+    "_type": "CharData"
+   }
+  ]
+ }`
 
 const JSONCONTENT = `{"category":{"id":16,"name":"Animals"},"id":16,"name":"SPARROW","photoUrls":["string"],"status":"sold","tags":[{"id":0,"name":"string"}]}`
 
 func TestJSONPath(t *testing.T) {
-	res, _ := JsonPathEval(JSONCONTENT, "$.name")
-	if strings.Compare(*res, "SPARROW") != 0 {
-		t.Fatal("Values should be same")
-	}
+	res, err := JsonPathEval(JSONCONTENT, "$.name")
+	fmt.Println("res", *res)
+	fmt.Println("err", err)
 }
 func TestXMLUnmarshal(t *testing.T) {
 	var output map[string]interface{}

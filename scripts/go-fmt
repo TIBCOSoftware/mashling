@@ -1,0 +1,7 @@
+#!/bin/bash
+for d in $(go list -f '{{.Dir}}' ./... | grep -v /vendor/); do
+  if [ -n "$(gofmt -l $d/*.go)" ]; then
+    echo "Go code is not formatted correctly. Please run \"make fmt\":"
+    gofmt -l $d/*.go
+  fi
+done

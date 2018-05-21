@@ -81,10 +81,10 @@ func TestInit(t *testing.T) {
 		t.Error(err)
 	}
 	tgr := f.New(config)
-
-	runner := &TestRunner{t: t}
-
-	tgr.Init(config, runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
+	tgr.Metadata()
 }
 
 func TestGetLocalIP(t *testing.T) {
@@ -108,10 +108,9 @@ func TestConfigureTracer(t *testing.T) {
 		t.Error(err)
 	}
 	tgr := f.New(config)
-
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
 
 	eftl := tgr.(*Trigger)
 	eftl.config.Settings[settingTracer] = TracerZipKin
@@ -147,9 +146,9 @@ func TestEndpoint(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
 
 	tgr.Start()
 	defer tgr.Stop()
@@ -318,9 +317,9 @@ func TestConstructJSONStartRequest(t *testing.T) {
 	}
 	tgr := f.New(config)
 
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	// TODO: Init no longer exists.
+	// runner := &TestRunner{t: t}
+	// tgr.Init(runner)
 
 	replyTo, params := tgr.(*Trigger).constructStartRequest([]byte(testJSONMessage), span)
 	if params == nil {
@@ -364,18 +363,18 @@ func TestConstructJSONStartRequest(t *testing.T) {
 }
 
 const testXMLMessage = `<?xml version="1.0"?>
-  
-  <test replyTo="abc123">
-   <message>hello world</message>
-   <pathParams>
-	<item key="param" value="a"/>
-   </pathParams>
-   <message>hello world</message>
-   <queryParams>
-	<item key="param" value="b"/>
-   </queryParams>
-   <message>hello world</message>
-  </test>`
+
+ <test replyTo="abc123">
+  <message>hello world</message>
+  <pathParams>
+   <item key="param" value="a"/>
+  </pathParams>
+  <message>hello world</message>
+  <queryParams>
+   <item key="param" value="b"/>
+  </queryParams>
+  <message>hello world</message>
+ </test>`
 
 func TestConstructXMLStartRequest(t *testing.T) {
 	tracer := &opentracing.NoopTracer{}
@@ -396,10 +395,10 @@ func TestConstructXMLStartRequest(t *testing.T) {
 		t.Error(err)
 	}
 	tgr := f.New(config)
+	// TODO: Init no longer exists.
+	//runner := &TestRunner{t: t}
 
-	runner := &TestRunner{t: t}
-
-	tgr.Init(runner)
+	// tgr.Init(runner)
 
 	replyTo, params := tgr.(*Trigger).constructStartRequest([]byte(testXMLMessage), span)
 	if params == nil {

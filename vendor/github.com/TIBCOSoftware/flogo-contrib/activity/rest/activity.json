@@ -1,0 +1,58 @@
+{
+  "name": "tibco-rest",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+  "version": "0.0.1",
+  "title": "Invoke REST Service",
+  "description": "Simple REST Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/rest",
+  "input":[
+    {
+      "name": "method",
+      "type": "string",
+      "required": true,
+      "allowed" : ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    },
+    {
+      "name": "uri",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "proxy",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "pathParams",
+      "type": "params"
+    },
+    {
+      "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "header",
+      "type": "params"
+    },
+    {
+      "name": "skipSsl",
+      "type": "boolean",
+      "value": "false"
+    },
+    {
+      "name": "content",
+      "type": "any"
+    }
+  ],
+  "output": [
+    {
+      "name": "result",
+      "type": "any"
+    },
+    {
+      "name": "status",
+      "type": "integer"
+    }
+  ]
+}

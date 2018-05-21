@@ -1,0 +1,50 @@
+{
+  "name": "tibco-lambda",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/lambda",
+  "version": "0.0.1",
+  "title": "Invoke AWS Lambda Function",
+  "description": "Invoke AWS Lambda Function via ARN Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/lambda",
+  "input":[
+    {
+      "name": "arn",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "region",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "accessKey",
+      "type": "string",
+      "required" : false
+    },
+    {
+      "name": "secretKey",
+      "type": "string",
+      "required" : false
+    },
+    {
+      "name": "payload",
+      "type": "any",
+      "required" : true
+    }
+  ],
+  "output": [
+    {
+      "name": "value",
+      "type": "any"
+    },
+    {
+      "name": "result",
+      "type": "any"
+    },
+    {
+      "name": "status",
+      "type": "integer"
+    }
+  ]
+}

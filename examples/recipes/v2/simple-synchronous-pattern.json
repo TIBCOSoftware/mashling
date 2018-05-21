@@ -1,0 +1,103 @@
+{
+  "mashling_schema": "1.0",
+  "gateway": {
+    "name": "MyProxy",
+    "version": "1.0.0",
+    "description": "This is a simple proxy.",
+    "triggers": [
+      {
+        "name": "MyProxy",
+        "description": "Animals rest trigger - PUT animal details",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "port": "9096"
+        },
+        "handlers": [
+          {
+            "dispatch": "Pets",
+            "settings": {
+              "autoIdReply": "false",
+              "method": "GET",
+              "path": "/pets/{petId}",
+              "useReplyHandler": "false"
+            }
+          }
+        ]
+      }
+    ],
+    "dispatches": [
+      {
+        "name": "Pets",
+        "routes": [
+          {
+            "if": "payload.pathParams.petId >= 8 && payload.pathParams.petId <= 15",
+            "steps": [
+              {
+                "service": "PetStorePets",
+                "input": {
+                  "method": "GET",
+                  "pathParams.id": "${payload.pathParams.petId}"
+                }
+              },
+              {
+                "if": "PetStorePets.response.body.status == 'available'",
+                "service": "PetStoreInventory",
+                "input": {
+                  "method": "GET"
+                }
+              }
+            ],
+            "responses": [
+              {
+                "if": "payload.pathParams.petId == 13",
+                "error": true,
+                "output": {
+                  "code": 404,
+                  "format": "json",
+                  "body": "petId is invalid"
+                }
+              },
+              {
+                "if": "PetStorePets.response.body.status != 'available'",
+                "error": true,
+                "output": {
+                  "code": 403,
+                  "format": "json",
+                  "body": "Pet is unavailable."
+                }
+              },
+              {
+                "if": "PetStorePets.response.body.status == 'available'",
+                "error": false,
+                "output": {
+                  "code": 200,
+                  "format": "json",
+                  "body.pet": "${PetStorePets.response.body}",
+                  "body.inventory": "${PetStoreInventory.response.body}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "name": "PetStorePets",
+        "description": "Make calls to find pets",
+        "type": "http",
+        "settings": {
+          "url": "http://petstore.swagger.io/v2/pet/:id"
+        }
+      },
+      {
+        "name": "PetStoreInventory",
+        "description": "Get pet store inventory.",
+        "type": "http",
+        "settings": {
+          "url": "http://petstore.swagger.io/v2/store/inventory"
+        }
+      }
+    ]
+  }
+}

@@ -14,28 +14,39 @@
   version = "v1.0.5"
 
 [[projects]]
-  name = "github.com/TIBCOSoftware/flogo-cli"
-  packages = [
-    "app",
-    "cli",
-    "config",
-    "dep",
-    "env",
-    "util"
-  ]
-  revision = "ef81ce0f77529aa17d58749979b9e4df19bdeb8c"
-  version = "v0.5.2"
-
-[[projects]]
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
+    "action/flow",
     "action/flow/definition",
+    "action/flow/instance",
     "action/flow/linker",
     "action/flow/model",
     "action/flow/model/simple",
+    "action/flow/service",
     "action/flow/support",
     "action/flow/test",
+    "action/flow/tester",
     "action/flow/util",
+    "activity/app",
+    "activity/awsiot",
+    "activity/coap",
+    "activity/counter",
+    "activity/error",
+    "activity/kafkapub",
+    "activity/lambda",
+    "activity/log",
+    "activity/reply",
+    "activity/rest",
+    "activity/twilio",
+    "activity/wsmessage",
+    "model/simple",
+    "model/simple/behaviors",
+    "trigger/cli",
+    "trigger/coap",
+    "trigger/kafkasub",
+    "trigger/lambda",
+    "trigger/mqtt",
+    "trigger/rest",
     "trigger/rest/cors"
   ]
   revision = "b9a1275df489a54ef85f1628949ceedefefd65c1"
@@ -65,6 +76,8 @@
     "core/mapper/exprmapper/json/field",
     "core/mapper/exprmapper/ref",
     "core/trigger",
+    "engine",
+    "engine/runner",
     "logger",
     "util",
     "util/managed"
@@ -79,16 +92,83 @@
   version = "0.11.0"
 
 [[projects]]
-  name = "github.com/callum-ramage/jsonconfig"
-  packages = ["."]
-  revision = "5c98f50e768c4c34a52ee10ffe8cd0c44011c8c7"
-  version = "v1.0.0"
+  name = "github.com/aws/aws-lambda-go"
+  packages = [
+    "lambda",
+    "lambda/messages",
+    "lambdacontext"
+  ]
+  revision = "fafa7e49388b8991caf99308e80655ba91816b72"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/aws/aws-sdk-go"
+  packages = [
+    "aws",
+    "aws/awserr",
+    "aws/awsutil",
+    "aws/client",
+    "aws/client/metadata",
+    "aws/corehandlers",
+    "aws/credentials",
+    "aws/credentials/ec2rolecreds",
+    "aws/credentials/endpointcreds",
+    "aws/credentials/stscreds",
+    "aws/defaults",
+    "aws/ec2metadata",
+    "aws/endpoints",
+    "aws/request",
+    "aws/session",
+    "aws/signer/v4",
+    "internal/sdkio",
+    "internal/sdkrand",
+    "internal/shareddefaults",
+    "private/protocol",
+    "private/protocol/json/jsonutil",
+    "private/protocol/jsonrpc",
+    "private/protocol/query",
+    "private/protocol/query/queryutil",
+    "private/protocol/rest",
+    "private/protocol/restjson",
+    "private/protocol/xml/xmlutil",
+    "service/lambda",
+    "service/sts"
+  ]
+  revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
+  version = "v1.13.17"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/dlclark/regexp2"
+  packages = [
+    ".",
+    "syntax"
+  ]
+  revision = "487489b64fb796de2e55f4e8a4ad1e145f80e957"
+  version = "v1.1.6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dop251/goja"
+  packages = [
+    ".",
+    "ast",
+    "file",
+    "parser",
+    "token"
+  ]
+  revision = "9183045acc25574e0dd2ad37d5e7f978b1a4de12"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dustin/go-coap"
+  packages = ["."]
+  revision = "ddcc80675fa42611359d91a6dfa5aa57fb90e72b"
 
 [[projects]]
   name = "github.com/eapache/go-resiliency"
@@ -109,13 +189,13 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/eclipse/paho.mqtt.golang"
   packages = [
     ".",
     "packets"
   ]
-  revision = "36d01c2b4cbeb3d2a12063e4880ce30800af9560"
-  version = "v1.1.1"
+  revision = "9ec68b7894ac4cd48fc9126e910e571d50eb5d9c"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -124,10 +204,25 @@
   version = "v1.4.7"
 
 [[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "6333e38ac20b8949a8dd68baa3650f4dee8f39f0"
+  version = "v1.33.0"
+
+[[projects]]
   name = "github.com/go-logfmt/logfmt"
   packages = ["."]
   revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
   version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/go-sourcemap/sourcemap"
+  packages = [
+    ".",
+    "internal/base64vlq"
+  ]
+  revision = "b019cc30c1eaa584753491b0d8f8c1534bf1eb44"
+  version = "v2.1.2"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -170,33 +265,39 @@
   version = "v1.6.1"
 
 [[projects]]
+  branch = "master"
   name = "github.com/gorilla/websocket"
   packages = ["."]
-  revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
-  version = "v1.2.0"
+  revision = "eb925808374e5ca90c83401a40d711dc08c0c0f6"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/hcl"
-  packages = [
-    ".",
-    "hcl/ast",
-    "hcl/parser",
-    "hcl/printer",
-    "hcl/scanner",
-    "hcl/strconv",
-    "hcl/token",
-    "json/parser",
-    "json/scanner",
-    "json/token"
-  ]
-  revision = "f40e974e75af4e271d97ce0fc917af5898ae7bda"
+  name = "github.com/imdario/mergo"
+  packages = ["."]
+  revision = "9d5f1277e9a8ed20c3684bda8fde67c05628518c"
+  version = "v0.3.4"
+
+[[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  revision = "0b12d6b5"
 
 [[projects]]
   name = "github.com/jtblin/go-ldap-client"
   packages = ["."]
   revision = "ad9f2ea47a83452873c01f1dc6960aedb9ff7e0e"
   version = "0.0.3"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/julienschmidt/httprouter"
+  packages = ["."]
+  revision = "d1898390779332322e6b5ca5011da4bf249bb056"
 
 [[projects]]
   branch = "master"
@@ -217,16 +318,10 @@
   version = "v0.15.2"
 
 [[projects]]
-  name = "github.com/magiconair/properties"
-  packages = ["."]
-  revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
-  version = "v1.7.6"
-
-[[projects]]
   branch = "master"
-  name = "github.com/mitchellh/mapstructure"
+  name = "github.com/mashling-support/jsonschema"
   packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+  revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
 
 [[projects]]
   branch = "master"
@@ -273,12 +368,6 @@
   version = "v0.3.3"
 
 [[projects]]
-  name = "github.com/pelletier/go-toml"
-  packages = ["."]
-  revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
-  version = "v1.1.0"
-
-[[projects]]
   name = "github.com/pierrec/lz4"
   packages = ["."]
   revision = "2fcda4cb7018ce05a25959d2fe08c83e3329f169"
@@ -309,37 +398,22 @@
   revision = "8732c616f52954686704c8645fe1a9d59e9df7c1"
 
 [[projects]]
-  name = "github.com/spf13/afero"
-  packages = [
-    ".",
-    "mem"
-  ]
-  revision = "bb8f1927f2a9d3ab41c9340aa034f6b803f4359c"
-  version = "v1.0.2"
-
-[[projects]]
-  name = "github.com/spf13/cast"
-  packages = ["."]
-  revision = "8965335b8c7107321228e3e3702cab9832751bac"
-  version = "v1.2.0"
-
-[[projects]]
   branch = "master"
-  name = "github.com/spf13/jwalterweatherman"
+  name = "github.com/sfreiberg/gotwilio"
   packages = ["."]
-  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
+  revision = "a0d4e5000ed679a67a69d2f92b62d06320bc5d09"
+
+[[projects]]
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "a1f051bc3eba734da4772d60e2d677f47cf93ef4"
+  version = "v0.0.2"
 
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/spf13/viper"
-  packages = ["."]
-  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
-  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -399,8 +473,10 @@
 [[projects]]
   name = "golang.org/x/text"
   packages = [
+    "cases",
     "collate",
     "collate/build",
+    "internal",
     "internal/colltab",
     "internal/gen",
     "internal/tag",
@@ -469,12 +545,6 @@
   version = "v2.5.1"
 
 [[projects]]
-  name = "gopkg.in/yaml.v2"
-  packages = ["."]
-  revision = "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb"
-  version = "v2.2.0"
-
-[[projects]]
   branch = "master"
   name = "sourcegraph.com/sourcegraph/appdash"
   packages = [
@@ -487,6 +557,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a572273b346595ce994af5765f10757e0807c7af119bd1c72e3899c81cd73b30"
+  inputs-digest = "f36777afc31cec43bc8032fdca6adf3d1c941e70619d98bb645f84837e4922b7"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,0 +1,28 @@
+{
+  "name": "flogo-lambda",
+  "type": "flogo:trigger",
+  "shim": "plugin",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/lambda",
+  "version": "0.0.1",
+  "title": "Start Flow as a function in Lambda",
+  "description": "Simple Lambda Trigger",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/lambda",
+  "settings": [
+  ],
+  "output": [
+    {
+      "name": "context",
+      "type": "object"
+    },
+    {
+      "name": "evt",
+      "type": "object"
+    }
+  ],
+  "reply": [
+    {
+      "name": "data",
+      "type": "object"
+    }
+  ]
+}

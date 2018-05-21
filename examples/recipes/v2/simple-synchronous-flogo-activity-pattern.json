@@ -1,0 +1,70 @@
+{
+  "mashling_schema": "1.0",
+  "gateway": {
+    "name": "MyProxy",
+    "version": "1.0.0",
+    "description": "This is a simple proxy.",
+    "triggers": [
+      {
+        "name": "MyProxy",
+        "description": "Animals rest trigger - PUT animal details",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "port": "9096"
+        },
+        "handlers": [
+          {
+            "dispatch": "Pets",
+            "settings": {
+              "autoIdReply": "false",
+              "method": "GET",
+              "path": "/pets/{petId}",
+              "useReplyHandler": "false"
+            }
+          }
+        ]
+      }
+    ],
+    "dispatches": [
+      {
+        "name": "Pets",
+        "routes": [
+          {
+            "steps": [
+              {
+                "service": "PetStorePets",
+                "input": {
+                  "inputs.pathParams": "${payload.pathParams}"
+                }
+              }
+            ],
+            "responses": [
+              {
+                "error": false,
+                "output": {
+                  "code": 200,
+                  "format": "json",
+                  "body": "${PetStorePets.response.outputs.result}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "name": "PetStorePets",
+        "description": "Get pets by ID from the petsore.",
+        "type": "flogoActivity",
+        "settings": {
+          "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+          "inputs": {
+            "uri": "http://petstore.swagger.io/v2/pet/:petId",
+            "method": "GET"
+          }
+        }
+      }
+    ]
+  }
+}

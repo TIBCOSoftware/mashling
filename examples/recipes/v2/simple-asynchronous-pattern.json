@@ -1,0 +1,100 @@
+{
+  "mashling_schema": "1.0",
+  "gateway": {
+    "name": "MyProxy",
+    "version": "1.0.0",
+    "description": "This is a simple proxy.",
+    "triggers": [
+      {
+        "name": "MQTTTrigger",
+        "description": "Animals MQTT Trigger",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt",
+        "settings": {
+          "broker": "tcp://localhost:1883",
+          "id": "flogo",
+          "user": "",
+          "password": "",
+          "store": "",
+          "qos": "0",
+          "cleansess": "false"
+        },
+        "handlers": [
+          {
+            "dispatch": "Pets",
+            "settings": {
+              "topic": "get"
+            }
+          }
+        ]
+      }
+    ],
+    "dispatches": [
+      {
+        "name": "Pets",
+        "routes": [
+          {
+            "if": "payload.pathParams.petId >= 8 && payload.pathParams.petId <= 15",
+            "async": true,
+            "steps": [
+              {
+                "service": "PetStorePets",
+                "input": {
+                  "method": "GET",
+                  "pathParams.id": "${payload.pathParams.petId}"
+                }
+              },
+              {
+                "if": "payload.pathParams.petId == 10",
+                "service": "MQTTPublisher",
+                "input": {
+                  "inputs.content": "${payload.pathParams}"
+                }
+              },
+              {
+                "if": "PetStorePets.response.body.status == 'available'",
+                "service": "PetStoreInventory",
+                "input": {
+                  "method": "GET"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "name": "PetStorePets",
+        "description": "Make calls to find pets",
+        "type": "http",
+        "settings": {
+          "url": "http://petstore.swagger.io/v2/pet/:id"
+        }
+      },
+      {
+        "name": "PetStoreInventory",
+        "description": "Get pet store inventory.",
+        "type": "http",
+        "settings": {
+          "url": "http://petstore.swagger.io/v2/store/inventory"
+        }
+      },
+      {
+        "name": "MQTTPublisher",
+        "description": "Publish messages to an MQTT broker.",
+        "type": "flogoActivity",
+        "settings": {
+          "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/mqtt",
+          "inputs": {
+            "broker": "tcp://localhost:1883",
+            "id": "magic",
+            "user": "",
+            "password": "",
+            "topic": "put",
+            "qos": 0
+          }
+        }
+      }
+    ]
+  }
+}

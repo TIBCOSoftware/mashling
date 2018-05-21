@@ -18,10 +18,8 @@ out/
 .DS_Store
 
 bin/
-pkg/
 **/vendor/src/
 **/vendor/manifest
-vendor/
 
 ## Golang
 
@@ -52,3 +50,10 @@ _testmain.go
 
 tags
 .vscode/*
+
+bin/
+release/
+.cache
+*.zip
+/.GOPATH
+/bin

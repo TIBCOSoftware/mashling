@@ -1,0 +1,30 @@
+{
+  "name": "tibco-counter",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/counter",
+  "version": "0.0.1",
+  "title": "Increment Counter",
+  "description": "Simple Global Counter Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/counter",
+  "input":[
+    {
+      "name": "counterName",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "increment",
+      "type": "boolean"
+    },
+    {
+      "name": "reset",
+      "type": "boolean"
+    }
+  ],
+  "output": [
+    {
+      "name": "value",
+      "type": "integer"
+    }
+  ]
+}

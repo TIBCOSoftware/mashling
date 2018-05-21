@@ -1,0 +1,188 @@
+{
+  "name": "mqtt-to-http-flow",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "triggers": [
+    {
+      "name": "Receive MQTT Message",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt",
+      "description": "Mashling MQTT Trigger",
+      "settings": {
+        "broker": "tcp://localhost:1883",
+        "id": "flogo",
+        "user": "",
+        "password": "",
+        "store": "",
+        "qos": "0",
+        "cleansess": "false",
+        "tracer": "zipkin",
+        "tracerEndpoint": "http://localhost:9411/api/v1/spans"
+      },
+      "id": "receive_mqtt_message",
+      "handlers": [
+        {
+          "settings": {
+            "topic": "alert"
+          },
+          "actionId": "mqtt_to_http"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "mqtt-to-http",
+      "data": {
+        "flow": {
+          "explicitReply": true,
+          "type": 1,
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "name": "Invoke REST Service",
+                "description": "Simple REST Activity",
+                "type": 1,
+                "activityType": "tibco-rest",
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+                "attributes": [
+                  {
+                    "name": "method",
+                    "value": "POST",
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "uri",
+                    "value": "https://integration.cloud.tibcoapps.com/conlxpvs5a3t3lc2jqzpjpj4q7spjzx6/case/:caseid",
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "pathParams",
+                    "value": {
+                      "caseid": "string"
+                    },
+                    "required": false,
+                    "type": "params"
+                  },
+                  {
+                    "name": "queryParams",
+                    "value": null,
+                    "required": false,
+                    "type": "params"
+                  },
+                  {
+                    "name": "content",
+                    "value": null,
+                    "required": false,
+                    "type": "object"
+                  },
+                  {
+                    "name": "tracing",
+                    "value": null,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "{T.pathParams}.caseid",
+                    "mapTo": "pathParams.caseid"
+                  },
+                  {
+                    "type": 1,
+                    "value": "{T.content}",
+                    "mapTo": "content"
+                  },
+                  {
+                    "type": 1,
+                    "value": "{T.tracing}",
+                    "mapTo": "tracing"
+                  }                ]
+              },
+              {
+                "id": 3,
+                "name": "Log Message",
+                "description": "Simple Log Activity",
+                "type": 1,
+                "activityType": "tibco-log",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+                "attributes": [
+                  {
+                    "name": "message",
+                    "value": "200 OK",
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "flowInfo",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "addToFlow",
+                    "value": "false",
+                    "required": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              {
+                "id": 4,
+                "name": "Reply To Trigger",
+                "description": "Simple Reply Activity",
+                "type": 1,
+                "activityType": "tibco-reply",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                "attributes": [
+                  {
+                    "name": "code",
+                    "value": 200,
+                    "required": true,
+                    "type": "integer"
+                  },
+                  {
+                    "name": "data",
+                    "value": null,
+                    "required": true,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "${activity.2.result}",
+                    "mapTo": "data"
+                  }
+                ]
+              }
+            ],
+            "links": [
+              {
+                "id": 1,
+                "from": 2,
+                "to": 3,
+                "type": 0
+              },
+              {
+                "id": 1,
+                "from": 3,
+                "to": 4,
+                "type": 0
+              }
+            ],
+            "attributes": []
+          }
+        }
+      },
+      "id": "mqtt_to_http",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+    }
+  ]
+}

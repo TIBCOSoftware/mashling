@@ -1,0 +1,66 @@
+{
+  "name": "flogo-mqtt",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt",
+  "version": "0.0.1",
+  "title": "Receive MQTT Message",
+  "author": "Michael Register <mregiste@tibco.com>",
+  "description": "Simple MQTT Trigger",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/mqtt",
+  "settings":[
+    {
+      "name": "broker",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "user",
+      "type": "string"
+    },
+    {
+      "name": "password",
+      "type": "string"
+    },
+    {
+      "name": "store",
+      "type": "string"
+    },
+    {
+      "name": "topic",
+      "type": "string"
+    },
+    {
+      "name": "qos",
+      "type": "double"
+    },
+    {
+      "name": "cleansess",
+      "type": "boolean"
+    }
+  ],
+  "output": [
+    {
+      "name": "message",
+      "type": "string"
+    }
+  ],
+  "reply": [
+    {
+      "name": "data",
+      "type": "object"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "topic",
+        "type": "string"
+      }
+    ]
+  }
+}

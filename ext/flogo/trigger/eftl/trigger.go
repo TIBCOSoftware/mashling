@@ -373,7 +373,7 @@ func (t *Trigger) Start() error {
 				}
 				handler := t.handlers[dest]
 				if handler == nil {
-					log.Errorf("no handler for dest", dest)
+					log.Error("no handler for dest ", dest)
 					continue
 				}
 				value = message["content"]

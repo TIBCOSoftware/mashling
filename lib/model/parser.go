@@ -84,7 +84,7 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 	//check if the trigger specifies a boolean setting key named 'optimize'
 	if util.CheckTriggerOptimization(mashTriggerSettingsUsable) {
-		fmt.Sprintf("Trigger specifies %v property setting true", util.Gateway_Trigger_Optimize_Property)
+		fmt.Printf("Trigger specifies %v property setting true", util.Gateway_Trigger_Optimize_Property)
 
 		//2.1 check if a trigger having the same settings is already created
 		//2.2 organize the trigger names as a list so that they can be sorted alphabetically. Golang maps are unordered and the iteration order is not guaranteed across multiple iterations.
@@ -101,12 +101,12 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 			createdTrigger := createdTriggersMap[name]
 			if reflect.DeepEqual(createdTrigger.Settings, triggerSettings) {
 				//looks like we found an existing trigger that has the same settings. No need to create a new trigger object. just create a new handler on the existing trigger
-				fmt.Sprintf("Found a trigger having same settings %v %v ", name, triggerSettings)
+				fmt.Printf("Found a trigger having same settings %v %v ", name, triggerSettings)
 				flogoTrigger = *createdTrigger
 				isNew = false
 				break
 			} else {
-				fmt.Sprintf("Current trigger %v did not match settings of trigger %v %v", flogoTrigger.Name, name, triggerSettings)
+				fmt.Printf("Current trigger %v did not match settings of trigger %v %v", flogoTrigger.Name, name, triggerSettings)
 			}
 		}
 	}
@@ -133,7 +133,7 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 				//set the condition on the trigger as is. the trigger should parse and interpret it.
 				handlerSettings[handler.Name][util.Flogo_Trigger_Handler_Setting_Condition] = dispatch.If
 			} else {
-				fmt.Sprintf("The trigger [%v] does not support [%v] handler setting. skippng the condition logic.", trigger.Type, util.Flogo_Trigger_Handler_Setting_Condition)
+				fmt.Printf("The trigger [%v] does not support [%v] handler setting. skippng the condition logic.", trigger.Type, util.Flogo_Trigger_Handler_Setting_Condition)
 			}
 		}
 
@@ -192,7 +192,7 @@ func CreateFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	flogoTrigger.Handlers = append(flogoTrigger.Handlers, handlers...)
 
 	if isNew {
-		fmt.Sprintf("Adding a new trigger with settings %v %v ", flogoTrigger.Name, triggerSettings)
+		fmt.Printf("Adding a new trigger with settings %v %v ", flogoTrigger.Name, triggerSettings)
 		createdTriggersMap[flogoTrigger.Name] = &flogoTrigger
 	}
 

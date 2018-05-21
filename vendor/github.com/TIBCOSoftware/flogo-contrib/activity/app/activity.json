@@ -1,0 +1,37 @@
+{
+  "name": "tibco-app",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/app",
+  "version": "0.0.1",
+  "title": "Use Global Attribute",
+  "description": "Simple Global App Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/app",
+  "input":[
+    {
+      "name": "attribute",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "operation",
+      "type": "string",
+      "required" : true,
+      "allowed" : ["ADD","GET","UPDATE"]
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "allowed" : [	"string", "integer", "number", "boolean", "object", "array", "params"]
+    },
+    {
+      "name": "value",
+      "type": "any"
+    }
+  ],
+  "output": [
+    {
+      "name": "value",
+      "type": "any"
+    }
+  ]
+}

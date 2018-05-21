@@ -1,0 +1,85 @@
+{
+  "mashling_schema": "1.0",
+  "gateway": {
+    "name": "MyProxy",
+    "version": "1.0.0",
+    "description": "This is a simple proxy.",
+    "triggers": [
+      {
+        "name": "MyProxy",
+        "description": "Animals rest trigger - PUT animal details",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "port": "9096"
+        },
+        "handlers": [
+          {
+            "dispatch": "Pets",
+            "settings": {
+              "autoIdReply": "false",
+              "method": "GET",
+              "path": "/pets/{petId}",
+              "useReplyHandler": "false"
+            }
+          }
+        ]
+      }
+    ],
+    "dispatches": [
+      {
+        "name": "Pets",
+        "routes": [
+          {
+            "if": "payload.pathParams.petId >= 8 && payload.pathParams.petId <= 15",
+            "steps": [
+              {
+                "service": "FlogoRestGetFlow",
+                "input": {
+                  "inputs.pathParams": "${payload.pathParams}"
+                }
+              }
+            ],
+            "responses": [
+              {
+                "if": "payload.pathParams.petId == 13",
+                "error": true,
+                "output": {
+                  "code": 404,
+                  "format": "json",
+                  "body": "petId is invalid"
+                }
+              },
+              {
+                "if": "payload.pathParams.petId < 8 || payload.pathParams.petId > 15",
+                "error": true,
+                "output": {
+                  "code": 403,
+                  "format": "json",
+                  "body": "Pet is not allowed to be queried."
+                }
+              },
+              {
+                "error": false,
+                "output": {
+                  "code": 200,
+                  "format": "json",
+                  "body": "${FlogoRestGetFlow.response.outputs.data}"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "name": "FlogoRestGetFlow",
+        "description": "Make GET calls against a remote HTTP service using a Flogo flow.",
+        "type": "flogoFlow",
+        "settings": {
+          "reference": "github.com/TIBCOSoftware/mashling/lib/flow/RestTriggerToRestGetActivity.json"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "flogo-coap",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/coap",
+  "version": "0.0.1",
+  "title": "Receive CoAP Message",
+  "description": "Simple CoAP Trigger",
+  "settings": [
+    {
+      "name": "port",
+      "type": "integer",
+      "required": true
+    }
+  ],
+  "output": [
+    {
+      "name": "queryParams",
+      "type": "params"
+    },
+    {
+      "name": "payload",
+      "type": "string"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "method",
+        "type": "string",
+        "required" : true,
+        "allowed" : ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      },
+      {
+        "name": "path",
+        "type": "string",
+        "required" : true
+      }
+    ]
+  }
+}
