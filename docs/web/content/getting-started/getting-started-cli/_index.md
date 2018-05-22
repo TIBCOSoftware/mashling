@@ -36,7 +36,7 @@ Available Commands:
 
 Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -h, --help                  help for mashling-cli
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 
@@ -70,7 +70,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 
@@ -107,7 +107,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 A simple example usage is:
@@ -194,7 +194,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 
 Use "mashling-cli publish [command] --help" for more information about a command.
@@ -228,7 +228,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 
@@ -263,7 +263,7 @@ Flags:
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
 ```
 Example registering a service with Consul:

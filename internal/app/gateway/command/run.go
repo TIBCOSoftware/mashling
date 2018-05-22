@@ -20,7 +20,7 @@ import (
 
 func init() {
 	gatewayCommand.PersistentFlags().StringVarP(&config, "config", "c", "mashling.json", "mashling gateway configuration")
-	gatewayCommand.PersistentFlags().StringVarP(&envVarName, "env-var-name", "e", "MASHLING_CONFIG", "name of the environment variable that contain sthe base64 encoded mashling gateway configuration")
+	gatewayCommand.PersistentFlags().StringVarP(&envVarName, "env-var-name", "e", "MASHLING_CONFIG", "name of the environment variable that contains the base64 encoded mashling gateway configuration")
 	gatewayCommand.PersistentFlags().BoolVarP(&loadFromEnv, "load-from-env", "l", false, "load the mashling gateway configuration from an environment variable")
 	gatewayCommand.PersistentFlags().BoolVarP(&dev, "dev", "d", false, "run mashling in dev mode")
 	gatewayCommand.PersistentFlags().StringVarP(&configCache, "config-cache", "C", ".cache", "location of the configuration artifacts cache")
