@@ -74,4 +74,3 @@ A more detailed health check response is available at *http://<GATEWAY IP>:<PING
 ```
 {"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}
 ```
-

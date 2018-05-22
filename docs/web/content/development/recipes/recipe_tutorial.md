@@ -73,14 +73,16 @@ Add a dispatches section:
                 "if": "GetPet.response.body.status != 'available'",
                 "error": true,
                 "output": {
-                  "error": "Pet is not available."
+                  "code": 404,
+                  "data": {"error": "Pet is not available."}
                 }
               },
               {
                 "if": "GetPet.response.body.status == 'available'",
                 "error": false,
                 "output": {
-                  "result": "${GetPet.response.body}"
+                  "code": 200,
+                  "data": "${GetPet.response.body}"
                 }
               }
             ]
@@ -105,14 +107,16 @@ Add a dispatches section:
                 "if": "PutPet.response.outputs.code != 200",
                 "error": true,
                 "output": {
-                  "error": "Pet is not registered."
+                  "code": 400,
+                  "data": { "error": "Pet is not registered."}
                 }
               },
               {
                 "if": "PutPet.response.outputs.code == 200",
                 "error": false,
                 "output": {
-                  "success": "${PutPet.response.outputs.data}"
+                  "code": 200,
+                  "data": "${PutPet.response.outputs.data}"
                 }
               }
             ]
@@ -130,7 +134,8 @@ Add a dispatches section:
               {
                 "error": false,
                 "output": {
-                  "error": "${InvalidAnimal.response.result.msg}"
+                  "code": 400,
+                  "data": {"error": "${InvalidAnimal.response.result.msg}"}
                 }
               }
             ]

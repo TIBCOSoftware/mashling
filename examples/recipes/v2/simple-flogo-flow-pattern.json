@@ -45,8 +45,9 @@
                 "error": true,
                 "output": {
                   "code": 404,
-                  "format": "json",
-                  "body": "petId is invalid"
+                  "data": {
+                    "error": "petId is invalid"
+                  }
                 }
               },
               {
@@ -54,16 +55,16 @@
                 "error": true,
                 "output": {
                   "code": 403,
-                  "format": "json",
-                  "body": "Pet is not allowed to be queried."
+                  "data": {
+                    "error": "Pet is not allowed to be queried"
+                  }
                 }
               },
               {
                 "error": false,
                 "output": {
                   "code": 200,
-                  "format": "json",
-                  "body": "${FlogoRestGetFlow.response.outputs.data}"
+                  "data": "${FlogoRestGetFlow.response.outputs.data}"
                 }
               }
             ]
