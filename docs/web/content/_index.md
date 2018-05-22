@@ -2,4 +2,4 @@
 
 <center>Docs and Recipes for an Ultralight Edge Microservices Framework</center>
 
-![](./images/Mashlings_Main - TM.svg)
+![](./introduction/images/mashling_WM_1.svg)

@@ -24,7 +24,7 @@ theme = "hugo-theme-learn"
   # Order sections in menu by "weight" or "title". Default to "weight"
   ordersectionsby = "weight"
   # Change default color scheme with a variant one. Can be "red", "blue", "green".
-  themeVariant = "green"
+  themeVariant = "blue"
 
 [[menu.shortcuts]] 
 name = "<i class='fa fa-github'></i> Github repo"
