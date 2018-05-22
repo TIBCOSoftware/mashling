@@ -37,7 +37,7 @@ Flags:
   -C, --config-cache string    location of the configuration artifacts cache (default ".cache")
   -E, --config-cache-enabled   cache post-processed configuration artifacts locally (default true)
   -d, --dev                    run mashling in dev mode
-  -e, --env-var-name string    name of the environment variable that contain sthe base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
+  -e, --env-var-name string    name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -h, --help                   help for mashling-gateway
   -l, --load-from-env          load the mashling gateway configuration from an environment variable
   -p, --ping-enabled           enable gateway ping service (default true)
@@ -74,4 +74,3 @@ A more detailed health check response is available at *http://<GATEWAY IP>:<PING
 ```
 {"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}
 ```
-

@@ -9,7 +9,7 @@ import (
 
 func init() {
 	cliCommand.PersistentFlags().StringVarP(&config, "config", "c", "mashling.json", "mashling gateway configuration")
-	cliCommand.PersistentFlags().StringVarP(&envVarName, "env-var-name", "e", "MASHLING_CONFIG", "name of the environment variable that contain sthe base64 encoded mashling gateway configuration")
+	cliCommand.PersistentFlags().StringVarP(&envVarName, "env-var-name", "e", "MASHLING_CONFIG", "name of the environment variable that contains the base64 encoded mashling gateway configuration")
 	cliCommand.PersistentFlags().BoolVarP(&loadFromEnv, "load-from-env", "l", false, "load the mashling gateway configuration from an environment variable")
 }
 

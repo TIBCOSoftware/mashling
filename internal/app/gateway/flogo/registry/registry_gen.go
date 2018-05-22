@@ -58,60 +58,105 @@ func RegisterUniverse() error {
 	// Register triggers
 	var tr []byte
 	var trmd *trigger.Metadata
+<<<<<<< HEAD
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter"] = true
 	tr, err = triggers.Asset("ext/flogo/trigger/kafkasubrouter/trigger.json")
+=======
+	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/lambda
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/lambda"] = true
+	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/lambda/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, extflogotriggerkafkasubrouter.NewFactory(trmd))
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt"] = true
 	tr, err = triggers.Asset("ext/flogo/trigger/mqtt/trigger.json")
+=======
+	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggerlambda.NewFactory(trmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt"] = true
+	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, extflogotriggermqtt.NewFactory(trmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/coap
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/coap"] = true
 	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/coap/trigger.json")
+=======
+	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggermqtt.NewFactory(trmd))
+	// Register github.com/TIBCOSoftware/mashling/ext/flogo/trigger/eftl
+	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/trigger/eftl"] = true
+	tr, err = triggers.Asset("ext/flogo/trigger/eftl/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggercoap.NewFactory(trmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt"] = true
 	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt/trigger.json")
+=======
+	trigger.RegisterFactory(trmd.ID, extflogotriggereftl.NewFactory(trmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/cli
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/cli"] = true
+	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/cli/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggermqtt.NewFactory(trmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/rest
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/rest"] = true
 	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/rest/trigger.json")
+=======
+	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggercli.NewFactory(trmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/coap
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/coap"] = true
+	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/coap/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggerrest.NewFactory(trmd))
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/trigger/eftl
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/trigger/eftl"] = true
 	tr, err = triggers.Asset("ext/flogo/trigger/eftl/trigger.json")
+=======
+	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggercoap.NewFactory(trmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub"] = true
+	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, extflogotriggereftl.NewFactory(trmd))
+=======
+	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggerkafkasub.NewFactory(trmd))
+>>>>>>> master
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger"] = true
 	tr, err = triggers.Asset("ext/flogo/trigger/gorillamuxtrigger/trigger.json")
@@ -121,91 +166,160 @@ func RegisterUniverse() error {
 	}
 	trmd = trigger.NewMetadata(string(tr))
 	trigger.RegisterFactory(trmd.ID, extflogotriggergorillamuxtrigger.NewFactory(trmd))
+<<<<<<< HEAD
 	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/cli
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/cli"] = true
 	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/cli/trigger.json")
+=======
+	// Register github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter
+	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/trigger/kafkasubrouter"] = true
+	tr, err = triggers.Asset("ext/flogo/trigger/kafkasubrouter/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggercli.NewFactory(trmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub"] = true
 	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub/trigger.json")
+=======
+	trigger.RegisterFactory(trmd.ID, extflogotriggerkafkasubrouter.NewFactory(trmd))
+	// Register github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt
+	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/trigger/mqtt"] = true
+	tr, err = triggers.Asset("ext/flogo/trigger/mqtt/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggerkafkasub.NewFactory(trmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/lambda
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/lambda"] = true
 	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/lambda/trigger.json")
+=======
+	trigger.RegisterFactory(trmd.ID, extflogotriggermqtt.NewFactory(trmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/trigger/rest
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/trigger/rest"] = true
+	tr, err = triggers.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/rest/trigger.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	trmd = trigger.NewMetadata(string(tr))
+<<<<<<< HEAD
 	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggerlambda.NewFactory(trmd))
+=======
+	trigger.RegisterFactory(trmd.ID, vendorgithubcomTIBCOSoftwareflogocontribtriggerrest.NewFactory(trmd))
+>>>>>>> master
 
 	// Register activities
 	var act []byte
 	var actmd *activity.Metadata
+<<<<<<< HEAD
 	// Register github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/core
 	SupportedImports["github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/core"] = true
 	act, err = activities.Asset("internal/pkg/model/v2/activity/core/activity.json")
+=======
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/awsiot
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/awsiot"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awsiot/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(internalpkgmodelv2activitycore.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/error
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/error"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/error/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityawsiot.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/counter
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/counter"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/counter/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityerror.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitycounter.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/lambda
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/lambda"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/lambda/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitykafkapub.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/twilio
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/twilio"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/twilio/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitylambda.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/lambda
+	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/lambda"] = true
+	act, err = activities.Asset("ext/flogo/activity/lambda/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitytwilio.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest"] = true
 	act, err = activities.Asset("ext/flogo/activity/rest/activity.json")
+=======
+	activity.Register(extflogoactivitylambda.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer
+	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer"] = true
+	act, err = activities.Asset("ext/flogo/activity/tracer/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(extflogoactivityrest.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/rest
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/rest"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/rest/activity.json")
+=======
+	activity.Register(extflogoactivitytracer.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/core
+	SupportedImports["github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/core"] = true
+	act, err = activities.Asset("internal/pkg/model/v2/activity/core/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityrest.NewActivity(actmd))
+=======
+	activity.Register(internalpkgmodelv2activitycore.NewActivity(actmd))
+>>>>>>> master
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/eftl
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/eftl"] = true
 	act, err = activities.Asset("ext/flogo/activity/eftl/activity.json")
@@ -224,15 +338,25 @@ func RegisterUniverse() error {
 	}
 	actmd = activity.NewMetadata(string(act))
 	activity.Register(extflogoactivityping.NewActivity(actmd))
+<<<<<<< HEAD
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/tracer"] = true
 	act, err = activities.Asset("ext/flogo/activity/tracer/activity.json")
+=======
+	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest
+	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest"] = true
+	act, err = activities.Asset("ext/flogo/activity/rest/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(extflogoactivitytracer.NewActivity(actmd))
+=======
+	activity.Register(extflogoactivityrest.NewActivity(actmd))
+>>>>>>> master
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/app
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/app"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/app/activity.json")
@@ -242,78 +366,137 @@ func RegisterUniverse() error {
 	}
 	actmd = activity.NewMetadata(string(act))
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityapp.NewActivity(actmd))
+<<<<<<< HEAD
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/awsiot
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/awsiot"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awsiot/activity.json")
+=======
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/coap
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/coap"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityawsiot.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/coap
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/coap"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitycoap.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/error
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/error"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/error/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitycoap.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/log
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/log"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/log/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityerror.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitylog.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/lambda
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/lambda"] = true
 	act, err = activities.Asset("ext/flogo/activity/lambda/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitykafkapub.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/reply
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/reply"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/reply/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(extflogoactivitylambda.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/mqtt
 	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/mqtt"] = true
 	act, err = activities.Asset("ext/flogo/activity/mqtt/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityreply.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/rest
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/rest"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/rest/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(extflogoactivitymqtt.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/counter
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/counter"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/counter/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityrest.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/twilio
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/twilio"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/twilio/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitycounter.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/lambda
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/lambda"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/lambda/activity.json")
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitytwilio.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/mashling/ext/flogo/activity/mqtt
+	SupportedImports["github.com/TIBCOSoftware/mashling/ext/flogo/activity/mqtt"] = true
+	act, err = activities.Asset("ext/flogo/activity/mqtt/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitylambda.NewActivity(actmd))
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/reply
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/reply"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/reply/activity.json")
+=======
+	activity.Register(extflogoactivitymqtt.NewActivity(actmd))
+	// Register github.com/TIBCOSoftware/flogo-contrib/activity/log
+	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/log"] = true
+	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/log/activity.json")
+>>>>>>> master
 	if err != nil {
 		// Asset was not found.
 		return err
 	}
 	actmd = activity.NewMetadata(string(act))
+<<<<<<< HEAD
 	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivityreply.NewActivity(actmd))
+=======
+	activity.Register(vendorgithubcomTIBCOSoftwareflogocontribactivitylog.NewActivity(actmd))
+>>>>>>> master
 	// Register github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage
 	SupportedImports["github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage"] = true
 	act, err = activities.Asset("vendor/github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage/activity.json")

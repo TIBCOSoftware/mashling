@@ -87,7 +87,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/jeffreybozek/jsonschema"
+  name = "github.com/mashling-support/jsonschema"
 
 [[constraint]]
   branch = "master"

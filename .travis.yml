@@ -1,6 +1,6 @@
 sudo: required
-language : 
-  - go  
+language :
+  - go
 os:
   - linux
 services:
@@ -12,7 +12,7 @@ branches:
     - develop
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
     - feature-v2-model
-    
+
 cache:
   bundler: false
   directories:
@@ -24,13 +24,13 @@ git:
 before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
 install:
-  - go get -u github.com/ains/go-test-html 
+  - go get -u github.com/ains/go-test-html
   - go get github.com/spf13/hugo
 
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - git clone -b feature-v2-model https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
-  - git clone -b feature-v2-model https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
+  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
+  - git clone https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
   - cd mashling/docs/web && hugo
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
@@ -40,8 +40,8 @@ script:
   - chmod ugo+x ./init.sh ./get-mashling-release-candidate.sh
   - ./get-mashling-release-candidate.sh
   - ./init.sh
-  - popd  
-    
+  - popd
+
 after_script:
   - "[ -f \"${HOME}/.netrc\" ] && rm -f ${HOME}/.netrc"
   - "[ -f \"${HOME}/.aws\" ] && rm -f ${HOME}/.aws"
@@ -59,13 +59,13 @@ deploy:
     local-dir: docs/web/public
     github_token: $GITHUB_USER_TOKEN
     on:
-      branch: feature-v2-model
+      branch: master
 
-notifications: 
-  email: 
+notifications:
+  email:
     on_failure: always
     on_success: always
-    recipients: 
+    recipients:
       - jpark@tibco.com
       - rpolishe@tibco.com
       - lmekala@tibco.com

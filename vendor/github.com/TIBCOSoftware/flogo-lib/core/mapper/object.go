@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
@@ -81,7 +82,7 @@ func evalExpr(exprString string, scope data.Scope, resolver data.Resolver) (inte
 
 	exprStr := exprString[2 : len(exprString)-2]
 
-	// fmt.Printf(exprStr)
+	fmt.Printf(exprStr)
 	//support just assign for now
 	//todo: optimization - trim whitspace when first creating object mapping
 	return resolver.Resolve(strings.TrimSpace(exprStr), scope)

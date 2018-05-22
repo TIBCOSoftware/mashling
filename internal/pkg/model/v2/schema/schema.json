@@ -1,353 +1,353 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "$ref": "#/definitions/Schema",
-    "definitions": {
-        "Dispatch": {
-            "required": [
-                "name",
-                "routes"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "routes": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Route"
-                    },
-                    "type": "array"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Schema",
+  "definitions": {
+    "Dispatch": {
+      "required": [
+        "name",
+        "routes"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
         },
-        "Gateway": {
-            "required": [
-                "name",
-                "version",
-                "triggers",
-                "dispatches"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "dispatches": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Dispatch"
-                    },
-                    "type": "array"
-                },
-                "display_image": {
-                    "type": "string"
-                },
-                "display_name": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "policies": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Policy"
-                    },
-                    "type": "array"
-                },
-                "services": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Service"
-                    },
-                    "type": "array"
-                },
-                "triggers": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Trigger"
-                    },
-                    "type": "array"
-                },
-                "version": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Handler": {
-            "required": [
-                "dispatch"
-            ],
-            "properties": {
-                "dispatch": {
-                    "type": "string"
-                },
-                "settings": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Output": {
-            "required": [
-                "data"
-            ],
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "additionalProperties": true,
-                    "type": [
-                        "array",
-                        "boolean",
-                        "integer",
-                        "number",
-                        "null",
-                        "object",
-                        "string"
-                    ]
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Policy": {
-            "required": [
-                "name",
-                "type"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "settings": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
-                },
-                "type": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Response": {
-            "required": [
-                "error"
-            ],
-            "properties": {
-                "error": {
-                    "type": "boolean"
-                },
-                "if": {
-                    "type": "string"
-                },
-                "output": {
-                    "$schema": "http://json-schema.org/draft-04/schema#",
-                    "$ref": "#/definitions/Output"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Route": {
-            "required": [
-                "steps"
-            ],
-            "properties": {
-                "async": {
-                    "type": "boolean"
-                },
-                "if": {
-                    "type": "string"
-                },
-                "policies": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "responses": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Response"
-                    },
-                    "type": "array"
-                },
-                "steps": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Step"
-                    },
-                    "type": "array"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Schema": {
-            "required": [
-                "mashling_schema",
-                "gateway"
-            ],
-            "properties": {
-                "gateway": {
-                    "$schema": "http://json-schema.org/draft-04/schema#",
-                    "$ref": "#/definitions/Gateway"
-                },
-                "mashling_schema": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Service": {
-            "required": [
-                "name",
-                "type"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "settings": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
-                },
-                "type": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Step": {
-            "required": [
-                "service"
-            ],
-            "properties": {
-                "if": {
-                    "type": "string"
-                },
-                "input": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
-                },
-                "service": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
-        "Trigger": {
-            "required": [
-                "name",
-                "type",
-                "handlers"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "handlers": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Handler"
-                    },
-                    "type": "array"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "settings": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
-                },
-                "type": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
+        "routes": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Route"
+          },
+          "type": "array"
         }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Gateway": {
+      "required": [
+        "name",
+        "version",
+        "triggers",
+        "dispatches"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "dispatches": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Dispatch"
+          },
+          "type": "array"
+        },
+        "display_image": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "policies": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Policy"
+          },
+          "type": "array"
+        },
+        "services": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Service"
+          },
+          "type": "array"
+        },
+        "triggers": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Trigger"
+          },
+          "type": "array"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Handler": {
+      "required": [
+        "dispatch"
+      ],
+      "properties": {
+        "dispatch": {
+          "type": "string"
+        },
+        "settings": {
+          "patternProperties": {
+            ".*": {
+              "additionalProperties": true,
+              "type": [
+                "array",
+                "boolean",
+                "integer",
+                "number",
+                "null",
+                "object",
+                "string"
+              ]
+            }
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Output": {
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "data": {
+          "additionalProperties": true,
+          "type": [
+            "array",
+            "boolean",
+            "integer",
+            "number",
+            "null",
+            "object",
+            "string"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Policy": {
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "settings": {
+          "patternProperties": {
+            ".*": {
+              "additionalProperties": true,
+              "type": [
+                "array",
+                "boolean",
+                "integer",
+                "number",
+                "null",
+                "object",
+                "string"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Response": {
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "type": "boolean"
+        },
+        "if": {
+          "type": "string"
+        },
+        "output": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Output"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Route": {
+      "required": [
+        "steps"
+      ],
+      "properties": {
+        "async": {
+          "type": "boolean"
+        },
+        "if": {
+          "type": "string"
+        },
+        "policies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "responses": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Response"
+          },
+          "type": "array"
+        },
+        "steps": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Step"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Schema": {
+      "required": [
+        "mashling_schema",
+        "gateway"
+      ],
+      "properties": {
+        "gateway": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Gateway"
+        },
+        "mashling_schema": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Service": {
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "settings": {
+          "patternProperties": {
+            ".*": {
+              "additionalProperties": true,
+              "type": [
+                "array",
+                "boolean",
+                "integer",
+                "number",
+                "null",
+                "object",
+                "string"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Step": {
+      "required": [
+        "service"
+      ],
+      "properties": {
+        "if": {
+          "type": "string"
+        },
+        "input": {
+          "patternProperties": {
+            ".*": {
+              "additionalProperties": true,
+              "type": [
+                "array",
+                "boolean",
+                "integer",
+                "number",
+                "null",
+                "object",
+                "string"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "service": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Trigger": {
+      "required": [
+        "name",
+        "type",
+        "handlers"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "handlers": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Handler"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "settings": {
+          "patternProperties": {
+            ".*": {
+              "additionalProperties": true,
+              "type": [
+                "array",
+                "boolean",
+                "integer",
+                "number",
+                "null",
+                "object",
+                "string"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     }
+  }
 }

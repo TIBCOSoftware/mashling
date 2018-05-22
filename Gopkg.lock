@@ -283,18 +283,6 @@
   version = "v1.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/oliveagle/jsonpath"
-  packages = ["."]
-  revision = "46faf33da13527c9ef82205c0ee188f6fc98b13e"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/jeffreybozek/jsonschema"
-  packages = ["."]
-  revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
-
-[[projects]]
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
   revision = "0b12d6b5"
@@ -328,6 +316,18 @@
   ]
   revision = "f9f54d495e5c6752b58fae6b66a5cb1107e17b29"
   version = "v0.15.2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mashling-support/jsonschema"
+  packages = ["."]
+  revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/oliveagle/jsonpath"
+  packages = ["."]
+  revision = "46faf33da13527c9ef82205c0ee188f6fc98b13e"
 
 [[projects]]
   branch = "master"
@@ -557,6 +557,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "741427b6cf44d66f9e6500f3447a58dd1645ae282ee317e7fd16ee4c8c945ae9"
+  inputs-digest = "f36777afc31cec43bc8032fdca6adf3d1c941e70619d98bb645f84837e4922b7"
   solver-name = "gps-cdcl"
   solver-version = 1

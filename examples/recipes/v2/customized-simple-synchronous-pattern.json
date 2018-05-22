@@ -8,7 +8,7 @@
       {
         "name": "MyProxy",
         "description": "Animals rest trigger - PUT animal details",
-        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "type": "github.com/mashling-support/mashling-extras/triggers/gorillamuxtrigger",
         "settings": {
           "port": "9096"
         },
