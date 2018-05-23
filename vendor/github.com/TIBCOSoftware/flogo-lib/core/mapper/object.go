@@ -3,9 +3,8 @@ package mapper
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"strings"
 )
 
 func MapObject(mappingObject interface{}, scope data.Scope, resolver data.Resolver) (result interface{}, err error) {
