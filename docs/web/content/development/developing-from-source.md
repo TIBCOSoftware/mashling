@@ -29,7 +29,7 @@ If Go is installed correctly, this command will also build the mashling binary t
 If you decide to download the source code from Github using Git, please make sure Git is installed.
 
 ```bash
-git clone -b feature-v2-model --single-branch https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
+git clone -b master --single-branch https://github.com/TIBCOSoftware/mashling.git $GOPATH/src/github.com/TIBCOSoftware/mashling
 cd $GOPATH/src/github.com/TIBCOSoftware/mashling
 go install ./...
 ```

@@ -11,7 +11,6 @@ branches:
     - master
     - develop
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - feature-v2-model
 
 cache:
   bundler: false

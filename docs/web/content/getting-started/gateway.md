@@ -6,7 +6,7 @@ pre: "<i class=\"fa fa-cog\" aria-hidden=\"true\"></i> "
 
 ### Overview
 
-The [mashling-gateway](https://github.com/TIBCOSoftware/mashling/tree/feature-v2-model/docs/gateway) powers the core event driven routing engine of the Mashling project. This core binary can run all versions of the Mashling schema to date, however for the purposes of this document, we will focus on the 1.0 configuration schema.
+The [mashling-gateway](https://github.com/TIBCOSoftware/mashling/tree/master/docs/gateway) powers the core event driven routing engine of the Mashling project. This core binary can run all versions of the Mashling schema to date, however for the purposes of this document, we will focus on the 1.0 configuration schema.
 
 ### Usage
 The gateway binary has the following command line arguments available to setup and specify how you would like the binary to operate.

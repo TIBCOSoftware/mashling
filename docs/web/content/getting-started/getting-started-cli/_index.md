@@ -4,7 +4,7 @@ weight: 3300
 pre: "<i class=\"fa fa-terminal\" aria-hidden=\"true\"></i> "
 ---
 
-Create a Mashling application using [CLI](https://github.com/TIBCOSoftware/mashling/blob/feature-v2-model/docs/cli/README.md) (the Command line tool for building Mashling-based gateways).
+Create a Mashling application using [CLI](https://github.com/TIBCOSoftware/mashling/blob/master/docs/cli/README.md) (the Command line tool for building Mashling-based gateways).
 
 ### Overview
 
