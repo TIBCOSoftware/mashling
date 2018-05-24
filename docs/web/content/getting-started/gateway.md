@@ -63,13 +63,13 @@ You can also disable the ping service using the command:
 ./mashling-gateway -c <path to mashling json> -p=false
 ```
 
-The health check endpoint is available at *http://<GATEWAY IP>:<PING-PORT>/ping* with an expected result of:
+The health check endpoint is available at *http://GATEWAY-IP:PING-PORT/ping* with an expected result of:
 
 ```
 {"response":"Ping successful"}
 ```
 
-A more detailed health check response is available at *http://<GATEWAY IP>:<PING-PORT>/ping/details* with an example result of:
+A more detailed health check response is available at *http://GATEWAY-IP:PING-PORT/ping/details* with an example result of:
 
 ```
 {"Version":"0.2","Appversion":"1.0.0","Appdescription":"This is the first microgateway app"}
