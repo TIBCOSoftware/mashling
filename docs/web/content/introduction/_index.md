@@ -13,5 +13,4 @@ Project Mashling highlights include:
 * Complements Service Meshes
 * Co-exists with API management platforms in a federated API Gateway model
 
-Project Mashling is also powered by [Project Flogo](https://tibcosoftware.github.io/flogo/) is an ultralight edge microservices framework which is extensible and reusable by design, 100% open source powered by the community and supported by TIBCO.
-
+Project Mashling is also powered by [Project Flogo](https://tibcosoftware.github.io/flogo/), an open source framework to simplify building efficient & modern serverless functions and edge microservices.
