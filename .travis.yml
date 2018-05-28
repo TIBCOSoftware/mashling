@@ -11,7 +11,6 @@ branches:
     - master
     - develop
     - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
-    - chore-addtest-customrecipes
 
 cache:
   bundler: false
@@ -29,7 +28,7 @@ install:
 
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
-  - git clone -b chore-addtest-customrecipes https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
+  - git clone https://github.com/TIBCOSoftware/mashling-cicd.git mashling-cicd
   - git clone https://github.com/TIBCOSoftware/mashling-recipes.git mashling-recipes
   - cd mashling/docs/web && hugo
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
