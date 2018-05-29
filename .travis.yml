@@ -33,7 +33,7 @@ script:
   - cd mashling/docs/web && hugo
   - cd $GOPATH/src/github.com/TIBCOSoftware/mashling
   - go test ./... -v 2> >(tee gotest_stderr_file) | tee gotest_stdout_file
-  - go run build.go buildgateway
+  - go run build.go build
   - cd $GOPATH/src/github.com/TIBCOSoftware
   - pushd mashling-cicd/sample-recipes/scripts
   - chmod ugo+x ./init.sh ./get-mashling-release-candidate.sh
