@@ -99,6 +99,8 @@ func run(command *cobra.Command, args []string) {
 		}
 		for _, errd := range gateway.Errors() {
 			switch e := errd.(type) {
+			case *gwerrors.UndefinedReference:
+				log.Printf("%s: %s", e.Type(), e.Details())
 			case *gwerrors.MissingDependency:
 				log.Println("Missing dependencies found: ", strings.Join(e.MissingDependencies, " "))
 			default:

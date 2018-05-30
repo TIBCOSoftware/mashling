@@ -66,6 +66,8 @@ func create(command *cobra.Command, args []string) {
 			case *gwerrors.MissingDependency:
 				log.Println("Missing dependencies found: ", strings.Join(e.MissingDependencies, " "))
 				deps = append(deps, e.MissingDependencies...)
+			case *gwerrors.UndefinedReference:
+				log.Fatalf("%s: %s", e.Type(), e.Details())
 			default:
 				log.Fatalf("Do not know how to handle error type %T!\n", e)
 			}
