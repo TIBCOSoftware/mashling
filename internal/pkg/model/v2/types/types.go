@@ -13,10 +13,9 @@ type Gateway struct {
 	DisplayName  string     `json:"display_name,omitempty"`
 	DisplayImage string     `json:"display_image,omitempty"`
 	Description  string     `json:"description,omitempty"`
-	Triggers     []Trigger  `json:"triggers" jsonschema:"required"`
-	Dispatches   []Dispatch `json:"dispatches" jsonschema:"required"`
-	Services     []Service  `json:"services,omitempty"`
-	Policies     []Policy   `json:"policies,omitempty"`
+	Triggers     []Trigger  `json:"triggers" jsonschema:"required,minItems=1,uniqueItems=true"`
+	Dispatches   []Dispatch `json:"dispatches" jsonschema:"required,minItems=1,uniqueItems=true"`
+	Services     []Service  `json:"services,omitempty" jsonschema:"required,minItems=1,uniqueItems=true"`
 }
 
 // Trigger contains the event listener definitions and configurations.
@@ -25,21 +24,20 @@ type Trigger struct {
 	Type        string                 `json:"type" jsonschema:"required"`
 	Description string                 `json:"description,omitempty"`
 	Settings    map[string]interface{} `json:"settings,omitempty" jsonschema:"additionalProperties"`
-	Handlers    []Handler              `json:"handlers" jsonschema:"required"`
+	Handlers    []Handler              `json:"handlers" jsonschema:"required,minItems=1,uniqueItems=true"`
 }
 
 // Dispatch links events on a trigger to execution flows.
 type Dispatch struct {
 	Name   string  `json:"name" jsonschema:"required"`
-	Routes []Route `json:"routes" jsonschema:"required"`
+	Routes []Route `json:"routes" jsonschema:"required,minItems=1,uniqueItems=true"`
 }
 
 // Route conditionally defines an execution flow.
 type Route struct {
 	Condition string     `json:"if,omitempty"`
 	Async     bool       `json:"async,omitempty"`
-	Policies  []string   `json:"policies,omitempty"`
-	Steps     []Step     `json:"steps" jsonschema:"required"`
+	Steps     []Step     `json:"steps" jsonschema:"required,minItems=1"`
 	Responses []Response `json:"responses,omitempty"`
 }
 
@@ -65,14 +63,6 @@ type Output struct {
 
 // Service defines a functional target that may be invoked by a step in an execution flow.
 type Service struct {
-	Name        string                 `json:"name" jsonschema:"required"`
-	Type        string                 `json:"type" jsonschema:"required"`
-	Description string                 `json:"description,omitempty"`
-	Settings    map[string]interface{} `json:"settings,omitempty" jsonschema:"additionalProperties"`
-}
-
-// Policy defines an invocation rule that may be applied to a route.
-type Policy struct {
 	Name        string                 `json:"name" jsonschema:"required"`
 	Type        string                 `json:"type" jsonschema:"required"`
 	Description string                 `json:"description,omitempty"`

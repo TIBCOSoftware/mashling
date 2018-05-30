@@ -16,6 +16,8 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Route"
                     },
+                    "minItems": 1,
+                    "uniqueItems": true,
                     "type": "array"
                 }
             },
@@ -38,6 +40,8 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Dispatch"
                     },
+                    "minItems": 1,
+                    "uniqueItems": true,
                     "type": "array"
                 },
                 "display_image": {
@@ -49,18 +53,13 @@
                 "name": {
                     "type": "string"
                 },
-                "policies": {
-                    "items": {
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "$ref": "#/definitions/Policy"
-                    },
-                    "type": "array"
-                },
                 "services": {
                     "items": {
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Service"
                     },
+                    "minItems": 1,
+                    "uniqueItems": true,
                     "type": "array"
                 },
                 "triggers": {
@@ -68,6 +67,8 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Trigger"
                     },
+                    "minItems": 1,
+                    "uniqueItems": true,
                     "type": "array"
                 },
                 "version": {
@@ -130,42 +131,6 @@
             "additionalProperties": false,
             "type": "object"
         },
-        "Policy": {
-            "required": [
-                "name",
-                "type"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "settings": {
-                    "patternProperties": {
-                        ".*": {
-                            "additionalProperties": true,
-                            "type": [
-                                "array",
-                                "boolean",
-                                "integer",
-                                "number",
-                                "null",
-                                "object",
-                                "string"
-                            ]
-                        }
-                    },
-                    "type": "object"
-                },
-                "type": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false,
-            "type": "object"
-        },
         "Response": {
             "required": [
                 "error"
@@ -196,12 +161,6 @@
                 "if": {
                     "type": "string"
                 },
-                "policies": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
                 "responses": {
                     "items": {
                         "$schema": "http://json-schema.org/draft-04/schema#",
@@ -214,6 +173,7 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Step"
                     },
+                    "minItems": 1,
                     "type": "array"
                 }
             },
@@ -320,6 +280,8 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Handler"
                     },
+                    "minItems": 1,
+                    "uniqueItems": true,
                     "type": "array"
                 },
                 "name": {
