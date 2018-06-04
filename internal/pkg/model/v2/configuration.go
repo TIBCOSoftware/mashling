@@ -105,9 +105,16 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 }
 
 func validateConfigurationContents(gateway *types.Schema) ([]gwerrors.Error, error) {
-	// Right now we just handle missing dependencies.
 	var deps []string
 	var gerrs []gwerrors.Error
+	dispatches := make(map[string]bool)
+	services := make(map[string]bool)
+	for _, dispatch := range gateway.Gateway.Dispatches {
+		dispatches[dispatch.Name] = true
+	}
+	for _, service := range gateway.Gateway.Services {
+		services[service.Name] = true
+	}
 	// Check trigger types for satisfied dependencies.
 	for _, trigger := range gateway.Gateway.Triggers {
 		if _, exists := registry.SupportedImports[trigger.Type]; !exists {
@@ -137,6 +144,24 @@ func validateConfigurationContents(gateway *types.Schema) ([]gwerrors.Error, err
 	}
 	if deps != nil {
 		gerrs = append(gerrs, &gwerrors.MissingDependency{MissingDependencies: deps})
+	}
+	// Check for undefined dispatch references in Trigger Handlers
+	for _, trigger := range gateway.Gateway.Triggers {
+		for _, handler := range trigger.Handlers {
+			if _, defined := dispatches[handler.Dispatch]; !defined {
+				gerrs = append(gerrs, &gwerrors.UndefinedReference{Reference: handler.Dispatch, ReferenceType: "Dispatch", ReferencedFrom: trigger.Name})
+			}
+		}
+	}
+	// Check for undefined service references in steps
+	for _, dispatch := range gateway.Gateway.Dispatches {
+		for _, route := range dispatch.Routes {
+			for _, step := range route.Steps {
+				if _, defined := services[step.Service]; !defined {
+					gerrs = append(gerrs, &gwerrors.UndefinedReference{Reference: step.Service, ReferenceType: "Service", ReferencedFrom: dispatch.Name})
+				}
+			}
+		}
 	}
 	return gerrs, nil
 }
