@@ -11,6 +11,7 @@ import (
 	"github.com/TIBCOSoftware/mashling/internal/app/assets"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo"
 	"github.com/TIBCOSoftware/mashling/internal/app/version"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/cache"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
@@ -77,6 +78,8 @@ func run(command *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	log.Println("\n", string(bannerTxt))
+	// Setup Mashling Logger
+	logger.Register()
 	log.Println("[mashling] Gateway Version: ", version.Version)
 	log.Println("[mashling] Build Date: ", version.BuildDate)
 	// Setup configuration artifacts cache.
