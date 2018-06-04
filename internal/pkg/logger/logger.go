@@ -30,8 +30,53 @@ func Register() {
 }
 
 func (f *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	logEntry := fmt.Sprintf("LULZ %s %-6s [%s] - %s\n", entry.Time.Format("2006-01-02 15:04:05.000"), getLevel(entry.Level), f.loggerName, entry.Message)
+	logEntry := fmt.Sprintf("%s %-6s [%s] - %s\n", entry.Time.Format("2006-01-02 15:04:05.000"), getLevel(entry.Level), f.loggerName, entry.Message)
 	return []byte(logEntry), nil
+}
+
+func Debug(args ...interface{}) {
+	GetMashlingLogger().Debug(args...)
+}
+
+func Debugf(format string, args ...interface{}) {
+	GetMashlingLogger().Debugf(format, args...)
+}
+
+func Info(args ...interface{}) {
+	GetMashlingLogger().Info(args...)
+}
+
+func Infof(format string, args ...interface{}) {
+	GetMashlingLogger().Infof(format, args...)
+}
+
+func Warn(args ...interface{}) {
+	GetMashlingLogger().Warn(args...)
+}
+
+func Warnf(format string, args ...interface{}) {
+	GetMashlingLogger().Warnf(format, args...)
+}
+
+func Error(args ...interface{}) {
+	GetMashlingLogger().Error(args...)
+}
+
+func Errorf(format string, args ...interface{}) {
+	GetMashlingLogger().Errorf(format, args...)
+}
+
+func SetLogLevel(level flogger.Level) {
+	GetMashlingLogger().SetLogLevel(level)
+}
+
+func GetMashlingLogger() flogger.Logger {
+	defLogger := flogger.GetLogger(mashlingLoggerName)
+	if defLogger == nil {
+		errorMsg := fmt.Sprintf("error getting Mashling logger '%s'", mashlingLoggerName)
+		panic(errorMsg)
+	}
+	return defLogger
 }
 
 func getLevel(level logrus.Level) string {
@@ -155,4 +200,8 @@ func (logfactory *MashlingLoggerFactory) GetLogger(name string) flogger.Logger {
 		mutex.Unlock()
 	}
 	return l
+}
+
+func GetLogger(name string) flogger.Logger {
+	return flogger.GetLogger(name)
 }

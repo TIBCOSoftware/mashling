@@ -2,11 +2,11 @@ package v1
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/consul"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/services"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/swagger"
@@ -26,7 +26,7 @@ type Gateway struct {
 
 // Init initializes the Gateway.
 func (g *Gateway) Init(pingEnabled bool, pingPort string) error {
-	log.Println("[mashling] Initializing Flogo engine...")
+	logger.Info("Initializing Flogo engine...")
 
 	g.pingEnabled = pingEnabled
 	//Initialize ping service if it is enabled
@@ -45,7 +45,7 @@ func (g *Gateway) Init(pingEnabled bool, pingPort string) error {
 
 // Start starts the Gateway.
 func (g *Gateway) Start() error {
-	log.Println("[mashling] Starting Flogo engine...")
+	logger.Info("Starting Flogo engine...")
 	err := g.FlogoEngine.Start()
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (g *Gateway) Start() error {
 
 	//Start ping service if it is enabled
 	if g.pingEnabled {
-		log.Println("[mashling] Starting Ping service...")
+		logger.Info("Starting Ping service...")
 		err = g.PingService.Start()
 		if err != nil {
 			g.Stop()
@@ -65,9 +65,9 @@ func (g *Gateway) Start() error {
 
 // Stop stops the Gateway.
 func (g *Gateway) Stop() error {
-	log.Println("[mashling] Stoppping Flogo engine...")
+	logger.Info("Stoppping Flogo engine...")
 	if g.pingEnabled {
-		log.Println("[mashling] Stoppping Ping service...")
+		logger.Info("Stoppping Ping service...")
 		g.PingService.Stop()
 	}
 	return g.FlogoEngine.Stop()

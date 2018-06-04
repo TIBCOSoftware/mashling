@@ -10,13 +10,13 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 	mservice "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 	"github.com/TIBCOSoftware/mashling/pkg/strings"
 )
 
-var log = logger.GetLogger("activity-mashling-core")
+var log = logger.GetLogger("mashling-activity-core")
 
 // MashlingCore is a stub for your Activity implementation
 type MashlingCore struct {

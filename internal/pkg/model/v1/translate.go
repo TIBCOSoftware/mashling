@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"sort"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo/registry/triggers"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/lib/util"
@@ -165,7 +165,7 @@ func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 
 	//check if the trigger specifies a boolean setting key named 'optimize'
 	if util.CheckTriggerOptimization(mashTriggerSettingsUsable) {
-		log.Printf("[mashling] Trigger specifies %v property setting true\n", util.Gateway_Trigger_Optimize_Property)
+		logger.Infof("Trigger specifies %v property setting true\n", util.Gateway_Trigger_Optimize_Property)
 
 		//2.1 check if a trigger having the same settings is already created
 		//2.2 organize the trigger names as a list so that they can be sorted alphabetically. Golang maps are unordered and the iteration order is not guaranteed across multiple iterations.
@@ -182,12 +182,12 @@ func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 			createdTrigger := createdTriggersMap[name]
 			if reflect.DeepEqual(createdTrigger.Settings, triggerSettings) {
 				//looks like we found an existing trigger that has the same settings. No need to create a new trigger object. just create a new handler on the existing trigger
-				log.Printf("[mashling] Found a trigger having same settings %v %v\n", name, triggerSettings)
+				logger.Infof("Found a trigger having same settings %v %v\n", name, triggerSettings)
 				flogoTrigger = *createdTrigger
 				isNew = false
 				break
 			} else {
-				log.Printf("[mashling] Current trigger %v did not match settings of trigger %v %v\n", flogoTrigger.Name, name, triggerSettings)
+				logger.Infof("Current trigger %v did not match settings of trigger %v %v\n", flogoTrigger.Name, name, triggerSettings)
 			}
 		}
 	}
@@ -214,7 +214,7 @@ func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 				//set the condition on the trigger as is. the trigger should parse and interpret it.
 				handlerSettings[handler.Name][util.Flogo_Trigger_Handler_Setting_Condition] = dispatch.If
 			} else {
-				log.Printf("[mashling] The trigger [%v] does not support [%v] handler setting. skippng the condition logic.\n", trigger.Type, util.Flogo_Trigger_Handler_Setting_Condition)
+				logger.Infof("The trigger [%v] does not support [%v] handler setting. skippng the condition logic.\n", trigger.Type, util.Flogo_Trigger_Handler_Setting_Condition)
 			}
 		}
 		//check if there are any handler's dispatch config parms provided
@@ -272,7 +272,7 @@ func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 	flogoTrigger.Handlers = append(flogoTrigger.Handlers, handlers...)
 
 	if isNew {
-		log.Printf("[mashling] Adding a new trigger with settings %v %v\n", flogoTrigger.Name, triggerSettings)
+		logger.Infof("Adding a new trigger with settings %v %v\n", flogoTrigger.Name, triggerSettings)
 		createdTriggersMap[flogoTrigger.Name] = &flogoTrigger
 	}
 

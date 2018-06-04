@@ -3,10 +3,13 @@ package services
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net"
 	"net/http"
+
+	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 )
+
+var log = logger.GetLogger("mashling-ping-service")
 
 // DefaultPort is the default port for Ping service
 const DefaultPort = "9090"
@@ -45,7 +48,7 @@ func (p *PingServiceConfig) Init(port string, pingRes PingResponse) error {
 
 	pingDataBytes, err := json.Marshal(pingRes)
 	if err != nil {
-		log.Println("[mashling-ping-service] Ping service data formation error")
+		log.Info("Ping service data formation error")
 	}
 
 	p.pingResVal = string(pingDataBytes)
@@ -57,28 +60,28 @@ func (p *PingServiceConfig) Init(port string, pingRes PingResponse) error {
 
 //Start starts ping  server on configured port
 func (p *PingServiceConfig) Start() error {
-	log.Println("[mashling-ping-service] Ping service starting...")
+	log.Info("Ping service starting...")
 	http.HandleFunc("/ping", p.PingResponseHandlerShort)
 	http.HandleFunc("/ping/details", p.PingResponseHandlerDetail)
 
 	listener, err := net.Listen("tcp", p.Server.Addr)
 	if err != nil {
-		log.Println("[mashling-ping-service] Ping service failed to start due to error:", err)
+		log.Info("Ping service failed to start due to error:", err)
 		return err
 	}
 
 	err = listener.Close()
 	if err != nil {
-		log.Println("[mashling-ping-service] Ping service failed to start due to error:", err)
+		log.Info("Ping service failed to start due to error:", err)
 		return err
 	}
 
 	go func() {
 		if err := p.ListenAndServe(); err != http.ErrServerClosed {
-			log.Println("[mashling-ping-service] Ping service err:", err)
+			log.Info("Ping service err:", err)
 		}
 	}()
-	log.Println("[mashling-ping-service] Ping service started")
+	log.Info("Ping service started")
 
 	return nil
 }
@@ -96,10 +99,10 @@ func (p *PingServiceConfig) PingResponseHandlerDetail(w http.ResponseWriter, req
 //Stop handles nullifying configured port
 func (p *PingServiceConfig) Stop() error {
 	if err := p.Shutdown(nil); err != nil {
-		log.Println("[mashling-ping-service] Ping service error when stopping:", err)
+		log.Info("Ping service error when stopping:", err)
 		return err
 	}
-	log.Println("[mashling-ping-service] Ping service stopped")
+	log.Info("Ping service stopped")
 
 	return nil
 }

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"log"
 
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo/registry"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/cache"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v1/schema"
@@ -39,9 +39,9 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 		if err != nil {
 			return gw, err
 		}
-		log.Println("[mashling] Post processed configuration contents found in cache")
+		logger.Info("Post processed configuration contents found in cache")
 	} else {
-		log.Println("[mashling] Post processed configuration contents *not* found in cache, processing now...")
+		logger.Info("Post processed configuration contents *not* found in cache, processing now...")
 		err = schema.Validate(configuration)
 		if err != nil {
 			return gw, err
@@ -81,7 +81,7 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 			if err != nil {
 				return gw, err
 			}
-			log.Println("[mashling] Post processed configuration contents written to cache")
+			logger.Info("Post processed configuration contents written to cache")
 		}
 	}
 	gw.MashlingConfig = *mashed

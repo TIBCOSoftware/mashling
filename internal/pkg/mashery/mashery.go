@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 )
 
 type ApiUser struct {
@@ -597,9 +598,10 @@ var DefaultNopTransport = &NopTransport{}
 
 func debug(data []byte, err error) {
 	if err == nil {
-		fmt.Printf("%s\n\n", data)
+		logger.Debugf("%s\n\n", data)
 	} else {
-		log.Fatalf("%s\n\n", err)
+		logger.Errorf("%s\n\n", err)
+		os.Exit(1)
 	}
 }
 

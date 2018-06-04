@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -53,8 +52,11 @@ var gatewayCommand = &cobra.Command{
 
 // Execute executes registered commands.
 func Execute() {
+	// Setup Mashling Logger
+	logger.Register()
 	if err := gatewayCommand.Execute(); err != nil {
-		log.Fatal(err)
+		logger.Error(err)
+		os.Exit(1)
 	}
 }
 
@@ -74,19 +76,17 @@ func run(command *cobra.Command, args []string) {
 	// Output friendly Mashling mascot with some build details.
 	bannerTxt, err := assets.Asset("banner.txt")
 	if err != nil {
-		log.Println(err.Error())
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
-	log.Println("\n", string(bannerTxt))
-	// Setup Mashling Logger
-	logger.Register()
-	log.Println("[mashling] Gateway Version: ", version.Version)
-	log.Println("[mashling] Build Date: ", version.BuildDate)
+	fmt.Println("\n", string(bannerTxt))
+	logger.Info("Gateway Version: ", version.Version)
+	logger.Info("Build Date: ", version.BuildDate)
 	// Setup configuration artifacts cache.
 	if configCacheEnabled {
 		err = cache.Initialize("file", configCache)
 		if err != nil {
-			log.Println(err.Error())
+			logger.Error(err.Error())
 			os.Exit(1)
 		}
 	}
@@ -96,18 +96,19 @@ func run(command *cobra.Command, args []string) {
 	if err != nil {
 		// Attempt to give insight into known  potentials errors.
 		if gateway == nil {
-			log.Fatal(err)
+			logger.Error(err)
+			os.Exit(1)
 		} else {
-			log.Println(err)
+			logger.Error(err)
 		}
 		for _, errd := range gateway.Errors() {
 			switch e := errd.(type) {
 			case *gwerrors.UndefinedReference:
-				log.Printf("%s: %s", e.Type(), e.Details())
+				logger.Errorf("%s: %s", e.Type(), e.Details())
 			case *gwerrors.MissingDependency:
-				log.Println("Missing dependencies found: ", strings.Join(e.MissingDependencies, " "))
+				logger.Error("Missing dependencies found: ", strings.Join(e.MissingDependencies, " "))
 			default:
-				log.Fatalf("Do not know how to handle error type %T!\n", e)
+				logger.Errorf("Do not know how to handle error type %T!\n", e)
 			}
 		}
 		// For now we still exit no matter what. The CLI handles missing errors.
@@ -118,7 +119,7 @@ func run(command *cobra.Command, args []string) {
 		// Configuring file watcher to automatically reload configuration file contents in dev mode.
 		watcher, err = fsnotify.NewWatcher()
 		if err != nil {
-			fmt.Println(err.Error())
+			logger.Error(err.Error())
 			os.Exit(1)
 		}
 		defer watcher.Close()
@@ -127,20 +128,20 @@ func run(command *cobra.Command, args []string) {
 
 		err = watcher.Add(config)
 		if err != nil {
-			log.Println(err.Error())
+			logger.Error(err.Error())
 			os.Exit(1)
 		}
 	}
 
-	log.Println("[mashling] Schema Version: ", gateway.Version())
-	log.Println("[mashling] App Version: ", gateway.AppVersion())
-	log.Println("[mashling] App Description: ", gateway.Description())
+	logger.Info("Schema Version: ", gateway.Version())
+	logger.Info("App Version: ", gateway.AppVersion())
+	logger.Info("App Description: ", gateway.Description())
 
 	// Startup the configured gateway instance.
 	gateway.Init(pingEnabled, pingPort)
 	err = gateway.Start()
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 		os.Exit(1)
 	}
 
@@ -195,11 +196,11 @@ func handleFileNotifications() {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Write == fsnotify.Write {
-				log.Println("[mashling] modified configuration file:", event.Name)
+				logger.Info("modified configuration file:", event.Name)
 				reloadGatewayFromConfigurationFile()
 			}
 		case ferr := <-watcher.Errors:
-			log.Println("[mashling] error:", ferr)
+			logger.Error(ferr)
 		}
 	}
 }
@@ -208,21 +209,21 @@ func handleFileNotifications() {
 func reloadGatewayFromConfigurationFile() {
 	err := gateway.Stop()
 	if err != nil {
-		log.Println("[mashling] error stopping gateway:", err)
+		logger.Error("error stopping gateway:", err)
 	}
 
 	flogo.ResetGlobalContext()
 	gateway, err = model.LoadFromFile(config)
 	if err != nil {
-		log.Println("[mashling] error re-loading gateway from file:", err)
+		logger.Error("error re-loading gateway from file:", err)
 	}
 	err = gateway.Init(pingEnabled, pingPort)
 	if err != nil {
-		log.Println("[mashling] error re-initializing gateway:", err)
+		logger.Error("error re-initializing gateway:", err)
 	}
 
 	err = gateway.Start()
 	if err != nil {
-		log.Println("[mashling] error re-starting gateway:", err)
+		logger.Error("error re-starting gateway:", err)
 	}
 }
