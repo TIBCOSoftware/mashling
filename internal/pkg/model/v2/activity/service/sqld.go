@@ -4,25 +4,24 @@ import (
 	"github.com/pointlander/injectsec"
 )
 
+var maker = injectsec.NewDetectorMaker()
+
 // SQLD is a SQL injection attack detector
 type SQLD struct {
 	values map[string]interface{}
-	maker  *injectsec.DetectorMaker
 	Attack bool `json:"attack"`
 }
 
 // InitializeSQLD creates a SQLD service
 func InitializeSQLD(settings map[string]interface{}) (service *SQLD, err error) {
-	service = &SQLD{
-		maker: injectsec.NewDetectorMaker(),
-	}
+	service = &SQLD{}
 	err = service.UpdateRequest(settings)
 	return
 }
 
 // Execute executes the SQLD service
 func (s *SQLD) Execute() (err error) {
-	detector := s.maker.Make()
+	detector := maker.Make()
 
 	var testMap func(a map[string]interface{}) bool
 	testMap = func(a map[string]interface{}) bool {

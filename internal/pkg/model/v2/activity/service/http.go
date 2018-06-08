@@ -13,9 +13,21 @@ import (
 	"time"
 
 	"github.com/imdario/mergo"
+
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
-const defaultTimeout = 5
+const (
+	methodGET    = "GET"
+	methodPOST   = "POST"
+	methodPUT    = "PUT"
+	methodPATCH  = "PATCH"
+	methodDELETE = "DELETE"
+
+	contentTypeApplicationJSON = "application/json; charset=UTF-8"
+
+	defaultTimeout = 5
+)
 
 // HTTP is an HTTP service.
 type HTTP struct {
@@ -101,6 +113,7 @@ func (h *HTTP) UpdateRequest(values map[string]interface{}) (err error) {
 }
 
 func (h *HTTP) setRequestValues(settings map[string]interface{}) (err error) {
+	var body interface{}
 	for k, v := range settings {
 		switch k {
 		case "url":
@@ -143,8 +156,31 @@ func (h *HTTP) setRequestValues(settings map[string]interface{}) (err error) {
 			if err := mergo.Merge(&h.Request.PathParams, pathParams, mergo.WithOverride); err != nil {
 				return errors.New("unable to merge pathParams values")
 			}
+		case "body":
+			body = v
 		default:
 			// ignore and move on.
+		}
+	}
+	if body != nil {
+		if method := h.Request.Method; method == methodPOST || method == methodPUT || method == methodPATCH {
+			contentType := contentTypeApplicationJSON
+			if object, ok := body.(map[string]interface{}); ok {
+				if mime, ok := object[util.MetaMIME]; ok {
+					if s, ok := mime.(string); ok {
+						contentType = s
+					}
+				}
+			}
+			if _, ok := h.Request.Headers["Content-Type"]; !ok {
+				h.Request.Headers["Content-Type"] = contentType
+			}
+
+			data, err := util.Marshal(body)
+			if err != nil {
+				return err
+			}
+			h.Request.Body = string(data)
 		}
 	}
 	return nil
