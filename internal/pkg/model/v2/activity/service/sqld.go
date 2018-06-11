@@ -9,7 +9,7 @@ var maker = injectsec.NewDetectorMaker()
 // SQLD is a SQL injection attack detector
 type SQLD struct {
 	values map[string]interface{}
-	Attack bool `json:"attack"`
+	Attack float32 `json:"attack"`
 }
 
 // InitializeSQLD creates a SQLD service
@@ -23,52 +23,60 @@ func InitializeSQLD(settings map[string]interface{}) (service *SQLD, err error) 
 func (s *SQLD) Execute() (err error) {
 	detector := maker.Make()
 
-	var testMap func(a map[string]interface{}) bool
-	testMap = func(a map[string]interface{}) bool {
+	var testMap func(a map[string]interface{}) (err error)
+	testMap = func(a map[string]interface{}) (err error) {
 		for _, v := range a {
 			switch element := v.(type) {
 			case map[string]interface{}:
-				if testMap(element) {
-					return true
+				err = testMap(element)
+				if err != nil {
+					return
 				}
 			case string:
-				if detector.Detect(element) {
-					return true
+				probability, err := detector.Detect(element)
+				if probability > s.Attack {
+					s.Attack = probability
+				}
+				if err != nil {
+					return err
 				}
 			}
 		}
 
-		return false
+		return nil
 	}
 
-	test := func(key string) bool {
+	test := func(key string) (err error) {
 		if a, ok := s.values[key]; ok {
 			switch b := a.(type) {
 			case map[string]interface{}:
-				if testMap(b) {
-					s.Attack = true
-					return true
-				}
+				err = testMap(b)
 			case map[string]string:
 				for _, v := range b {
-					if detector.Detect(v) {
-						s.Attack = true
-						return true
+					probability, err := detector.Detect(v)
+					if probability > s.Attack {
+						s.Attack = probability
+					}
+					if err != nil {
+						return err
 					}
 				}
 			}
 		}
 
-		return false
+		return
 	}
 
-	if test("pathParams") {
+	err = test("pathParams")
+	if err != nil {
 		return
 	}
-	if test("queryParams") {
+	err = test("queryParams")
+	if err != nil {
 		return
 	}
-	if test("content") {
+	err = test("content")
+	if err != nil {
 		return
 	}
 
