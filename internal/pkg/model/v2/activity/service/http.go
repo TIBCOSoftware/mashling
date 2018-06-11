@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"compress/gzip"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -83,15 +82,17 @@ func (h *HTTP) Execute() (err error) {
 		}
 	}
 	defer bodyReader.Close()
-	if resp.Header.Get("Content-Type") == "application/json" {
-		err = json.NewDecoder(bodyReader).Decode(&h.Response.Body)
-	} else {
-		respbody, err := ioutil.ReadAll(bodyReader)
-		if err != nil {
-			return err
-		}
-		h.Response.Body = string(respbody)
+	respbody, err := ioutil.ReadAll(bodyReader)
+	if err != nil {
+		return err
 	}
+
+	contentType := resp.Header.Get("Content-Type")
+	err = util.Unmarshal(contentType, respbody, &h.Response.Body)
+	if err != nil {
+		return err
+	}
+
 	return err
 }
 
