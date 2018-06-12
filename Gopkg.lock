@@ -92,6 +92,19 @@
   version = "0.11.0"
 
 [[projects]]
+  name = "github.com/awalterschulze/gographviz"
+  packages = [
+    ".",
+    "ast",
+    "internal/errors",
+    "internal/lexer",
+    "internal/parser",
+    "internal/token"
+  ]
+  revision = "c84395e536e1a1199093a4e6253d1bee99e4cd2a"
+  version = "v2.0"
+
+[[projects]]
   name = "github.com/aws/aws-lambda-go"
   packages = [
     "lambda",
@@ -136,6 +149,18 @@
   ]
   revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
   version = "v1.13.17"
+
+[[projects]]
+  name = "github.com/chewxy/hm"
+  packages = ["."]
+  revision = "61efb3290a086d1335e8954b3734c102126818ba"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/chewxy/math32"
+  packages = ["."]
+  revision = "d1e7b22839c693f54edf7811dd9487623abf2cd2"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -306,6 +331,12 @@
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/leesper/go_rng"
+  packages = ["."]
+  revision = "5344a9259b21627d94279721ab1f27eb029194e7"
+
+[[projects]]
   name = "github.com/lightstep/lightstep-tracer-go"
   packages = [
     ".",
@@ -393,6 +424,15 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/pointlander/injectsec"
+  packages = [
+    ".",
+    "gru"
+  ]
+  revision = "a66b5aec202c958de6a0dc71e840c889047f535e"
+
+[[projects]]
+  branch = "master"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
   revision = "8732c616f52954686704c8645fe1a9d59e9df7c1"
@@ -440,6 +480,12 @@
   revision = "8bcffc811467a5f691810420385be6e66b35a317"
 
 [[projects]]
+  name = "github.com/xtgo/set"
+  packages = ["."]
+  revision = "708d80f4a27458f99f8ca12bd0e638c6ee65627f"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -457,6 +503,8 @@
     "lex/httplex",
     "proxy",
     "trace",
+    "webdav",
+    "webdav/internal/xml",
     "websocket"
   ]
   revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
@@ -492,6 +540,31 @@
   ]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  name = "gonum.org/v1/gonum"
+  packages = [
+    "blas",
+    "blas/blas64",
+    "blas/gonum",
+    "floats",
+    "graph",
+    "graph/internal/linear",
+    "graph/internal/ordered",
+    "graph/internal/set",
+    "graph/topo",
+    "graph/traverse",
+    "internal/asm/c128",
+    "internal/asm/f32",
+    "internal/asm/f64",
+    "internal/math32",
+    "lapack",
+    "lapack/gonum",
+    "lapack/lapack64",
+    "mat"
+  ]
+  revision = "5794ed370185cc01b96e28e503975e1a3c0477e8"
 
 [[projects]]
   branch = "master"
@@ -545,6 +618,40 @@
   version = "v2.5.1"
 
 [[projects]]
+  name = "gorgonia.org/cu"
+  packages = ["."]
+  revision = "32f165836e285c14a4f78c455872d069e0cc5a7d"
+  version = "v0.8.0"
+
+[[projects]]
+  name = "gorgonia.org/gorgonia"
+  packages = ["."]
+  revision = "f155b218fcfe2b8534acda861f3e346ad61e0800"
+  version = "v0.8.4"
+
+[[projects]]
+  name = "gorgonia.org/tensor"
+  packages = [
+    ".",
+    "internal/execution",
+    "internal/storage"
+  ]
+  revision = "2ab2564f998fe504b94a1679c1c95277cdedea47"
+  version = "v0.8.1"
+
+[[projects]]
+  branch = "master"
+  name = "gorgonia.org/vecf32"
+  packages = ["."]
+  revision = "64df62f0b841c2424c7acfa09dd45dcd07d3a7bd"
+
+[[projects]]
+  branch = "master"
+  name = "gorgonia.org/vecf64"
+  packages = ["."]
+  revision = "8f2bcc9f3977945c8e2107267681282e23e13ca1"
+
+[[projects]]
   branch = "master"
   name = "sourcegraph.com/sourcegraph/appdash"
   packages = [
@@ -557,6 +664,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f36777afc31cec43bc8032fdca6adf3d1c941e70619d98bb645f84837e4922b7"
+  inputs-digest = "ebbb35a21de28ff60206d38ad948f926a089717051fc1375a63567d55f064d22"
   solver-name = "gps-cdcl"
   solver-version = 1

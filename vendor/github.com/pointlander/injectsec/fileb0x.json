@@ -1,0 +1,26 @@
+{
+  "pkg": "injectsec",
+  "dest": "./",
+  "fmt": true,
+  "tags": "",
+  "compression": {
+    "compress": true,
+    "method": "BestCompression",
+    "keep": false
+  },
+  "clean": false,
+  "output": "ab0x.go",
+  "unexporTed": false,
+  "spread": false,
+  "debug": false,
+  "custom": [
+    {
+      "files": [
+        "weights.w"
+      ],
+      "base": "",
+      "prefix": "",
+      "tags": ""
+    }
+  ]
+}
