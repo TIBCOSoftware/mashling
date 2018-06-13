@@ -2,16 +2,17 @@ package logger
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/TIBCOSoftware/flogo-lib/config"
 	flogger "github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
-var loggerMap = make(map[string]flogger.Logger)
-var mutex = &sync.RWMutex{}
+var logFactory = &MashlingLoggerFactory{}
+var loggerMap sync.Map
 var mashlingLoggerName = "mashling"
+var logLevel = flogger.InfoLevel
 
 type MashlingLoggerFactory struct {
 }
@@ -25,8 +26,36 @@ type LogFormatter struct {
 	loggerName string
 }
 
-func Register() {
-	flogger.RegisterLoggerFactory(&MashlingLoggerFactory{})
+func init() {
+	flogger.RegisterLoggerFactory(logFactory)
+}
+
+func Configure(levelName string, hooks []LogHook) error {
+	level, err := flogger.GetLevelForName(strings.ToUpper(levelName))
+	if err != nil {
+		return nil
+	}
+	SetLogLevel(level)
+	for _, hook := range hooks {
+		logrusHook, err := hook.GetHook()
+		if err != nil {
+			return err
+		}
+		logrusHookID, err := hook.Id()
+		if err != nil {
+			return err
+		}
+		logrusHooks.Store(logrusHookID, logrusHook)
+		loggerMap.Range(func(key, value interface{}) bool {
+			logr, ok := value.(*MashlingLogger)
+			if !ok {
+				return false
+			}
+			logr.loggerImpl.AddHook(logrusHook)
+			return true
+		})
+	}
+	return nil
 }
 
 func (f *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
@@ -67,11 +96,20 @@ func Errorf(format string, args ...interface{}) {
 }
 
 func SetLogLevel(level flogger.Level) {
-	GetMashlingLogger().SetLogLevel(level)
+	logLevel = level
+	loggerMap.Range(func(key, value interface{}) bool {
+		logr, ok := value.(*MashlingLogger)
+		if !ok {
+			// skip logger
+			return true
+		}
+		logr.SetLogLevel(logLevel)
+		return true
+	})
 }
 
 func GetMashlingLogger() flogger.Logger {
-	defLogger := flogger.GetLogger(mashlingLoggerName)
+	defLogger := GetLogger(mashlingLoggerName)
 	if defLogger == nil {
 		errorMsg := fmt.Sprintf("error getting Mashling logger '%s'", mashlingLoggerName)
 		panic(errorMsg)
@@ -175,33 +213,32 @@ func (logger *MashlingLogger) SetLogLevel(logLevel flogger.Level) {
 }
 
 func (logfactory *MashlingLoggerFactory) GetLogger(name string) flogger.Logger {
-	mutex.RLock()
-	l := loggerMap[name]
-	mutex.RUnlock()
-	if l == nil {
+	lStored, exists := loggerMap.Load(name)
+	if !exists {
 		logImpl := logrus.New()
 		logImpl.Formatter = &LogFormatter{
 			loggerName: name,
 		}
-		l = &MashlingLogger{
+		l := &MashlingLogger{
 			loggerName: name,
 			loggerImpl: logImpl,
 		}
-		// Get log level from config
-		logLevelName := config.GetLogLevel()
-		// Get log level for name
-		level, err := flogger.GetLevelForName(logLevelName)
-		if err != nil {
-			return nil
-		}
-		l.SetLogLevel(level)
-		mutex.Lock()
-		loggerMap[name] = l
-		mutex.Unlock()
+		l.SetLogLevel(logLevel)
+		// Add hooks
+		logrusHooks.Range(func(key, value interface{}) bool {
+			hook, ok := value.(logrus.Hook)
+			if !ok {
+				return false
+			}
+			l.loggerImpl.AddHook(hook)
+			return true
+		})
+		loggerMap.Store(name, l)
+		return l
 	}
-	return l
+	return lStored.(flogger.Logger)
 }
 
 func GetLogger(name string) flogger.Logger {
-	return flogger.GetLogger(name)
+	return logFactory.GetLogger(name)
 }

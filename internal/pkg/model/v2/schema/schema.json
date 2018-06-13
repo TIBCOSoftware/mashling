@@ -50,6 +50,10 @@
                 "display_name": {
                     "type": "string"
                 },
+                "logger": {
+                    "$schema": "http://json-schema.org/draft-04/schema#",
+                    "$ref": "#/definitions/Logger"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -102,6 +106,51 @@
                         }
                     },
                     "type": "object"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
+        "Logger": {
+            "properties": {
+                "hooks": {
+                    "items": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "$ref": "#/definitions/LoggerHook"
+                    },
+                    "type": "array"
+                },
+                "level": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
+        "LoggerHook": {
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "settings": {
+                    "patternProperties": {
+                        ".*": {
+                            "additionalProperties": true,
+                            "type": [
+                                "array",
+                                "boolean",
+                                "integer",
+                                "number",
+                                "null",
+                                "object",
+                                "string"
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false,

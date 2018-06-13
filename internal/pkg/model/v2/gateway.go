@@ -17,6 +17,8 @@ type Gateway struct {
 	FlogoEngine    engine.Engine
 	MashlingConfig interface{}
 	SchemaVersion  string
+	LogLevel       string
+	LogHooks       []logger.LogHook
 	ErrorDetails   []gwerrors.Error
 	pingEnabled    bool
 	PingService    services.PingService
@@ -24,6 +26,11 @@ type Gateway struct {
 
 // Init initializes the Gateway.
 func (g *Gateway) Init(pingEnabled bool, pingPort string) error {
+	// Setup any logging configuration
+	err := logger.Configure(g.LogLevel, g.LogHooks)
+	if err != nil {
+		return err
+	}
 	logger.Info("Initializing Flogo engine...")
 
 	g.pingEnabled = pingEnabled

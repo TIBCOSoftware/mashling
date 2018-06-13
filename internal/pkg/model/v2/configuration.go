@@ -90,6 +90,15 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 		}
 	}
 	gw.MashlingConfig = *gateway
+	// Set logging configuration
+	gw.LogLevel = gw.MashlingConfig.(types.Schema).Gateway.Logger.Level
+	for _, logHook := range gw.MashlingConfig.(types.Schema).Gateway.Logger.Hooks {
+		hook, hErr := logger.Initialize(logHook.Type, logHook.Settings)
+		if hErr != nil {
+			return gw, hErr
+		}
+		gw.LogHooks = append(gw.LogHooks, hook)
+	}
 	jsonParser := json.NewDecoder(bytes.NewReader(flogoJSON))
 	gw.FlogoApp = app.Config{}
 	err = jsonParser.Decode(&gw.FlogoApp)

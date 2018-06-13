@@ -53,7 +53,6 @@ var gatewayCommand = &cobra.Command{
 // Execute executes registered commands.
 func Execute() {
 	// Setup Mashling Logger
-	logger.Register()
 	if err := gatewayCommand.Execute(); err != nil {
 		logger.Error(err)
 		os.Exit(1)

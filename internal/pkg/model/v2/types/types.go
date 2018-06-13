@@ -16,6 +16,7 @@ type Gateway struct {
 	Triggers     []Trigger  `json:"triggers" jsonschema:"required,minItems=1,uniqueItems=true"`
 	Dispatches   []Dispatch `json:"dispatches" jsonschema:"required,minItems=1,uniqueItems=true"`
 	Services     []Service  `json:"services,omitempty" jsonschema:"required,minItems=1,uniqueItems=true"`
+	Logger       Logger     `json:"logger,omitempty"`
 }
 
 // Trigger contains the event listener definitions and configurations.
@@ -67,6 +68,18 @@ type Service struct {
 	Type        string                 `json:"type" jsonschema:"required"`
 	Description string                 `json:"description,omitempty"`
 	Settings    map[string]interface{} `json:"settings,omitempty" jsonschema:"additionalProperties"`
+}
+
+// Logger defines the logging configuration for this Mashling instance.
+type Logger struct {
+	Level string       `json:"level,omitempty"`
+	Hooks []LoggerHook `json:"hooks,omitempty"`
+}
+
+// LoggerHook defines a logging service to write logs.
+type LoggerHook struct {
+	Type     string                 `json:"type" jsonschema:"required"`
+	Settings map[string]interface{} `json:"settings,omitempty" jsonschema:"additionalProperties"`
 }
 
 // Handler maps a trigger and settings to a specific dispatch
