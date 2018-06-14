@@ -27,6 +27,7 @@ func init() {
 	gatewayCommand.PersistentFlags().BoolVarP(&configCacheEnabled, "config-cache-enabled", "E", true, "cache post-processed configuration artifacts locally")
 	gatewayCommand.PersistentFlags().BoolVarP(&pingEnabled, "ping-enabled", "p", true, "enable gateway ping service")
 	gatewayCommand.PersistentFlags().StringVarP(&pingPort, "ping-port", "P", "9090", "configure mashling gateway ping service port")
+	gatewayCommand.PersistentFlags().StringVarP(&logLevel, "log-level", "L", "INFO", "set the log level for logging messages (DEBUG, INFO, ERROR, WARN, PANIC, FATAL)")
 }
 
 var (
@@ -40,6 +41,7 @@ var (
 	configCacheEnabled bool
 	pingEnabled        bool
 	pingPort           string
+	logLevel           string
 )
 
 var gatewayCommand = &cobra.Command{
@@ -81,6 +83,12 @@ func run(command *cobra.Command, args []string) {
 	fmt.Println("\n", string(bannerTxt))
 	logger.Info("Gateway Version: ", version.Version)
 	logger.Info("Build Date: ", version.BuildDate)
+	// Set log level from command line
+	err = logger.Configure(logLevel, nil)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	// Setup configuration artifacts cache.
 	if configCacheEnabled {
 		err = cache.Initialize("file", configCache)
