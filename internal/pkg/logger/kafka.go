@@ -32,17 +32,21 @@ func InitializeKafkaHook(settings map[string]interface{}) (kafkaLogger *KafkaLog
 			}
 			kafkaLogger.ID = id
 		case "levels":
-			levels, ok := v.([]string)
+			levels, ok := v.([]interface{})
 			if !ok {
 				return nil, errors.New("invalid type for levels")
 			}
-			kafkaLogger.Levels = levels
+			for _, level := range levels {
+				kafkaLogger.Levels = append(kafkaLogger.Levels, level.(string))
+			}
 		case "brokers":
-			brokers, ok := v.([]string)
+			brokers, ok := v.([]interface{})
 			if !ok {
 				return nil, errors.New("invalid type for brokers")
 			}
-			kafkaLogger.Brokers = brokers
+			for _, broker := range brokers {
+				kafkaLogger.Brokers = append(kafkaLogger.Brokers, broker.(string))
+			}
 		case "defaultTopic":
 			defaultTopic, ok := v.(string)
 			if !ok {

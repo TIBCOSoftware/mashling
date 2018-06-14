@@ -31,11 +31,13 @@ func init() {
 }
 
 func Configure(levelName string, hooks []LogHook) error {
-	level, err := flogger.GetLevelForName(strings.ToUpper(levelName))
-	if err != nil {
-		return nil
+	if levelName != "" {
+		level, err := flogger.GetLevelForName(strings.ToUpper(levelName))
+		if err != nil {
+			return nil
+		}
+		SetLogLevel(level)
 	}
-	SetLogLevel(level)
 	for _, hook := range hooks {
 		logrusHook, err := hook.GetHook()
 		if err != nil {
