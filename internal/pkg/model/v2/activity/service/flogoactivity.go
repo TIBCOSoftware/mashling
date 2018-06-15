@@ -12,8 +12,8 @@ import (
 
 // FlogoActivity is a Flogo activity service.
 type FlogoActivity struct {
-	Request  FlogoActivityRequest  `json:"request"`
-	Response FlogoActivityResponse `json:"response"`
+	Request  FlogoActivityRequest `json:"request"`
+	Activity activity.Activity    `json:"activity"`
 }
 
 // FlogoActivityRequest is a Flogo activity service request.
@@ -32,62 +32,67 @@ type FlogoActivityResponse struct {
 // InitializeFlogoActivity initializes a FlogoActivity service with provided settings.
 func InitializeFlogoActivity(settings map[string]interface{}) (flogoActivityService *FlogoActivity, err error) {
 	flogoActivityService = &FlogoActivity{}
-	req := FlogoActivityRequest{}
-	req.Inputs = make(map[string]interface{})
-	flogoActivityService.Request = req
-	err = flogoActivityService.setRequestValues(settings)
+	// req := FlogoActivityRequest{}
+	// req.Inputs = make(map[string]interface{})
+	// flogoActivityService.Request = req
+	flogoActivityService.Request, err = flogoActivityService.createRequest(settings)
+	if err != nil {
+		return flogoActivityService, err
+	}
+	fa := activity.Get(flogoActivityService.Request.Ref)
+	if fa == nil {
+		return flogoActivityService, fmt.Errorf("unable to find Flogo activity: %s", flogoActivityService.Request.Ref)
+	}
+	flogoActivityService.Activity = fa
 	return flogoActivityService, err
 }
 
-// UpdateRequest updates a request on an existing FlogoActivity service instance with new values.
-func (f *FlogoActivity) UpdateRequest(values map[string]interface{}) (err error) {
-	return f.setRequestValues(values)
-}
-
 // Execute invokes this FlogoActivity service.
-func (f *FlogoActivity) Execute() (err error) {
-	fa := activity.Get(f.Request.Ref)
-	if fa == nil {
-		return fmt.Errorf("unable to find Flogo activity: %s", f.Request.Ref)
-	}
+func (f *FlogoActivity) Execute(requestValues map[string]interface{}) (Response, error) {
+	response := FlogoActivityResponse{}
+	request, err := f.createRequest(requestValues)
 	var done bool
-	actContext := NewFlogoActivityContext(fa.Metadata())
-	actContext.TaskNameVal = f.Request.Ref
-	for name, value := range f.Request.Inputs {
+	actContext := NewFlogoActivityContext(f.Activity.Metadata())
+	actContext.TaskNameVal = request.Ref
+	for name, value := range request.Inputs {
 		actContext.SetInput(name, value)
 	}
-	done, err = fa.Eval(actContext)
-	f.Response = FlogoActivityResponse{}
-	f.Response.Done = done
+	done, err = f.Activity.Eval(actContext)
+	response.Done = done
 	if err != nil {
-		f.Response.Error = err.Error()
+		response.Error = err.Error()
 	}
-	f.Response.Outputs = actContext.GetOutputs()
-	return err
+	response.Outputs = actContext.GetOutputs()
+	return response, err
 }
 
-func (f *FlogoActivity) setRequestValues(settings map[string]interface{}) (err error) {
+func (f *FlogoActivity) createRequest(settings map[string]interface{}) (FlogoActivityRequest, error) {
+	request := FlogoActivityRequest{}
 	for k, v := range settings {
 		switch k {
 		case "ref":
 			ref, ok := v.(string)
 			if !ok {
-				return errors.New("invalid type for ref")
+				return request, errors.New("invalid type for ref")
 			}
-			f.Request.Ref = ref
+			request.Ref = ref
 		case "inputs":
 			inputs, ok := v.(map[string]interface{})
 			if !ok {
-				return errors.New("invalid type for inputs")
+				return request, errors.New("invalid type for inputs")
 			}
-			if err := mergo.Merge(&f.Request.Inputs, inputs, mergo.WithOverride); err != nil {
-				return errors.New("unable to merge inputs values")
+			request.Inputs = inputs
+			if err := mergo.Merge(&request.Inputs, f.Request.Inputs); err != nil {
+				return request, errors.New("unable to merge inputs values")
 			}
 		default:
 			// ignore and move on.
 		}
 	}
-	return nil
+	if err := mergo.Merge(&request, f.Request); err != nil {
+		return request, errors.New("unable to merge request values")
+	}
+	return request, nil
 }
 
 // FlogoActivityContext is an activity context in a mashling flow.

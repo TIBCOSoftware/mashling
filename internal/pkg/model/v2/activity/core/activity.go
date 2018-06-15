@@ -1,7 +1,6 @@
-package Core
+package core
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -17,10 +16,43 @@ import (
 )
 
 var log = logger.GetLogger("mashling-activity-core")
+var initializedServices = map[string]map[string]mservice.Service{}
+var initializedRoutes = map[string][]types.Route{}
+var envFlags = map[string]string{}
 
 // MashlingCore is a stub for your Activity implementation
 type MashlingCore struct {
 	metadata *activity.Metadata
+}
+
+func WarmUp() error {
+	// Capture env variable once
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		envFlags[pair[0]] = pair[1]
+	}
+	return nil
+}
+
+// WarmUpServices sets up re-used service data structures once to reduce per invocation overhead. This should not be called concurrently.
+func WarmUpServices(mashlingInstance string, services []types.Service) error {
+	// Create services map
+	serviceMap := make(map[string]mservice.Service)
+	for _, service := range services {
+		serviceInstance, err := mservice.Initialize(service)
+		if err != nil {
+			return err
+		}
+		serviceMap[service.Name] = serviceInstance
+	}
+	initializedServices[mashlingInstance] = serviceMap
+	return nil
+}
+
+// WarmUpRoutes sets up re-used route data structures once to reduce per invocation overhead. This should not be called concurrently.
+func WarmUpRoutes(mashlingIdentifier string, routes []types.Route) error {
+	initializedRoutes[mashlingIdentifier] = routes
+	return nil
 }
 
 // NewActivity creates a new activity
@@ -38,52 +70,15 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 	// github.com/TIBCOSoftware/flogo-lib/core/mapper/object.go has fmt.Printf statement commented out to stop flow params from being written to screen.
 	payload := context.GetInput("mashlingPayload")
 	if payload == nil {
-		log.Info("Executing mashling-core with empty payload.")
+		log.Debug("Executing mashling-core with empty payload.")
 	} else {
-		log.Info("Executing mashling-core with payload: ", payload)
+		log.Debug("Executing mashling-core with payload: ", payload)
 	}
 	identifier := context.GetInput("identifier").(string)
 	instance := context.GetInput("instance").(string)
-	rawRoutes := context.GetInput("routes").([]interface{})
-	rawServices := context.GetInput("services").([]interface{})
 
-	log.Info("Executing mashling-core with identifier: ", identifier)
-	log.Info("Executing mashling-core with instance: ", instance)
-	log.Debug("Executing mashling-core with routes: ", rawRoutes)
-	log.Debug("Executing mashling-core with services: ", rawServices)
-
-	// Parse routes
-	var routes []types.Route
-	var routesJSON json.RawMessage
-	routesJSON, err = json.Marshal(rawRoutes)
-	if err != nil {
-		log.Error("error loading routes")
-		return false, err
-	}
-	err = json.Unmarshal(routesJSON, &routes)
-	if err != nil {
-		log.Error("error parsing routes")
-		return false, err
-	}
-
-	// Parse services
-	var services []types.Service
-	var servicesJSON json.RawMessage
-	servicesJSON, err = json.Marshal(rawServices)
-	if err != nil {
-		log.Error("error loading services")
-		return false, err
-	}
-	err = json.Unmarshal(servicesJSON, &services)
-	if err != nil {
-		log.Error("error parsing services")
-		return false, err
-	}
-	// Create services map
-	serviceMap := make(map[string]types.Service)
-	for _, service := range services {
-		serviceMap[service.Name] = service
-	}
+	log.Debug("Executing mashling-core with identifier: ", identifier)
+	log.Debug("Executing mashling-core with instance: ", instance)
 
 	// Route to be executed once it is identified by the conditional evaluation.
 	var routeToExecute *types.Route
@@ -94,12 +89,6 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 		vmDefaults["payload"] = payload
 	}
 	vmDefaults["async"] = false
-	// Add ENV flags to the vmDefaults
-	envFlags := make(map[string]string)
-	for _, e := range os.Environ() {
-		pair := strings.Split(e, "=")
-		envFlags[pair[0]] = pair[1]
-	}
 	vmDefaults["env"] = envFlags
 	vm, err := mservice.NewVM(vmDefaults)
 	if err != nil {
@@ -107,14 +96,14 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 	}
 
 	// Evaluate route conditions to select which one to execute.
-	for _, route := range routes {
+	for _, route := range initializedRoutes[identifier] {
 		var truthiness bool
 		truthiness, err = evaluateTruthiness(route.Condition, vm)
 		if err != nil {
 			continue
 		}
 		if truthiness {
-			log.Info("route identified via conditional evaluation to true: ", route.Condition)
+			log.Debug("route identified via conditional evaluation to true: ", route.Condition)
 			routeToExecute = &route
 			break
 		}
@@ -127,22 +116,22 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 	// Execute the identified route if it exists and handle the async option.
 	if routeToExecute != nil {
 		if routeToExecute.Async {
-			log.Info("executing route asynchronously")
+			log.Debug("executing route asynchronously")
 			vmDefaults["async"] = true
 			asyncVM, vmerr := mservice.NewVM(vmDefaults)
 			if vmerr != nil {
 				return false, vmerr
 			}
-			go executeRoute(routeToExecute, serviceMap, &executionContext, asyncVM)
+			go executeRoute(instance, routeToExecute, &executionContext, asyncVM)
 			vm.SetPrimitiveInVM("async", true)
 		} else {
-			err = executeRoute(routeToExecute, serviceMap, &executionContext, vm)
+			err = executeRoute(instance, routeToExecute, &executionContext, vm)
 		}
 		if err != nil {
 			log.Error("error executing route: ", err)
 		}
 	} else {
-		log.Info("no route to execute, continuing to reply handler")
+		log.Debug("no route to execute, continuing to reply handler")
 	}
 
 	replyHandler := context.FlowDetails().ReplyHandler()
@@ -170,14 +159,14 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 					case string:
 						code, err = strconv.Atoi(cv)
 						if err != nil {
-							log.Info("unable to format extracted code string from response output", cv)
+							log.Debug("unable to format extracted code string from response output", cv)
 						}
 					}
 				}
 				if ok && code != 0 {
-					log.Info("Code identified in response output: ", code)
+					log.Debug("Code identified in response output: ", code)
 				} else {
-					log.Info("Code contents is not found or not an integer, default response code is 200")
+					log.Debug("Code contents is not found or not an integer, default response code is 200")
 					code = 200
 				}
 				// Translate data mappings
@@ -203,11 +192,11 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 			}
 		}
 	}
-	log.Info("no response conditions evaluated to true")
+	log.Debug("no response conditions evaluated to true")
 	return true, err
 }
 
-func executeRoute(route *types.Route, services map[string]types.Service, executionContext *map[string]interface{}, vm *mservice.VM) (err error) {
+func executeRoute(instance string, route *types.Route, executionContext *map[string]interface{}, vm *mservice.VM) (err error) {
 	for _, step := range route.Steps {
 		var truthiness bool
 		truthiness, err = evaluateTruthiness(step.Condition, vm)
@@ -215,7 +204,7 @@ func executeRoute(route *types.Route, services map[string]types.Service, executi
 			return err
 		}
 		if truthiness {
-			err = invokeService(services[step.Service], executionContext, step.Input, vm)
+			err = invokeService(instance, step.Service, executionContext, step.Input, vm)
 			if err != nil {
 				return err
 			}
@@ -226,41 +215,35 @@ func executeRoute(route *types.Route, services map[string]types.Service, executi
 
 func evaluateTruthiness(condition string, vm *mservice.VM) (truthy bool, err error) {
 	if condition == "" {
-		log.Info("condition was empty and thus evaluates to true")
+		log.Debug("condition was empty and thus evaluates to true")
 		return true, nil
 	}
 	truthy, err = vm.EvaluateToBool(condition)
 	if err != nil {
-		log.Infof("condition evaluation causes error so is false: %s", condition)
+		log.Debugf("condition evaluation causes error so is false: %s", condition)
 		return false, err
 	}
-	log.Infof("condition evaluated to %t: %s", truthy, condition)
+	log.Debugf("condition evaluated to %t: %s", truthy, condition)
 	return truthy, err
 }
 
-func invokeService(serviceDef types.Service, executionContext *map[string]interface{}, input map[string]interface{}, vm *mservice.VM) (err error) {
-	log.Info("invoking service type: ", serviceDef.Type)
-	serviceInstance, err := mservice.Initialize(serviceDef)
-	if err != nil {
-		return err
-	}
-	(*executionContext)[serviceDef.Name] = &serviceInstance
+func invokeService(instance string, serviceName string, executionContext *map[string]interface{}, input map[string]interface{}, vm *mservice.VM) (err error) {
+	serviceInstance := initializedServices[instance][serviceName]
+	log.Debug("invoking service: ", serviceName)
 	values, mErr := translateMappings(executionContext, input)
 	if mErr != nil {
 		return mErr
 	}
-	err = serviceInstance.UpdateRequest(values)
+	response, err := serviceInstance.Execute(values)
 	if err != nil {
 		return err
 	}
-	err = serviceInstance.Execute()
+	mappedResp := map[string]mservice.Response{"response": response}
+	err = vm.SetInVM(serviceName, mappedResp)
 	if err != nil {
 		return err
 	}
-	err = vm.SetInVM(serviceDef.Name, serviceInstance)
-	if err != nil {
-		return err
-	}
+	(*executionContext)[serviceName] = mappedResp
 	return nil
 }
 

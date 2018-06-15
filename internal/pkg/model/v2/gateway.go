@@ -6,6 +6,7 @@ import (
 	"github.com/TIBCOSoftware/mashling/internal/pkg/consul"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/logger"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/core"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/services"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/swagger"
@@ -46,7 +47,26 @@ func (g *Gateway) Init(pingEnabled bool, pingPort string) error {
 		g.PingService.Init(pingPort, pingResponse)
 	}
 
-	return g.FlogoEngine.Init(true)
+	err = g.FlogoEngine.Init(true)
+	if err != nil {
+		return err
+	}
+	// Warmup Mashling v2 runtime. This is ugly, clean it up
+	gw := g.MashlingConfig.(types.Schema)
+	core.WarmUp()
+	core.WarmUpServices(gw.Gateway.Name, gw.Gateway.Services)
+	for _, trigger := range gw.Gateway.Triggers {
+		for _, handler := range trigger.Handlers {
+			convertedName := trigger.Name + "_" + handler.Dispatch
+			for _, dispatch := range gw.Gateway.Dispatches {
+				if dispatch.Name != handler.Dispatch {
+					continue
+				}
+				core.WarmUpRoutes(convertedName, dispatch.Routes)
+			}
+		}
+	}
+	return nil
 }
 
 // Start starts the Gateway.

@@ -74,6 +74,11 @@ func loadGateway() (err error) {
 }
 
 func run(command *cobra.Command, args []string) {
+	// f, _ := os.Create("cpu.prof")
+	// pprof.StartCPUProfile(f)
+	// f1, _ := os.Create("mem.prof")
+	// runtime.GC()
+
 	// Output friendly Mashling mascot with some build details.
 	bannerTxt, err := assets.Asset("banner.txt")
 	if err != nil {
@@ -158,7 +163,10 @@ func run(command *cobra.Command, args []string) {
 
 	// Try to gracefully shutdown
 	gateway.Stop()
-
+	// pprof.WriteHeapProfile(f1)
+	// f1.Close()
+	// pprof.StopCPUProfile()
+	// f.Close()
 	os.Exit(code)
 }
 

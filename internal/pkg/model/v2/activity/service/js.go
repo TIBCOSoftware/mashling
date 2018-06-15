@@ -10,8 +10,7 @@ import (
 
 // JS is a JS service.
 type JS struct {
-	Request  JSRequest  `json:"request"`
-	Response JSResponse `json:"response"`
+	Request JSRequest `json:"request"`
 }
 
 // JSRequest is a JS service request.
@@ -28,70 +27,74 @@ type JSResponse struct {
 }
 
 // Execute invokes this JS service.
-func (j *JS) Execute() (err error) {
-	j.Response = JSResponse{}
+func (j *JS) Execute(requestValues map[string]interface{}) (Response, error) {
+	response := JSResponse{}
+	request, err := j.createRequest(requestValues)
+	if err != nil {
+		return response, err
+	}
 	result := make(map[string]interface{})
 	vm, err := NewVM(nil)
 	if err != nil {
-		j.Response.Error = true
-		j.Response.ErrorMessage = err.Error()
-		return err
+		response.Error = true
+		response.ErrorMessage = err.Error()
+		return response, err
 	}
-	vm.SetInVM("parameters", j.Request.Parameters)
+	vm.SetInVM("parameters", request.Parameters)
 	vm.SetInVM("result", result)
-	_, err = vm.vm.RunScript("JSServiceScript", j.Request.Script)
+	_, err = vm.vm.RunScript("JSServiceScript", request.Script)
 	if err != nil {
-		j.Response.Error = true
-		j.Response.ErrorMessage = err.Error()
-		return err
+		response.Error = true
+		response.ErrorMessage = err.Error()
+		return response, err
 	}
 	err = vm.GetFromVM("result", &result)
 	if err != nil {
-		j.Response.Error = true
-		j.Response.ErrorMessage = err.Error()
-		return err
+		response.Error = true
+		response.ErrorMessage = err.Error()
+		return response, err
 	}
-	j.Response.Result = result
-	return err
+	response.Result = result
+	return response, err
 }
 
 // InitializeJS initializes a JS service with provided settings.
 func InitializeJS(settings map[string]interface{}) (j *JS, err error) {
 	j = &JS{}
-	req := JSRequest{}
-	req.Parameters = make(map[string]interface{})
-	j.Request = req
-	err = j.setRequestValues(settings)
+	// req := JSRequest{}
+	// req.Parameters = make(map[string]interface{})
+	// j.Request = req
+	j.Request, err = j.createRequest(settings)
 	return j, err
 }
 
-// UpdateRequest updates a request on an existing JS service instance with new values.
-func (j *JS) UpdateRequest(values map[string]interface{}) (err error) {
-	return j.setRequestValues(values)
-}
-
-func (j *JS) setRequestValues(settings map[string]interface{}) (err error) {
+func (j *JS) createRequest(settings map[string]interface{}) (JSRequest, error) {
+	request := JSRequest{}
 	for k, v := range settings {
 		switch k {
 		case "script":
 			script, ok := v.(string)
 			if !ok {
-				return errors.New("invalid type for script")
+				return request, errors.New("invalid type for script")
 			}
-			j.Request.Script = script
+			request.Script = script
 		case "parameters":
 			parameters, ok := v.(map[string]interface{})
 			if !ok {
-				return errors.New("invalid type for headers")
+				return request, errors.New("invalid type for headers")
 			}
-			if err := mergo.Merge(&j.Request.Parameters, parameters, mergo.WithOverride); err != nil {
-				return errors.New("unable to merge parameters values")
+			request.Parameters = parameters
+			if err := mergo.Merge(&request.Parameters, j.Request.Parameters); err != nil {
+				return request, errors.New("unable to merge parameters values")
 			}
 		default:
 			// ignore and move on.
 		}
+		if err := mergo.Merge(&request, j.Request); err != nil {
+			return request, errors.New("unable to merge request values")
+		}
 	}
-	return nil
+	return request, nil
 }
 
 // VM represents a VM object.

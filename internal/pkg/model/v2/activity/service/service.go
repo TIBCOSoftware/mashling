@@ -8,9 +8,10 @@ import (
 
 // Service encapsulates everything necessary to execute a step against a target.
 type Service interface {
-	Execute() (err error)
-	UpdateRequest(values map[string]interface{}) (err error)
+	Execute(requestValues map[string]interface{}) (response Response, err error)
 }
+
+type Response interface{}
 
 // Initialize sets up the service based off of the service definition.
 func Initialize(serviceDef types.Service) (service Service, err error) {

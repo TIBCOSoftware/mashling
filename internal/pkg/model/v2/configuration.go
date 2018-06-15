@@ -22,17 +22,21 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 	gw := &Gateway{}
 	gateway := &types.Schema{}
 	gw.SchemaVersion = Version
-	var flogoJSON []byte
+	var flogoJSON, gatwayJSON []byte
 	key, err := files.ChecksumContents(configuration)
 	if err != nil {
 		return gw, err
 	}
-	if cache.Enabled && cache.Cache.InCache(key) {
-		flogoJSON, err = cache.Cache.LoadFromCache(key)
+	if cache.Enabled && cache.Cache.InCache(key+"F") && cache.Cache.InCache(key+"M") {
+		flogoJSON, err = cache.Cache.LoadFromCache(key + "F")
 		if err != nil {
 			return gw, err
 		}
-		err = json.Unmarshal(configuration, gateway)
+		gatwayJSON, err = cache.Cache.LoadFromCache(key + "M")
+		if err != nil {
+			return gw, err
+		}
+		err = json.Unmarshal(gatwayJSON, gateway)
 		if err != nil {
 			return gw, err
 		}
@@ -82,7 +86,15 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 			return gw, err
 		}
 		if cache.Enabled {
-			err = cache.Cache.WriteToCache(key, flogoJSON)
+			err = cache.Cache.WriteToCache(key+"F", flogoJSON)
+			if err != nil {
+				return gw, err
+			}
+			gatewayJSON, err := json.MarshalIndent(gateway, "", "    ")
+			if err != nil {
+				return gw, err
+			}
+			err = cache.Cache.WriteToCache(key+"M", gatewayJSON)
 			if err != nil {
 				return gw, err
 			}
@@ -91,8 +103,8 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 	}
 	gw.MashlingConfig = *gateway
 	// Set logging configuration
-	gw.LogLevel = gw.MashlingConfig.(types.Schema).Gateway.Logger.Level
-	for _, logHook := range gw.MashlingConfig.(types.Schema).Gateway.Logger.Hooks {
+	gw.LogLevel = gateway.Gateway.Logger.Level
+	for _, logHook := range gateway.Gateway.Logger.Hooks {
 		hook, hErr := logger.Initialize(logHook.Type, logHook.Settings)
 		if hErr != nil {
 			return gw, hErr

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"sync"
 
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
@@ -14,12 +13,10 @@ import (
 	"github.com/imdario/mergo"
 )
 
-var flowActions sync.Map
-
 // FlogoFlow is a Flogo flow service.
 type FlogoFlow struct {
-	Request  FlogoFlowRequest  `json:"request"`
-	Response FlogoFlowResponse `json:"response"`
+	Request FlogoFlowRequest `json:"request"`
+	Action  action.Action    `json:"action"`
 }
 
 // FlogoFlowRequest is a flogo flow service request.
@@ -39,90 +36,89 @@ type FlogoFlowResponse struct {
 // InitializeFlogoFlow initializes a FlogoFlow service with provided settings.
 func InitializeFlogoFlow(settings map[string]interface{}) (flogoFlowService *FlogoFlow, err error) {
 	flogoFlowService = &FlogoFlow{}
-	req := FlogoFlowRequest{}
-	req.Inputs = make(map[string]interface{})
-	flogoFlowService.Request = req
-	err = flogoFlowService.setRequestValues(settings)
+	// req := FlogoFlowRequest{}
+	// req.Inputs = make(map[string]interface{})
+	// flogoFlowService.Request = req
+	flogoFlowService.Request, err = flogoFlowService.createRequest(settings)
+	if err != nil {
+		return flogoFlowService, nil
+	}
+	var flowAction action.Action
+	cfg := &action.Config{}
+	rawData, err := json.Marshal(flogoFlowService.Request.Definition["data"])
+	if err != nil {
+		return flogoFlowService, err
+	}
+	cfg.Data = rawData
+	cfg.Id = flogoFlowService.Request.Reference
+	cfg.Ref = flogoFlowService.Request.Definition["ref"].(string)
+	ff := flow.ActionFactory{}
+	flowAction, err = ff.New(cfg)
+	if err != nil {
+		return flogoFlowService, err
+	}
+	flogoFlowService.Action = flowAction
 	return flogoFlowService, err
 }
 
-// UpdateRequest updates a request on an existing FlogoFlow service instance with new values.
-func (f *FlogoFlow) UpdateRequest(values map[string]interface{}) (err error) {
-	return f.setRequestValues(values)
-}
-
-func (f *FlogoFlow) setRequestValues(settings map[string]interface{}) (err error) {
+func (f *FlogoFlow) createRequest(settings map[string]interface{}) (FlogoFlowRequest, error) {
+	request := FlogoFlowRequest{}
 	for k, v := range settings {
 		switch k {
 		case "definition":
 			definition, ok := v.(map[string]interface{})
 			if !ok {
-				return errors.New("invalid type for definition")
+				return request, errors.New("invalid type for definition")
 			}
-			f.Request.Definition = definition
+			request.Definition = definition
 		case "reference":
 			reference, ok := v.(string)
 			if !ok {
-				return errors.New("invalid type for reference")
+				return request, errors.New("invalid type for reference")
 			}
-			f.Request.Reference = reference
+			request.Reference = reference
 		case "inputs":
 			inputs, ok := v.(map[string]interface{})
 			if !ok {
-				return errors.New("invalid type for inputs")
+				return request, errors.New("invalid type for inputs")
 			}
-			if err := mergo.Merge(&f.Request.Inputs, inputs, mergo.WithOverride); err != nil {
-				return errors.New("unable to merge inputs values")
+			request.Inputs = inputs
+			if err := mergo.Merge(&request.Inputs, f.Request.Inputs); err != nil {
+				return request, errors.New("unable to merge inputs values")
 			}
 		default:
 			// ignore and move on.
 		}
 	}
-	return nil
+	if err := mergo.Merge(&request, f.Request); err != nil {
+		return request, errors.New("unable to merge request values")
+	}
+	return request, nil
 }
 
 // Execute invokes this FlogoActivity service.
-func (f *FlogoFlow) Execute() (err error) {
-	// Ignore IDs and do everything by ref?
-	var flowAction action.Action
-	flowActionStored, exists := flowActions.Load(f.Request.Reference)
-	if !exists {
-		cfg := &action.Config{}
-		f.Response = FlogoFlowResponse{}
-		rawData, err := json.Marshal(f.Request.Definition["data"])
-		if err != nil {
-			return err
-		}
-		cfg.Data = rawData
-		cfg.Id = f.Request.Reference
-		cfg.Ref = f.Request.Definition["ref"].(string)
-
-		ff := flow.ActionFactory{}
-		flowAction, err = ff.New(cfg)
-		if err != nil {
-			return err
-		}
-		flowActions.Store(f.Request.Reference, flowAction)
-	} else {
-		flowAction = flowActionStored.(action.Action)
+func (f *FlogoFlow) Execute(requestValues map[string]interface{}) (Response, error) {
+	response := FlogoFlowResponse{}
+	request, err := f.createRequest(requestValues)
+	if err != nil {
+		return response, err
 	}
-	f.Response = FlogoFlowResponse{}
 	var attrs []*data.Attribute
 	mAttrs := make(map[string]*data.Attribute)
-	if f.Request.Inputs != nil {
+	if request.Inputs != nil {
 
-		for k, v := range f.Request.Inputs {
+		for k, v := range request.Inputs {
 			attr, dErr := data.NewAttribute(k, data.TypeAny, v)
 			if dErr != nil {
-				f.Response.Error = dErr.Error()
-				return dErr
+				response.Error = dErr.Error()
+				return response, dErr
 			}
 			attrs = append(attrs, attr)
 			mAttrs[k] = attr
 			attr, dErr = data.NewAttribute("_T."+k, data.TypeAny, v)
 			if dErr != nil {
-				f.Response.Error = dErr.Error()
-				return dErr
+				response.Error = dErr.Error()
+				return response, dErr
 			}
 			attrs = append(attrs, attr)
 			mAttrs["_T."+k] = attr
@@ -130,16 +126,15 @@ func (f *FlogoFlow) Execute() (err error) {
 	}
 	ctx := trigger.NewContext(context.Background(), attrs)
 	r := runner.NewDirect()
-	outputData, err := r.Execute(ctx, flowAction, mAttrs)
+	outputData, err := r.Execute(ctx, f.Action, mAttrs)
 	outputs := make(map[string]interface{})
 	for _, v := range outputData {
 		outputs[v.Name()] = v.Value()
 	}
-	f.Response = FlogoFlowResponse{}
-	f.Response.Done = true
+	response.Done = true
 	if err != nil {
-		f.Response.Error = err.Error()
+		response.Error = err.Error()
 	}
-	f.Response.Outputs = outputs
-	return err
+	response.Outputs = outputs
+	return response, err
 }

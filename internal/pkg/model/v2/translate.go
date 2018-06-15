@@ -55,14 +55,14 @@ func Translate(gateway *types.Schema) ([]byte, error) {
 				if err != nil {
 					return nil, err
 				}
-				rawRoutes, err := json.Marshal(dispatch.Routes)
-				if err != nil {
-					return nil, err
-				}
-				rawServices, err := json.Marshal(gateway.Gateway.Services)
-				if err != nil {
-					return nil, err
-				}
+				// rawRoutes, err := json.Marshal(dispatch.Routes)
+				// if err != nil {
+				// 	return nil, err
+				// }
+				// rawServices, err := json.Marshal(gateway.Gateway.Services)
+				// if err != nil {
+				// 	return nil, err
+				// }
 				var output bytes.Buffer
 				actionTemplate.Execute(&output, struct {
 					Name          string
@@ -73,12 +73,12 @@ func Translate(gateway *types.Schema) ([]byte, error) {
 					Services      template.HTML
 					InputMappings template.HTML
 				}{
-					Name:          convertedName,
-					ID:            convertedName,
-					Identifier:    convertedName,
-					Instance:      gateway.Gateway.Name,
-					Routes:        template.HTML(rawRoutes),
-					Services:      template.HTML(rawServices),
+					Name:       convertedName,
+					ID:         convertedName,
+					Identifier: convertedName,
+					Instance:   gateway.Gateway.Name,
+					// Routes:        template.HTML(rawRoutes),
+					// Services:      template.HTML(rawServices),
 					InputMappings: template.HTML(rawMappings),
 				})
 				rawAction := json.RawMessage(output.String())
@@ -143,18 +143,6 @@ var actionTemplate = template.Must(template.New("").Parse(`{
                 "value": "{{ .Instance }}",
                 "required": true,
                 "type": "string"
-              },
-              {
-                "name": "routes",
-                "value": {{ .Routes }},
-                "required": true,
-                "type": "array"
-              },
-              {
-                "name": "services",
-                "value": {{ .Services }},
-                "required": true,
-                "type": "array"
               }
             ],
 						"inputMappings": {{ .InputMappings }}

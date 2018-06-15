@@ -19,8 +19,7 @@ const defaultTimeout = 5
 
 // HTTP is an HTTP service.
 type HTTP struct {
-	Request  HTTPRequest  `json:"request"`
-	Response HTTPResponse `json:"response"`
+	Request HTTPRequest `json:"request"`
 }
 
 // HTTPRequest is an http service request.
@@ -43,44 +42,44 @@ type HTTPResponse struct {
 }
 
 // Execute invokes this HTTP service.
-func (h *HTTP) Execute() (err error) {
-	h.Response = HTTPResponse{}
-	if h.Request.Timeout == 0 {
-		h.Request.Timeout = defaultTimeout
-	}
-	client := &http.Client{Timeout: time.Duration(h.Request.Timeout) * time.Second}
-	body := bytes.NewReader([]byte(h.Request.Body))
-
-	req, err := http.NewRequest(h.Request.Method, h.Request.CompleteURL(), body)
+func (h *HTTP) Execute(requestValues map[string]interface{}) (Response, error) {
+	response := HTTPResponse{}
+	request, err := h.createRequest(requestValues)
 	if err != nil {
-		return err
+		return response, err
 	}
-	AddHeaders(req.Header, h.Request.Headers)
+	client := &http.Client{Timeout: time.Duration(request.Timeout) * time.Second}
+	body := bytes.NewReader([]byte(request.Body))
 
+	req, err := http.NewRequest(request.Method, request.CompleteURL(), body)
+	if err != nil {
+		return response, err
+	}
+	AddHeaders(req.Header, request.Headers)
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return response, err
 	}
-	h.Response.StatusCode = resp.StatusCode
-	h.Response.Headers = DesliceValues(resp.Header)
+	response.StatusCode = resp.StatusCode
+	response.Headers = DesliceValues(resp.Header)
 	bodyReader := resp.Body
 	if resp.ContentLength > 0 && resp.Header.Get("Content-Encoding") == "gzip" {
 		bodyReader, err = gzip.NewReader(bodyReader)
 		if err != nil {
-			return err
+			return response, err
 		}
 	}
 	defer bodyReader.Close()
 	if resp.Header.Get("Content-Type") == "application/json" {
-		err = json.NewDecoder(bodyReader).Decode(&h.Response.Body)
+		err = json.NewDecoder(bodyReader).Decode(&response.Body)
 	} else {
 		respbody, err := ioutil.ReadAll(bodyReader)
 		if err != nil {
-			return err
+			return response, err
 		}
-		h.Response.Body = string(respbody)
+		response.Body = string(respbody)
 	}
-	return err
+	return response, err
 }
 
 // InitializeHTTP initializes an HTTP service with provided settings.
@@ -90,64 +89,72 @@ func InitializeHTTP(settings map[string]interface{}) (httpService *HTTP, err err
 	req.PathParams = make(map[string]interface{})
 	req.Headers = make(map[string]interface{})
 	req.Query = make(map[string]string)
+	req.Timeout = defaultTimeout
 	httpService.Request = req
-	err = httpService.setRequestValues(settings)
+	httpService.Request, err = httpService.createRequest(settings)
 	return httpService, err
 }
 
-// UpdateRequest updates a request on an existing HTTP service instance with new values.
-func (h *HTTP) UpdateRequest(values map[string]interface{}) (err error) {
-	return h.setRequestValues(values)
-}
-
-func (h *HTTP) setRequestValues(settings map[string]interface{}) (err error) {
+func (h *HTTP) createRequest(settings map[string]interface{}) (HTTPRequest, error) {
+	request := HTTPRequest{}
 	for k, v := range settings {
 		switch k {
 		case "url":
 			url, ok := v.(string)
 			if !ok {
-				return errors.New("invalid type for url")
+				return request, errors.New("invalid type for url")
 			}
-			h.Request.URL = url
+			request.URL = url
 		case "method":
 			method, ok := v.(string)
 			if !ok {
-				return errors.New("invalid type for method")
+				return request, errors.New("invalid type for method")
 			}
-			h.Request.Method = method
+			request.Method = method
 		case "path":
 			path, ok := v.(string)
 			if !ok {
-				return errors.New("invalid type for path")
+				return request, errors.New("invalid type for path")
 			}
-			h.Request.Path = path
+			request.Path = path
 		case "headers":
 			headers, ok := v.(map[string]interface{})
 			if !ok {
-				return errors.New("invalid type for headers")
+				return request, errors.New("invalid type for headers")
 			}
-			if err := mergo.Merge(&h.Request.Headers, headers, mergo.WithOverride); err != nil {
-				return errors.New("unable to merge header values")
+			request.Headers = headers
+			if err := mergo.Merge(&request.Headers, h.Request.Headers); err != nil {
+				return request, errors.New("unable to merge header values")
 			}
 		case "query":
 			query, ok := v.(map[string]string)
 			if !ok {
-				return errors.New("invalid type for query")
+				return request, errors.New("invalid type for query")
 			}
-			h.Request.Query = query
+			request.Query = query
 		case "pathParams":
 			pathParams, ok := v.(map[string]interface{})
 			if !ok {
-				return errors.New("invalid type for pathParams")
+				return request, errors.New("invalid type for pathParams")
 			}
-			if err := mergo.Merge(&h.Request.PathParams, pathParams, mergo.WithOverride); err != nil {
-				return errors.New("unable to merge pathParams values")
+			request.PathParams = pathParams
+			if err := mergo.Merge(&request.PathParams, h.Request.PathParams); err != nil {
+				return request, errors.New("unable to merge pathParams values")
 			}
+		case "timeout":
+			timeout, ok := v.(int)
+			if !ok {
+				return request, errors.New("invalid type for timeout")
+			}
+			request.Timeout = timeout
 		default:
 			// ignore and move on.
 		}
 	}
-	return nil
+	if err := mergo.Merge(&request, h.Request); err != nil {
+		return request, errors.New("unable to merge request values")
+	}
+	return request, nil
 }
 
 // AddHeaders adds the headers in headers to headers.
