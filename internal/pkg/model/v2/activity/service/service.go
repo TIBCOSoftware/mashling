@@ -24,6 +24,8 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeFlogoActivity(serviceDef.Settings)
 	case "flogoFlow":
 		return InitializeFlogoFlow(serviceDef.Settings)
+	case "jwt":
+		return InitializeJWT(serviceDef.Settings)
 	default:
 		return nil, errors.New("unknown service type")
 	}

@@ -1,0 +1,70 @@
+{
+  "mashling_schema": "1.0",
+  "gateway": {
+    "name": "MyJWTValidator",
+    "version": "1.0.0",
+    "description": "This is a JWT validator.",
+    "triggers": [
+      {
+        "name": "JWTValidator",
+        "description": "Accepts JWT tokens and returns the validation results",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "port": "9096"
+        },
+        "handlers": [
+          {
+            "dispatch": "JWT",
+            "settings": {
+              "autoIdReply": "false",
+              "method": "GET",
+              "path": "/jwt",
+              "useReplyHandler": "false"
+            }
+          }
+        ]
+      }
+    ],
+    "dispatches": [
+      {
+        "name": "JWT",
+        "routes": [
+          {
+            "steps": [
+              {
+                "service": "JWTValidator",
+                "input": {
+                  "token": "${payload.header.Authorization}"
+                }
+              }
+            ],
+            "responses": [
+              {
+                "error": false,
+                "output": {
+                  "code": 200,
+                  "data": {
+                    "details": "${JWTValidator.response}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "name": "JWTValidator",
+        "description": "Validate some tokens",
+        "type": "jwt",
+        "settings": {
+          "signingMethod": "HMAC",
+          "key": "qwertyuiopasdfghjklzxcvbnm123456",
+          "audience": "www.mashling.io",
+          "issuer": "Mashling"
+        }
+      }
+    ]
+  }
+}
