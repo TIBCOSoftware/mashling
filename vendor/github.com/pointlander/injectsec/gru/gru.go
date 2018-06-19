@@ -202,6 +202,7 @@ func NewDetectorMaker() *DetectorMaker {
 // Detector detects SQL injection attacks
 type Detector struct {
 	*RNN
+	SkipRegex bool
 }
 
 // Make makes a new detector
@@ -218,26 +219,28 @@ func (d *DetectorMaker) Make() *Detector {
 
 // Detect returns true if the input is a SQL injection attack
 func (d *Detector) Detect(a string) (float32, error) {
-	isNumber := true
-	for _, v := range a {
-		if !unicode.IsDigit(v) {
-			isNumber = false
-			break
+	if !d.SkipRegex {
+		isNumber := true
+		for _, v := range a {
+			if !unicode.IsDigit(v) {
+				isNumber = false
+				break
+			}
 		}
-	}
-	if isNumber {
-		return 0, nil
-	}
+		if isNumber {
+			return 0, nil
+		}
 
-	isWord := true
-	for _, v := range a {
-		if !unicode.IsLetter(v) {
-			isWord = false
-			break
+		isWord := true
+		for _, v := range a {
+			if !unicode.IsLetter(v) {
+				isWord = false
+				break
+			}
 		}
-	}
-	if isWord {
-		return 0, nil
+		if isWord {
+			return 0, nil
+		}
 	}
 
 	data := convert([]byte(strings.ToLower(a)))

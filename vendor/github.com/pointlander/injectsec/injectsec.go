@@ -6,6 +6,7 @@ package injectsec
 
 import (
 	"bytes"
+	"io"
 
 	"github.com/pointlander/injectsec/gru"
 )
@@ -15,18 +16,24 @@ type DetectorMaker struct {
 	*gru.DetectorMaker
 }
 
-// NewDetectorMaker creates a new detector maker
-func NewDetectorMaker() *DetectorMaker {
+// NewDetectorMakerWithWeights creates a new detector maker using weights
+func NewDetectorMakerWithWeights(weights io.Reader) (*DetectorMaker, error) {
 	maker := gru.NewDetectorMaker()
-	weights, err := ReadFile("weights.w")
+	err := maker.Read(weights)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	err = maker.Read(bytes.NewBuffer(weights))
-	if err != nil {
-		panic(err)
-	}
+
 	return &DetectorMaker{
 		DetectorMaker: maker,
+	}, nil
+}
+
+// NewDetectorMaker creates a new detector maker
+func NewDetectorMaker() (*DetectorMaker, error) {
+	weights, err := ReadFile("weights.w")
+	if err != nil {
+		return nil, err
 	}
+	return NewDetectorMakerWithWeights(bytes.NewBuffer(weights))
 }
