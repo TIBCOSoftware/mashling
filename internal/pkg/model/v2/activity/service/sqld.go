@@ -124,8 +124,10 @@ func (s *SQLD) Execute() (err error) {
 				err = testMap(b, values)
 				s.AttackValues[key] = values
 			case map[string]string:
+				values := make(map[string]interface{})
 				for _, v := range b {
 					probability, err := detector.Detect(v)
+					values[v] = float64(probability)
 					if probability > s.Attack {
 						s.Attack = probability
 					}
@@ -133,6 +135,7 @@ func (s *SQLD) Execute() (err error) {
 						return err
 					}
 				}
+				s.AttackValues[key] = values
 			}
 		}
 
