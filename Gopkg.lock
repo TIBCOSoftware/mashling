@@ -427,9 +427,10 @@
   name = "github.com/pointlander/injectsec"
   packages = [
     ".",
+    "data",
     "gru"
   ]
-  revision = "a264869e4b77b594821715d7ed6011955fee7898"
+  revision = "82571f700201ad9c38e9f19133f496e6f84b6e51"
 
 [[projects]]
   branch = "master"
@@ -480,10 +481,10 @@
   revision = "8bcffc811467a5f691810420385be6e66b35a317"
 
 [[projects]]
+  branch = "master"
   name = "github.com/xtgo/set"
   packages = ["."]
   revision = "708d80f4a27458f99f8ca12bd0e638c6ee65627f"
-  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -664,6 +665,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ebbb35a21de28ff60206d38ad948f926a089717051fc1375a63567d55f064d22"
+  inputs-digest = "bcea0677a94fca7611d5b1ff2c6cfccf640426bfab87e917df46a4e5a8f99c70"
   solver-name = "gps-cdcl"
   solver-version = 1

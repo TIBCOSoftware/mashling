@@ -3,10 +3,11 @@ package gru
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
 	"sort"
 	"strings"
-	"unicode"
 
+	"github.com/pointlander/injectsec/data"
 	G "gorgonia.org/gorgonia"
 )
 
@@ -79,6 +80,30 @@ func init() {
 		}
 		return false
 	})
+}
+
+var filter, notFilter *regexp.Regexp
+
+func init() {
+	rnd := rand.New(rand.NewSource(1))
+	generators, expression, sep := data.TrainingDataGenerator(rnd), "", "("
+	for _, generator := range generators {
+		if generator.SkipMatch {
+			continue
+		}
+		if generator.Regex != nil {
+			parts := data.NewParts()
+			generator.Regex(parts)
+			exp, err := parts.RegexFragment()
+			if err != nil {
+				panic(err)
+			}
+			expression += sep + exp + ")"
+			sep = "|("
+		}
+	}
+	filter = regexp.MustCompile("^(" + expression + ")$")
+	notFilter = regexp.MustCompile("^(([\\p{L}]+)|([\\p{N}]+))$")
 }
 
 // GRU is a GRU based anomaly detection engine
@@ -219,27 +244,17 @@ func (d *DetectorMaker) Make() *Detector {
 
 // Detect returns true if the input is a SQL injection attack
 func (d *Detector) Detect(a string) (float32, error) {
+	if a == "" {
+		return 0, nil
+	}
+
 	if !d.SkipRegex {
-		isNumber := true
-		for _, v := range a {
-			if !unicode.IsDigit(v) {
-				isNumber = false
-				break
-			}
-		}
-		if isNumber {
+		if notFilter.MatchString(a) {
 			return 0, nil
 		}
 
-		isWord := true
-		for _, v := range a {
-			if !unicode.IsLetter(v) {
-				isWord = false
-				break
-			}
-		}
-		if isWord {
-			return 0, nil
+		if filter.MatchString(a) {
+			return 100.0, nil
 		}
 	}
 
