@@ -23,6 +23,8 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeFlogoActivity(serviceDef.Settings)
 	case "flogoFlow":
 		return InitializeFlogoFlow(serviceDef.Settings)
+	case "sqld":
+		return InitializeSQLD(serviceDef.Settings)
 	default:
 		return nil, errors.New("unknown service type")
 	}

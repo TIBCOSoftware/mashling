@@ -1,0 +1,10 @@
+" or 1=1 ", attack
+"computer", not_attack
+"/**/or/**/1=1", attack
+"game", not_attack
+"abc123", not_attack
+"123abc", not_attack
+" or 1337=1337 ", attack
+"dog", not_attack
+"cat", not_attack
+" or 'hello'='hello' ", attack
