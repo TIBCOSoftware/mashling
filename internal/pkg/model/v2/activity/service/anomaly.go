@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"math/bits"
 	"sync"
@@ -75,9 +76,9 @@ type Context16 struct {
 }
 
 // NewContext creates a new context
-func NewContext16() *Context16 {
+func NewContext16(depth int) *Context16 {
 	return &Context16{
-		Context: make([]uint16, CDF16Depth),
+		Context: make([]uint16, depth),
 	}
 }
 
@@ -155,22 +156,24 @@ func (c *CDF16) Update(s uint16, ctxt *Context16) {
 // Complexity is an entorpy based anomaly detector
 type Complexity struct {
 	*CDF16
+	depth          int
 	count          int
 	mean, dSquared float32
 	sync.RWMutex
 }
 
 // NewComplexity creates a new entorpy based model
-func NewComplexity() *Complexity {
+func NewComplexity(depth int) *Complexity {
 	return &Complexity{
 		CDF16: NewCDF16(),
+		depth: depth,
 	}
 }
 
 // Complexity outputs the complexity
 func (c *Complexity) Complexity(input []byte) float32 {
 	var total uint64
-	ctxt := NewContext16()
+	ctxt := NewContext16(c.depth)
 	c.RLock()
 	for _, s := range input {
 		model := c.Model(ctxt)
@@ -208,18 +211,14 @@ func (c *Complexity) Complexity(input []byte) float32 {
 	return normalized
 }
 
-var complexity = NewComplexity()
-
 // Contexts is a set of anomaly contexts
 type Contexts struct {
 	contexts map[string]*Complexity
 	sync.RWMutex
 }
 
-func (c *Contexts) Lookup(context string) *Complexity {
-	if context == "" {
-		return complexity
-	}
+func (c *Contexts) Lookup(context string, depth int) *Complexity {
+	context = fmt.Sprintf("%s.%d", context, depth)
 
 	c.RLock()
 	complexity := c.contexts[context]
@@ -227,7 +226,7 @@ func (c *Contexts) Lookup(context string) *Complexity {
 	if complexity != nil {
 		return complexity
 	}
-	complexity = NewComplexity()
+	complexity = NewComplexity(depth)
 	c.Lock()
 	c.contexts[context] = complexity
 	c.Unlock()
@@ -242,20 +241,23 @@ var contexts = Contexts{
 type Anomaly struct {
 	values     map[string]interface{}
 	context    string
+	depth      int
 	Complexity float32 `json:"complexity"`
 	Count      int     `json:"count"`
 }
 
 // InitializeAnomaly creates an anomaly detection service
 func InitializeAnomaly(settings map[string]interface{}) (service *Anomaly, err error) {
-	service = &Anomaly{}
+	service = &Anomaly{
+		depth: CDF16Depth,
+	}
 	err = service.UpdateRequest(settings)
 	return
 }
 
 // Execute executes the anomaly service
 func (a *Anomaly) Execute() (err error) {
-	complexity := contexts.Lookup(a.context)
+	complexity := contexts.Lookup(a.context, a.depth)
 
 	data, err := json.Marshal(a.values)
 	if err != nil {
@@ -268,9 +270,12 @@ func (a *Anomaly) Execute() (err error) {
 
 // UpdateRequest updates the SQLD service
 func (a *Anomaly) UpdateRequest(values map[string]interface{}) (err error) {
-	context := values["context"]
-	if context != nil {
+	if context := values["context"]; context != nil {
 		a.context = context.(string)
+	}
+
+	if depth := values["depth"]; depth != nil {
+		a.depth = int(depth.(float64))
 	}
 
 	payload := values["payload"]
