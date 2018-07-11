@@ -188,27 +188,62 @@ func (c *Complexity) Complexity(input []byte) float32 {
 	complexity := float32(CDF16Fixed+1) - (float32(total) / float32(len(input)))
 	// https://dev.to/nestedsoftware/calculating-standard-deviation-on-streaming-data-253l
 	c.count++
-	meanDifferential := (complexity - c.mean) / float32(c.count)
-	newMean := c.mean + meanDifferential
-	dSquaredIncrement := (complexity - newMean) * (complexity - c.mean)
+	mean, count := c.mean, float32(c.count)
+	meanDifferential := (complexity - mean) / count
+	newMean := mean + meanDifferential
+	dSquaredIncrement := (complexity - newMean) * (complexity - mean)
 	newDSquared := c.dSquared + dSquaredIncrement
 	c.mean, c.dSquared = newMean, newDSquared
 	c.Unlock()
 
-	stddev := float32(math.Sqrt(float64(newDSquared / float32(c.count))))
+	stddev := float32(math.Sqrt(float64(newDSquared / count)))
 	normalized := (complexity - newMean) / stddev
 	if normalized < 0 {
 		normalized = -normalized
 	}
+	if math.IsNaN(float64(normalized)) {
+		normalized = 0
+	}
+
 	return normalized
 }
 
 var complexity = NewComplexity()
 
+// Contexts is a set of anomaly contexts
+type Contexts struct {
+	contexts map[string]*Complexity
+	sync.RWMutex
+}
+
+func (c *Contexts) Lookup(context string) *Complexity {
+	if context == "" {
+		return complexity
+	}
+
+	c.RLock()
+	complexity := c.contexts[context]
+	c.RUnlock()
+	if complexity != nil {
+		return complexity
+	}
+	complexity = NewComplexity()
+	c.Lock()
+	c.contexts[context] = complexity
+	c.Unlock()
+	return complexity
+}
+
+var contexts = Contexts{
+	contexts: make(map[string]*Complexity),
+}
+
 // Anomaly is an anomaly detector
 type Anomaly struct {
 	values     map[string]interface{}
+	context    string
 	Complexity float32 `json:"complexity"`
+	Count      int     `json:"count"`
 }
 
 // InitializeAnomaly creates an anomaly detection service
@@ -220,16 +255,24 @@ func InitializeAnomaly(settings map[string]interface{}) (service *Anomaly, err e
 
 // Execute executes the anomaly service
 func (a *Anomaly) Execute() (err error) {
+	complexity := contexts.Lookup(a.context)
+
 	data, err := json.Marshal(a.values)
 	if err != nil {
 		return
 	}
 	a.Complexity = complexity.Complexity(data)
+	a.Count = complexity.count
 	return
 }
 
 // UpdateRequest updates the SQLD service
 func (a *Anomaly) UpdateRequest(values map[string]interface{}) (err error) {
+	context := values["context"]
+	if context != nil {
+		a.context = context.(string)
+	}
+
 	payload := values["payload"]
 	if payload == nil {
 		return
