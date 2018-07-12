@@ -75,7 +75,7 @@ func generateRandomJSON(rnd *rand.Rand) map[string]interface{} {
 
 func TestComplexity(t *testing.T) {
 	rnd := rand.New(rand.NewSource(1))
-	complexity := NewComplexity()
+	complexity := NewComplexity(2)
 	for i := 0; i < 1024; i++ {
 		data, err := json.Marshal(generateRandomJSON(rnd))
 		if err != nil {
