@@ -12,7 +12,7 @@ import (
 var limiterInstance *limiter.Limiter
 
 // RateLimiter is a rate limiter service
-// Limit can specified in the format "<limit>-<period>"
+// Limit can be specified in the format "<limit>-<period>"
 //
 // Valid periods:
 // * "S": second
