@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/ulule/limiter/drivers/store/memory"
 
@@ -36,12 +35,11 @@ type RateLimiter struct {
 
 // Execute invokes this service
 func (rl *RateLimiter) Execute() (err error) {
-	fmt.Printf("Applying RateLimiter with %s for the request with token = %s\n", rl.Limit, rl.Token)
 
+	//check for request token
 	if rl.Token == "" {
-		fmt.Println("token not found")
-		rl.QuotaExceeded = true
-		return nil
+		//TODO: Need to handle 'token not found' case elegantly. Time being set to dummy value.
+		rl.Token = "DUMMYTOKEN"
 	}
 
 	//consume quota
@@ -50,7 +48,7 @@ func (rl *RateLimiter) Execute() (err error) {
 		return nil
 	}
 
-	//check whether rate has exceeded
+	//check the ratelimit
 	rl.AvailableQuota = limiterContext.Remaining
 	if limiterContext.Reached {
 		rl.QuotaExceeded = true
@@ -63,20 +61,17 @@ func (rl *RateLimiter) Execute() (err error) {
 
 // UpdateRequest updates a request on an existing RateLimiter service instance with new values.
 func (rl *RateLimiter) UpdateRequest(values map[string]interface{}) (err error) {
-	fmt.Println("RateLimiter -> UpdateRequest()")
 	err = rl.setRequestValues(values)
 	return err
 }
 
 // InitializeRateLimiter initializes a RateLimiter services with provided settings.
 func InitializeRateLimiter(settings map[string]interface{}) (rl *RateLimiter, err error) {
-	fmt.Println("RateLimiter -> InitializeRateLimiter()")
 	rl = &RateLimiter{}
 	err = rl.setRequestValues(settings)
 
 	//create limiter instance once
 	if limiterInstance == nil {
-		fmt.Println("creating limiterInstance")
 		//create rate
 		rate, err := limiter.NewRateFromFormatted(rl.Limit)
 		if err != nil {
@@ -96,7 +91,6 @@ func InitializeRateLimiter(settings map[string]interface{}) (rl *RateLimiter, er
 
 func (rl *RateLimiter) setRequestValues(settings map[string]interface{}) (err error) {
 	for k, v := range settings {
-		fmt.Printf("k=%s, v=%T %v \n", k, v, v)
 		switch k {
 		case "limit":
 			limit, ok := v.(string)
