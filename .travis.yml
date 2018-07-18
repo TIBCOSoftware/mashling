@@ -24,7 +24,9 @@ before_install:
   - "echo -e \"machine github.com\n  login ${GITHUB_USER_TOKEN}\" >> ~/.netrc"
 install:
   - go get -u github.com/ains/go-test-html
-  - go get github.com/spf13/hugo
+  - cd $GOPATH/bin
+  - wget https://github.com/gohugoio/hugo/releases/download/v0.44/hugo_0.44_Linux-64bit.tar.gz
+  - tar -zxvf hugo_0.44_Linux-64bit.tar.gz
 
 script:
   - cd $GOPATH/src/github.com/TIBCOSoftware
