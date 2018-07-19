@@ -13,6 +13,8 @@
     * [JS](#services-js)
     * [Flogo Activity](#services-flogo-activity)
     * [Flogo Flow](#services-flogo-flow)
+    * [Anomaly](#services-anomaly)
+    * [SQL Detector](#services-sqld)
   * [Responses](#responses)
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
@@ -173,7 +175,7 @@ As you can see above, a step consists of a simple condition, a service reference
 
 ### <a name="services"></a>Services
 
-A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, `flogoActivity`, and `flogoFlow`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
+A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, `flogoActivity`, `flogoFlow`, `anomaly`, and `sqld`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
 
 #### <a name="services-http"></a>HTTP
 
@@ -423,6 +425,118 @@ Utilizing the response values can be seen in a response handler:
     "code": 200,
     "format": "json",
     "body": "${FlogoRestGetFlow.response.outputs.data}"
+  }
+}
+```
+
+#### <a name="services-anomaly"></a>Anomaly
+
+The `anomaly` service type implements anomaly detection for payloads. The anomaly detection algorithm is based on a [statistical model](https://fgiesen.wordpress.com/2015/05/26/models-for-adaptive-arithmetic-coding/) for compression. The anomaly detection algorithm computes the relative [complexity](https://en.wikipedia.org/wiki/Kolmogorov_complexity), K(payload | previous payloads), of a payload and then updates the statistical model. A running mean and standard deviation of the complexity is then computed using [this](https://dev.to/nestedsoftware/calculating-standard-deviation-on-streaming-data-253l) algorithm. If the complexity of a payload is some number of deviations from the mean then it is an anomaly. An anomaly is a payload that is statistically significant relative to previous payloads. The anomaly detection algorithm uses real time learning, so what is considered an anomaly can change over time.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| payload | JSON object | A payload to do anomaly detection on |
+| context | string | Allows a different statistical model to be used for payloads with different sources |
+| depth | number |  The size of the statistical model. Defaults to 2 |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| complexity | number | How unusual the payload is in terms of standard deviations from the mean |
+| count | number | The number of payloads that have been processed |
+
+A sample `service` definition is:
+
+```json
+{
+  "name": "Anomaly",
+  "description": "Look for anomalies",
+  "type": "anomaly",
+  "settings": {
+    "context": "test",
+    "depth": 3
+  }
+}
+```
+
+An example `step` that invokes the above `Anomaly` service using `payload` is:
+
+```json
+{
+  "service": "Anomaly",
+  "input": {
+    "payload": "${payload}"
+  }
+}
+```
+
+Utilizing the response values can be seen in a response handler:
+
+```json
+{
+  "if": "(Anomaly.count < 100) || (Anomaly.complexity < 3)",
+  "error": false,
+  "output": {
+    "code": 200,
+    "data": "${Update.response.body}"
+  }
+}
+```
+
+#### <a name="services-sqld"></a>SQL Detector
+
+The `sqld` service type implements SQL injection attack detection. Regular expressions and a [GRU](https://en.wikipedia.org/wiki/Gated_recurrent_unit) recurrent neural network are used to detect SQL injection attacks.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| payload | JSON object | A payload to do SQL injection attack detection on |
+| file | string | An optional file name for custom neural network weights |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| attack | number | The probability that the payload is a SQL injection attack |
+| attackValues | JSON object | The SQL injection attack probability for each string in the payload |
+
+A sample `service` definition is:
+
+```json
+{
+  "name": "SQLSecurity",
+  "description": "Look for sql injection attacks",
+  "type": "sqld"
+}
+```
+
+An example `step` that invokes the above `SQLSecurity` service using `payload` is:
+
+```json
+{
+  "service": "SQLSecurity",
+  "input": {
+    "payload": "${payload}"
+  }
+}
+```
+
+Utilizing the response values can be seen in a response handler:
+
+```json
+{
+  "if": "SQLSecurity.attack > 80",
+  "error": true,
+  "output": {
+    "code": 403,
+    "data": {
+      "error": "hack attack!",
+      "attackValues": "${SQLSecurity.attackValues}"
+    }
   }
 }
 ```
