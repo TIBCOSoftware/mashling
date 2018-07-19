@@ -75,7 +75,7 @@ type Context16 struct {
 	First   int
 }
 
-// NewContext creates a new context
+// NewContext16 creates a new context
 func NewContext16(depth int) *Context16 {
 	return &Context16{
 		Context: make([]uint16, depth),
@@ -171,7 +171,7 @@ func NewComplexity(depth int) *Complexity {
 }
 
 // Complexity outputs the complexity
-func (c *Complexity) Complexity(input []byte) float32 {
+func (c *Complexity) Complexity(input []byte) (float32, int) {
 	var total uint64
 	ctxt := NewContext16(c.depth)
 	c.RLock()
@@ -191,15 +191,16 @@ func (c *Complexity) Complexity(input []byte) float32 {
 	complexity := float32(CDF16Fixed+1) - (float32(total) / float32(len(input)))
 	// https://dev.to/nestedsoftware/calculating-standard-deviation-on-streaming-data-253l
 	c.count++
-	mean, count := c.mean, float32(c.count)
-	meanDifferential := (complexity - mean) / count
+	count := c.count
+	mean, n := c.mean, float32(count)
+	meanDifferential := (complexity - mean) / n
 	newMean := mean + meanDifferential
 	dSquaredIncrement := (complexity - newMean) * (complexity - mean)
 	newDSquared := c.dSquared + dSquaredIncrement
 	c.mean, c.dSquared = newMean, newDSquared
 	c.Unlock()
 
-	stddev := float32(math.Sqrt(float64(newDSquared / count)))
+	stddev := float32(math.Sqrt(float64(newDSquared / n)))
 	normalized := (complexity - newMean) / stddev
 	if normalized < 0 {
 		normalized = -normalized
@@ -208,7 +209,7 @@ func (c *Complexity) Complexity(input []byte) float32 {
 		normalized = 0
 	}
 
-	return normalized
+	return normalized, count
 }
 
 // Contexts is a set of anomaly contexts
@@ -217,6 +218,7 @@ type Contexts struct {
 	sync.RWMutex
 }
 
+// Lookup looks up a complexity model
 func (c *Contexts) Lookup(context string, depth int) *Complexity {
 	context = fmt.Sprintf("%s.%d", context, depth)
 
@@ -263,8 +265,7 @@ func (a *Anomaly) Execute() (err error) {
 	if err != nil {
 		return
 	}
-	a.Complexity = complexity.Complexity(data)
-	a.Count = complexity.count
+	a.Complexity, a.Count = complexity.Complexity(data)
 	return
 }
 

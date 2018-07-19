@@ -83,8 +83,8 @@ func TestComplexity(t *testing.T) {
 		}
 		complexity.Complexity(data)
 	}
-	a := complexity.Complexity([]byte(complexityTests[0]))
-	b := complexity.Complexity([]byte(complexityTests[1]))
+	a, _ := complexity.Complexity([]byte(complexityTests[0]))
+	b, _ := complexity.Complexity([]byte(complexityTests[1]))
 	if a < b {
 		t.Fatal("complexity sanity check failed", a, b)
 	}
