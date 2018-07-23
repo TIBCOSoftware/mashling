@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -48,6 +49,7 @@ type HTTPRequest struct {
 
 // HTTPResponse is an http service response.
 type HTTPResponse struct {
+	NetError   string                 `json:"netError"`
 	StatusCode int                    `json:"statusCode"`
 	Body       interface{}            `json:"body"`
 	Headers    map[string]interface{} `json:"headers"`
@@ -70,6 +72,10 @@ func (h *HTTP) Execute() (err error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		if netError, ok := err.(net.Error); ok {
+			h.Response.NetError = netError.Error()
+			return nil
+		}
 		return err
 	}
 	h.Response.StatusCode = resp.StatusCode
@@ -86,7 +92,6 @@ func (h *HTTP) Execute() (err error) {
 	if err != nil {
 		return err
 	}
-
 	contentType := resp.Header.Get("Content-Type")
 	err = util.Unmarshal(contentType, respbody, &h.Response.Body)
 	if err != nil {
