@@ -119,6 +119,10 @@
     {
       "name": "tracing",
       "type": "any"
+    },
+    {
+      "name": "wsconnection",
+      "type": "any"
     }
   ],
   "handler": {

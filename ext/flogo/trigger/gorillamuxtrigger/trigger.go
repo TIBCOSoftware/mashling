@@ -27,6 +27,7 @@ import (
 
 	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	lightstep "github.com/lightstep/lightstep-tracer-go"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -526,6 +527,23 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			log.Debugf("dispatch not resolved. Continue with default action - %v", actionId)
 		}
 
+		//upgrade to websocket protocol if wsUpgradeRequired is defined to "true" in handler settings
+		wsUpgradeRequiredSetting, ok := handlerCfg.Settings["wsUpgradeRequired"]
+		wsUpgradeRequired := false
+		if ok && wsUpgradeRequiredSetting == "true" {
+			wsUpgradeRequired = true
+		}
+		if wsUpgradeRequired {
+			var upgrader = websocket.Upgrader{}
+			conn, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				fmt.Println("Upgrade error", err)
+			}
+			log.Debug("connection upgraded to websocket protocol")
+			//add connection object into context data
+			data["wsconnection"] = conn
+		}
+
 		//todo handle error
 		startAttrs, _ := rt.metadata.OutputsToAttrs(data, false)
 
@@ -537,58 +555,67 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		var replyCode int
 		var replyData interface{}
 
-		allowed := true
-		if isAuthEnabled(rt.config.Settings) {
-			log.Debugf("Authenticating the request.")
-			if !authenticate(r, rt.config.Settings) {
-				replyCode = http.StatusForbidden
-				allowed = false
+		if wsUpgradeRequired {
+			_, _, err = rt.runner.Run(context, action, actionId, nil)
+			if err != nil {
+				serverSpan.SetTag("error", err.Error())
+				log.Debugf("REST Trigger Error: %s", err.Error())
+				return
 			}
-		}
-
-		if allowed {
-			replyCode, replyData, err = rt.runner.Run(context, action, actionId, nil)
-		}
-
-		if err != nil {
-			serverSpan.SetTag("error", err.Error())
-			log.Debugf("REST Trigger Error: %s", err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if replyData != nil {
-			if object, ok := replyData.(map[string]interface{}); ok {
-				if mime, ok := object[util.MetaMIME]; ok {
-					if s, ok := mime.(string); ok {
-						w.Header().Set("Content-Type", s)
-					}
-				} else {
-					w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-				}
-				w.WriteHeader(replyCode)
-
-				data, err := util.Marshal(replyData)
-				if err != nil {
-					serverSpan.SetTag("error", err.Error())
-					http.Error(w, err.Error(), http.StatusBadRequest)
-					return
-				}
-				_, err = io.Copy(w, bytes.NewReader(data))
-				if err != nil {
-					serverSpan.SetTag("error", err.Error())
-					http.Error(w, err.Error(), http.StatusBadRequest)
-					return
-				}
-			}
-			return
-		}
-
-		if replyCode > 0 {
-			serverSpan.SetTag("http.status_code", replyCode)
-			w.WriteHeader(replyCode)
 		} else {
-			w.WriteHeader(http.StatusOK)
+			allowed := true
+			if isAuthEnabled(rt.config.Settings) {
+				log.Debugf("Authenticating the request.")
+				if !authenticate(r, rt.config.Settings) {
+					replyCode = http.StatusForbidden
+					allowed = false
+				}
+			}
+
+			if allowed {
+				replyCode, replyData, err = rt.runner.Run(context, action, actionId, nil)
+			}
+
+			if err != nil {
+				serverSpan.SetTag("error", err.Error())
+				log.Debugf("REST Trigger Error: %s", err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			if replyData != nil {
+				if object, ok := replyData.(map[string]interface{}); ok {
+					if mime, ok := object[util.MetaMIME]; ok {
+						if s, ok := mime.(string); ok {
+							w.Header().Set("Content-Type", s)
+						}
+					} else {
+						w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+					}
+					w.WriteHeader(replyCode)
+
+					data, err := util.Marshal(replyData)
+					if err != nil {
+						serverSpan.SetTag("error", err.Error())
+						http.Error(w, err.Error(), http.StatusBadRequest)
+						return
+					}
+					_, err = io.Copy(w, bytes.NewReader(data))
+					if err != nil {
+						serverSpan.SetTag("error", err.Error())
+						http.Error(w, err.Error(), http.StatusBadRequest)
+						return
+					}
+				}
+				return
+			}
+
+			if replyCode > 0 {
+				serverSpan.SetTag("http.status_code", replyCode)
+				w.WriteHeader(replyCode)
+			} else {
+				w.WriteHeader(http.StatusOK)
+			}
 		}
 	}
 }
