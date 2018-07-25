@@ -63,13 +63,11 @@ func (c *CircuitBreaker) Execute() (err error) {
 		circuitBreakerContexts.contexts[c.context] = context
 		circuitBreakerContexts.Unlock()
 	default:
-		circuitBreakerContexts.Lock()
+		circuitBreakerContexts.RLock()
 		context := circuitBreakerContexts.contexts[c.context]
+		circuitBreakerContexts.RUnlock()
 		if context.timeout.Sub(time.Now()) > 0 {
 			c.Tripped = true
-		}
-		circuitBreakerContexts.Unlock()
-		if c.Tripped {
 			return errors.New("circuit breaker tripped")
 		}
 	}
@@ -78,14 +76,33 @@ func (c *CircuitBreaker) Execute() (err error) {
 
 // UpdateRequest updates the circuit breaker service
 func (c *CircuitBreaker) UpdateRequest(values map[string]interface{}) (err error) {
-	if operation := values["operation"]; operation != nil {
-		c.operation = operation.(string)
-	}
-	if context := values["context"]; context != nil {
-		c.context = context.(string)
-	}
-	if threshold := values["threshold"]; threshold != nil {
-		c.threshold = int(threshold.(float64))
+	for k, v := range values {
+		switch k {
+		case "operation":
+			operation, ok := v.(string)
+			if !ok {
+				return errors.New("operation is not a string")
+			}
+			c.operation = operation
+		case "context":
+			context, ok := v.(string)
+			if !ok {
+				return errors.New("context is not a string")
+			}
+			c.context = context
+		case "threshold":
+			threshold, ok := v.(float64)
+			if !ok {
+				return errors.New("threshold is not a number")
+			}
+			c.threshold = int(threshold)
+		case "timeout":
+			timeout, ok := v.(float64)
+			if !ok {
+				return errors.New("timeout is not a number")
+			}
+			c.timeout = int(timeout)
+		}
 	}
 	return nil
 }

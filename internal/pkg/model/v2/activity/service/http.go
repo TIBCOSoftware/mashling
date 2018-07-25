@@ -31,6 +31,7 @@ const (
 
 // HTTP is an HTTP service.
 type HTTP struct {
+	netError bool
 	Request  HTTPRequest  `json:"request"`
 	Response HTTPResponse `json:"response"`
 }
@@ -72,9 +73,11 @@ func (h *HTTP) Execute() (err error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		if netError, ok := err.(net.Error); ok {
-			h.Response.NetError = netError.Error()
-			return nil
+		if h.netError {
+			if netError, ok := err.(net.Error); ok {
+				h.Response.NetError = netError.Error()
+				return nil
+			}
 		}
 		return err
 	}
@@ -164,6 +167,12 @@ func (h *HTTP) setRequestValues(settings map[string]interface{}) (err error) {
 			}
 		case "body":
 			body = v
+		case "netError":
+			netError, ok := v.(bool)
+			if !ok {
+				return errors.New("invalid type for netError")
+			}
+			h.netError = netError
 		default:
 			// ignore and move on.
 		}
