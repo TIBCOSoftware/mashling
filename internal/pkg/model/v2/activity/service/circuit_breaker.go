@@ -181,13 +181,13 @@ func (c *CircuitBreaker) UpdateRequest(values map[string]interface{}) (err error
 			if !ok {
 				return errors.New("timeout is not a number")
 			}
-			c.timeout = time.Duration(int(timeout)) * time.Second
+			c.timeout = time.Duration(timeout) * time.Second
 		case "period":
 			period, ok := v.(float64)
 			if !ok {
 				return errors.New("period is not a number")
 			}
-			c.period = time.Duration(int(period)) * time.Second
+			c.period = time.Duration(period) * time.Second
 		}
 	}
 	return nil
