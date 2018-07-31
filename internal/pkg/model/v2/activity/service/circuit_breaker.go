@@ -43,6 +43,7 @@ type CircuitBreakerContext struct {
 	timeout   time.Time
 	index     int
 	buffer    []time.Time
+	tripped   bool
 	sync.RWMutex
 }
 
@@ -50,6 +51,7 @@ type CircuitBreakerContext struct {
 func (c *CircuitBreakerContext) Trip(now time.Time, timeout time.Duration) {
 	c.timeout = now.Add(timeout)
 	c.counter = 0
+	c.tripped = true
 }
 
 // CircuitBreakerContexts holds a bunch of circuit breaker contexts
@@ -92,16 +94,23 @@ func (c *CircuitBreaker) Execute() (err error) {
 		return errors.New("invalid threshold")
 	}
 
-	context := circuitBreakerContexts.GetContext(c.context, c.threshold)
-
+	context, now := circuitBreakerContexts.GetContext(c.context, c.threshold), time.Now()
 	switch c.operation {
 	case "counter":
-		now := time.Now()
 		context.Lock()
+		if context.timeout.Sub(now) > 0 {
+			context.Unlock()
+			break
+		}
 		context.counter++
 		context.processed++
 		context.buffer[context.index] = now
 		context.index = (context.index + 1) % c.threshold
+		if context.tripped {
+			context.Trip(now, c.timeout)
+			context.Unlock()
+			break
+		}
 		switch c.mode {
 		case CircuitBreakerModeA:
 			if context.counter >= c.threshold {
@@ -126,10 +135,12 @@ func (c *CircuitBreaker) Execute() (err error) {
 		context.Unlock()
 	case "reset":
 		context.Lock()
-		context.counter = 0
+		if context.timeout.Sub(now) <= 0 {
+			context.counter = 0
+			context.tripped = false
+		}
 		context.Unlock()
 	default:
-		now := time.Now()
 		context.RLock()
 		timeout := context.timeout
 		context.RUnlock()
