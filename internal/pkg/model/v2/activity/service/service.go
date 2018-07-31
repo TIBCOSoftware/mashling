@@ -29,7 +29,7 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 	case "anomaly":
 		return InitializeAnomaly(serviceDef.Settings)
 	case "ws":
-		return wsproxy.InitializeWSProxy(serviceDef.Settings)
+		return wsproxy.InitializeWSProxy(serviceDef.Name, serviceDef.Settings)
 	default:
 		return nil, errors.New("unknown service type")
 	}
