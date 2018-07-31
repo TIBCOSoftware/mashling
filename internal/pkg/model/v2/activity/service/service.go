@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 
+	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
+
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 )
 
@@ -25,6 +27,8 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeFlogoFlow(serviceDef.Settings)
 	case "sqld":
 		return InitializeSQLD(serviceDef.Settings)
+	case "grpc":
+		return grpc.InitializeGRPC(serviceDef.Settings)
 	case "anomaly":
 		return InitializeAnomaly(serviceDef.Settings)
 	default:

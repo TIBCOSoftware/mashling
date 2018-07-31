@@ -95,10 +95,11 @@ func (p *PingServiceConfig) PingResponseHandlerDetail(w http.ResponseWriter, req
 
 //Stop handles nullifying configured port
 func (p *PingServiceConfig) Stop() error {
-	if err := p.Shutdown(nil); err != nil {
-		log.Println("[mashling-ping-service] Ping service error when stopping:", err)
-		return err
-	}
+	// if err := p.Shutdown(nil); err != nil {
+	// 	log.Println("[mashling-ping-service] Ping service error when stopping:", err)
+	// 	return err
+	// }
+	p.Close()
 	log.Println("[mashling-ping-service] Ping service stopped")
 
 	return nil
