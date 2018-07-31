@@ -2,10 +2,12 @@ package wsproxy
 
 import (
 	"errors"
-	"fmt"
 
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/gorilla/websocket"
 )
+
+var log = logger.GetLogger("service-wsproxy")
 
 // WSProxy is websocket proxy service
 type WSProxy struct {
@@ -15,7 +17,6 @@ type WSProxy struct {
 
 // InitializeWSProxy initializes an WSProxy service with provided settings.
 func InitializeWSProxy(settings map[string]interface{}) (wspService *WSProxy, err error) {
-	fmt.Println("InitializeWSProxy")
 	wspService = &WSProxy{}
 	err = wspService.setRequestValues(settings)
 	return wspService, err
@@ -23,10 +24,8 @@ func InitializeWSProxy(settings map[string]interface{}) (wspService *WSProxy, er
 
 // Execute invokes this WSProxy service.
 func (wsp *WSProxy) Execute() (err error) {
-	fmt.Println("Execute()")
-	fmt.Println("client address:", wsp.clientConn.RemoteAddr())
-	fmt.Println("backendURL:", wsp.backendURL)
 
+	log.Infof("starting websocket proxy (client address: %s & server url: %s)...", wsp.clientConn.RemoteAddr(), wsp.backendURL)
 	//start proxy client
 	go start(wsp.clientConn, wsp.backendURL)
 
@@ -39,7 +38,6 @@ func (wsp *WSProxy) UpdateRequest(values map[string]interface{}) (err error) {
 }
 
 func (wsp *WSProxy) setRequestValues(settings map[string]interface{}) (err error) {
-	fmt.Println("setRequestValues")
 	for k, v := range settings {
 		switch k {
 		case "wsconnection":
