@@ -549,7 +549,7 @@ The service `settings` and available `input` for the request are as follows:
 
 | Name   |  Type   | Description   |
 |:-----------|:--------|:--------------|
-| grpcMthdParamtrs | JSON object | A grpcMthdParamtrs payload which holds full information like method parameters etc.|
+| grpcMthdParamtrs | JSON object | A grpcMthdParamtrs payload which holds full information like method parameters, service name, proto name, method name etc.|
 | hosturl | string | A gRPC end point url with port |
 
 The available response outputs are as follows:
