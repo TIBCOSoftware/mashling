@@ -82,7 +82,7 @@ func init() {
 	}
 
 	Env = os.Environ()
-	// Env = append(Env, "CGO_ENABLED=0")
+	Env = append(Env, "CGO_ENABLED=0")
 
 	v := os.Getenv("V")
 	if v != "" {
