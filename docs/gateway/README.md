@@ -15,6 +15,7 @@
     * [Flogo Flow](#services-flogo-flow)
     * [Anomaly](#services-anomaly)
     * [SQL Detector](#services-sqld)
+    * [gRPC](#services-grpc)
   * [Responses](#responses)
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
@@ -537,6 +538,58 @@ Utilizing the response values can be seen in a response handler:
       "error": "hack attack!",
       "attackValues": "${SQLSecurity.attackValues}"
     }
+  }
+}
+```
+#### <a name="services-grpc"></a>gRPC
+
+The `grpc` service type works as gRPC client and will communicate to the given address with given method parameters.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| grpcMthdParamtrs | JSON object | A grpcMthdParamtrs payload which holds full information like method parameters etc.|
+| hosturl | string | A gRPC end point url with port |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+|body | JSON object | The response object from gRPC end server |
+
+A sample `service` definition is:
+
+```json
+{
+    "name": "PetStoreUsers",
+    "description": "Make calls to grpc end point",
+    "type": "grpc",
+    "settings": {
+        "hosturl": "localhost:9000"
+    }
+}
+```
+
+An example `step` that invokes the above `PetStoreUsers` service using `grpcMthdParamtrs` is:
+
+```json
+{
+ "service": "PetStoreUsers",
+ "input": {
+ "grpcMthdParamtrs": "${payload.grpcData}"
+ }
+}
+```
+
+Response handler:
+
+```json
+{
+  "error": false,
+  "output": {
+      "code": 200,
+      "data": "${PetStoreUsers.response.body}"
   }
 }
 ```
