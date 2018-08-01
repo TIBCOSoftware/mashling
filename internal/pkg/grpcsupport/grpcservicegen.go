@@ -100,6 +100,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	servInfo "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/grpc"
@@ -158,14 +159,19 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.
 	if strings.Compare(typeHandRes, typeMethodRes) == 0 {
 		res = replyData.(*pb.{{.MethodResName}})
 	} else {
-		rDBytes, err := json.Marshal(replyData)
-		if err != nil {
-			fmt.Println("Error", err)
-		}
+		var errValue = replyData.(map[string]interface{})["error"]
+		if errValue != nil && len(errValue.(string)) != 0 {
+			return res, errors.New(errValue.(string))
+		} else {
+			rDBytes, err := json.Marshal(replyData)
+			if err != nil {
+				fmt.Println("Error", err)
+			}
 
-		err = json.Unmarshal(rDBytes, &res)
-		if err != nil {
-			fmt.Println("!!!!!!!!!!Error!!!!!!!!!", err)
+			err = json.Unmarshal(rDBytes, &res)
+			if err != nil {
+				fmt.Println("!!!!!!!!!!Error!!!!!!!!!", err)
+			}
 		}
 	}
 	fmt.Println("@@@response to client@@@", res)
