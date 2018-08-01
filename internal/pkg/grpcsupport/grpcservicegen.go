@@ -151,6 +151,9 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.
 	}
 
 	typeHandRes := fmt.Sprintf("%T", replyData)
+	if strings.Compare(typeHandRes, "*status.statusError") == 0 {
+		return res, replyData.(error)
+	}
 	typeMethodRes := fmt.Sprintf("%T", res)
 	if strings.Compare(typeHandRes, typeMethodRes) == 0 {
 		res = replyData.(*pb.{{.MethodResName}})

@@ -80,11 +80,11 @@ func (g *GRPC) Execute() (err error) {
 	res := resultArr[0]
 	grpcErr := resultArr[1]
 	if !grpcErr.IsNil() {
-		return errors.New("Error occured in grpc service :" + fmt.Sprintf("%v", grpcErr))
+		fmt.Println("@@@@@@@@@@ERROR OCCURED@@@@@ Propagating it to calling function")
+		g.Response.Body = grpcErr.Interface()
+	} else {
+		g.Response.Body = res.Interface()
 	}
-
-	g.Response.Body = res.Interface()
-
 	return nil
 }
 
