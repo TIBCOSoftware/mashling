@@ -27,6 +27,8 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeSQLD(serviceDef.Settings)
 	case "anomaly":
 		return InitializeAnomaly(serviceDef.Settings)
+	case "jwt":
+		return InitializeJWT(serviceDef.Settings)
 	default:
 		return nil, errors.New("unknown service type")
 	}
