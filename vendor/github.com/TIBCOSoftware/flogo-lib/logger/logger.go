@@ -14,6 +14,7 @@ type Logger interface {
 	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
 	SetLogLevel(Level)
+	GetLogLevel() Level
 }
 
 type LoggerFactory interface {

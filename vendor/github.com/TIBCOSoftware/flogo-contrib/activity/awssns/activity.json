@@ -1,0 +1,55 @@
+{
+  "name": "Amazon SNS - SMS",
+  "title": "Amazon SNS - SMS",
+  "version": "0.0.1",
+  "type": "flogo:activity",
+  "description": "Send SMS using Amazon Web Services Simple Notification Services",
+  "author": "Philippe GABERT <pgabert@tibco.com>",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/awssns",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/awssns",
+  "input":[
+    {
+      "name": "accessKey",
+      "type": "string",
+      "required": "true"
+    },
+    {
+      "name": "secretKey",
+      "type": "string",
+      "required": "true"
+    },
+    {
+      "name": "region",
+      "type": "string",
+      "required": "true",
+      "allowed" : ["us-east-2","us-east-1","us-west-1","us-west-2","ap-south-1","ap-northeast-2","ap-southeast-1","ap-southeast-2","ap-northeast-1","cn-northwest-1","ca-central-1","eu-central-1","eu-west-1","eu-west-2","sa-east-1"]
+    },
+    {
+      "name": "smsType",
+      "type": "string",
+      "allowed" : ["Promotional", "Transactional"],
+	  "value": "Promotional"
+    },
+    {
+      "name": "from",
+      "type": "string",
+      "required": "true"
+    },
+    {
+      "name": "to",
+      "type": "string",
+      "required": "true"
+    },
+    {
+      "name": "message",
+      "type": "string",
+      "required": "true"
+    }
+  ],
+  "output": [
+    {
+      "name": "messageId",
+      "type": "string"
+    }
+  ]
+}

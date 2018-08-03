@@ -1,0 +1,9 @@
+{
+  "name": "mashling",
+  "type": "flogo:action",
+  "ref": "github.com/TIBCOSoftware/mashling/pkg/flogo/action",
+  "version": "0.0.1",
+  "title": "Mashling Gateway Action",
+  "description": "Action implementing the Mashling Microgateway features.",
+  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/poc-mashling-action/pkg/flogo/action",
+}

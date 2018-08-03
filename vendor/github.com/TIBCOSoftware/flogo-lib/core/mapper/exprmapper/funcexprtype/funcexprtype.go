@@ -11,6 +11,7 @@ const (
 	FUNCTION
 	EXPRESSION
 	BOOLEAN
+	NIL
 )
 
 func (t Type) String() string {
@@ -31,6 +32,8 @@ func (t Type) String() string {
 		return "expression"
 	case BOOLEAN:
 		return "boolean"
+	case NIL:
+		return "nil"
 	}
 	return ""
 }

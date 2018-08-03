@@ -1,9 +1,15 @@
-# tibco-counter
-This activity provides your flogo application the ability to use a global counter.
+---
+title: Counter
+weight: 4609
+---
 
+# Counter
+This activity allows you to use a global counter.
 
 ## Installation
-
+### Flogo Web
+This activity comes out of the box with the Flogo Web UI
+### Flogo CLI
 ```bash
 flogo add activity github.com/TIBCOSoftware/flogo-contrib/activity/counter
 ```
@@ -37,54 +43,63 @@ Inputs and Outputs:
 }
 ```
 ## Settings
-| Setting     | Description    |
-|:------------|:---------------|
-| counterName | The name of the counter |         
-| increment   | Increment the counter |
-| reset       | Reset the counter |
-Note: if reset is set to true, increment is ignored
-## Configuration Examples
+| Setting     | Required | Description |
+|:------------|:---------|:------------|
+| counterName | True     | The name of the counter |         
+| increment   | False    | If this field is set to true, increment the counter by one |
+| reset       | False    | Reset the counter. _If reset is set to true, increment is ignored_|
+| value       | False    | The value of the counter after executing the increment or reset |
+
+## Examples
 ### Increment
-Configure a task to increment a 'messages' counter:
+The below example increments a 'messages' counter:
 
 ```json
 {
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-counter",
-  "name": "Increment Message Count",
-  "attributes": [
-    { "name": "counterName", "value": "messages" },
-    { "name": "increment", "value": true }
-  ]
+  "id": "counter_1",
+  "name": "Increment Counter",
+  "description": "Simple Global Counter Activity",
+  "activity": {
+    "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/counter",
+    "input": {
+      "counterName": "messages",
+      "increment": true
+    }
+  }
 }
 ```
+
 ### Get
-Configure a task to get the 'messages' counter:
+The below example retrieves the last value of the 'messages' counter:
 
 ```json
 {
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-counter",
-  "name": "Get Message Count",
-  "attributes": [
-    { "name": "counterName", "value": "messages" }
-  ]
+  "id": "counter_1",
+  "name": "Increment Counter",
+  "description": "Simple Global Counter Activity",
+  "activity": {
+    "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/counter",
+    "input": {
+      "counterName": "messages"
+    }
+  }
 }
 ```
+
 ### Reset
-Configure a task to reset the 'messages' counter:
+The below example resets the 'messages' counter:
 
 ```json
 {
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-counter",
-  "name": "Reset Message Count",
-  "attributes": [
-    { "name": "counterName", "value": "messages" }
-    { "name": "reset", "value": true }
-  ]
+  "id": "counter_1",
+  "name": "Increment Counter",
+  "description": "Simple Global Counter Activity",
+  "activity": {
+    "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/counter",
+    "input": {
+      "counterName": "messages",
+      "reset": true
+    }
+  }
 }
 ```

@@ -75,6 +75,12 @@ var operatorCharactorMap = map[string]OPERATIOR{
 	//TODO negtive
 }
 
+type Expr interface {
+	EvalWithScope(inputScope data.Scope, resolver data.Resolver) (interface{}, error)
+	Eval() (interface{}, error)
+	EvalWithData(value interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error)
+}
+
 func ToOperator(operator string) (OPERATIOR, bool) {
 	op, found := operatorMap[operator]
 	if !found {
@@ -116,18 +122,26 @@ type TernaryExpressio struct {
 }
 
 func (t *TernaryExpressio) EvalWithScope(inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-	v, err := t.HandleParameter(t.First, inputScope, resolver)
+	return t.EvalWithData(nil, inputScope, resolver)
+}
+
+func (t *TernaryExpressio) Eval() (interface{}, error) {
+	return t.EvalWithScope(nil, data.GetBasicResolver())
+}
+
+func (t *TernaryExpressio) EvalWithData(value interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	v, err := t.HandleParameter(t.First, value, inputScope, resolver)
 	if err != nil {
 		return nil, err
 	}
 	if v.(bool) {
-		v2, err2 := t.HandleParameter(t.Second, inputScope, resolver)
+		v2, err2 := t.HandleParameter(t.Second, value, inputScope, resolver)
 		if err2 != nil {
 			return nil, err2
 		}
 		return v2, nil
 	} else {
-		v3, err3 := t.HandleParameter(t.Third, inputScope, resolver)
+		v3, err3 := t.HandleParameter(t.Third, value, inputScope, resolver)
 		if err3 != nil {
 			return nil, err3
 		}
@@ -135,30 +149,48 @@ func (t *TernaryExpressio) EvalWithScope(inputScope data.Scope, resolver data.Re
 	}
 }
 
-func (t *TernaryExpressio) HandleParameter(param interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+func (t *TernaryExpressio) HandleParameter(param interface{}, value interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
 	var firstValue interface{}
-	fmt.Println(reflect.TypeOf(param))
 	switch t := param.(type) {
 	case *function.FunctionExp:
-		vss, err := t.EvalWithScope(inputScope, resolver)
+		vss, err := t.EvalWithData(value, inputScope, resolver)
 		if err != nil {
 			return nil, err
 		}
-		if len(vss) > 0 {
-			firstValue = vss[0]
-		}
-		return firstValue, nil
+		return function.HandleToSingleOutput(vss), nil
 	case *Expression:
-		vss, err := t.EvalWithScope(inputScope, resolver)
+		vss, err := t.EvalWithData(value, inputScope, resolver)
 		if err != nil {
 			return nil, err
 		}
 		firstValue = vss
 		return firstValue, nil
-
+	case *ref.ArrayRef:
+		return handleArrayRef(value, t.GetRef(), inputScope, resolver)
+	case *ref.MappingRef:
+		return t.Eval(inputScope, resolver)
 	default:
 		firstValue = t
 		return firstValue, nil
+	}
+}
+
+func handleArrayRef(edata interface{}, mapref string, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
+	if edata == nil {
+		v, err := ref.NewMappingRef(mapref).Eval(inputScope, resolver)
+		if err != nil {
+			log.Errorf("Mapping ref eva error [%s]", err.Error())
+			return nil, fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+		}
+		return v, nil
+	} else {
+		arrayRef := ref.NewArrayRef(mapref)
+		v, err := arrayRef.EvalFromData(edata)
+		if err != nil {
+			log.Errorf("Mapping ref eva error [%s]", err.Error())
+			return nil, fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+		}
+		return v, nil
 	}
 }
 
@@ -265,18 +297,12 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 	log.Debug("Do left and expression ", f)
 	var leftValue interface{}
 	if f.IsFunction() {
-		function := f.Value.(*function.FunctionExp)
-		funcReturn, err := function.EvalWithScope(inputScope, resolver)
+		funct := f.Value.(*function.FunctionExp)
+		funcReturn, err := funct.EvalWithScope(inputScope, resolver)
 		if err != nil {
 			resultChan <- errors.New("Eval left expression error: " + err.Error())
 		}
-
-		if len(funcReturn) > 1 {
-			resultChan <- errors.New("Function " + function.Name + " cannot return more than one using in expression")
-		}
-		if len(funcReturn) == 1 {
-			leftValue = funcReturn[0]
-		}
+		leftValue = function.HandleToSingleOutput(funcReturn)
 	} else if f.Type == funcexprtype.EXPRESSION {
 		var err error
 		leftValue, err = f.evaluate(edata, inputScope, resolver)
@@ -292,11 +318,9 @@ func (f *Expression) do(edata interface{}, inputScope data.Scope, resolver data.
 		}
 		leftValue = v
 	} else if f.Type == funcexprtype.ARRAYREF {
-		arrayRef := ref.NewArrayRef(f.Value.(string))
-		v, err := arrayRef.EvalFromData(edata)
+		v, err := handleArrayRef(edata, f.Value.(string), inputScope, resolver)
 		if err != nil {
-			log.Errorf("Mapping ref eva error [%s]", err.Error())
-			resultChan <- fmt.Errorf("Mapping ref eva error [%s]", err.Error())
+			resultChan <- err
 		}
 		leftValue = v
 	} else {
@@ -362,53 +386,70 @@ func equals(left interface{}, right interface{}) (bool, error) {
 		return false, nil
 	}
 
-	rightValue, err := convertRightValueToLeftType(left, right)
+	leftValue, rightValue, err := ConvertToSameType(left, right)
 	if err != nil {
 		return false, err
 	}
 
 	log.Debugf("Right expression value [%s]", rightValue)
 
-	return left == rightValue, nil
+	return leftValue == rightValue, nil
 }
 
-func convertRightValueToLeftType(left interface{}, right interface{}) (interface{}, error) {
+func ConvertToSameType(left interface{}, right interface{}) (interface{}, interface{}, error) {
 	if left == nil || right == nil {
-		return right, nil
+		return left, right, nil
 	}
+	var leftValue interface{}
 	var rightValue interface{}
 	var err error
-	switch left.(type) {
+	switch t := left.(type) {
 	case int:
 		rightValue, err = data.CoerceToInteger(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
-		return rightValue, nil
+		leftValue = t
 	case int64:
 		rightValue, err = data.CoerceToInteger(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
 		}
+		leftValue = t
 	case float64:
 		rightValue, err = data.CoerceToNumber(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type float64 failed, due to %s", err.Error())
 		}
+		leftValue = t
 	case string:
 		rightValue, err = data.CoerceToString(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type string failed, due to %s", err.Error())
 		}
+		leftValue = t
+
 	case bool:
 		rightValue, err = data.CoerceToBoolean(right)
 		if err != nil {
 			err = fmt.Errorf("Convert right expression to type boolean failed, due to %s", err.Error())
 		}
+		leftValue = t
+
+	case json.Number:
+		rightValue, err = data.CoerceToLong(right)
+		if err != nil {
+			err = fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err = data.CoerceToLong(left)
+		if err != nil {
+			err = fmt.Errorf("Convert left expression to type long failed, due to %s", err.Error())
+		}
 	default:
 		err = fmt.Errorf("Unsupport type to compare now")
 	}
-	return rightValue, err
+	return leftValue, rightValue, err
 
 }
 
@@ -423,14 +464,14 @@ func notEquals(left interface{}, right interface{}) (bool, error) {
 		return true, nil
 	}
 
-	rightValue, err := convertRightValueToLeftType(left, right)
+	leftValue, rightValue, err := ConvertToSameType(left, right)
 	if err != nil {
 		return false, err
 	}
 
 	log.Debugf("Right expression value [%s]", rightValue)
 
-	return left != rightValue, nil
+	return leftValue != rightValue, nil
 
 }
 
@@ -445,8 +486,8 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		return false, nil
 	}
 
+	log.Debugf("Left value [%+v] and Right value: [%+v]", left, right)
 	rightType := getType(right)
-	log.Infof("Right type: %s", rightType.String())
 	switch le := left.(type) {
 	case int:
 		//We should conver to int first
@@ -483,8 +524,26 @@ func gt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le > rightValue, nil
 		}
+	case string, json.Number:
+		//In case of string, convert to number and compare
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert left expression to type int64 failed, due to %s", err.Error())
+		}
+
+		if includeEquals {
+			return leftValue >= rightValue, nil
+
+		} else {
+			return leftValue > rightValue, nil
+		}
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to greater than, left [%s] and right [%s] ", getType(left).String(), rightType.String()))
 	}
 
 	return false, nil
@@ -535,8 +594,26 @@ func lt(left interface{}, right interface{}, includeEquals bool) (bool, error) {
 		} else {
 			return le < rightValue, nil
 		}
+	case string, json.Number:
+		//In case of string, convert to number and compare
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type int64 failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert left expression to type int64 failed, due to %s", err.Error())
+		}
+
+		if includeEquals {
+			return leftValue <= rightValue, nil
+
+		} else {
+			return leftValue < rightValue, nil
+		}
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to <, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -554,7 +631,7 @@ func add(left interface{}, right interface{}) (bool, error) {
 		}
 		return le && rightValue, nil
 	default:
-		return false, errors.New("Unknow type to add expression " + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to &&, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -571,7 +648,7 @@ func or(left interface{}, right interface{}) (bool, error) {
 		}
 		return le || rightValue, nil
 	default:
-		return false, errors.New("Unknow type to add expression " + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to ||, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -610,8 +687,20 @@ func additon(left interface{}, right interface{}) (interface{}, error) {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 		return le + rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue * rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to additon, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -650,8 +739,20 @@ func sub(left interface{}, right interface{}) (interface{}, error) {
 		}
 
 		return le - rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue - rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to sub, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -690,8 +791,20 @@ func multiplication(left interface{}, right interface{}) (interface{}, error) {
 		}
 
 		return le * rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue * rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to multiplication, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil
@@ -727,8 +840,20 @@ func div(left interface{}, right interface{}) (interface{}, error) {
 			return false, fmt.Errorf("Convert right expression to type int failed, due to %s", err.Error())
 		}
 		return le + rightValue, nil
+	case json.Number:
+		rightValue, err := data.CoerceToLong(right)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		leftValue, err := data.CoerceToLong(left)
+		if err != nil {
+			return false, fmt.Errorf("Convert right expression to type long failed, due to %s", err.Error())
+		}
+
+		return leftValue + rightValue, nil
 	default:
-		return false, errors.New("Unknow type to equals" + getType(left).String())
+		return false, errors.New(fmt.Sprintf("Unknow type use to div, left [%s] and right [%s] ", getType(left).String(), getType(right).String()))
 	}
 
 	return false, nil

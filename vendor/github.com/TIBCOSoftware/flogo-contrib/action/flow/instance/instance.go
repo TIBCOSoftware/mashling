@@ -132,6 +132,10 @@ func (inst *Instance) GetResolver() data.Resolver {
 	return definition.GetDataResolver()
 }
 
+func (inst *Instance) GetError() ( error) {
+	return inst.returnError
+}
+
 func (inst *Instance) GetReturnData() (map[string]*data.Attribute, error) {
 
 	if inst.returnData == nil {

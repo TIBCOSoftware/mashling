@@ -1,9 +1,15 @@
-# tibco-rest
-This activity provides your flogo application the ability to invoke a REST service.
+---
+title: REST
+weight: 4618
+---
 
+# REST
+This activity allows you to invoke a REST service.
 
 ## Installation
-
+### Flogo Web
+This activity comes out of the box with the Flogo Web UI
+### Flogo CLI
 ```bash
 flogo add activity github.com/TIBCOSoftware/flogo-contrib/activity/rest
 ```
@@ -17,7 +23,8 @@ Inputs and Outputs:
     {
       "name": "method",
       "type": "string",
-      "required": true
+      "required": true,
+      "allowed" : ["GET", "POST", "PUT", "PATCH", "DELETE"]
     },
     {
       "name": "uri",
@@ -25,8 +32,9 @@ Inputs and Outputs:
       "required": true
     },
     {
-      "name": "params",
-      "type": "params"
+      "name": "proxy",
+      "type": "string",
+      "required": false
     },
     {
       "name": "pathParams",
@@ -41,80 +49,74 @@ Inputs and Outputs:
       "type": "params"
     },
     {
+      "name": "skipSsl",
+      "type": "boolean",
+      "value": "false"
+    },
+    {
       "name": "content",
-      "type": "object"
+      "type": "any"
     }
   ],
   "output": [
     {
       "name": "result",
-      "type": "object"
+      "type": "any"
+    },
+    {
+      "name": "status",
+      "type": "integer"
     }
   ]
 }
 ```
 ## Settings
-| Setting     | Description    |
-|:------------|:---------------|
-| method      | The HTTP method to invoke |         
-| uri         | The uri of the resource   |
-| pathParams  | The path parameters |
-| queryParams | The query parameters |
-| header      | The header parameters |
-| content     | The message content |
-| params      | The path parameters (Deprecated) |
-Note: 
+| Setting     | Required | Description |
+|:------------|:---------|:------------|
+| method      | True     | The HTTP method to invoke (Allowed values are GET, POST, PUT, DELETE, and PATCH) |         
+| uri         | True     | The URI of the service to invoke |
+| proxy       | False    | The address of the proxy server to be used |
+| pathParams  | False    | The path parameters. This field is only required if you have params in your URI (for example http://.../pet/:id) |
+| queryParams | False    | The query parameters |
+| header      | False    | The header parameters |
+| skipSsl     | False    | If set to true, skips the SSL validation (defaults to false)
+| content     | False    | The message content you want to send. This field is only used in POST, PUT, and PATCH |
 
-* **pathParams**: Is only required if you have params in your URI ( i.e. http://.../pet/:id )
-* **content**: Is only used in POST, PUT, PATCH
 
-## Configuration Examples
+## Examples
 ### Simple
-Configure a task in flow to get pet '1234' from the [swagger petstore](http://petstore.swagger.io):
+The below example retrieves a pet with number '1234' from the [swagger petstore](http://petstore.swagger.io):
 
 ```json
 {
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-rest",
-  "name": "Query for pet 1234",
-  "attributes": [
-    { "name": "method", "value": "GET" },
-    { "name": "uri", "value": "http://petstore.swagger.io/v2/pet/1234" }
-  ]
+  "id": "rest_2",
+  "name": "Invoke REST Service",
+  "description": "Simple REST Activity",
+  "activity": {
+    "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+    "input": {
+      "method": "GET",
+      "uri": "http://petstore.swagger.io/v2/pet/1234"
+    }
+  }
 }
 ```
+
 ### Using Path Params
-Configure a task in flow to get pet '1234' from the [swagger petstore](http://petstore.swagger.io) via parameters.
+The below example is the same as above, itretrieves a pet with number '1234' from the [swagger petstore](http://petstore.swagger.io), but uses a URI parameter to configure the ID:
 
 ```json
 {
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-rest",
-  "name": "Query for Pet",
-  "attributes": [
-    { "name": "method", "value": "GET" },
-    { "name": "uri", "value": "http://petstore.swagger.io/v2/pet/:id" },
-    { "name": "params", "value": { "id": "1234"} }
-  ]
-}
-```
-### Advanced
-Configure a task in flow to get pet from the [swagger petstore](http://petstore.swagger.io) using a flow attribute to specify the id.
-
-```json
-{
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-rest",
-  "name": "Query for Pet",
-  "attributes": [
-    { "name": "method", "value": "GET" },
-    { "name": "uri", "value": "http://petstore.swagger.io/v2/pet/:id" },
-  ],
-  "inputMappings": [
-    { "type": 1, "value": "petId", "mapTo": "params.id" }
-  ]
+  "id": "rest_2",
+  "name": "Invoke REST Service",
+  "description": "Simple REST Activity",
+  "activity": {
+    "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+    "input": {
+      "method": "GET",
+      "uri": "http://petstore.swagger.io/v2/pet/:id",
+      "params": { "id": "1234"}
+    }
+  }
 }
 ```

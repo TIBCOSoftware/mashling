@@ -1,8 +1,9 @@
 package model
 
 import (
-	"github.com/TIBCOSoftware/flogo-contrib/action/flow/util"
 	"sync"
+
+	"github.com/TIBCOSoftware/flogo-contrib/action/flow/util"
 )
 
 var (
@@ -51,21 +52,22 @@ func Get(id string) *FlowModel {
 }
 
 // Register registers the specified flow model
-func RegisterDefault(model *FlowModel) {
+func RegisterDefault(flowModel *FlowModel) {
 	modelsMu.Lock()
 	defer modelsMu.Unlock()
 
-	if model == nil {
+	if flowModel == nil {
 		panic("model.RegisterDefault: model cannot be nil")
 	}
 
-	id := model.Name()
+	id := flowModel.Name()
 
 	if _, dup := models[id]; !dup {
-		models[id] = model
+		models[id] = flowModel
 	}
 
-	defaultModel = model
+	defaultModel = flowModel
+	util.RegisterModelValidator("", flowModel)
 }
 
 func Default() *FlowModel {

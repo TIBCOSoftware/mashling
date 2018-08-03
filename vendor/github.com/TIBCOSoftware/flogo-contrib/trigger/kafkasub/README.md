@@ -1,3 +1,7 @@
+---
+title: Receive Kafka Message
+weight: 4703
+---
 # tibco-kafkasub
 This trigger provides your flogo application with the ability to subscribe to messages from a kafka cluster and start a flow with the contents of the message.  It is assumed that the messages plain text.  The trigger supports TLS and SASL.  
 To make a TLS connection specifiy a trust dir containing the caroots for your kafka server and a broker URL which points to an SSL port.

@@ -8,22 +8,13 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json/field"
 
-	"encoding/json"
 	"sync"
 
+	"encoding/json"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var log = logger.GetLogger("json")
-
-func GetFieldValueP(jsonData string, path string) (interface{}, error) {
-	jsonParsed, err := ParseJSON([]byte(jsonData))
-	if err != nil {
-		return nil, err
-
-	}
-	return getFieldValueP(&JSONData{container: jsonParsed, rw: sync.RWMutex{}}, path)
-}
 
 func GetFieldValueFromInP(data interface{}, path string) (interface{}, error) {
 	var jsonParsed *Container

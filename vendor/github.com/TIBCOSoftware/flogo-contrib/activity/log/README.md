@@ -1,9 +1,15 @@
-# tibco-log
-This activity provides your flogo application with rudementary logging.
+---
+title: Log
+weight: 4615
+---
 
+# Log
+This activity allows you to write log messages.
 
 ## Installation
-
+### Flogo Web
+This activity comes out of the box with the Flogo Web UI
+### Flogo CLI
 ```bash
 flogo add activity github.com/TIBCOSoftware/flogo-contrib/activity/log
 ```
@@ -39,40 +45,28 @@ Inputs and Outputs:
 }
 ```
 ## Settings
-| Setting   | Description    |
-|:----------|:---------------|
-| message   | The message to log |         
-| flowInfo  | Append the flow information to the log message |
-| addToFlow | Add the log message to the 'message' output of the activity |
+| Setting     | Required | Description |
+|:------------|:---------|:------------|
+| message     | False    | The message to log |
+| flowInfo    | False    | If set to true this will append the flow information to the log message |
+| addToFlow   | False    | If set to true this will add the log message to the 'message' output of the activity and make it available in further activities |
+| message     | False    | The message that was logged |
 
-
-## Configuration Examples
-### Simple
-Configure a task to log a message 'test message':
+## Examples
+The below example logs a message 'test message':
 
 ```json
 {
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-log",
+  "id": "log_3",
   "name": "Log Message",
-  "attributes": [
-    { "name": "message", "value": "test message" }
-  ]
-}
-```
-### Advanced
-Configure a task to log a 'petId' attribute as a message:
-
-```json
-{
-  "id": 3,
-  "type": 1,
-  "activityType": "tibco-log",
-  "name": "Log PetId",
-  "attributes": [],
-  "inputMappings": [
-    { "type": 1, "value": "petId", "mapTo": "message" }
-  ]
+  "description": "Simple Log Activity",
+  "activity": {
+    "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+    "input": {
+      "message": "test message",
+      "flowInfo": "false",
+      "addToFlow": "true"
+    }
+  }
 }
 ```

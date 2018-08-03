@@ -10,12 +10,23 @@ import (
 
 var loggerMap = make(map[string]Logger)
 var mutex = &sync.RWMutex{}
+var logLevel = InfoLevel
 
 type DefaultLoggerFactory struct {
 }
 
 func init() {
+
 	RegisterLoggerFactory(&DefaultLoggerFactory{})
+
+	logLevelName := config.GetLogLevel()
+	// Get log level for name
+	getLogLevel, err := GetLevelForName(logLevelName)
+	if err != nil {
+		println("Unsupported Log Level - [" + logLevelName + "]. Set to Log Level - [" + defaultLogLevel + "]")
+	} else {
+		logLevel = getLogLevel
+	}
 }
 
 type DefaultLogger struct {
@@ -52,79 +63,85 @@ func getLevel(level logrus.Level) string {
 }
 
 // Debug logs message at Debug level.
-func (logger *DefaultLogger) Debug(args ...interface{}) {
-	logger.loggerImpl.Debug(args...)
+func (l *DefaultLogger) Debug(args ...interface{}) {
+	l.loggerImpl.Debug(args...)
 }
 
 // DebugEnabled checks if Debug level is enabled.
-func (logger *DefaultLogger) DebugEnabled() bool {
-	return logger.loggerImpl.Level >= logrus.DebugLevel
+func (l *DefaultLogger) DebugEnabled() bool {
+	return l.loggerImpl.Level >= logrus.DebugLevel
 }
 
 // Info logs message at Info level.
-func (logger *DefaultLogger) Info(args ...interface{}) {
-	logger.loggerImpl.Info(args...)
+func (l *DefaultLogger) Info(args ...interface{}) {
+	l.loggerImpl.Info(args...)
 }
 
 // InfoEnabled checks if Info level is enabled.
-func (logger *DefaultLogger) InfoEnabled() bool {
-	return logger.loggerImpl.Level >= logrus.InfoLevel
+func (l *DefaultLogger) InfoEnabled() bool {
+	return l.loggerImpl.Level >= logrus.InfoLevel
 }
 
 // Warn logs message at Warning level.
-func (logger *DefaultLogger) Warn(args ...interface{}) {
-	logger.loggerImpl.Warn(args...)
+func (l *DefaultLogger) Warn(args ...interface{}) {
+	l.loggerImpl.Warn(args...)
 }
 
 // WarnEnabled checks if Warning level is enabled.
-func (logger *DefaultLogger) WarnEnabled() bool {
-	return logger.loggerImpl.Level >= logrus.WarnLevel
+func (l *DefaultLogger) WarnEnabled() bool {
+	return l.loggerImpl.Level >= logrus.WarnLevel
 }
 
 // Error logs message at Error level.
-func (logger *DefaultLogger) Error(args ...interface{}) {
-	logger.loggerImpl.Error(args...)
+func (l *DefaultLogger) Error(args ...interface{}) {
+	l.loggerImpl.Error(args...)
 }
 
 // ErrorEnabled checks if Error level is enabled.
-func (logger *DefaultLogger) ErrorEnabled() bool {
-	return logger.loggerImpl.Level >= logrus.ErrorLevel
+func (l *DefaultLogger) ErrorEnabled() bool {
+	return l.loggerImpl.Level >= logrus.ErrorLevel
 }
 
 // Debug logs message at Debug level.
-func (logger *DefaultLogger) Debugf(format string, args ...interface{}) {
-	logger.loggerImpl.Debugf(format, args...)
+func (l *DefaultLogger) Debugf(format string, args ...interface{}) {
+	l.loggerImpl.Debugf(format, args...)
 }
 
 // Info logs message at Info level.
-func (logger *DefaultLogger) Infof(format string, args ...interface{}) {
-	logger.loggerImpl.Infof(format, args...)
+func (l *DefaultLogger) Infof(format string, args ...interface{}) {
+	l.loggerImpl.Infof(format, args...)
 }
 
 // Warn logs message at Warning level.
-func (logger *DefaultLogger) Warnf(format string, args ...interface{}) {
-	logger.loggerImpl.Warnf(format, args...)
+func (l *DefaultLogger) Warnf(format string, args ...interface{}) {
+	l.loggerImpl.Warnf(format, args...)
 }
 
 // Error logs message at Error level.
-func (logger *DefaultLogger) Errorf(format string, args ...interface{}) {
-	logger.loggerImpl.Errorf(format, args...)
+func (l *DefaultLogger) Errorf(format string, args ...interface{}) {
+	l.loggerImpl.Errorf(format, args...)
 }
 
 //SetLog Level
-func (logger *DefaultLogger) SetLogLevel(logLevel Level) {
+func (l *DefaultLogger) SetLogLevel(logLevel Level) {
 	switch logLevel {
 	case DebugLevel:
-		logger.loggerImpl.Level = logrus.DebugLevel
+		l.loggerImpl.Level = logrus.DebugLevel
 	case InfoLevel:
-		logger.loggerImpl.Level = logrus.InfoLevel
+		l.loggerImpl.Level = logrus.InfoLevel
 	case ErrorLevel:
-		logger.loggerImpl.Level = logrus.ErrorLevel
+		l.loggerImpl.Level = logrus.ErrorLevel
 	case WarnLevel:
-		logger.loggerImpl.Level = logrus.WarnLevel
+		l.loggerImpl.Level = logrus.WarnLevel
 	default:
-		logger.loggerImpl.Level = logrus.ErrorLevel
+		l.loggerImpl.Level = logrus.ErrorLevel
 	}
+}
+
+func (l *DefaultLogger) GetLogLevel() Level {
+	levelStr := getLevel(l.loggerImpl.Level)
+	level, _ := GetLevelForName(levelStr)
+	return level
 }
 
 func (logfactory *DefaultLoggerFactory) GetLogger(name string) Logger {
@@ -140,14 +157,9 @@ func (logfactory *DefaultLoggerFactory) GetLogger(name string) Logger {
 			loggerName: name,
 			loggerImpl: logImpl,
 		}
-		// Get log level from config
-		logLevelName := config.GetLogLevel()
-		// Get log level for name
-		level, err := GetLevelForName(logLevelName)
-		if err != nil {
-			return nil
-		}
-		l.SetLogLevel(level)
+
+		l.SetLogLevel(logLevel)
+
 		mutex.Lock()
 		loggerMap[name] = l
 		mutex.Unlock()

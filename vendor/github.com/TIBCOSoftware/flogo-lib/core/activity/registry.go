@@ -21,7 +21,7 @@ func Register(activity Activity) {
 		panic("cannot register 'nil' activity")
 	}
 
-	logger.Debugf("Registering activity: '%s'", activity.Metadata().ID)
+	logger.Debugf("Registering activity [ %s ] which has version [ %s ]", activity.Metadata().ID, activity.Metadata().Version)
 
 	id := activity.Metadata().ID
 

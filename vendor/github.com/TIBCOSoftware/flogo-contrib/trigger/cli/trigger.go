@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/TIBCOSoftware/flogo-lib/config"
@@ -116,9 +117,15 @@ func (t *CliTrigger) Stop() error {
 }
 
 func Invoke() (string, error) {
+	// Build an array of flags that are not the command
+	// before we parse the flags, otherwise extra flags
+	// will be seen as an error
+	args := os.Args[2:]
+
+	// Create a new string array
+	os.Args = []string{"", os.Args[1]}
 
 	flag.Parse()
-	args := flag.Args()
 
 	for _, info := range singleton.handlerInfos {
 

@@ -335,6 +335,8 @@ func (fa *FlowAction) Run(context context.Context, inputs map[string]*data.Attri
 		if inst.Status() == model.FlowStatusCompleted {
 			returnData, err := inst.GetReturnData()
 			handler.HandleResult(returnData, err)
+		} else if inst.Status() == model.FlowStatusFailed {
+			handler.HandleResult(nil, inst.GetError())
 		}
 
 		logger.Debugf("Done Executing flow instance [%s] - Status: %d", inst.ID(), inst.Status())

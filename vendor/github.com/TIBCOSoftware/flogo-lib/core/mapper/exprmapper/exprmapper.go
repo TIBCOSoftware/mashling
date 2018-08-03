@@ -9,11 +9,20 @@ import (
 
 	"reflect"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/ref"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+
+	//Pre registry all function for now
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/array/length"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/number/random"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/concat"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equals"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/equalsignorecase"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/length"
+	_ "github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/function/string/substring"
 )
 
 var log = logger.GetLogger("mapper")
@@ -27,7 +36,7 @@ func Map(mapping *data.MappingDef, inputScope, outputScope data.Scope, resolver 
 	if err != nil {
 		return err
 	}
-	err = setValueToOutputScopde(mapping.MapTo, outputScope, mappingValue, resolver)
+	err = SetValueToOutputScope(mapping.MapTo, outputScope, mappingValue)
 	if err != nil {
 		err = fmt.Errorf("Set value %+v to output [%s] error - %s", mappingValue, mapping.MapTo, err.Error())
 		log.Error(err)
@@ -41,72 +50,36 @@ func GetMappingValue(mappingV interface{}, inputScope data.Scope, resolver data.
 	if mappingV == nil || reflect.TypeOf(mappingV).Kind() != reflect.String {
 		return mappingV, nil
 	}
-
 	mappingValue := mappingV.(string)
-	expressionType := expression.GetExpressionType(mappingValue)
-	if expressionType == expression.TERNARY_EXPRESSION {
-		exp, err := expression.NewExpression(mappingValue).GetTernaryExpression()
-		if err != nil {
-			return nil, fmt.Errorf("Parsing ternary expression [%s] error - %s", mappingValue, err.Error())
-		}
-
-		funcValue, err := exp.EvalWithScope(inputScope, resolver)
+	exp, err := expression.ParseExpression(mappingValue)
+	if err == nil {
+		//flogo expression
+		expValue, err := exp.EvalWithScope(inputScope, resolver)
 		if err != nil {
 			return nil, fmt.Errorf("Execution failed for mapping [%s] due to error - %s", mappingValue, err.Error())
 		}
-		log.Debugf("Ternary expression value: %+v", funcValue)
-		return funcValue, nil
-	} else if expressionType == expression.EXPRESSION {
-		exp, err := expression.NewExpression(mappingValue).GetExpression()
-		if err != nil {
-			return nil, fmt.Errorf("Parsing expression [%s] error - %s", mappingValue, err.Error())
-		}
-
-		funcValue, err := exp.EvalWithScope(inputScope, resolver)
-		if err != nil {
-			return nil, fmt.Errorf("Execution failed for mapping [%s] due to error - %s", mappingValue, err.Error())
-		}
-		log.Debugf("Expression value: %+v", funcValue)
-		return funcValue, nil
-
-	} else if expressionType == expression.FUNCTION {
-		log.Debugf("The mapping ref is a function")
-		function, err := expression.NewFunctionExpression(mappingValue).GetFunction()
-		if err != nil {
-			return nil, fmt.Errorf("Parsing function [%s] error - %s", mappingValue, err.Error())
-		}
-		funcValue, err := function.EvalWithScope(inputScope, resolver)
-		if err != nil {
-			return nil, fmt.Errorf("Execution failed for mapping [%s] due to error - %s", mappingValue, err.Error())
-		}
-
-		if funcValue != nil && len(funcValue) == 1 {
-			return funcValue[0], nil
-
-		} else if funcValue != nil && len(funcValue) > 1 {
-			return funcValue, nil
-		}
-
-	} else if !isMappingRef(mappingValue) {
-		log.Debugf("Mapping value is literal set directly to field")
-		log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
-		return mappingValue, nil
+		return expValue, nil
 	} else {
+		if !isMappingRef(mappingValue) {
+			log.Debugf("Mapping value is literal set directly to field")
+			log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
+			return mappingValue, nil
+		} else {
 
-		mappingref := ref.NewMappingRef(mappingValue)
-		mappingValue, err := mappingref.GetValue(inputScope, resolver)
-		if err != nil {
-			return nil, fmt.Errorf("Get value from ref [%s] error - %s", mappingref.GetRef(), err.Error())
+			mappingref := ref.NewMappingRef(mappingValue)
+			mappingValue, err := mappingref.GetValue(inputScope, resolver)
+			if err != nil {
+				return nil, fmt.Errorf("Get value from ref [%s] error - %s", mappingref.GetRef(), err.Error())
 
+			}
+			log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
+			return mappingValue, nil
 		}
-		log.Debugf("Mapping ref %s and value %+v", mappingValue, mappingValue)
-		return mappingValue, nil
 	}
-
 	return nil, nil
 }
 
-func setValueToOutputScopde(mapTo string, outputScope data.Scope, value interface{}, resolver data.Resolver) error {
+func SetValueToOutputScope(mapTo string, outputScope data.Scope, value interface{}) error {
 	toMappingRef := ref.NewMappingRef(mapTo)
 	actRootField, err := toMappingRef.GetActivtyRootField()
 	if err != nil {
@@ -178,7 +151,6 @@ func SetAttribute(fieldName string, value interface{}, outputScope data.Scope) e
 	return nil
 }
 
-
 func RemovePrefixInput(str string) string {
 	if str != "" && strings.HasPrefix(str, MAP_TO_INPUT) {
 		//Remove $INPUT for mapTo
@@ -190,4 +162,3 @@ func RemovePrefixInput(str string) string {
 	}
 	return str
 }
-

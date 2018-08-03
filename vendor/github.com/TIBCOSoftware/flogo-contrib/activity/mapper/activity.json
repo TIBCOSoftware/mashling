@@ -1,0 +1,23 @@
+{
+  "name": "flogo-mapper",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/mapper",
+  "version": "0.0.1",
+  "title": "Mapper",
+  "description": "Simple Mapper Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/mapper",
+  "input":[
+    {
+      "name": "mappings",
+      "type": "array",
+      "required": true,
+      "display": {
+        "name": "Mapper",
+        "type": "mapper",
+        "mapperOutputScope" : "action"
+      }
+    }
+  ],
+  "output": [
+  ]
+}

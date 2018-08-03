@@ -40,7 +40,12 @@ func SetLogLevel(level Level) {
 	GetDefaultLogger().SetLogLevel(level)
 }
 
+func GetLogLevel() Level {
+	return GetDefaultLogger().GetLogLevel()
+}
+
 var defaultLoggerName = "flogo"
+var defaultLogLevel = "INFO"
 
 func SetDefaultLogger(name string) {
 	defaultLoggerName = name

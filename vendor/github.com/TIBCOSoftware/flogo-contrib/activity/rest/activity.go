@@ -153,8 +153,8 @@ func (a *RESTActivity) Eval(context activity.Context) (done bool, err error) {
 	}
 
 	// Skip ssl validation
-	skipSsl := context.GetInput(ivSkipSsl).(bool)
-	if skipSsl {
+	skipSsl, ok := context.GetInput(ivSkipSsl).(bool)
+	if ok && skipSsl {
 		httpTransportSettings.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 

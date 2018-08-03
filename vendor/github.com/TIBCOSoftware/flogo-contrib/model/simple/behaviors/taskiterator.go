@@ -5,6 +5,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/model"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"reflect"
 )
 
 // SimpleIteratorTask implements model.TaskBehavior
@@ -46,6 +47,10 @@ func (tb *IteratorTask) Eval(ctx model.TaskContext) (evalResult model.EvalResult
 				return model.EVAL_FAIL, err
 			}
 			itx = NewIntIterator(count)
+		case int64:
+			itx = NewIntIterator(int(t))
+		case float64:
+			itx = NewIntIterator(int(t))
 		case int:
 			count := iterateOn.(int)
 			itx = NewIntIterator(count)
@@ -54,7 +59,14 @@ func (tb *IteratorTask) Eval(ctx model.TaskContext) (evalResult model.EvalResult
 		case []interface{}:
 			itx = NewArrayIterator(t)
 		default:
-			return model.EVAL_FAIL, fmt.Errorf("unsupported type '%s' for iterateOn", t)
+			val := reflect.ValueOf(iterateOn)
+			rt := val.Kind()
+
+			if rt == reflect.Array || rt == reflect.Slice {
+				itx = NewReflectIterator(val)
+			} else {
+				return model.EVAL_FAIL, fmt.Errorf("unsupported type '%s' for iterateOn", t)
+			}
 		}
 
 		itxAttr, _ = data.NewAttribute("_iterator", data.TypeAny, itx)
@@ -133,12 +145,12 @@ func getIterateValue(ctx model.TaskContext) (value interface{}, set bool) {
 
 	strVal, ok := value.(string)
 	if ok {
-		if strVal[0] == '$' {
-			val, err := ctx.Resolve(strVal)
-			if err != nil {
-				return val, true
-			}
+		val, err := ctx.Resolve(strVal)
+		if err != nil {
+			log.Errorf("Get iterate value failed, due to %s", err.Error())
+			return nil, false
 		}
+		return val, true
 	}
 
 	return value, true
@@ -257,4 +269,37 @@ func NewObjectIterator(data map[string]interface{}) *ObjectIterator {
 	}
 
 	return &ObjectIterator{keyMap: keyMap, data: data, current: -1}
+}
+
+type ReflectIterator struct {
+	current int
+	val     reflect.Value
+}
+
+func (itx *ReflectIterator) Key() interface{} {
+	return itx.current
+}
+
+func (itx *ReflectIterator) Value() interface{} {
+	e := itx.val.Index(itx.current)
+	return e.Interface()
+}
+
+func (itx *ReflectIterator) HasNext() bool {
+	if itx.current >= itx.val.Len() {
+		return false
+	}
+	return true
+}
+
+func (itx *ReflectIterator) next() bool {
+	itx.current++
+	if itx.current >= itx.val.Len() {
+		return false
+	}
+	return true
+}
+
+func NewReflectIterator(val reflect.Value) *ReflectIterator {
+	return &ReflectIterator{val: val, current: -1}
 }

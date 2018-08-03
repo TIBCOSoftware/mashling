@@ -12,6 +12,8 @@ type Config struct {
 	Data     json.RawMessage  `json:"data"`
 	Mappings *data.IOMappings `json:"mappings"`
 
+	Act      Action
+
 	// Deprecated: No longer used
 	Id string `json:"id"`
 	// Deprecated: No longer used

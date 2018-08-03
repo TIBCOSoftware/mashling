@@ -1,0 +1,24 @@
+{
+  "name": "flogo-reply",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/actreply",
+  "version": "0.0.1",
+  "title": "Reply To Trigger",
+  "description": "Simple Reply Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/actreply",
+  "reply": true,
+  "input":[
+    {
+      "name": "mappings",
+      "type": "array",
+      "required": true,
+      "display": {
+        "name": "Mapper",
+        "type": "mapper",
+        "mapperOutputScope" : "action.output"
+      }
+    }
+  ],
+  "output": [
+  ]
+}

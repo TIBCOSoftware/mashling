@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"reflect"
 )
 
 //todo consolidate and optimize code
@@ -27,7 +28,24 @@ func PathGetValue(value interface{}, path string) (interface{}, error) {
 		} else if objVal, ok := value.(*ComplexObject); ok {
 			return PathGetValue(objVal.Value, path)
 		} else {
-			return nil, fmt.Errorf("unable to evaluate path: %s", path)
+
+			val := reflect.ValueOf(value)
+			if val.Kind() == reflect.Ptr {
+				val = val.Elem()
+			}
+
+			if val.Kind() == reflect.Struct {
+				fieldName,npIdx := getObjectKey(path[1:])
+				newPath = path[npIdx:]
+				f := val.FieldByName(fieldName)
+				if f.IsValid() {
+					return f.Interface(), nil
+				}
+
+				return nil, nil
+			} else {
+				return nil, fmt.Errorf("unable to evaluate path: %s", path)
+			}
 		}
 	} else if strings.HasPrefix(path, `["`) {
 		if objVal, ok := value.(map[string]interface{}); ok {
@@ -189,6 +207,8 @@ func pathGetSetObjValue(objValue map[string]interface{}, path string, value inte
 
 	return val, path[npIdx:], nil
 }
+
+
 
 func pathGetSetParamsValue(params map[string]string, path string, value interface{}, set bool) (interface{}, string, error) {
 

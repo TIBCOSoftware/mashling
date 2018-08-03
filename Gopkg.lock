@@ -27,16 +27,24 @@
     "action/flow/test",
     "action/flow/tester",
     "action/flow/util",
+    "activity/actreply",
+    "activity/actreturn",
+    "activity/aggregate",
+    "activity/aggregate/aggregator",
     "activity/app",
     "activity/awsiot",
+    "activity/awssns",
     "activity/coap",
+    "activity/couchbase",
     "activity/counter",
     "activity/error",
     "activity/kafkapub",
     "activity/lambda",
     "activity/log",
-    "activity/reply",
+    "activity/mapper",
+    "activity/mongodb",
     "activity/rest",
+    "activity/subflow",
     "activity/twilio",
     "activity/wsmessage",
     "model/simple",
@@ -49,8 +57,8 @@
     "trigger/rest",
     "trigger/rest/cors"
   ]
-  revision = "b9a1275df489a54ef85f1628949ceedefefd65c1"
-  version = "v0.5.2"
+  revision = "49037a4e7b8adbe8fe55132ad314c3875d487da2"
+  version = "v0.5.5"
 
 [[projects]]
   name = "github.com/TIBCOSoftware/flogo-lib"
@@ -72,6 +80,13 @@
     "core/mapper/exprmapper/expression/gocc/parser",
     "core/mapper/exprmapper/expression/gocc/token",
     "core/mapper/exprmapper/funcexprtype",
+    "core/mapper/exprmapper/function/array/length",
+    "core/mapper/exprmapper/function/number/random",
+    "core/mapper/exprmapper/function/string/concat",
+    "core/mapper/exprmapper/function/string/equals",
+    "core/mapper/exprmapper/function/string/equalsignorecase",
+    "core/mapper/exprmapper/function/string/length",
+    "core/mapper/exprmapper/function/string/substring",
     "core/mapper/exprmapper/json",
     "core/mapper/exprmapper/json/field",
     "core/mapper/exprmapper/ref",
@@ -82,8 +97,8 @@
     "util",
     "util/managed"
   ]
-  revision = "14ecc2c23809d781ec0855fa72725fe4517f84c1"
-  version = "v0.5.2"
+  revision = "7ba0fc08f4d79fcd821f6aee6326d1348a728cf2"
+  version = "v0.5.5"
 
 [[projects]]
   name = "github.com/apache/thrift"
@@ -111,8 +126,8 @@
     "lambda/messages",
     "lambdacontext"
   ]
-  revision = "fafa7e49388b8991caf99308e80655ba91816b72"
-  version = "v1.1.0"
+  revision = "4d30d0ff60440c2d0480a15747c96ee71c3c53d4"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
@@ -145,10 +160,17 @@
     "private/protocol/restjson",
     "private/protocol/xml/xmlutil",
     "service/lambda",
+    "service/sns",
     "service/sts"
   ]
   revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
   version = "v1.13.17"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/buger/jsonparser"
+  packages = ["."]
+  revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
 
 [[projects]]
   name = "github.com/chewxy/hm"
@@ -167,6 +189,12 @@
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
 
 [[projects]]
   name = "github.com/dlclark/regexp2"
@@ -250,6 +278,12 @@
   version = "v2.1.2"
 
 [[projects]]
+  name = "github.com/go-stack/stack"
+  packages = ["."]
+  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
+  version = "v1.7.0"
+
+[[projects]]
   name = "github.com/gogo/protobuf"
   packages = [
     "io",
@@ -278,6 +312,12 @@
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
 
 [[projects]]
+  name = "github.com/google/uuid"
+  packages = ["."]
+  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
+  version = "0.2"
+
+[[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
   revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
@@ -288,6 +328,12 @@
   packages = ["."]
   revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
   version = "v1.6.1"
+
+[[projects]]
+  name = "github.com/gorilla/schema"
+  packages = ["."]
+  revision = "d0e4c24cff97ae983e9847e0ed5a02dc10013d41"
+  version = "v1.0.2"
 
 [[projects]]
   branch = "master"
@@ -353,6 +399,61 @@
   name = "github.com/mashling-support/jsonschema"
   packages = ["."]
   revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
+
+[[projects]]
+  name = "github.com/mongodb/mongo-go-driver"
+  packages = [
+    "bson",
+    "bson/builder",
+    "bson/decimal",
+    "bson/elements",
+    "bson/objectid",
+    "bson/parser",
+    "bson/parser/ast",
+    "core/address",
+    "core/auth",
+    "core/auth/internal/gssapi",
+    "core/command",
+    "core/compressor",
+    "core/connection",
+    "core/connstring",
+    "core/description",
+    "core/dispatch",
+    "core/event",
+    "core/option",
+    "core/readconcern",
+    "core/readpref",
+    "core/result",
+    "core/session",
+    "core/tag",
+    "core/topology",
+    "core/uuid",
+    "core/version",
+    "core/wiremessage",
+    "core/writeconcern",
+    "internal",
+    "mongo",
+    "mongo/aggregateopt",
+    "mongo/changestreamopt",
+    "mongo/clientopt",
+    "mongo/collectionopt",
+    "mongo/countopt",
+    "mongo/dbopt",
+    "mongo/deleteopt",
+    "mongo/distinctopt",
+    "mongo/dropcollopt",
+    "mongo/findopt",
+    "mongo/indexopt",
+    "mongo/insertopt",
+    "mongo/listcollectionopt",
+    "mongo/listdbopt",
+    "mongo/mongoopt",
+    "mongo/replaceopt",
+    "mongo/runcmdopt",
+    "mongo/updateopt"
+  ]
+  revision = "8df56f107cdd485351eb2523992c3364114b4b2e"
+  version = "v0.0.10"
 
 [[projects]]
   branch = "master"
@@ -442,7 +543,7 @@
   branch = "master"
   name = "github.com/sfreiberg/gotwilio"
   packages = ["."]
-  revision = "a0d4e5000ed679a67a69d2f92b62d06320bc5d09"
+  revision = "8fb7259ba8bf8c1b0e16e8568da10785ac29c79f"
 
 [[projects]]
   name = "github.com/spf13/cobra"
@@ -489,7 +590,10 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "pbkdf2",
+    "ssh/terminal"
+  ]
   revision = "88942b9c40a4c9d203b82b3731787b672d6e809b"
 
 [[projects]]
@@ -509,6 +613,12 @@
     "websocket"
   ]
   revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
   branch = "master"
@@ -613,6 +723,30 @@
   version = "v1.2"
 
 [[projects]]
+  name = "gopkg.in/couchbase/gocb.v1"
+  packages = ["."]
+  revision = "fdc4fce6da1cc8ddb898ed6170a80f56411dd791"
+  version = "v1.4"
+
+[[projects]]
+  name = "gopkg.in/couchbase/gocbcore.v7"
+  packages = ["."]
+  revision = "e7fffa66c6958759a533a0857083f058e714dc60"
+  version = "v7.1.3"
+
+[[projects]]
+  name = "gopkg.in/couchbaselabs/gocbconnstr.v1"
+  packages = ["."]
+  revision = "896fab9ddffac355b8b5be5763ffcd15a78c475d"
+  version = "v1.0.2"
+
+[[projects]]
+  name = "gopkg.in/couchbaselabs/jsonx.v1"
+  packages = ["."]
+  revision = "5b7baa20429a46a5543ee259664cc86502738cad"
+  version = "v1.0.0"
+
+[[projects]]
   name = "gopkg.in/ldap.v2"
   packages = ["."]
   revision = "bb7a9ca6e4fbc2129e3db588a34bc970ffe811a9"
@@ -665,6 +799,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bcea0677a94fca7611d5b1ff2c6cfccf640426bfab87e917df46a4e5a8f99c70"
+  inputs-digest = "b8a96f2a8090584d41f480d37cb29c2a03198eafbe768327e49e1389540b6606"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -365,6 +365,8 @@ func (inst *IndependentInstance) HandleGlobalError(containerInst *Instance, err 
 		return
 	}
 
+	containerInst.isHandlingError = true
+
 	flowBehavior := inst.flowModel.GetFlowBehavior()
 
 	//not currently handling error, so check if it has an error handler
@@ -398,6 +400,8 @@ func (inst *IndependentInstance) HandleGlobalError(containerInst *Instance, err 
 
 				//inst.scheduleEval(host)
 			}
+		}  else {
+			 inst.returnError = err
 		}
 	}
 }

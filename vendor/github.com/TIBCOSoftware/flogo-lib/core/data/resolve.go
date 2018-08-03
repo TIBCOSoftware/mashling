@@ -125,14 +125,23 @@ type ResolutionDetails struct {
 func GetResolutionDetails(toResolve string) (*ResolutionDetails, error) {
 
 	//todo optimize, maybe tokenize first
+	details := &ResolutionDetails{}
+
+	bracketIdx := strings.Index(toResolve, "]")
+	exprLen := len(toResolve)
+	if bracketIdx == (exprLen-1) && (strings.HasPrefix(toResolve, "property") || strings.HasPrefix(toResolve, "env")) {
+		//$property[] or $env[] resolution
+		itemIdx := strings.Index(toResolve, "[")
+		details.ResolverName = toResolve[:itemIdx]
+		details.Property = toResolve[itemIdx+1 : exprLen-1]
+		return details, nil
+	}
 
 	dotIdx := strings.Index(toResolve, ".")
-
 	if dotIdx == -1 {
 		return nil, fmt.Errorf("invalid resolution expression [%s]", toResolve)
 	}
 
-	details := &ResolutionDetails{}
 	itemIdx := strings.Index(toResolve[:dotIdx], "[")
 
 	if itemIdx != -1 {

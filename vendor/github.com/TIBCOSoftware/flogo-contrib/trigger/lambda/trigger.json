@@ -4,8 +4,8 @@
   "shim": "plugin",
   "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/lambda",
   "version": "0.0.1",
-  "title": "Start Flow as a function in Lambda",
-  "description": "Simple Lambda Trigger",
+  "title": "Lambda Trigger",
+  "description": "AWS Lambda Trigger used to start a flow as a function.",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/lambda",
   "settings": [
   ],
@@ -22,7 +22,12 @@
   "reply": [
     {
       "name": "data",
-      "type": "object"
+      "type": "any"
+    },
+    {
+      "name": "status",
+      "type": "integer",
+      "value": 200
     }
   ]
 }

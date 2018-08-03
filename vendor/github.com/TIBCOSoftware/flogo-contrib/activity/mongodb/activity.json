@@ -1,0 +1,60 @@
+{
+  "name": "flogo-mongodb",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/mongodb",
+  "version": "0.0.1",
+  "title": "MongoDB",
+  "description": "Manage MongoDB documents in a specified collection",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/mongodb",
+  "input": [
+    {
+      "name": "uri",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "dbName",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "collection",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "method",
+      "type": "string",
+      "allowed": [
+        "DELETE",
+        "INSERT",
+        "REPLACE",
+        "UPDATE"
+      ],
+      "value": "INSERT",
+      "required": true
+    },
+    {
+      "name": "keyName",
+      "type": "string"
+    },
+    {
+      "name": "keyValue",
+      "type": "string"
+    },
+    {
+      "name": "data",
+      "type": "object"
+    }
+  ],
+  "output": [
+    {
+      "name": "output",
+      "type": "any"
+    },
+    {
+      "name": "count",
+      "type": "integer"
+    }
+  ]
+}

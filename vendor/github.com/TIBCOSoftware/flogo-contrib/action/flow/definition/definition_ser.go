@@ -297,7 +297,7 @@ func resolveSettingValue(setting string, value interface{}) interface{} {
 	if ok && len(strVal) > 0 && strVal[0] == '$' {
 		v, err := data.GetBasicResolver().Resolve(strVal, nil)
 
-		if err != nil {
+		if err == nil {
 
 			logger.Debugf("Resolved setting [%s: %s] to : %v", setting, value, v)
 			return v

@@ -87,39 +87,16 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 
 		//TODO this might never be call.. try to delete
 		stringVal, _ := a.From.(string)
-		if expression.IsExpression(stringVal) {
-			exp, err := expression.NewExpression(stringVal).GetExpression()
+		exp, err := expression.ParseExpression(stringVal)
+		if err == nil {
+			//flogo expression
+			expValue, err := exp.EvalWithScope(inputScope, resolver)
 			if err != nil {
-				log.Errorf("New expression from %s error: %s", stringVal, err.Error())
+				err = fmt.Errorf("Eval expression from scope error: %s", err.Error())
+				log.Error(err)
 				return err
 			}
-
-			fromValue, err = exp.EvalWithScope(inputScope, resolver)
-			if err != nil {
-				log.Errorf("Eval expression from scope error: %s", err.Error())
-				return err
-			}
-
-		} else if expression.IsFunction(stringVal) {
-			log.Debugf("The mapping ref is a function")
-			function, err := expression.NewFunctionExpression(stringVal).GetFunction()
-			if err != nil {
-				log.Errorf("New function from %s error: %s", stringVal, err.Error())
-				return err
-			}
-			log.Debugf("Function is:%+v", function)
-			funcValue, err := function.EvalWithScope(inputScope, resolver)
-			if err != nil {
-				log.Errorf("Eval function error %s", err.Error())
-				return err
-			}
-
-			if funcValue != nil && len(funcValue) == 1 {
-				fromValue = funcValue[0]
-			} else if funcValue != nil && len(funcValue) > 1 {
-				fromValue = funcValue[0]
-			}
-
+			fromValue = expValue
 		} else {
 			if strings.EqualFold(stringVal, NEWARRAY) {
 				log.Debugf("Init a new array for field", a.To)
@@ -135,13 +112,17 @@ func (a *ArrayMapping) DoArrayMapping(inputScope, outputScope data.Scope, resolv
 		//Check if fields is empty for primitive array mapping
 		if a.Fields == nil || len(a.Fields) <= 0 {
 			//Set value directlly to MapTo field
-			return setValueToOutputScopde(a.To, outputScope, fromValue, resolver)
+			return SetValueToOutputScope(a.To, outputScope, fromValue)
 		}
 
 		//Loop array
 		fromArrayvalues, ok := fromValue.([]interface{})
 		if !ok {
-			return fmt.Errorf("Failed to get array value from [%s], due to error- [%s] value not an array", a.From, a.From)
+			//Try to convert to array.
+			fromArrayvalues, err = data.CoerceToArray(fromValue)
+			if err != nil {
+				return fmt.Errorf("Failed to get array value from [%s], due to error- [%s] value not an array", a.From, a.From)
+			}
 		}
 
 		toValue, err := toRef.GetValueFromOutputScope(outputScope)
@@ -367,7 +348,6 @@ func getFieldValue(value interface{}, fieldName string) interface{} {
 }
 
 func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputScope data.Scope, resolver data.Resolver) (interface{}, error) {
-
 	var fromValue interface{}
 	var err error
 
@@ -377,48 +357,16 @@ func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputSc
 		//Non string value
 		return expressionRef, nil
 	}
-	if expression.IsTernaryExpression(stringVal) {
-		exp, err := expression.NewExpression(stringVal).GetTernaryExpression()
+	exp, err := expression.ParseExpression(stringVal)
+	if err == nil {
+		//flogo expression
+		expValue, err := exp.EvalWithData(object, inputScope, resolver)
 		if err != nil {
-			return nil, fmt.Errorf("Parsing ternary expression [%s] error - %s", stringVal, err.Error())
-		}
-
-		funcValue, err := exp.EvalWithScope(inputScope, resolver)
-		if err != nil {
-			return nil, fmt.Errorf("Execution failed for mapping [%s] due to error - %s", stringVal, err.Error())
-		}
-		log.Debugf("Ternary expression value: %+v", funcValue)
-		return funcValue, nil
-	} else if expression.IsExpression(stringVal) {
-		exp, err := expression.NewExpression(stringVal).GetExpression()
-		if err != nil {
-			log.Errorf("Parsing expression from [%s] error - %s", stringVal, err.Error())
+			err = fmt.Errorf("Execution failed for mapping [%s] due to error - %s", stringVal, err.Error())
+			log.Error(err)
 			return nil, err
 		}
-
-		fromValue, err = exp.EvalWithScope(inputScope, resolver)
-		if err != nil {
-			return nil, fmt.Errorf("Execution failed for mapping [%s] due to error - %s", stringVal, err.Error())
-		}
-
-	} else if expression.IsFunction(stringVal) {
-		log.Debugf("The mapping ref is a function")
-		function, err := expression.NewFunctionExpression(stringVal).GetFunction()
-		if err != nil {
-			log.Errorf("Parsing function from [%s] error - %s", stringVal, err.Error())
-			return nil, err
-		}
-		funcValue, err := function.EvalWithData(object, inputScope, resolver)
-		if err != nil {
-			return nil, fmt.Errorf("Execution failed for mapping [%s] due to error - %s", stringVal, err.Error())
-		}
-
-		if funcValue != nil && len(funcValue) == 1 {
-			fromValue = funcValue[0]
-		} else if funcValue != nil && len(funcValue) > 1 {
-			fromValue = funcValue[0]
-		}
-
+		fromValue = expValue
 	} else {
 		if ref.IsArrayMapping(stringVal) {
 			reference := ref.GetFieldNameFromArrayRef(stringVal)
@@ -437,7 +385,6 @@ func GetValueFromArrayRef(object interface{}, expressionRef interface{}, inputSc
 		}
 
 	}
-
-	return fromValue, err
+	return fromValue, nil
 
 }

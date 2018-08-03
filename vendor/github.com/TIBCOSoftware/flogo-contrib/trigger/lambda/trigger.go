@@ -6,6 +6,7 @@ import (
 	"flag"
 	syslog "log"
 
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 
@@ -50,7 +51,8 @@ func (t *LambdaTrigger) Initialize(ctx trigger.InitContext) error {
 	return nil
 }
 
-func Invoke() (interface{}, error) {
+// Invoke starts the trigger and invokes the action registered in the handler
+func Invoke() (map[string]interface{}, error) {
 
 	log.Info("Starting AWS Lambda Trigger")
 	syslog.Println("Starting AWS Lambda Trigger")
@@ -84,19 +86,24 @@ func Invoke() (interface{}, error) {
 	//select handler, use 0th for now
 	handler := singleton.handlers[0]
 
-	data := map[string]interface{}{
+	inputData := map[string]interface{}{
 		"context": lambdaCtx,
 		"evt":     evt,
 	}
 
-	results, err := handler.Handle(context.Background(), data)
+	results, err := handler.Handle(context.Background(), inputData)
 
 	var replyData interface{}
+	var replyStatus int
 
 	if len(results) != 0 {
 		dataAttr, ok := results["data"]
 		if ok {
 			replyData = dataAttr.Value()
+		}
+		code, ok := results["status"]
+		if ok {
+			replyStatus, _ = data.CoerceToInteger(code.Value())
 		}
 	}
 
@@ -105,7 +112,11 @@ func Invoke() (interface{}, error) {
 		return nil, err
 	}
 
-	return replyData, err
+	flowResponse := map[string]interface{}{
+		"data":   replyData,
+		"status": replyStatus,
+	}
+	return flowResponse, err
 }
 
 func (t *LambdaTrigger) Start() error {

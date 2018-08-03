@@ -1,3 +1,7 @@
+---
+title: Lambda
+weight: 4704
+---
 # tibco-lambda
 This trigger provides your flogo application the ability to start a flow as an AWS Lambda function
 

@@ -1,11 +1,13 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors"
@@ -133,19 +135,6 @@ func newActionHandler(rt *RestTrigger, handler *trigger.Handler) httprouter.Hand
 			pathParams[param.Key] = param.Value
 		}
 
-		var content interface{}
-		err := json.NewDecoder(r.Body).Decode(&content)
-		if err != nil {
-			switch {
-			case err == io.EOF:
-				// empty body
-				//todo should handler say if content is expected?
-			case err != nil:
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-		}
-
 		queryValues := r.URL.Query()
 		queryParams := make(map[string]string, len(queryValues))
 		header := make(map[string]string, len(r.Header))
@@ -163,7 +152,43 @@ func newActionHandler(rt *RestTrigger, handler *trigger.Handler) httprouter.Hand
 			"pathParams":  pathParams,
 			"queryParams": queryParams,
 			"header":      header,
-			"content":     content,
+		}
+
+		// Check the HTTP Header Content-Type
+		contentType := r.Header.Get("Content-Type")
+		switch contentType {
+		case "application/x-www-form-urlencoded":
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(r.Body)
+			s := buf.String()
+			m, err := url.ParseQuery(s)
+			content := make(map[string]interface{}, 0)
+			if err != nil {
+				log.Errorf("Error while parsing query string: %s", err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			}
+			for key, val := range m {
+				if len(val) == 1 {
+					content[key] = val[0]
+				} else {
+					content[key] = val[0]
+				}
+			}
+			triggerData["content"] = content
+		default:
+			var content interface{}
+			err := json.NewDecoder(r.Body).Decode(&content)
+			if err != nil {
+				switch {
+				case err == io.EOF:
+					// empty body
+					//todo should handler say if content is expected?
+				case err != nil:
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+			}
+			triggerData["content"] = content
 		}
 
 		results, err := handler.Handle(context.Background(), triggerData)

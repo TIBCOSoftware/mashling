@@ -45,15 +45,23 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 		//create handlers for that trigger and init
 		for _, hConfig := range tConfig.Handlers {
 
-			//create the action
-			actionFactory := action.GetFactory(hConfig.Action.Ref)
-			if actionFactory == nil {
-				return nil, fmt.Errorf("Action Factory '%s' not registered", hConfig.Action.Ref)
-			}
+			var act action.Action
+			var err error
 
-			act, err := actionFactory.New(hConfig.Action)
-			if err != nil {
-				return nil, err
+			//use action if already associated with Handler
+			if hConfig.Action.Act != nil {
+				act = hConfig.Action.Act
+			} else {
+				//create the action
+				actionFactory := action.GetFactory(hConfig.Action.Ref)
+				if actionFactory == nil {
+					return nil, fmt.Errorf("Action Factory '%s' not registered", hConfig.Action.Ref)
+				}
+
+				act, err = actionFactory.New(hConfig.Action)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			handler := trigger.NewHandler(hConfig, act, trg.Metadata().Output, trg.Metadata().Reply, runner)

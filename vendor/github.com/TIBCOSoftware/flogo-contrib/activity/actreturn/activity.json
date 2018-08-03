@@ -1,0 +1,24 @@
+{
+  "name": "flogo-return",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/actreturn",
+  "version": "0.0.1",
+  "title": "Return",
+  "description": "Simple Return Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/actreturn",
+  "return": true,
+  "input":[
+    {
+      "name": "mappings",
+      "type": "array",
+      "required": true,
+      "display": {
+        "name": "Mapper",
+        "type": "mapper",
+        "mapperOutputScope" : "action.output"
+      }
+    }
+  ],
+  "output": [
+  ]
+}

@@ -1,3 +1,7 @@
+---
+title: CoAP
+weight: 4702
+---
 # tibco-coap
 This trigger provides your flogo application the ability to start a flow via CoAP
 

@@ -4,7 +4,7 @@
   "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage",
   "version": "0.0.1",
   "title": "Send WebSocket Message",
-  "description": "This activity sends a message to a WebSocket enabled server like TIBCO eFTL",
+  "description": "This activity sends a message to a WebSocket enabled servers",
   "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/wsmessage",
   "input":[
     {

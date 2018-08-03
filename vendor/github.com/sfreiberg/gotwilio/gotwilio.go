@@ -5,7 +5,19 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
+
+const (
+	baseURL       = "https://api.twilio.com/2010-04-01"
+	videoURL      = "https://video.twilio.com"
+	clientTimeout = time.Second * 30
+)
+
+// The default http.Client that is used if none is specified
+var defaultClient = &http.Client{
+	Timeout: time.Second * 30,
+}
 
 // Twilio stores basic information important for connecting to the
 // twilio.com REST api such as AccountSid and AuthToken.
@@ -13,7 +25,11 @@ type Twilio struct {
 	AccountSid string
 	AuthToken  string
 	BaseUrl    string
+	VideoUrl   string
 	HTTPClient *http.Client
+
+	APIKeySid    string
+	APIKeySecret string
 }
 
 // Exception is a representation of a twilio exception.
@@ -31,13 +47,23 @@ func NewTwilioClient(accountSid, authToken string) *Twilio {
 
 // Create a new Twilio client, optionally using a custom http.Client
 func NewTwilioClientCustomHTTP(accountSid, authToken string, HTTPClient *http.Client) *Twilio {
-	twilioUrl := "https://api.twilio.com/2010-04-01" // Should this be moved into a constant?
-
 	if HTTPClient == nil {
-		HTTPClient = http.DefaultClient
+		HTTPClient = defaultClient
 	}
 
-	return &Twilio{accountSid, authToken, twilioUrl, HTTPClient}
+	return &Twilio{
+		AccountSid: accountSid,
+		AuthToken:  authToken,
+		BaseUrl:    baseURL,
+		VideoUrl:   videoURL,
+		HTTPClient: HTTPClient,
+	}
+}
+
+func (twilio *Twilio) WithAPIKey(apiKeySid string, apiKeySecret string) *Twilio {
+	twilio.APIKeySid = apiKeySid
+	twilio.APIKeySecret = apiKeySecret
+	return twilio
 }
 
 func (twilio *Twilio) post(formValues url.Values, twilioUrl string) (*http.Response, error) {
@@ -48,12 +74,7 @@ func (twilio *Twilio) post(formValues url.Values, twilioUrl string) (*http.Respo
 	req.SetBasicAuth(twilio.AccountSid, twilio.AuthToken)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	client := twilio.HTTPClient
-	if client == nil {
-		client = http.DefaultClient
-	}
-
-	return client.Do(req)
+	return twilio.do(req)
 }
 
 func (twilio *Twilio) get(twilioUrl string) (*http.Response, error) {
@@ -63,9 +84,23 @@ func (twilio *Twilio) get(twilioUrl string) (*http.Response, error) {
 	}
 	req.SetBasicAuth(twilio.AccountSid, twilio.AuthToken)
 
+	return twilio.do(req)
+}
+
+func (twilio *Twilio) delete(twilioUrl string) (*http.Response, error) {
+	req, err := http.NewRequest("DELETE", twilioUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.SetBasicAuth(twilio.AccountSid, twilio.AuthToken)
+
+	return twilio.do(req)
+}
+
+func (twilio *Twilio) do(req *http.Request) (*http.Response, error) {
 	client := twilio.HTTPClient
 	if client == nil {
-		client = http.DefaultClient
+		client = defaultClient
 	}
 
 	return client.Do(req)

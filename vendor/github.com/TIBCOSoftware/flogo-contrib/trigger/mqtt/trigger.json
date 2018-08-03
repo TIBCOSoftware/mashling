@@ -31,10 +31,6 @@
       "type": "string"
     },
     {
-      "name": "topic",
-      "type": "string"
-    },
-    {
       "name": "qos",
       "type": "double"
     },

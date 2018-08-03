@@ -9,6 +9,7 @@ import (
 // Metadata is the metadata for the Activity
 type Metadata struct {
 	ID             string
+	Version        string
 	Settings       map[string]*data.Attribute
 	Input          map[string]*data.Attribute
 	Output         map[string]*data.Attribute
@@ -31,8 +32,9 @@ func NewMetadata(jsonMetadata string) *Metadata {
 func (md *Metadata) UnmarshalJSON(b []byte) error {
 
 	ser := &struct {
-		Name string `json:"name"`
-		Ref  string `json:"ref"`
+		Name    string `json:"name"`
+		Version string `json:"version"`
+		Ref     string `json:"ref"`
 
 		Settings  []*data.Attribute `json:"settings"`
 		Input     []*data.Attribute `json:"input"`
@@ -57,6 +59,8 @@ func (md *Metadata) UnmarshalJSON(b []byte) error {
 		// TODO remove and add a proper error once the BC is removed
 		md.ID = ser.Name
 	}
+
+	md.Version = ser.Version
 
 	md.ProducesResult = ser.Reply || ser.Return
 	md.DynamicIO = ser.DynamicIO
