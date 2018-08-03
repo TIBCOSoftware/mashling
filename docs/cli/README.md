@@ -378,7 +378,7 @@ Example Usage:
 ```
 
 ##### Note
-Generate command accepts basic proto file and generates stub files with `protoc` binary. Tool also generates support files for trigger and gRPC service in path `<MASHLING-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
+Generate command accepts basic proto file and generates stub file with `protoc` binary. Tool also generates support files for trigger and gRPC service in path `<MASHLING-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
 
 1. Unary methods alone accepted. Implimentaion code is auto generated in above mentioned path.
 2. RPC method parameters should be declared in proto itself.
