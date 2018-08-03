@@ -79,6 +79,20 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 		log.Error("error parsing services")
 		return false, err
 	}
+
+	code, data, err := ExecuteMashling(payload, identifier, instance, routes, services)
+
+	replyHandler := context.FlowDetails().ReplyHandler()
+
+	if replyHandler != nil {
+		replyHandler.Reply(code, data, nil)
+		return true, err
+	}
+	log.Info("no response conditions evaluated to true")
+	return true, err
+}
+
+func ExecuteMashling(payload interface{}, identifier string, instance string, routes []types.Route, services []types.Service) (code int, output interface{}, err error) {
 	// Create services map
 	serviceMap := make(map[string]types.Service)
 	for _, service := range services {
@@ -103,7 +117,7 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 	vmDefaults["env"] = envFlags
 	vm, err := mservice.NewVM(vmDefaults)
 	if err != nil {
-		return false, err
+		return -1, nil, err
 	}
 
 	// Evaluate route conditions to select which one to execute.
@@ -131,7 +145,7 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 			vmDefaults["async"] = true
 			asyncVM, vmerr := mservice.NewVM(vmDefaults)
 			if vmerr != nil {
-				return false, vmerr
+				return -1, nil, vmerr
 			}
 			go executeRoute(routeToExecute, serviceMap, &executionContext, asyncVM)
 			vm.SetPrimitiveInVM("async", true)
@@ -145,9 +159,7 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 		log.Info("no route to execute, continuing to reply handler")
 	}
 
-	replyHandler := context.FlowDetails().ReplyHandler()
-
-	if replyHandler != nil && routeToExecute != nil {
+	if routeToExecute != nil {
 		for _, response := range routeToExecute.Responses {
 			var truthiness bool
 			truthiness, err = evaluateTruthiness(response.Condition, vm)
@@ -157,7 +169,7 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 			if truthiness {
 				output, oErr := translateMappings(&executionContext, map[string]interface{}{"code": response.Output.Code})
 				if oErr != nil {
-					return false, oErr
+					return -1, nil, oErr
 				}
 				var code int
 				codeElement, ok := output["code"]
@@ -186,25 +198,23 @@ func (a *MashlingCore) Eval(context activity.Context) (done bool, err error) {
 				if ok {
 					data, oErr = translateMappings(&executionContext, nestedData)
 					if oErr != nil {
-						return false, oErr
+						return -1, nil, oErr
 					}
 				} else {
 					interimData, dErr := translateMappings(&executionContext, map[string]interface{}{"data": response.Output.Data})
 					if dErr != nil {
-						return false, dErr
+						return -1, nil, dErr
 					}
 					data, ok = interimData["data"]
 					if !ok {
-						return false, errors.New("cannot extract data from response output")
+						return -1, nil, errors.New("cannot extract data from response output")
 					}
 				}
-				replyHandler.Reply(code, data, nil)
-				return true, err
+				return code, data, err
 			}
 		}
 	}
-	log.Info("no response conditions evaluated to true")
-	return true, err
+	return 0, nil, err
 }
 
 func executeRoute(route *types.Route, services map[string]types.Service, executionContext *map[string]interface{}, vm *mservice.VM) (err error) {
