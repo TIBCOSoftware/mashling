@@ -17,21 +17,21 @@ const (
 
 type MashlingAction struct {
 	ioMetadata *data.IOMetadata
-	routes     []types.Route
+	dispatch   types.Dispatch
 	services   []types.Service
 	identifier string
 	instance   string
 }
 
 type Data struct {
-	Routes     []types.Route   `json:"routes"`
-	Services   []types.Service `json:"services"`
+	Dispatch   json.RawMessage `json:"dispatch"`
+	Services   json.RawMessage `json:"services"`
 	Identifier string          `json:"identifier"`
 	Instance   string          `json:"Instance"`
 }
 
 //todo fix this
-var metadata = &action.Metadata{ID: "MashlingActionRef"}
+var metadata = &action.Metadata{ID: "github.com/TIBCOSoftware/mashling/pkg/flogo/action"}
 
 func init() {
 	action.RegisterFactory(MashlingActionRef, &Factory{})
@@ -45,15 +45,27 @@ func (f *Factory) Init() error {
 }
 
 func (f *Factory) New(config *action.Config) (action.Action, error) {
-
 	mAction := &MashlingAction{}
 	var actionData Data
 	err := json.Unmarshal(config.Data, &actionData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load mashling data: '%s' error '%s'", config.Id, err.Error())
 	}
-	mAction.routes = actionData.Routes
-	mAction.services = actionData.Services
+	// Parse routes
+	var dispatch types.Dispatch
+	err = json.Unmarshal(actionData.Dispatch, &dispatch)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse services
+	var services []types.Service
+	err = json.Unmarshal(actionData.Services, &services)
+	if err != nil {
+		return nil, err
+	}
+	mAction.dispatch = dispatch
+	mAction.services = services
 	mAction.identifier = actionData.Identifier
 	mAction.instance = actionData.Instance
 	return mAction, nil
@@ -68,7 +80,21 @@ func (m *MashlingAction) IOMetadata() *data.IOMetadata {
 }
 
 func (m *MashlingAction) Run(context context.Context, inputs map[string]*data.Attribute) (map[string]*data.Attribute, error) {
-
-	code, data, err := Core.ExecuteMashling(nil, m.identifier, m.instance, m.routes, m.services)
-	return nil, err
+	payload := make(map[string]interface{})
+	for k, v := range inputs {
+		payload[k] = v.Value()
+	}
+	code, mData, err := Core.ExecuteMashling(payload, m.identifier, m.instance, m.dispatch.Routes, m.services)
+	output := make(map[string]*data.Attribute)
+	codeAttr, err := data.NewAttribute("code", data.TypeInteger, code)
+	if err != nil {
+		return nil, err
+	}
+	output["code"] = codeAttr
+	dataAttr, err := data.NewAttribute("data", data.TypeObject, mData)
+	if err != nil {
+		return nil, err
+	}
+	output["data"] = dataAttr
+	return output, err
 }

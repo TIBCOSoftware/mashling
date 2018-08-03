@@ -93,6 +93,7 @@
     "core/trigger",
     "engine",
     "engine/runner",
+    "flogo",
     "logger",
     "util",
     "util/managed"
@@ -799,6 +800,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b8a96f2a8090584d41f480d37cb29c2a03198eafbe768327e49e1389540b6606"
+  inputs-digest = "bd77ca71540673809806dbbdff343d995e5746b165740366876cd6ea823e9c3e"
   solver-name = "gps-cdcl"
   solver-version = 1

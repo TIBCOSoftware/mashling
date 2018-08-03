@@ -21,6 +21,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	fData "github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/mashling/lib/util"
@@ -547,7 +548,20 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		}
 
 		if allowed {
-			replyCode, replyData, err = rt.runner.Run(context, action, actionId, nil)
+			results, eErr := rt.runner.RunAction(context, action, nil)
+			if eErr != nil {
+				err = eErr
+			}
+			if len(results) != 0 {
+				dataAttr, ok := results["data"]
+				if ok {
+					replyData = dataAttr.Value()
+				}
+				codeAttr, ok := results["code"]
+				if ok {
+					replyCode, _ = fData.CoerceToInteger(codeAttr.Value())
+				}
+			}
 		}
 
 		if err != nil {
