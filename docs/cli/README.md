@@ -8,7 +8,7 @@
 	* [Publish](#publish)
 		* [Mashery](#mashery)
 	  * [Consul](#consul)
-  * [gRPC](#gRPC)
+  * [gRPC](#grpc)
     * [Generate](#generate)
     * [Clean](#clean)
 
@@ -376,6 +376,16 @@ Example Usage:
 ```bash
 ./mashling-cli grpc generate -p /path/to/proto/file
 ```
+
+##### Note
+Generate command accepts basic proto file and generates stub files with `protoc` binary. Tool also generates support files for trigger and gRPC service in path `<MASHLING-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
+
+1. Unary methods alone accepted. Implimentaion code is auto generated in above mentioned path.
+2. RPC method parameters should be declared in proto itself.
+3. Method should have input and output request params of message type.<br>
+
+Sample proto file can be found [here](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes/grpc-to-grpc-gateway).
+
 #### <a name="clean"></a>Clean
 gRPC clean command is used to remove above generated files. Flags -p and -a are mutually exclusive, -a is used to remove all the generated files, -p is used to remove specific files related to given proto file.
 

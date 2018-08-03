@@ -593,6 +593,8 @@ Response handler:
   }
 }
 ```
+#### Note
+Currently gRPC mashling service will accept `grpc unary` methods. Support files for this service is generated with mashling cli command. CLI command usage is [here](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#grpc).
 
 ### <a name="responses"></a>Responses
 

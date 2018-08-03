@@ -188,5 +188,13 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
 }
 ```
 ### Sample Usage
+This trigger depends on support files which can be generated with cli tool by passing proto file. Usage of tool can be found [here](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#grpc).<br>
 
-Complete usage of this trigger can be found [here](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes).
+Sample usage of this trigger can be found in gRPC [recipe](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes).
+
+#### Note
+Currently This Trigger handles.<br>
+1. Unary methods propagation.
+2. GET method is supported in REST end point.
+3. REST path params can be mapped through params output key.
+4. Routing can be done based on method names.
