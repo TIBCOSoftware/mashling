@@ -113,13 +113,12 @@ func InitializeJWT(settings map[string]interface{}) (jwtService *JWT, err error)
 	return jwtService, err
 }
 
-// UpdateRequest updates a rJWT validation service with new provided settings.
+// UpdateRequest updates a JWT validation service with new provided settings.
 func (j *JWT) UpdateRequest(values map[string]interface{}) (err error) {
 	return j.setRequestValues(values)
 }
 
 func (j *JWT) setRequestValues(settings map[string]interface{}) error {
-	request := JWTRequest{}
 	for k, v := range settings {
 		switch k {
 		case "token":
@@ -136,7 +135,7 @@ func (j *JWT) setRequestValues(settings map[string]interface{}) error {
 			if !ok {
 				return errors.New("invalid type for key")
 			}
-			request.Key = key
+			j.Request.Key = key
 		case "signingMethod":
 			signingMethod, ok := v.(string)
 			if !ok {
