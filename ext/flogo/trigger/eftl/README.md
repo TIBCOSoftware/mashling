@@ -1,4 +1,4 @@
-# tibco-mqtt
+# eFTL
 This trigger provides your mashling application the ability to start a flow via EFTL.
 It supports content based conditional routing and distributed tracing.
 
