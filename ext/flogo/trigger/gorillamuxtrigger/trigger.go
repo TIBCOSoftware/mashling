@@ -527,19 +527,22 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			log.Debugf("dispatch not resolved. Continue with default action - %v", actionId)
 		}
 
-		//upgrade to websocket protocol if wsUpgradeRequired is defined to "true" in handler settings
+		// upgrade to websocket protocol if wsUpgradeRequired is defined to "true" in handler settings
 		wsUpgradeRequiredSetting, ok := handlerCfg.Settings["wsUpgradeRequired"]
 		wsUpgradeRequired := false
 		if ok && wsUpgradeRequiredSetting == "true" {
 			wsUpgradeRequired = true
 		}
 		if wsUpgradeRequired {
+			log.Debug("wsUpgradeRequired is defined to 'true'. upgrading to websocket protocol...")
 			var upgrader = websocket.Upgrader{}
 			conn, err := upgrader.Upgrade(w, r, nil)
 			if err != nil {
-				fmt.Println("Upgrade error", err)
+				serverSpan.SetTag("error", err.Error())
+				log.Errorf("websocket protocol upgrade error: %s", err.Error())
+				return
 			}
-			log.Debug("connection upgraded to websocket protocol")
+			log.Info("connection upgraded to websocket protocol")
 			//add connection object into context data
 			data["wsconnection"] = conn
 		}
@@ -555,67 +558,63 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		var replyCode int
 		var replyData interface{}
 
+		allowed := true
+		if isAuthEnabled(rt.config.Settings) {
+			log.Debugf("Authenticating the request.")
+			if !authenticate(r, rt.config.Settings) {
+				replyCode = http.StatusForbidden
+				allowed = false
+			}
+		}
+
+		if allowed {
+			replyCode, replyData, err = rt.runner.Run(context, action, actionId, nil)
+		}
+
+		if err != nil {
+			serverSpan.SetTag("error", err.Error())
+			log.Debugf("REST Trigger Error: %s", err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 		if wsUpgradeRequired {
-			_, _, err = rt.runner.Run(context, action, actionId, nil)
-			if err != nil {
-				serverSpan.SetTag("error", err.Error())
-				log.Debugf("REST Trigger Error: %s", err.Error())
-				return
-			}
-		} else {
-			allowed := true
-			if isAuthEnabled(rt.config.Settings) {
-				log.Debugf("Authenticating the request.")
-				if !authenticate(r, rt.config.Settings) {
-					replyCode = http.StatusForbidden
-					allowed = false
+			// ignore replyCode, replyData and just return in case of websocket protocol
+			return
+		}
+
+		if replyData != nil {
+			if object, ok := replyData.(map[string]interface{}); ok {
+				if mime, ok := object[util.MetaMIME]; ok {
+					if s, ok := mime.(string); ok {
+						w.Header().Set("Content-Type", s)
+					}
+				} else {
+					w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 				}
-			}
-
-			if allowed {
-				replyCode, replyData, err = rt.runner.Run(context, action, actionId, nil)
-			}
-
-			if err != nil {
-				serverSpan.SetTag("error", err.Error())
-				log.Debugf("REST Trigger Error: %s", err.Error())
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			if replyData != nil {
-				if object, ok := replyData.(map[string]interface{}); ok {
-					if mime, ok := object[util.MetaMIME]; ok {
-						if s, ok := mime.(string); ok {
-							w.Header().Set("Content-Type", s)
-						}
-					} else {
-						w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-					}
-					w.WriteHeader(replyCode)
-
-					data, err := util.Marshal(replyData)
-					if err != nil {
-						serverSpan.SetTag("error", err.Error())
-						http.Error(w, err.Error(), http.StatusBadRequest)
-						return
-					}
-					_, err = io.Copy(w, bytes.NewReader(data))
-					if err != nil {
-						serverSpan.SetTag("error", err.Error())
-						http.Error(w, err.Error(), http.StatusBadRequest)
-						return
-					}
-				}
-				return
-			}
-
-			if replyCode > 0 {
-				serverSpan.SetTag("http.status_code", replyCode)
 				w.WriteHeader(replyCode)
-			} else {
-				w.WriteHeader(http.StatusOK)
+
+				data, err := util.Marshal(replyData)
+				if err != nil {
+					serverSpan.SetTag("error", err.Error())
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				_, err = io.Copy(w, bytes.NewReader(data))
+				if err != nil {
+					serverSpan.SetTag("error", err.Error())
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
 			}
+			return
+		}
+
+		if replyCode > 0 {
+			serverSpan.SetTag("http.status_code", replyCode)
+			w.WriteHeader(replyCode)
+		} else {
+			w.WriteHeader(http.StatusOK)
 		}
 	}
 }
