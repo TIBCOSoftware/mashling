@@ -569,7 +569,7 @@ A sample `service` definition is:
 }
 ```
 
-An example `step` that invokes the above `ProxyWebSocketService` service using `payload` is:
+An example `step` that invokes the above `ProxyWebSocketService` service using `wsconnection` is:
 
 ```json
 {
