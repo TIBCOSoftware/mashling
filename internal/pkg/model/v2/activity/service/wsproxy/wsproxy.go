@@ -2,7 +2,6 @@ package wsproxy
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/gorilla/websocket"
@@ -12,9 +11,10 @@ var log = logger.GetLogger("service-wsproxy")
 
 // WSProxy is websocket proxy service
 type WSProxy struct {
-	serviceName string
-	backendURL  string
-	clientConn  *websocket.Conn
+	serviceName    string
+	backendURL     string
+	maxConnections int
+	clientConn     *websocket.Conn
 }
 
 // InitializeWSProxy initializes an WSProxy service with provided settings.
@@ -29,11 +29,8 @@ func InitializeWSProxy(name string, settings map[string]interface{}) (wspService
 // Execute invokes this WSProxy service.
 func (wsp *WSProxy) Execute() (err error) {
 
-	//proxy client name is combination of connection + service name
-	proxyName := fmt.Sprintf("%p-%s", wsp.clientConn, wsp.serviceName)
-	log.Infof("starting proxy (name: %s, client address: %s & server url: %s)...", proxyName, wsp.clientConn.RemoteAddr(), wsp.backendURL)
-	//start proxy client
-	go start(proxyName, wsp.clientConn, wsp.backendURL)
+	// start proxy client as a goroutine
+	go startProxyClient(wsp)
 
 	return nil
 }
@@ -58,6 +55,12 @@ func (wsp *WSProxy) setRequestValues(settings map[string]interface{}) (err error
 				return errors.New("invalid type for url")
 			}
 			wsp.backendURL = url
+		case "maxConnections":
+			i, ok := v.(float64)
+			if !ok {
+				return errors.New("invalid type for maxConnections")
+			}
+			wsp.maxConnections = int(i)
 		default:
 			// ignore and move on.
 		}
