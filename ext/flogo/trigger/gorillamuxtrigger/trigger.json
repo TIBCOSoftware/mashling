@@ -93,6 +93,10 @@
     {
       "name": "ldapGroupFilter",
       "type": "string"
+    },
+    {
+      "name": "wsUpgradeRequired",
+      "type": "string"
     }
   ],
   "outputs": [

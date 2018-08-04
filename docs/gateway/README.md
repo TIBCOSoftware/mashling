@@ -15,6 +15,7 @@
     * [Flogo Flow](#services-flogo-flow)
     * [Anomaly](#services-anomaly)
     * [SQL Detector](#services-sqld)
+    * [Websocket Proxy](#services-websocket-proxy)
   * [Responses](#responses)
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
@@ -175,7 +176,7 @@ As you can see above, a step consists of a simple condition, a service reference
 
 ### <a name="services"></a>Services
 
-A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, `flogoActivity`, `flogoFlow`, `anomaly`, and `sqld`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
+A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, `flogoActivity`, `flogoFlow`, `anomaly`, `sqld` and `ws`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
 
 #### <a name="services-http"></a>HTTP
 
@@ -538,6 +539,44 @@ Utilizing the response values can be seen in a response handler:
       "attackValues": "${SQLSecurity.attackValues}"
     }
   }
+}
+```
+
+#### <a name="services-websocket-proxy"></a>Websocket Proxy
+
+The `ws` service type accepts a websocket connection and backend url. It establishes another websocket connection against supplied backend url and acts as a proxy between both connections. This service doesn't produce any outputs as it runs proxy instance in the background and returns immediately.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| wsconnection | connection object | Websocket connection object |
+| url | string | Backend websocket url to connect |
+| maxConnections | number | Maximum allowed concurrent connections |
+
+
+A sample `service` definition is:
+
+```json
+{
+    "name": "ProxyWebSocketService",
+    "description": "Web socket proxy service",
+    "type": "ws",
+    "settings":{
+        "url": "ws://localhost:8080/ws",
+        "maxConnections": 5
+    }
+}
+```
+
+An example `step` that invokes the above `ProxyWebSocketService` service using `payload` is:
+
+```json
+{
+    "service": "ProxyWebSocketService",
+    "input": {
+        "wsconnection":"${payload.wsconnection}"
+    }
 }
 ```
 
