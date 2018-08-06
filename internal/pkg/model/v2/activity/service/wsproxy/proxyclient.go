@@ -120,7 +120,6 @@ func startProxyClient(wsp *WSProxy) error {
 	}
 	defer pService.ReleaseProxyClient(pClient)
 	defer pClient.clientConn.Close()
-	log.Infof("proxy[%s] started", clientName)
 
 	// establish backend connection
 	log.Debugf("connecting to %s ", pService.backendURL)
@@ -134,6 +133,7 @@ func startProxyClient(wsp *WSProxy) error {
 	}
 	pClient.serverConn = conn
 	defer pClient.serverConn.Close()
+	log.Infof("proxy[%s] started", clientName)
 
 	// handle upstream & downstream on saparate goroutines
 	go pClient.upstreamPump()
@@ -154,11 +154,11 @@ func startProxyClient(wsp *WSProxy) error {
 		if websocket.IsUnexpectedCloseError(e, websocket.CloseNormalClosure, websocket.CloseAbnormalClosure) {
 			log.Errorf(errMessageTemplate, e.Code, e.Text)
 		} else {
-			log.Infof(infoMessageTemplate, e.Code, e.Text)
+			log.Debugf(infoMessageTemplate, e.Code, e.Text)
 		}
 	}
-	log.Info(pClient.status())
-	log.Infof("proxy[%s] closed", pClient.name)
+	log.Debug(pClient.status())
+	log.Infof("proxy[%s] stopped", pClient.name)
 
 	return nil
 }
