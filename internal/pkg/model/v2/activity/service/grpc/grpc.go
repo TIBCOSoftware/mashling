@@ -2,9 +2,12 @@ package grpc
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"reflect"
 	"strings"
+
+	"google.golang.org/grpc/credentials"
 
 	"github.com/imdario/mergo"
 	"google.golang.org/grpc"
@@ -20,6 +23,8 @@ type GRPC struct {
 type GRPCRequest struct {
 	HostURL          string                 `json:"hosturl"`
 	GrpcMthdParamtrs map[string]interface{} `json:"grpcMthdParamtrs"`
+	EnableTLS        string                 `json:"enableTLS"`
+	ClientCert       string                 `json:"clientCert"`
 }
 
 //GRPCResponse is a grpc service response
@@ -39,7 +44,21 @@ func InitializeGRPC(settings map[string]interface{}) (grpcService *GRPC, err err
 
 // Execute invokes this GRPC service.
 func (g *GRPC) Execute() (err error) {
-	opts := []grpc.DialOption{grpc.WithInsecure()}
+
+	opts := []grpc.DialOption{}
+
+	if strings.Compare(g.Request.EnableTLS, "true") == 0 {
+		fmt.Println("g.Request.ClientCert", g.Request.ClientCert)
+		creds, err := credentials.NewClientTLSFromFile(g.Request.ClientCert, "")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		opts = []grpc.DialOption{grpc.WithTransportCredentials(creds)}
+
+	} else {
+		opts = []grpc.DialOption{grpc.WithInsecure()}
+	}
 
 	conn, err := grpc.Dial(g.Request.HostURL, opts...)
 	if err != nil {
@@ -79,7 +98,7 @@ func (g *GRPC) Execute() (err error) {
 	res := resultArr[0]
 	grpcErr := resultArr[1]
 	if !grpcErr.IsNil() {
-		log.Println("@@@@@@@@@@ERROR OCCURED@@@@@ Propagating it to calling function")
+		log.Println("Error Propagating it to calling function")
 		g.Response.Body = grpcErr.Interface()
 	} else {
 		g.Response.Body = res.Interface()
@@ -101,6 +120,18 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 				return errors.New("invalid type for url")
 			}
 			g.Request.HostURL = url
+		case "enableTLS":
+			enableTLS, ok := v.(string)
+			if !ok {
+				return errors.New("invalid type for enableTLS")
+			}
+			g.Request.EnableTLS = enableTLS
+		case "clientCert":
+			clientCert, ok := v.(string)
+			if !ok {
+				return errors.New("invalid type for clientCert")
+			}
+			g.Request.ClientCert = clientCert
 		case "grpcMthdParamtrs":
 			grpcData, ok := v.(map[string]interface{})
 			if !ok {

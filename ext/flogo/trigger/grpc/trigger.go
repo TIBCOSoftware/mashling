@@ -7,7 +7,10 @@ import (
 	"log"
 	"net"
 	"reflect"
+	"strconv"
 	"strings"
+
+	"google.golang.org/grpc/credentials"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
@@ -41,6 +44,14 @@ type GRPCTrigger struct {
 	config   *trigger.Config
 	handlers map[string]*OptimizedHandler
 	server   *grpc.Server
+	TLSConfig
+}
+
+//TLSConfig is stub for tls support
+type TLSConfig struct {
+	enableTLS bool
+	serveKey  string
+	serveCert string
 }
 
 // Init implements trigger.Trigger.Init
@@ -59,6 +70,33 @@ func (t *GRPCTrigger) Init(runner action.Runner) {
 	t.runner = runner
 
 	t.handlers = t.CreateHandlers()
+
+	//Check whether TLS (Transport Layer Security) is enabled for the trigger
+	enableTLS := false
+	serverCert := ""
+	serverKey := ""
+	if _, ok := t.config.Settings["enableTLS"]; ok {
+		enableTLSSetting, err := strconv.ParseBool(t.config.GetSetting("enableTLS"))
+
+		if err == nil && enableTLSSetting {
+			//TLS is enabled, get server certificate & key
+			enableTLS = true
+			if _, ok := t.config.Settings["serverCert"]; !ok {
+				panic(fmt.Sprintf("No serverCert found for trigger '%s' in settings", t.config.Id))
+			}
+			serverCert = t.config.GetSetting("serverCert")
+
+			if _, ok := t.config.Settings["serverKey"]; !ok {
+				panic(fmt.Sprintf("No serverKey found for trigger '%s' in settings", t.config.Id))
+			}
+			serverKey = t.config.GetSetting("serverKey")
+		}
+	}
+
+	log.Println("enableTLS: ", enableTLS, "\nserverCert: ", serverCert, "\nserverKey: ", serverKey)
+	t.enableTLS = enableTLS
+	t.serveCert = serverCert
+	t.serveKey = serverKey
 }
 
 // Metadata implements trigger.Trigger.Metadata
@@ -81,14 +119,17 @@ func (t *GRPCTrigger) Start() error {
 		log.Fatal(err)
 	}
 
-	// creds, err := credentials.NewServerTLSFromFile("cert.pem", "key.pem")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	opts := []grpc.ServerOption{}
 
-	//opts := []grpc.ServerOption{grpc.Creds(creds)}
+	if t.enableTLS {
+		creds, err := credentials.NewServerTLSFromFile(t.serveCert, t.serveKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		opts = []grpc.ServerOption{grpc.Creds(creds)}
+	}
 
-	t.server = grpc.NewServer()
+	t.server = grpc.NewServer(opts...)
 
 	servicename := t.config.GetSetting("servicename")
 	protoname := t.config.GetSetting("protoname")
@@ -97,7 +138,7 @@ func (t *GRPCTrigger) Start() error {
 	if len(ServiceRegistery.ServerServices) != 0 {
 		for k, service := range ServiceRegistery.ServerServices {
 			if strings.Compare(k, protoname+servicename) == 0 {
-				fmt.Println("*********** service registered ************", protoname, servicename)
+				log.Println("*********** service registered ************", protoname, servicename)
 				service.RunRegisterServerService(t.server, t)
 			}
 		}
