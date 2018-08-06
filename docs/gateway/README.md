@@ -551,6 +551,8 @@ The service `settings` and available `input` for the request are as follows:
 |:-----------|:--------|:--------------|
 | grpcMthdParamtrs | JSON object | A grpcMthdParamtrs payload which holds full information like method parameters, service name, proto name, method name etc.|
 | hosturl | string | A gRPC end point url with port |
+| enableTLS | bool | true - To enable TLS (Transport Layer Security), false - No TLS security  |
+| clientCert | string | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 
 The available response outputs are as follows:
 
@@ -566,7 +568,8 @@ A sample `service` definition is:
     "description": "Make calls to grpc end point",
     "type": "grpc",
     "settings": {
-        "hosturl": "localhost:9000"
+        "hosturl": "localhost:9000",
+        "enableTLS": "true"
     }
 }
 ```
@@ -577,7 +580,8 @@ An example `step` that invokes the above `PetStoreUsers` service using `grpcMthd
 {
  "service": "PetStoreUsers",
  "input": {
- "grpcMthdParamtrs": "${payload.grpcData}"
+    "grpcMthdParamtrs": "${payload.grpcData}",
+    "clientCert": "${env.CLIENT_CERT}"
  }
 }
 ```

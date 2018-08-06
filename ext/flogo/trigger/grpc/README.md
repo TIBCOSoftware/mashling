@@ -55,6 +55,9 @@ settings, outputs and handler:
 | port | The port to listen on |
 | protoname | The name of the proto file|
 | servicename | The name of the service mentioned in proto file|
+| enableTLS | true - To enable TLS (Transport Layer Security), false - No TLS security  |
+| serverCert | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
+| serverKey | Server private key file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 
 ### Outputs
 | Key    | Description   |
@@ -88,7 +91,10 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                 "settings": {
                     "port": 9096,
                     "protoname":"messages",
-                    "servicename":"PetService"
+                    "servicename":"PetService",
+                    "enableTLS": "true",
+                    "serverCert": "${env.SERVER_CERT}",
+                    "serverKey": "${env.SERVER_KEY}"
                 },
                 "handlers": [
                     {
