@@ -552,7 +552,7 @@ The service `settings` and available `input` for the request are as follows:
 |:-----------|:--------|:--------------|
 | wsconnection | connection object | Websocket connection object |
 | url | string | Backend websocket url to connect |
-| maxConnections | number | Maximum allowed concurrent connections |
+| maxConnections | number | Maximum allowed concurrent connections(default 5) |
 
 
 A sample `service` definition is:

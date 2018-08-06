@@ -9,6 +9,8 @@ import (
 
 var log = logger.GetLogger("service-wsproxy")
 
+const defaultMaxConnections = 5
+
 // WSProxy is websocket proxy service
 type WSProxy struct {
 	serviceName    string
@@ -20,7 +22,8 @@ type WSProxy struct {
 // InitializeWSProxy initializes an WSProxy service with provided settings.
 func InitializeWSProxy(name string, settings map[string]interface{}) (wspService *WSProxy, err error) {
 	wspService = &WSProxy{
-		serviceName: name,
+		serviceName:    name,
+		maxConnections: defaultMaxConnections,
 	}
 	err = wspService.setRequestValues(settings)
 	return wspService, err
