@@ -244,6 +244,12 @@ func invokeService(serviceDef types.Service, executionContext *map[string]interf
 	if err != nil {
 		return err
 	}
+	defer func() {
+		vmErr := vm.SetInVM(serviceDef.Name, serviceInstance)
+		if vmErr != nil {
+			err = vmErr
+		}
+	}()
 	(*executionContext)[serviceDef.Name] = &serviceInstance
 	values, mErr := translateMappings(executionContext, input)
 	if mErr != nil {
@@ -254,10 +260,6 @@ func invokeService(serviceDef types.Service, executionContext *map[string]interf
 		return err
 	}
 	err = serviceInstance.Execute()
-	if err != nil {
-		return err
-	}
-	err = vm.SetInVM(serviceDef.Name, serviceInstance)
 	if err != nil {
 		return err
 	}

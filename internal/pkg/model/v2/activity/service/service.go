@@ -25,6 +25,8 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeFlogoFlow(serviceDef.Settings)
 	case "sqld":
 		return InitializeSQLD(serviceDef.Settings)
+	case "circuitBreaker":
+		return InitializeCircuitBreaker(serviceDef.Settings)
 	case "anomaly":
 		return InitializeAnomaly(serviceDef.Settings)
 	default:
