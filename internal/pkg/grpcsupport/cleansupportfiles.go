@@ -1,15 +1,19 @@
 package grpcsupport
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var (
 	allFIlesFlag bool
 )
+
+//Logger
+var log_clean = logger.GetLogger("mashling-cli-grpc-clean")
 
 //GrpcSupportData holds clean up support data
 type GrpcSupportData struct {
@@ -19,6 +23,7 @@ type GrpcSupportData struct {
 
 //CleanSupportFiles cleans all the generated code depends on the proto file name
 func CleanSupportFiles(supStruct GrpcSupportData) error {
+	log_clean.Info("CleanSupportFiles invoked with:", supStruct)
 	assignValues()
 	var fileDetails []string
 
@@ -27,7 +32,7 @@ func CleanSupportFiles(supStruct GrpcSupportData) error {
 		path, _ := filepath.Abs(supStruct.ProtoPath)
 		_, err := os.Stat(path)
 		if err != nil {
-			log.Fatal("file path provided is invalid")
+			log_clean.Error("file path provided is invalid")
 			return err
 		}
 		protoFileName = path[strings.LastIndex(path, string(filepath.Separator))+1:]
@@ -62,6 +67,7 @@ func CleanSupportFiles(supStruct GrpcSupportData) error {
 }
 
 func deleteFiles(files []string) error {
+	log_clean.Info("deleteFiles invoked")
 	for _, fileName := range files {
 		if strings.Compare(filepath.Join(goPath, "src", grpcGenPath), fileName) != 0 {
 			os.RemoveAll(fileName)

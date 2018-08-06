@@ -2,13 +2,17 @@ package grpc
 
 import (
 	"errors"
-	"log"
 	"reflect"
 	"strings"
+
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 
 	"github.com/imdario/mergo"
 	"google.golang.org/grpc"
 )
+
+// log is the default package logger
+var log = logger.GetLogger("tibco-service-grpc")
 
 //GRPC is a grpc service
 type GRPC struct {
@@ -43,7 +47,7 @@ func (g *GRPC) Execute() (err error) {
 
 	conn, err := grpc.Dial(g.Request.HostURL, opts...)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	defer conn.Close()
 
@@ -57,16 +61,20 @@ func (g *GRPC) Execute() (err error) {
 		return errors.New("Service name and Proto name required")
 	}
 
+	clServFlag := false
 	if len(ClientServiceRegistery.ClientServices) != 0 {
 		for k, service := range ClientServiceRegistery.ClientServices {
 			if strings.Compare(k, protoname+servicename) == 0 {
-				log.Println("*********** getting client service for proto ************", protoname, servicename)
+				log.Debugf("client service object found for proto [%v] and service [%v]", protoname, servicename)
 				clientInterfaceObj = service.GetRegisteredClientService(conn)
+				clServFlag = true
 			}
 		}
+		if !clServFlag {
+			log.Errorf("client service object not found for proto [%v] and service [%v]", protoname, servicename)
+		}
 	} else {
-		log.Println("***********client Services not available for proto ***********", protoname, servicename)
-		log.Fatal(errors.New("client stubs not registered"))
+		log.Errorf("gRPC Client services not registered")
 	}
 
 	inputs := make([]reflect.Value, 2)
@@ -79,7 +87,7 @@ func (g *GRPC) Execute() (err error) {
 	res := resultArr[0]
 	grpcErr := resultArr[1]
 	if !grpcErr.IsNil() {
-		log.Println("@@@@@@@@@@ERROR OCCURED@@@@@ Propagating it to calling function")
+		log.Debug("Propagating error value to calling function")
 		g.Response.Body = grpcErr.Interface()
 	} else {
 		g.Response.Body = res.Interface()

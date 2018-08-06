@@ -133,7 +133,7 @@ func extFlogoTriggerGrpcTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/grpc/trigger.json", size: 1042, mode: os.FileMode(438), modTime: time.Unix(1533020305, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/grpc/trigger.json", size: 1042, mode: os.FileMode(438), modTime: time.Unix(1533547167, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

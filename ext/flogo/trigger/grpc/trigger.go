@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"reflect"
 	"strings"
+
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
@@ -18,6 +19,9 @@ import (
 var addr string
 
 const settingDest = "dest"
+
+// log is the default package logger
+var log = logger.GetLogger("trigger-tibco-grpc")
 
 //GRPCTriggerFactory gRPC Trigger factory
 type GRPCTriggerFactory struct {
@@ -78,7 +82,7 @@ func (t *GRPCTrigger) Start() error {
 	// start the trigger
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	// creds, err := credentials.NewServerTLSFromFile("cert.pem", "key.pem")
@@ -94,24 +98,29 @@ func (t *GRPCTrigger) Start() error {
 	protoname := t.config.GetSetting("protoname")
 	protoname = strings.Split(protoname, ".")[0]
 
+	servRegFlag := false
 	if len(ServiceRegistery.ServerServices) != 0 {
 		for k, service := range ServiceRegistery.ServerServices {
 			if strings.Compare(k, protoname+servicename) == 0 {
-				fmt.Println("*********** service registered ************", protoname, servicename)
+				log.Infof("Registered Proto [%v] and Service [%v]", protoname, servicename)
 				service.RunRegisterServerService(t.server, t)
+				servRegFlag = true
 			}
 		}
+		if !servRegFlag {
+			log.Errorf("Proto [%s] and Service [%s] not registered", protoname, servicename)
+		}
 	} else {
-		log.Println("@@@@@@@@@@@@Services not registered@@@@@@@@@@@")
+		log.Error("gRPC server services not registered")
 	}
 
-	log.Println("Starting server on port: ", addr)
+	log.Debug("Starting server on port", addr)
 
 	go func() {
 		t.server.Serve(lis)
 	}()
 
-	log.Println("Server started")
+	log.Info("Server started")
 	return nil
 }
 
@@ -164,7 +173,7 @@ func (t *GRPCTrigger) CreateHandlers() map[string]*OptimizedHandler {
 
 //CallHandler call to perticular handler
 func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interface{}, error) {
-
+	log.Info("CallHandler method invoked")
 	// getting values from inputrequestdata and mapping it to params which can be used in different services like HTTP pathparams etc.
 	s := reflect.ValueOf(grpcData["reqdata"]).Elem()
 	typeOfT := s.Type()
@@ -190,6 +199,7 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 	//calling perticular handler based on method name specification in gateway json file
 	for _, hand := range handlers {
 		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodname"].(string)) == 0 {
+			log.Debug("Dispatch Found for ", hand.GetSetting("methodName"), " Handler Invoked: ", hand.ActionId)
 			actID := action.Get(hand.ActionId)
 			context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: hand})
 			replyCode, replyData, err := t.runner.Run(context, actID, hand.ActionId, nil)
@@ -200,6 +210,7 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 	//calling default handler if method name not specified
 	for _, hand := range handlers {
 		if len(hand.GetSetting("methodName")) == 0 {
+			log.Debug("Default Dispatch Invoked: ", hand.ActionId)
 			actID := action.Get(hand.ActionId)
 			context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: hand})
 			replyCode, replyData, err := t.runner.Run(context, actID, hand.ActionId, nil)
@@ -207,5 +218,6 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 		}
 	}
 
+	log.Error("Dispatch not found")
 	return 0, nil, errors.New("Dispatch not found")
 }
