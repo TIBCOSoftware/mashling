@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"reflect"
 	"strings"
@@ -61,7 +60,7 @@ func (g *GRPC) Execute() (err error) {
 	if len(ClientServiceRegistery.ClientServices) != 0 {
 		for k, service := range ClientServiceRegistery.ClientServices {
 			if strings.Compare(k, protoname+servicename) == 0 {
-				fmt.Println("*********** getting client service for proto ************", protoname, servicename)
+				log.Println("*********** getting client service for proto ************", protoname, servicename)
 				clientInterfaceObj = service.GetRegisteredClientService(conn)
 			}
 		}
@@ -80,7 +79,7 @@ func (g *GRPC) Execute() (err error) {
 	res := resultArr[0]
 	grpcErr := resultArr[1]
 	if !grpcErr.IsNil() {
-		fmt.Println("@@@@@@@@@@ERROR OCCURED@@@@@ Propagating it to calling function")
+		log.Println("@@@@@@@@@@ERROR OCCURED@@@@@ Propagating it to calling function")
 		g.Response.Body = grpcErr.Interface()
 	} else {
 		g.Response.Body = res.Interface()

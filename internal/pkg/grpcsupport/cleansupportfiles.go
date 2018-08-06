@@ -1,7 +1,7 @@
 package grpcsupport
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,7 +27,7 @@ func CleanSupportFiles(supStruct GrpcSupportData) error {
 		path, _ := filepath.Abs(supStruct.ProtoPath)
 		_, err := os.Stat(path)
 		if err != nil {
-			fmt.Println("file path provided is invalid")
+			log.Fatal("file path provided is invalid")
 			return err
 		}
 		protoFileName = path[strings.LastIndex(path, string(filepath.Separator))+1:]
