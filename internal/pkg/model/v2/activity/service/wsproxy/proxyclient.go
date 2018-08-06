@@ -28,35 +28,40 @@ type ProxyService struct {
 	sync.RWMutex
 }
 
-// RegisterProxyClient registers proxy client instance with proxy service
-func (p *ProxyService) RegisterProxyClient(pc *ProxyClient) (err error) {
+// CreateProxyClient creates proxy client instance with the supplied name & client connection
+func (p *ProxyService) CreateProxyClient(name string, conn *websocket.Conn) (*ProxyClient, error) {
 	p.Lock()
-	if len(p.proxyclients) < p.maxConnections {
-		p.proxyclients[pc.name] = pc
-	} else {
-		errMessage := fmt.Sprintf("proxy service[%s] utilized maximum[%d] concurrent connections, can't accept any more connections", p.name, p.maxConnections)
-		err = errors.New(errMessage)
+	defer p.Unlock()
+
+	pClient := p.proxyclients[name]
+	if pClient != nil {
+		errMessage := fmt.Sprintf("connection [%p] already being handled with the client[%s]", conn, name)
+		return nil, errors.New(errMessage)
 	}
-	p.Unlock()
-	return err
+	if len(p.proxyclients) >= p.maxConnections {
+		errMessage := fmt.Sprintf("proxy service[%s] utilized maximum[%d] allowed concurrent connections, can't accept any more connections", p.name, p.maxConnections)
+		closeMessage := websocket.FormatCloseMessage(websocket.CloseNormalClosure, errMessage)
+		conn.WriteMessage(websocket.CloseMessage, closeMessage)
+		conn.Close()
+		return nil, errors.New(errMessage)
+	}
+	pClient = &ProxyClient{
+		name:          name,
+		startTime:     time.Now(),
+		clientConn:    conn,
+		upstreamErr:   make(chan error, 1),
+		downstreamErr: make(chan error, 1),
+	}
+	p.proxyclients[name] = pClient
+
+	return pClient, nil
 }
 
-// DeregisterProxyClient deregisters proxy client instance from proxy service
-func (p *ProxyService) DeregisterProxyClient(pc *ProxyClient) {
+// ReleaseProxyClient removes proxy client instance from proxy service
+func (p *ProxyService) ReleaseProxyClient(pc *ProxyClient) {
 	p.Lock()
+	defer p.Unlock()
 	delete(p.proxyclients, pc.name)
-	p.Unlock()
-}
-
-// GetProxyClient returns proxy client instance corresponding to supplied name
-func (p *ProxyService) GetProxyClient(name string) *ProxyClient {
-	p.RLock()
-	defer p.RUnlock()
-
-	if pc, ok := p.proxyclients[name]; ok {
-		return pc
-	}
-	return nil
 }
 
 // ProxyServices holds multiple ProxyService instances
@@ -71,71 +76,58 @@ var proxyServices = ProxyServices{
 }
 
 // GetService returns proxy service corresponding to supplied name
-func (p *ProxyServices) GetService(name string) *ProxyService {
-	p.RLock()
-	defer p.RUnlock()
-	if ps, ok := p.services[name]; ok {
-		return ps
+// it creates new service it doesn't exist already
+func (p *ProxyServices) GetService(name string, backendURL string, maxConnections int) *ProxyService {
+	p.Lock()
+	defer p.Unlock()
+	pService := p.services[name]
+	if pService == nil {
+		pService = &ProxyService{
+			name:           name,
+			proxyclients:   make(map[string]*ProxyClient),
+			backendURL:     backendURL,
+			maxConnections: maxConnections,
+		}
+		p.services[name] = pService
 	}
-	return nil
+	return pService
 }
 
-// AddService adds proxy service to proxyServices
-func (p *ProxyServices) AddService(ps *ProxyService) {
+// ReleaseService delete the service it doesn't hold any proxy clients
+func (p *ProxyServices) ReleaseService(name string) {
 	p.Lock()
-	p.services[ps.name] = ps
-	p.Unlock()
+	defer p.Unlock()
+	if pService, ok := p.services[name]; ok {
+		if len(pService.proxyclients) <= 0 {
+			delete(p.services, name)
+		}
+	}
 }
 
 // start creates new ProxyClient instance and handles upstream & downstream flow
 func startProxyClient(wsp *WSProxy) error {
+	log.Debugf("starting proxy between the connection:%p & backendURL:%s ...", wsp.clientConn, wsp.backendURL)
 	// get proxy service
-	pService := proxyServices.GetService(wsp.serviceName)
-	if pService == nil {
-		pService = &ProxyService{
-			name:           wsp.serviceName,
-			proxyclients:   make(map[string]*ProxyClient),
-			backendURL:     wsp.backendURL,
-			maxConnections: wsp.maxConnections,
-		}
-		proxyServices.AddService(pService)
-	}
+	pService := proxyServices.GetService(wsp.serviceName, wsp.backendURL, wsp.maxConnections)
+	defer proxyServices.ReleaseService(wsp.serviceName)
 
-	// get proxy client
+	// create proxy client
 	clientName := fmt.Sprintf("%s-%p-%s", wsp.serviceName, wsp.clientConn, wsp.clientConn.RemoteAddr())
-	pClient := pService.GetProxyClient(clientName)
-	if pClient != nil {
-		log.Warnf("connection [%p] already utilized", wsp.clientConn)
-		return nil
-	}
-
-	// create new proxy client
-	pClient = &ProxyClient{
-		name:          clientName,
-		startTime:     time.Now(),
-		clientConn:    wsp.clientConn,
-		upstreamErr:   make(chan error, 1),
-		downstreamErr: make(chan error, 1),
-	}
-	defer pClient.clientConn.Close()
-	log.Infof("handling websocket connection with the proxy client[%s]", clientName)
-
-	// register proxy client
-	err := pService.RegisterProxyClient(pClient)
+	pClient, err := pService.CreateProxyClient(clientName, wsp.clientConn)
 	if err != nil {
-		log.Error(err)
-		closeMessage := websocket.FormatCloseMessage(websocket.CloseNormalClosure, err.Error())
-		pClient.clientConn.WriteMessage(websocket.CloseMessage, closeMessage)
+		log.Errorf("error while creating proxy - %s", err.Error())
 		return nil
 	}
-	defer pService.DeregisterProxyClient(pClient)
+	defer pService.ReleaseProxyClient(pClient)
+	defer pClient.clientConn.Close()
+	log.Infof("proxy[%s] started", clientName)
 
 	// establish backend connection
 	log.Debugf("connecting to %s ", pService.backendURL)
 	conn, _, err := websocket.DefaultDialer.Dial(pService.backendURL, nil)
 	if err != nil {
 		log.Errorf("connection error: %s", err)
-		m := fmt.Sprintf("Mashling failed to connect backend url[%s]", pService.backendURL)
+		m := fmt.Sprintf("failed to connect backend url[%s]", pService.backendURL)
 		closeMessage := websocket.FormatCloseMessage(websocket.CloseNormalClosure, m)
 		pClient.clientConn.WriteMessage(websocket.CloseMessage, closeMessage)
 		return nil
@@ -166,7 +158,7 @@ func startProxyClient(wsp *WSProxy) error {
 		}
 	}
 	log.Info(pClient.status())
-	log.Infof("proxy[%s->%s] closed", pService.name, pClient.name)
+	log.Infof("proxy[%s] closed", pClient.name)
 
 	return nil
 }
@@ -226,8 +218,8 @@ func (pc *ProxyClient) status() string {
 	statusTemplate := `proxy instance status:
 	name: %s
 	up time: %s
-	upstream bytes copyied: %d
-	downstream bytes copyied: %d`
+	upstream bytes transferred: %d
+	downstream bytes transferred: %d`
 	status := fmt.Sprintf(statusTemplate, pc.name, time.Since(pc.startTime), pc.upstreamBytes, pc.downstreamBytes)
 	return status
 }
