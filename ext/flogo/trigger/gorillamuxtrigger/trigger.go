@@ -27,6 +27,7 @@ import (
 
 	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	lightstep "github.com/lightstep/lightstep-tracer-go"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -526,6 +527,26 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			log.Debugf("dispatch not resolved. Continue with default action - %v", actionId)
 		}
 
+		// upgrade to websocket protocol if wsUpgradeRequired is defined to "true" in handler settings
+		wsUpgradeRequiredSetting, ok := handlerCfg.Settings["wsUpgradeRequired"]
+		wsUpgradeRequired := false
+		if ok && wsUpgradeRequiredSetting == "true" {
+			wsUpgradeRequired = true
+		}
+		if wsUpgradeRequired {
+			log.Debug("wsUpgradeRequired is defined to 'true'. upgrading to websocket protocol...")
+			var upgrader = websocket.Upgrader{}
+			conn, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				serverSpan.SetTag("error", err.Error())
+				log.Errorf("websocket protocol upgrade error: %s", err.Error())
+				return
+			}
+			log.Info("connection upgraded to websocket protocol")
+			//add connection object into context data
+			data["wsconnection"] = conn
+		}
+
 		//todo handle error
 		startAttrs, _ := rt.metadata.OutputsToAttrs(data, false)
 
@@ -554,6 +575,11 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			serverSpan.SetTag("error", err.Error())
 			log.Debugf("REST Trigger Error: %s", err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if wsUpgradeRequired {
+			// ignore replyCode, replyData and just return in case of websocket protocol
 			return
 		}
 
