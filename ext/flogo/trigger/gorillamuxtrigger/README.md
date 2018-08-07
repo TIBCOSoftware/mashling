@@ -92,6 +92,10 @@ settings, outputs and handler:
     {
       "name": "ldapGroupFilter",
       "type": "string"
+    },
+    {
+      "name": "wsUpgradeRequired",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -117,6 +121,10 @@ settings, outputs and handler:
     },
     {
       "name": "tracing",
+      "type": "any"
+    },
+    {
+      "name": "wsconnection",
       "type": "any"
     }
   ],
@@ -172,6 +180,7 @@ settings, outputs and handler:
 | ldapBindPassword | The bind password for the bind distinguished name. |
 | ldapUserFilter | The filter to use for authentication. |
 | ldapGroupFilter | The filter to use for find user groups. |
+| wsUpgradeRequired | true - To upgrade http request to websocket connection |
 
 ### Outputs
 | Key    | Description   |
@@ -182,6 +191,7 @@ settings, outputs and handler:
 | header | HTTP request header params. Header key gets converted in to canonical format, i.e. the first letter and any letter following a hyphen to upper case, the rest are converted to lowercase. For example, the canonical key for "accept-encoding" and "host" are "Accept-Encoding" and "Host" respectively|
 | content | HTTP request paylod |
 | tracing | Tracing context |
+| wsconnection | Websocket connection object |
 
 ### Handler settings
 | Key    | Description   |

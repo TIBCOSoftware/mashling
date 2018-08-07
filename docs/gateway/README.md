@@ -15,6 +15,8 @@
     * [Flogo Flow](#services-flogo-flow)
     * [Anomaly](#services-anomaly)
     * [SQL Detector](#services-sqld)
+    * [Circuit Breaker](#services-circuit-breaker)
+    * [Websocket Proxy](#services-websocket-proxy)
   * [Responses](#responses)
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
@@ -175,7 +177,7 @@ As you can see above, a step consists of a simple condition, a service reference
 
 ### <a name="services"></a>Services
 
-A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, `flogoActivity`, `flogoFlow`, `anomaly`, and `sqld`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
+A service defines a function or activity of some sort that will be utilized in a step within an execution flow. Services have names, types, and settings. Currently supported types are `http`, `js`, `flogoActivity`, `flogoFlow`, `anomaly`, `sqld`, `circuitBreaker` and `ws`. Services may call external endpoints like HTTP servers or may stay within the context of the mashling gateway, like the `js` service. Once a service is defined it can be used as many times as needed within your routes and steps.
 
 #### <a name="services-http"></a>HTTP
 
@@ -538,6 +540,122 @@ Utilizing the response values can be seen in a response handler:
       "attackValues": "${SQLSecurity.attackValues}"
     }
   }
+}
+```
+
+#### <a name="services-circuit-breaker"></a>Circuit Breaker
+
+The circuit breaker prevents the calling of a service when that service has failed in the past. How the circuit breaker is tripped depends on the mode of operation. There are three modes of operation: contiguous errors, errors within a time period, and contiguous errors within a time period.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| mode | string | The tripping mode: 'a' for contiguous errors, 'b' for errors within a time period, and 'c' for contiguous errors within a time period. Defaults to mode 'a' |
+| operation | string | An operation to perform: '' for protecting a service, 'counter' for processing errors, and 'reset' for processing non-errors. Defaults to '' |
+| context | string | The name of the circuit breaker |
+| threshold | number | The number of errors required for tripping. Defaults to 5 errors |
+| timeout | number | Number of seconds that the circuit breaker will remain tripped. Defaults to 60 seconds |
+| period | number | Number of seconds in which errors have to occur for the circuit breaker to trip. Applies to modes 'b' and 'c'. Defaults to 60 seconds |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| tripped | boolean | The state of the circuit breaker |
+
+A sample `service` definition is:
+
+```json
+{
+  "name": "CircuitBreaker",
+  "description": "Circuit breaker service",
+  "type": "circuitBreaker",
+  "settings": {
+    "mode": "a",
+    "context": "get"
+  }
+}
+```
+
+An example series of `step` that invokes the above `CircuitBreaker` service:
+
+```json
+{
+  "service": "CircuitBreaker"
+},
+{
+  "service": "PetStorePets",
+  "input": {
+    "method": "GET"
+  }
+},
+{
+  "if": "PetStorePets.response.netError != ''",
+  "service": "CircuitBreaker",
+  "input": {
+    "operation": "counter"
+  }
+},
+{
+  "if": "PetStorePets.response.netError == ''",
+  "service": "CircuitBreaker",
+  "input": {
+    "operation": "reset"
+  }
+}
+```
+
+Utilizing the response values can be seen in a response handler:
+
+```json
+{
+  "if": "CircuitBreaker.tripped == true",
+  "error": true,
+  "output": {
+    "code": 403,
+    "data": {
+      "error": "circuit breaker tripped"
+    }
+  }
+}
+```
+
+#### <a name="services-websocket-proxy"></a>Websocket Proxy
+
+The `ws` service type accepts a websocket connection and backend url. It establishes another websocket connection against supplied backend url and acts as a proxy between both connections. This service doesn't produce any outputs as it runs proxy instance in the background and returns immediately.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| wsconnection | connection object | Websocket connection object |
+| url | string | Backend websocket url to connect |
+| maxConnections | number | Maximum allowed concurrent connections(default 5) |
+
+
+A sample `service` definition is:
+
+```json
+{
+    "name": "ProxyWebSocketService",
+    "description": "Web socket proxy service",
+    "type": "ws",
+    "settings":{
+        "url": "ws://localhost:8080/ws",
+        "maxConnections": 5
+    }
+}
+```
+
+An example `step` that invokes the above `ProxyWebSocketService` service using `wsconnection` is:
+
+```json
+{
+    "service": "ProxyWebSocketService",
+    "input": {
+        "wsconnection":"${payload.wsconnection}"
+    }
 }
 ```
 

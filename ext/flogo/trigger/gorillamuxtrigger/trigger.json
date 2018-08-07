@@ -93,6 +93,10 @@
     {
       "name": "ldapGroupFilter",
       "type": "string"
+    },
+    {
+      "name": "wsUpgradeRequired",
+      "type": "string"
     }
   ],
   "outputs": [
@@ -118,6 +122,10 @@
     },
     {
       "name": "tracing",
+      "type": "any"
+    },
+    {
+      "name": "wsconnection",
       "type": "any"
     }
   ],
