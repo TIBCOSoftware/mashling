@@ -17,6 +17,7 @@
     * [SQL Detector](#services-sqld)
     * [Circuit Breaker](#services-circuit-breaker)
     * [Websocket Proxy](#services-websocket-proxy)
+    * [JWT](#services-jwt)
   * [Responses](#responses)
   * [Policies Proposal](#policies)
     * [Simple Policy](#simple-policy)
@@ -658,6 +659,9 @@ An example `step` that invokes the above `ProxyWebSocketService` service using `
     }
 }
 ```
+#### <a name="services-jwt"></a>JWT
+
+
 
 ### <a name="responses"></a>Responses
 
