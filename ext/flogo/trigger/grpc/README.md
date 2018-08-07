@@ -20,6 +20,18 @@ settings, outputs and handler:
       "name": "servicename",
       "type": "string",
       "required": true
+    },
+    {
+      "name": "enableTLS",
+      "type": "boolean"
+    },
+    {
+      "name": "serverCert",
+      "type": "string"
+    },
+    {
+      "name": "serverKey",
+      "type": "string"
     }
   ],
   "outputs": [
