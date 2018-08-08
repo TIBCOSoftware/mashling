@@ -169,6 +169,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
+
+[[projects]]
   name = "github.com/dlclark/regexp2"
   packages = [
     ".",
@@ -665,6 +671,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "23107cb130dd2954568c64bcdae8c255955ba71b8721f4517c05d49ca87579a4"
+  inputs-digest = "a821487f88e46a12f62e8760773934bc9f958a61e50d13f031d775b99ce73ac7"
   solver-name = "gps-cdcl"
   solver-version = 1

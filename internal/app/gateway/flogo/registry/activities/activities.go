@@ -518,24 +518,24 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"ext/flogo/activity/eftl/activity.json": extFlogoActivityEftlActivityJson,
-	"ext/flogo/activity/lambda/activity.json": extFlogoActivityLambdaActivityJson,
-	"ext/flogo/activity/mqtt/activity.json": extFlogoActivityMqttActivityJson,
-	"ext/flogo/activity/ping/activity.json": extFlogoActivityPingActivityJson,
-	"ext/flogo/activity/rest/activity.json": extFlogoActivityRestActivityJson,
-	"ext/flogo/activity/tracer/activity.json": extFlogoActivityTracerActivityJson,
-	"internal/pkg/model/v2/activity/core/activity.json": internalPkgModelV2ActivityCoreActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/app/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityAppActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awsiot/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityAwsiotActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityCoapActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/counter/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityCounterActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/error/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityErrorActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityKafkapubActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/lambda/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityLambdaActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/log/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityLogActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/reply/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityReplyActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/rest/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityRestActivityJson,
-	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/twilio/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityTwilioActivityJson,
+	"ext/flogo/activity/eftl/activity.json":                                          extFlogoActivityEftlActivityJson,
+	"ext/flogo/activity/lambda/activity.json":                                        extFlogoActivityLambdaActivityJson,
+	"ext/flogo/activity/mqtt/activity.json":                                          extFlogoActivityMqttActivityJson,
+	"ext/flogo/activity/ping/activity.json":                                          extFlogoActivityPingActivityJson,
+	"ext/flogo/activity/rest/activity.json":                                          extFlogoActivityRestActivityJson,
+	"ext/flogo/activity/tracer/activity.json":                                        extFlogoActivityTracerActivityJson,
+	"internal/pkg/model/v2/activity/core/activity.json":                              internalPkgModelV2ActivityCoreActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/app/activity.json":       vendorGithubComTibcosoftwareFlogoContribActivityAppActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awsiot/activity.json":    vendorGithubComTibcosoftwareFlogoContribActivityAwsiotActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json":      vendorGithubComTibcosoftwareFlogoContribActivityCoapActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/counter/activity.json":   vendorGithubComTibcosoftwareFlogoContribActivityCounterActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/error/activity.json":     vendorGithubComTibcosoftwareFlogoContribActivityErrorActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/kafkapub/activity.json":  vendorGithubComTibcosoftwareFlogoContribActivityKafkapubActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/lambda/activity.json":    vendorGithubComTibcosoftwareFlogoContribActivityLambdaActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/log/activity.json":       vendorGithubComTibcosoftwareFlogoContribActivityLogActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/reply/activity.json":     vendorGithubComTibcosoftwareFlogoContribActivityReplyActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/rest/activity.json":      vendorGithubComTibcosoftwareFlogoContribActivityRestActivityJson,
+	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/twilio/activity.json":    vendorGithubComTibcosoftwareFlogoContribActivityTwilioActivityJson,
 	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityWsmessageActivityJson,
 }
 
@@ -578,6 +578,7 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"ext": &bintree{nil, map[string]*bintree{
 		"flogo": &bintree{nil, map[string]*bintree{
@@ -710,4 +711,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-
