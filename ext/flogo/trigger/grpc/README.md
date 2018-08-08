@@ -206,7 +206,7 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
 }
 ```
 ### Sample Usage
-This trigger depends on support files which can be generated with cli tool by passing proto file. Usage of tool can be found [here](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#grpc).<br>
+This trigger depends on support files which can be generated with cli tool by passing proto file. Usage of tool can be found [here](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#create).<br>
 
 Sample demonstration of this trigger can be found in gRPC [recipe](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes).
 
