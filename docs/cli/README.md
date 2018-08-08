@@ -8,9 +8,6 @@
 	* [Publish](#publish)
 		* [Mashery](#mashery)
 	  * [Consul](#consul)
-  * [gRPC](#grpc)
-    * [Generate](#generate)
-    * [Clean](#clean)
 
 ## <a name="overview"></a>Overview
 
@@ -90,6 +87,7 @@ Flags:
   -n, --name string   customized mashling-gateway name (default "mashling-custom")
   -N, --native        build the customized binary natively instead of using Docker
   -O, --os string     target OS to build for (default is the host OS, valid values are windows, darwin, and linux)
+  -p, --protoPath string   path to proto file for grpc service
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
@@ -108,6 +106,15 @@ By default all of the build commands will run through `Docker` so as to simplify
 You can also specify which target OS to build the customized binary for via the `-O` flag. Supported values are `windows`, `darwin` (for macOS), and `linux`. The default value is whatever the host operating system is at the time the `create` command is executed.
 
 A target architecture to build the customized binary for can be specified via the `-A` flag. Supported values are `amd64`, and `arm64`. The default value is `amd64` and will suffice for the vast majority of use cases. Linux is the only compatible target OS for `arm64` architectures.
+
+##### Note
+In case of gRPC, Create command accepts basic proto file and generates stub file with `protoc` binary. Tool also generates support files for trigger and gRPC service in path `<MASHLING-APP-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
+
+1. Unary methods alone accepted. Implimentaion code is auto generated in above mentioned path.
+2. RPC method parameters should be declared in proto itself.
+3. Method should have input and output request params of message type.<br>
+
+Sample proto file can be found [here](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes/grpc-to-grpc-gateway).
 
 ### <a name="swagger"></a>Swagger
 Swagger allows you to generate a Swagger 2.0 document based off of the provided `mashling.json` configuration file. Currently it only works with HTTP based triggers.
@@ -319,103 +326,4 @@ Example registering a service with Consul using the service definition folder:
 
 ```bash
 ./mashling-cli publish consul -r -c mashling-gateway-consul.json -t abcd1234 -D /etc/consul/configfiles/
-```
-### <a name="grpc"></a>gRPC
-This command is used to generate stub files and support files for trigger/grpc service based on the given proto file.
-
-Details are:
-```bash
-./mashling-cli grpc -h
-```
-
-```bash
-gRPC generates/cleans support files for gRPC trigger/gRPC service.
-
-Usage:
-  mashling-cli grpc [command]
-
-Available Commands:
-  clean       Removes grpc Support Files
-  generate    Generates grpc Support Files
-
-Flags:
-  -h, --help   help for grpc
-
-Global Flags:
-  -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
-  -l, --load-from-env         load the mashling gateway configuration from an environment variable
-
-Use "mashling-cli grpc [command] --help" for more information about a command.
-```
-
-#### <a name="generate"></a>Generate
-gRPC generate command used to generate support files for gRPC trigger and gRPC service. Files are generated in mashling home folder in path /MASHLING-HOME/gen/grpc/ 
-
-Details are:
-```bash
-./mashling-cli grpc generate -h
-```
-
-```bash
-Generates Support Files for Mashling gRPC trigger/service Use
-
-Usage:
-  mashling-cli grpc generate [flags]
-
-Flags:
-  -h, --help               help for generate
-  -p, --protoPath string   grpc proto file path
-
-Global Flags:
-  -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
-  -l, --load-from-env         load the mashling gateway configuration from an environment variable
-```
-Example Usage:
-```bash
-./mashling-cli grpc generate -p /path/to/proto/file
-```
-
-##### Note
-Generate command accepts basic proto file and generates stub file with `protoc` binary. Tool also generates support files for trigger and gRPC service in path `<MASHLING-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
-
-1. Unary methods alone accepted. Implimentaion code is auto generated in above mentioned path.
-2. RPC method parameters should be declared in proto itself.
-3. Method should have input and output request params of message type.<br>
-
-Sample proto file can be found [here](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes/grpc-to-grpc-gateway).
-
-#### <a name="clean"></a>Clean
-gRPC clean command is used to remove above generated files. Flags -p and -a are mutually exclusive, -a is used to remove all the generated files, -p is used to remove specific files related to given proto file.
-
-Details are:
-```bash
-./mashling-cli grpc clean -h
-```
-
-```bash
-Removes grpc Support Files from generated code location
-
-Usage:
-  mashling-cli grpc clean [flags]
-
-Flags:
-  -a, --all                clean all files flag
-  -h, --help               help for clean
-  -p, --protoPath string   grpc proto file path
-
-Global Flags:
-  -c, --config string         mashling gateway configuration (default "mashling.json")
-  -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
-  -l, --load-from-env         load the mashling gateway configuration from an environment variable
-```
-
-Example Usage: If proto path is given
-```bash
-./mashling-cli grpc clean -p /path/to/proto/file
-```
-or to clean all the generated files
-```bash
-./mashling-cli grpc clean -a
 ```

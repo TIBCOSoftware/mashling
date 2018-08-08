@@ -36,6 +36,7 @@ func init() {
 }
 
 var (
+	protoPath           string
 	name                string
 	native              bool
 	targetOS            string

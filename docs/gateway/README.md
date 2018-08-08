@@ -600,7 +600,7 @@ Response handler:
 }
 ```
 #### Note
-Currently gRPC mashling service will accept `grpc unary` methods. Support files for this service is generated with mashling cli [command](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#grpc).
+Currently gRPC mashling service will accept `grpc unary` methods. Support files for this service is generated using proto file during custom creation of gateway with mashling cli create [command](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#create).
 
 #### <a name="services-circuit-breaker"></a>Circuit Breaker
 
