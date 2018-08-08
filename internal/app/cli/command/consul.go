@@ -44,7 +44,7 @@ func consulReg(command *cobra.Command, args []string) {
 		consulRegister = false
 	}
 	if consulDefDir == "" && cHost == "" {
-		log.Fatal("argument missing consul agent address(-h ip:port) is needed")
+		log.Fatal("argument missing consul agent address(-H ip:port) is needed")
 	}
 
 	if consulRegister {
