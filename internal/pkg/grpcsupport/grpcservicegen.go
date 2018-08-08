@@ -2,31 +2,27 @@ package grpcsupport
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
 	"time"
-
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 const (
 	serviceName = "\nservice "
 	grpcGenPath = "github.com/TIBCOSoftware/mashling/gen/grpc"
+	impPath     = "github.com/TIBCOSoftware/mashling/cmd/mashling-gateway"
 )
-
-//Logger
-var log = logger.GetLogger("mashling-cli-grpc-gen")
 
 var (
 	protoPath     string
 	protoFileName string
 	protoImpPath  string
-	goPath        string
-	cmdExePath    string
 	appPath       string
+	cmdExePath    string
 )
 
 //MethodInfoTree holds method information
@@ -46,9 +42,9 @@ type ProtoData struct {
 	ProtoName      string
 }
 
-func assignValues() {
-	appPath = "github.com/TIBCOSoftware/mashling"
-	goPath = os.Getenv("GOPATH")
+//AssignValues will set fullpath value
+func AssignValues(path string) {
+	appPath = path
 }
 
 //GenerateSupportFiles creates auto genearted code
@@ -57,40 +53,47 @@ func GenerateSupportFiles(path string) error {
 	path, _ = filepath.Abs(path)
 	_, err := os.Stat(path)
 	if err != nil {
-		log.Error("file path provided is invalid")
+		log.Fatal("file path provided is invalid")
 		return err
 	}
 
 	protoPath = path[:strings.LastIndex(path, string(filepath.Separator))]
 	protoFileName = path[strings.LastIndex(path, string(filepath.Separator))+1:]
 
-	log.Debug("protoPath:[", protoPath, "] protoFileName:[", protoFileName, "]")
-
-	assignValues()
+	log.Println("protoPath:[", protoPath, "] protoFileName:[", protoFileName, "]")
 
 	protoImpPath = grpcGenPath + "/" + strings.Split(protoFileName, ".")[0]
 
+	log.Println("generating pb files")
 	err = generatePbFiles()
 	if err != nil {
 		return err
 	}
 
+	log.Println("getting proto data")
 	pdArr, err := getProtoData(path)
 	if err != nil {
 		return err
 	}
 
+	log.Println("creating trigger support files")
 	err = generateServiceImplFile(pdArr, "server")
 	if err != nil {
 		return err
 	}
 
+	log.Println("creating service support files")
 	err = generateServiceImplFile(pdArr, "client")
 	if err != nil {
 		return err
 	}
 
-	//buildGateway()
+	err = createImportFile(appPath)
+	if err != nil {
+		return err
+	}
+
+	log.Println("support files created")
 	return nil
 }
 
@@ -236,7 +239,7 @@ func Exec(name string, arg ...string) error {
 	}
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Error("error: ", string(output), err)
+		log.Fatal("error: ", string(output), err)
 		return err
 	}
 
@@ -245,8 +248,7 @@ func Exec(name string, arg ...string) error {
 
 //generatePbFiles generates stub file based on given proto
 func generatePbFiles() error {
-	log.Info("generatePbFiles")
-	fullPath := filepath.Join(goPath, "src", protoImpPath)
+	fullPath := filepath.Join(appPath, "src", protoImpPath)
 
 	_, err := os.Stat(fullPath)
 	if err != nil {
@@ -259,22 +261,20 @@ func generatePbFiles() error {
 		if statErr == nil {
 			os.RemoveAll(fullPath)
 		}
-		log.Error("error occured", err)
+		log.Fatal("error occured", err)
 		return err
 	}
-	log.Debug("files generated at: ", fullPath)
 	return nil
 }
 
 //getProtoData reads proto and returns proto data present in proto file
 func getProtoData(protoPath string) ([]ProtoData, error) {
-	log.Info("getProtoData")
 	var regServiceName string
 	var methodInfoList []MethodInfoTree
 
 	bytes, err := ioutil.ReadFile(protoPath)
 	if err != nil {
-		log.Error(err)
+		log.Fatal(err)
 		return nil, err
 	}
 
@@ -283,7 +283,6 @@ func getProtoData(protoPath string) ([]ProtoData, error) {
 	var ProtodataArr []ProtoData
 
 	tempString := fullString
-	log.Debug("Number of services present in proto ", strings.Count(fullString, serviceName))
 	for i := 0; i < strings.Count(fullString, serviceName); i++ {
 
 		//getting service declaration full string
@@ -327,12 +326,16 @@ func getProtoData(protoPath string) ([]ProtoData, error) {
 
 //generateServiceImplFile creates implimentation files supported for grpc trigger and grpc service
 func generateServiceImplFile(pdArr []ProtoData, option string) error {
+	dirPath := filepath.Join(appPath, "src", grpcGenPath, option)
+	_, fileErr := os.Stat(dirPath)
+	if fileErr != nil {
+		os.MkdirAll(dirPath, os.ModePerm)
+	}
 	for _, pd := range pdArr {
-		connectorFile := filepath.Join(goPath, "src", grpcGenPath, option, strings.Split(protoFileName, ".")[0]+"."+pd.RegServiceName+".grpcservice.go")
-		log.Debugf("Generating %s...\n", connectorFile)
+		connectorFile := filepath.Join(appPath, "src", grpcGenPath, option, strings.Split(protoFileName, ".")[0]+"."+pd.RegServiceName+".grpcservice.go")
 		f, err := os.Create(connectorFile)
 		if err != nil {
-			log.Error("error: ", err)
+			log.Fatal("error: ", err)
 			return err
 		}
 		defer f.Close()
@@ -347,4 +350,19 @@ func generateServiceImplFile(pdArr []ProtoData, option string) error {
 		}
 	}
 	return nil
+}
+
+func createImportFile(appPath string) error {
+	fileData := `
+	package main
+
+	import (
+		_ "github.com/TIBCOSoftware/mashling/gen/grpc/client"
+		_ "github.com/TIBCOSoftware/mashling/gen/grpc/server"
+	)
+
+	`
+	filePath := filepath.Join(appPath, "src", impPath, "imports.go")
+	err := ioutil.WriteFile(filePath, []byte(fileData), 0644)
+	return err
 }
