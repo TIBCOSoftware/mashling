@@ -685,6 +685,7 @@ The available response outputs are as follows:
 | errorMessage | string | The error message |
 
 The parsed token contents are:
+
 | Name   |  Type   | Description   |
 |:-----------|:--------|:--------------|
 | claims | JSON object | The set of standard and custom claims provided by the parsed token |
