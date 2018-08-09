@@ -391,11 +391,18 @@ func (t *MqttTrigger) RunAction(actionURI string, payload string, span Span) {
 
 	action := action.Get(actionURI)
 	context := trigger.NewContext(context.Background(), startAttrs)
-	_, replyData, err := t.runner.Run(context, action, actionURI, nil)
+	var replyData interface{}
+	results, err := t.runner.RunAction(context, action, nil)
 	if err != nil {
 		span.Error("Error starting action: %v", err)
 	}
 	log.Debugf("Ran action: [%s]", actionURI)
+	if len(results) != 0 {
+		dataAttr, ok := results["data"]
+		if ok {
+			replyData = dataAttr.Value()
+		}
+	}
 
 	if replyData != nil {
 		data, err := json.Marshal(replyData)

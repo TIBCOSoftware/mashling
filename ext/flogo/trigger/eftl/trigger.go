@@ -426,9 +426,17 @@ func (t *Trigger) RunAction(handler *OptimizedHandler, dest string, content []by
 	actionURI, handlerCfg := handler.GetActionID(string(content), span)
 	action := action.Get(actionURI)
 	context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: handlerCfg})
-	_, replyData, err := t.runner.Run(context, action, actionURI, nil)
+	var replyData interface{}
+	results, err := t.runner.RunAction(context, action, nil)
 	if err != nil {
 		span.Error("Error starting action: %v", err)
+	}
+	log.Debugf("Ran action: [%s]", actionURI)
+	if len(results) != 0 {
+		dataAttr, ok := results["data"]
+		if ok {
+			replyData = dataAttr.Value()
+		}
 	}
 	log.Debugf("Ran action: [%s]", actionURI)
 	span.SetTag("actionURI", actionURI)

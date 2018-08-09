@@ -440,8 +440,7 @@ func onMessage(t *KafkaSubTrigger, msg *sarama.ConsumerMessage) {
 		}
 
 		ctx := trigger.NewContext(context.Background(), startAttrs)
-		_, _, err := t.runner.Run(ctx, actionID, handler.ActionId, nil)
-
+		_, err := t.runner.RunAction(ctx, actionID, nil)
 		if err != nil {
 			flogoLogger.Errorf("Run action for ActionID [%s] failed for reason [%s] message lost", err, handler.ActionId)
 		}
