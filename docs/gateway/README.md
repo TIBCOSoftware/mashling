@@ -15,6 +15,7 @@
     * [Flogo Flow](#services-flogo-flow)
     * [Anomaly](#services-anomaly)
     * [SQL Detector](#services-sqld)
+    * [gRPC](#services-grpc)
     * [Circuit Breaker](#services-circuit-breaker)
     * [Websocket Proxy](#services-websocket-proxy)
     * [JWT](#services-jwt)
@@ -543,6 +544,64 @@ Utilizing the response values can be seen in a response handler:
   }
 }
 ```
+#### <a name="services-grpc"></a>gRPC
+
+The `grpc` service type works as gRPC client and will communicate to the given address with given method parameters.
+
+The service `settings` and available `input` for the request are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+| grpcMthdParamtrs | JSON object | A grpcMthdParamtrs payload which holds full information like method parameters, service name, proto name, method name etc.|
+| hosturl | string | A gRPC end point url with port |
+| enableTLS | bool | true - To enable TLS (Transport Layer Security), false - No TLS security  |
+| clientCert | string | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
+
+The available response outputs are as follows:
+
+| Name   |  Type   | Description   |
+|:-----------|:--------|:--------------|
+|body | JSON object | The response object from gRPC end server |
+
+A sample `service` definition is:
+
+```json
+{
+    "name": "PetStoreUsers",
+    "description": "Make calls to grpc end point",
+    "type": "grpc",
+    "settings": {
+        "hosturl": "localhost:9000",
+        "enableTLS": "true"
+    }
+}
+```
+
+An example `step` that invokes the above `PetStoreUsers` service using `grpcMthdParamtrs` is:
+
+```json
+{
+ "service": "PetStoreUsers",
+ "input": {
+    "grpcMthdParamtrs": "${payload.grpcData}",
+    "clientCert": "${env.CLIENT_CERT}"
+ }
+}
+```
+
+Response handler:
+
+```json
+{
+  "error": false,
+  "output": {
+      "code": 200,
+      "data": "${PetStoreUsers.response.body}"
+  }
+}
+```
+#### Note
+Currently gRPC mashling service will accept `grpc unary` methods. Support files for this service is generated using proto file during custom creation of gateway with mashling cli create [command](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#create).
 
 #### <a name="services-circuit-breaker"></a>Circuit Breaker
 

@@ -100,6 +100,5 @@ func (p *PingServiceConfig) Stop() error {
 		return err
 	}
 	log.Println("[mashling-ping-service] Ping service stopped")
-
 	return nil
 }
