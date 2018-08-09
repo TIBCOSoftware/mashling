@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/mashling/internal/app/cli/assets"
-	"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/pkg/files"
 	"github.com/TIBCOSoftware/mashling/pkg/strings"
@@ -28,7 +27,6 @@ const (
 
 func init() {
 	createCommand.Flags().StringVarP(&name, "name", "n", "mashling-custom", "customized mashling-gateway name")
-	createCommand.Flags().StringVarP(&protoPath, "protoPath", "p", "", "path to proto file for grpc service")
 	createCommand.Flags().BoolVarP(&native, "native", "N", false, "build the customized binary natively instead of using Docker")
 	createCommand.Flags().StringVarP(&targetOS, "os", "O", "", "target OS to build for (default is the host OS, valid values are windows, darwin, and linux)")
 	createCommand.Flags().StringVarP(&targetArch, "arch", "A", "", "target architecture to build for (default is amd64, arm64 is only compatible with Linux)")
@@ -36,7 +34,6 @@ func init() {
 }
 
 var (
-	protoPath           string
 	name                string
 	native              bool
 	targetOS            string
@@ -125,21 +122,6 @@ func create(command *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	//grpc Support code
-	gRPCFlag := false
-	if len(protoPath) != 0 {
-		gRPCFlag = true
-	}
-	if gRPCFlag {
-		log.Println("Generating grpc support files using proto file: ", protoPath)
-		grpcsupport.AssignValues(name)
-		err := grpcsupport.GenerateSupportFiles(protoPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	//grpc Support code end
-
 	var cmd *exec.Cmd
 	var dockerCmd, dockerContainerID string
 	if dockerCmd, err = exec.LookPath("docker"); native || err != nil {
@@ -226,7 +208,6 @@ func create(command *cobra.Command, args []string) {
 		log.Println(string(output))
 		log.Fatal(cErr)
 	}
-
 	// Run make build target to build for appropriate OS
 	log.Println("Building customized Mashling binary...")
 	if dockerCmd != "" {
