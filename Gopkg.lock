@@ -265,7 +265,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -275,7 +274,8 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "70b3af33377e7aa25ae42977bed93cc6b90f0373"
+  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
