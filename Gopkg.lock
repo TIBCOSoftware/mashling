@@ -127,8 +127,8 @@
     "lambda/messages",
     "lambdacontext"
   ]
-  revision = "4d30d0ff60440c2d0480a15747c96ee71c3c53d4"
-  version = "v1.2.0"
+  revision = "e630af386f8aad6ec9fc899b951cf62d37cfe56f"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
@@ -171,7 +171,7 @@
   branch = "master"
   name = "github.com/buger/jsonparser"
   packages = ["."]
-  revision = "2cac668e8456b4284edb0715e17e2af02d3ec993"
+  revision = "f4dd9f5a6b441265aefc1d44872a6f8c10f42b37"
 
 [[projects]]
   name = "github.com/chewxy/hm"
@@ -800,6 +800,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bd77ca71540673809806dbbdff343d995e5746b165740366876cd6ea823e9c3e"
+  inputs-digest = "391de38c014d7d7de9acfd074fdd55ef95b9d9a7b94db09ba2e8abfabe0ec8d4"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 
+	wsproxy "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/wsproxy"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 )
 
@@ -25,8 +26,14 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeFlogoFlow(serviceDef.Settings)
 	case "sqld":
 		return InitializeSQLD(serviceDef.Settings)
+	case "circuitBreaker":
+		return InitializeCircuitBreaker(serviceDef.Settings)
 	case "anomaly":
 		return InitializeAnomaly(serviceDef.Settings)
+	case "jwt":
+		return InitializeJWT(serviceDef.Settings)
+	case "ws":
+		return wsproxy.InitializeWSProxy(serviceDef.Name, serviceDef.Settings)
 	default:
 		return nil, errors.New("unknown service type")
 	}
