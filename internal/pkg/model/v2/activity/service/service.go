@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 
+	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
+
 	wsproxy "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/wsproxy"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 )
@@ -26,6 +28,8 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeFlogoFlow(serviceDef.Settings)
 	case "sqld":
 		return InitializeSQLD(serviceDef.Settings)
+	case "grpc":
+		return grpc.InitializeGRPC(serviceDef.Settings)
 	case "circuitBreaker":
 		return InitializeCircuitBreaker(serviceDef.Settings)
 	case "anomaly":

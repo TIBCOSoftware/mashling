@@ -83,7 +83,7 @@ func schemaJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "schema.json", size: 9791, mode: os.FileMode(420), modTime: time.Unix(1533396028, 0)}
+	info := bindataFileInfo{name: "schema.json", size: 9791, mode: os.FileMode(436), modTime: time.Unix(1533715836, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -182,7 +182,6 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"schema.json": &bintree{schemaJson, map[string]*bintree{}},
 }}
@@ -233,3 +232,4 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
