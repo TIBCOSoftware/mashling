@@ -6,7 +6,6 @@
 // ext/flogo/activity/ping/activity.json
 // ext/flogo/activity/rest/activity.json
 // ext/flogo/activity/tracer/activity.json
-// internal/pkg/model/v2/activity/core/activity.json
 // vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreply/activity.json
 // vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreturn/activity.json
 // vendor/github.com/TIBCOSoftware/flogo-contrib/activity/aggregate/activity.json
@@ -209,26 +208,6 @@ func extFlogoActivityTracerActivityJson() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "ext/flogo/activity/tracer/activity.json", size: 548, mode: os.FileMode(420), modTime: time.Unix(1505413202, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _internalPkgModelV2ActivityCoreActivityJson = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\x91\xc1\xab\xd4\x30\x10\xc6\xef\xfd\x2b\x86\x9e\x9f\xcd\xd3\x63\x11\x91\xe7\x49\x41\x14\xf4\x26\x1e\xd2\x74\xd2\xce\x6e\x9a\xa9\x93\x49\xa5\x2e\xfb\xbf\x4b\xdb\x5d\x16\xd9\x55\x61\x79\x97\x04\xe6\x9b\xf9\x65\xf2\x7d\x87\x02\xa0\x8c\x76\xc0\xb2\x86\x72\xb0\xa9\x0f\x14\xbb\x17\x8e\x05\xcb\x87\x45\x9a\x50\x12\x71\x5c\xd4\xc7\xea\xb1\x7a\xb9\x55\x75\x1e\xd7\x01\x1f\xb8\xe3\xda\x3a\xa5\x89\x74\xde\x34\x41\xbf\x48\x1d\x69\x9f\x9b\xca\xf1\x60\xbe\xbe\x7f\x7a\xf7\xe9\x0b\x7b\xfd\x69\x05\xcd\xf9\x11\x43\x51\x51\xa2\x0d\x66\xdc\x77\x66\xe0\x16\x83\x99\x5e\x99\x33\xcc\x5c\x76\x68\x31\x39\xa1\x51\x4f\x7b\xfc\xb1\x25\xd0\x30\x06\x1c\x30\x6a\x02\xed\x11\x84\xb3\x52\xec\x20\x70\x47\x0e\x3c\x0b\x58\xf8\x78\x1a\x00\x8a\x49\x6d\x74\x58\x6d\x5c\x9b\xb5\x67\x59\x90\x1f\xd0\x7b\xc1\x19\x9e\xf8\x17\xee\xe1\xf5\xae\x59\xee\xb7\x4a\x8d\xe3\xe5\x07\x6f\xb6\x7e\x8a\x63\xd6\x54\xd6\xf0\xad\x00\x00\x38\xac\xe7\x0d\xfb\x3e\xdb\x39\xb0\x6d\xd7\xa1\xb5\xe1\x6c\x17\x37\x3b\x74\x7a\xa9\x0b\xfe\xc8\x24\xd8\x96\x35\x78\x1b\x12\xae\xf5\xe3\xc3\x6d\x3a\xb5\x18\x95\x3c\xa1\x5c\x83\x93\x0a\xc5\xee\x26\x58\x25\xff\x87\x7b\x32\xe5\x79\xa9\x4b\x0e\x98\xae\x99\x56\xc4\xce\xf7\x21\x13\xca\x44\xee\x5e\x68\x01\xf0\x7d\x4d\x91\xb3\xfe\x3b\x46\xc1\x94\x83\xfe\x35\xbd\x0b\xae\x38\x16\xbf\x03\x00\x00\xff\xff\xa8\xb8\x3f\xb1\x3f\x03\x00\x00")
-
-func internalPkgModelV2ActivityCoreActivityJsonBytes() ([]byte, error) {
-	return bindataRead(
-		_internalPkgModelV2ActivityCoreActivityJson,
-		"internal/pkg/model/v2/activity/core/activity.json",
-	)
-}
-
-func internalPkgModelV2ActivityCoreActivityJson() (*asset, error) {
-	bytes, err := internalPkgModelV2ActivityCoreActivityJsonBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "internal/pkg/model/v2/activity/core/activity.json", size: 831, mode: os.FileMode(420), modTime: time.Unix(1528122438, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -671,7 +650,6 @@ var _bindata = map[string]func() (*asset, error){
 	"ext/flogo/activity/ping/activity.json":                                          extFlogoActivityPingActivityJson,
 	"ext/flogo/activity/rest/activity.json":                                          extFlogoActivityRestActivityJson,
 	"ext/flogo/activity/tracer/activity.json":                                        extFlogoActivityTracerActivityJson,
-	"internal/pkg/model/v2/activity/core/activity.json":                              internalPkgModelV2ActivityCoreActivityJson,
 	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreply/activity.json":  vendorGithubComTibcosoftwareFlogoContribActivityActreplyActivityJson,
 	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreturn/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityActreturnActivityJson,
 	"vendor/github.com/TIBCOSoftware/flogo-contrib/activity/aggregate/activity.json": vendorGithubComTibcosoftwareFlogoContribActivityAggregateActivityJson,
@@ -754,19 +732,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				}},
 				"tracer": &bintree{nil, map[string]*bintree{
 					"activity.json": &bintree{extFlogoActivityTracerActivityJson, map[string]*bintree{}},
-				}},
-			}},
-		}},
-	}},
-	"internal": &bintree{nil, map[string]*bintree{
-		"pkg": &bintree{nil, map[string]*bintree{
-			"model": &bintree{nil, map[string]*bintree{
-				"v2": &bintree{nil, map[string]*bintree{
-					"activity": &bintree{nil, map[string]*bintree{
-						"core": &bintree{nil, map[string]*bintree{
-							"activity.json": &bintree{internalPkgModelV2ActivityCoreActivityJson, map[string]*bintree{}},
-						}},
-					}},
 				}},
 			}},
 		}},

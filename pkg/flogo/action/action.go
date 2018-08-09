@@ -7,7 +7,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/core"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/action/core"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 )
 
@@ -19,15 +19,11 @@ type MashlingAction struct {
 	ioMetadata *data.IOMetadata
 	dispatch   types.Dispatch
 	services   []types.Service
-	identifier string
-	instance   string
 }
 
 type Data struct {
-	Dispatch   json.RawMessage `json:"dispatch"`
-	Services   json.RawMessage `json:"services"`
-	Identifier string          `json:"identifier"`
-	Instance   string          `json:"Instance"`
+	Dispatch json.RawMessage `json:"dispatch"`
+	Services json.RawMessage `json:"services"`
 }
 
 //todo fix this
@@ -66,8 +62,6 @@ func (f *Factory) New(config *action.Config) (action.Action, error) {
 	}
 	mAction.dispatch = dispatch
 	mAction.services = services
-	mAction.identifier = actionData.Identifier
-	mAction.instance = actionData.Instance
 	return mAction, nil
 }
 
@@ -84,7 +78,7 @@ func (m *MashlingAction) Run(context context.Context, inputs map[string]*data.At
 	for k, v := range inputs {
 		payload[k] = v.Value()
 	}
-	code, mData, err := Core.ExecuteMashling(payload, m.identifier, m.instance, m.dispatch.Routes, m.services)
+	code, mData, err := core.ExecuteMashling(payload, m.dispatch.Routes, m.services)
 	output := make(map[string]*data.Attribute)
 	codeAttr, err := data.NewAttribute("code", data.TypeInteger, code)
 	if err != nil {

@@ -53,7 +53,7 @@ var (
 )
 
 // log is the default package logger
-var log = logger.GetLogger("trigger-tibco-rest")
+var log = logger.GetLogger("trigger-mashling-gorilla-mux")
 
 //OptimizedHandler optimized handler
 type OptimizedHandler struct {
