@@ -123,7 +123,7 @@
                                 "description": "Simple Reply Activity",
                                 "type": 1,
                                 "activityType": "github-com-tibco-software-flogo-contrib-activity-reply",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/actreply",
                                 "attributes": [
                                     {
                                         "name": "code",

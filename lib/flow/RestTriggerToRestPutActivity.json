@@ -121,7 +121,7 @@
                 "description": "Simple Reply Activity",
                 "type": 1,
                 "activityType": "tibco-reply",
-                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/actreply",
                 "attributes": [
                   {
                     "name": "code",
@@ -183,7 +183,7 @@
                 "description": "Simple Reply Activity",
                 "type": 1,
                 "activityType": "tibco-reply",
-                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/reply",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/actreply",
                 "attributes": [
                   {
                     "name": "code",
