@@ -84,7 +84,7 @@ func pkgFlogoActionActionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "pkg/flogo/action/action.json", size: 362, mode: os.FileMode(420), modTime: time.Unix(1533844005, 0)}
+	info := bindataFileInfo{name: "pkg/flogo/action/action.json", size: 362, mode: os.FileMode(420), modTime: time.Unix(1533904915, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

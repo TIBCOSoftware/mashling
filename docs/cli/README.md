@@ -87,6 +87,7 @@ Flags:
   -n, --name string   customized mashling-gateway name (default "mashling-custom")
   -N, --native        build the customized binary natively instead of using Docker
   -O, --os string     target OS to build for (default is the host OS, valid values are windows, darwin, and linux)
+  -p, --protoPath string   path to proto file for grpc service
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
@@ -105,6 +106,15 @@ By default all of the build commands will run through `Docker` so as to simplify
 You can also specify which target OS to build the customized binary for via the `-O` flag. Supported values are `windows`, `darwin` (for macOS), and `linux`. The default value is whatever the host operating system is at the time the `create` command is executed.
 
 A target architecture to build the customized binary for can be specified via the `-A` flag. Supported values are `amd64`, and `arm64`. The default value is `amd64` and will suffice for the vast majority of use cases. Linux is the only compatible target OS for `arm64` architectures.
+
+##### Note
+In case of gRPC, Create command accepts basic proto file and generates stub file with `protoc` binary. Tool also generates support files for trigger and gRPC service in path `<MASHLING-APP-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
+
+1. Unary methods alone accepted. Implimentaion code is auto generated in above mentioned path.
+2. RPC method parameters should be declared in proto itself.
+3. Method should have input and output request params of message type.<br>
+
+Sample proto file can be found [here](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes/grpc-to-grpc-gateway).
 
 ### <a name="swagger"></a>Swagger
 Swagger allows you to generate a Swagger 2.0 document based off of the provided `mashling.json` configuration file. Currently it only works with HTTP based triggers.
