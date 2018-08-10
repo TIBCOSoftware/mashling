@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
+	fData "github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling/lib/util"
 	"google.golang.org/grpc"
@@ -240,13 +241,28 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 
 	handlers := t.config.Handlers
 
+	var replyCode int
+	var replyData interface{}
 	//calling perticular handler based on method name specification in gateway json file
 	for _, hand := range handlers {
 		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodname"].(string)) == 0 {
 			log.Debug("Dispatch Found for ", hand.GetSetting("methodName"), " Handler Invoked: ", hand.ActionId)
 			actID := action.Get(hand.ActionId)
 			context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: hand})
-			replyCode, replyData, err := t.runner.Run(context, actID, hand.ActionId, nil)
+			results, err := t.runner.RunAction(context, actID, nil)
+			if err != nil {
+				return replyCode, replyData, err
+			}
+			if len(results) != 0 {
+				dataAttr, ok := results["data"]
+				if ok {
+					replyData = dataAttr.Value()
+				}
+				codeAttr, ok := results["code"]
+				if ok {
+					replyCode, _ = fData.CoerceToInteger(codeAttr.Value())
+				}
+			}
 			return replyCode, replyData, err
 		}
 	}
@@ -257,7 +273,20 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 			log.Debug("Default Dispatch Invoked: ", hand.ActionId)
 			actID := action.Get(hand.ActionId)
 			context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: hand})
-			replyCode, replyData, err := t.runner.Run(context, actID, hand.ActionId, nil)
+			results, err := t.runner.RunAction(context, actID, nil)
+			if err != nil {
+				return replyCode, replyData, err
+			}
+			if len(results) != 0 {
+				dataAttr, ok := results["data"]
+				if ok {
+					replyData = dataAttr.Value()
+				}
+				codeAttr, ok := results["code"]
+				if ok {
+					replyCode, _ = fData.CoerceToInteger(codeAttr.Value())
+				}
+			}
 			return replyCode, replyData, err
 		}
 	}
