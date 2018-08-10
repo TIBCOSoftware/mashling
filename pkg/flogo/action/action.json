@@ -5,5 +5,5 @@
   "version": "0.0.1",
   "title": "Mashling Gateway Action",
   "description": "Action implementing the Mashling Microgateway features.",
-  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/feature-mashling-as-an-action/pkg/flogo/action",
+  "homepage": "https://github.com/TIBCOSoftware/mashling/tree/feature-mashling-as-an-action/pkg/flogo/action"
 }
