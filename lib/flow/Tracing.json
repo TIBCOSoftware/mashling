@@ -160,7 +160,7 @@
                 "inputMappings": [
                   {
                     "type": 1,
-                    "value": "{A5.result}",
+                    "value": "$activity.5.result",
                     "mapTo": "data"
                   }
                 ]

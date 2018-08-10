@@ -1,166 +1,166 @@
 {
-    "name": "newapp",
-    "type": "flogo:app",
-    "version": "0.0.1",
-    "description": "",
-    "triggers": [
+  "name": "newapp",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "triggers": [
+    {
+      "name": "gorillamuxtrigger",
+      "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+      "description": "gorillamuxtrigger REST Trigger",
+      "settings": {
+        "port": "9096"
+      },
+      "id": "receive_http_message",
+      "handlers": [
         {
-            "name": "gorillamuxtrigger",
-            "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
-            "description": "gorillamuxtrigger REST Trigger",
-            "settings": {
-                "port": "9096"
-            },
-            "id": "receive_http_message",
-            "handlers": [
-                {
-                    "settings": {
-                        "method": "GET",
-                        "path": "/users/:id",
-                        "autoIdReply": "false",
-                        "useReplyHandler": "false"
-                    },
-                    "actionId": "check"
-                }
-            ]
+          "settings": {
+            "method": "GET",
+            "path": "/users/:id",
+            "autoIdReply": "false",
+            "useReplyHandler": "false"
+          },
+          "actionId": "check"
         }
-    ],
-    "actions": [
-        {
-            "name": "check",
-            "data": {
-                "flow": {
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "check",
+      "data": {
+        "flow": {
+          "type": 1,
+          "explicitReply": true,
+          "attributes": [],
+          "rootTask": {
+            "id": 1,
+            "type": 1,
+            "tasks": [
+              {
+                "id": 2,
+                "name": "Invoke REST Service",
+                "description": "Simple REST Activity",
+                "type": 1,
+                "activityType": "github-com-tibco-software-flogo-contrib-activity-rest",
+                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
+                "attributes": [
+                  {
+                    "name": "method",
+                    "value": "GET",
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "uri",
+                    "value": null,
+                    "required": true,
+                    "type": "string"
+                  },
+                  {
+                    "name": "pathParams",
+                    "value": null,
+                    "required": false,
+                    "type": "params"
+                  },
+                  {
+                    "name": "queryParams",
+                    "value": null,
+                    "required": false,
+                    "type": "params"
+                  },
+                  {
+                    "name": "content",
+                    "value": null,
+                    "required": false,
+                    "type": "any"
+                  },
+                  {
+                    "name": "serverCert",
+                    "value": null,
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "serverKey",
+                    "value": null,
+                    "required": false,
+                    "type": "string"
+                  },
+                  {
+                    "name": "trustStore",
+                    "value": null,
+                    "required": false,
+                    "type": "string"
+                  }
+                ],
+                "inputMappings": [
+                  {
                     "type": 1,
-                    "explicitReply": true,
-                    "attributes": [],
-                    "rootTask": {
-                        "id": 1,
-                        "type": 1,
-                        "tasks": [
-                            {
-                                "id": 2,
-                                "name": "Invoke REST Service",
-                                "description": "Simple REST Activity",
-                                "type": 1,
-                                "activityType": "github-com-tibco-software-flogo-contrib-activity-rest",
-                                "activityRef": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/rest",
-                                "attributes": [
-                                    {
-                                        "name": "method",
-                                        "value": "GET",
-                                        "required": true,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "uri",
-                                        "value": null,
-                                        "required": true,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "pathParams",
-                                        "value": null,
-                                        "required": false,
-                                        "type": "params"
-                                    },
-                                    {
-                                        "name": "queryParams",
-                                        "value": null,
-                                        "required": false,
-                                        "type": "params"
-                                    },
-                                    {
-                                        "name": "content",
-                                        "value": null,
-                                        "required": false,
-                                        "type": "any"
-                                    },
-                                    {
-                                        "name": "serverCert",
-                                        "value": null,
-                                        "required": false,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "serverKey",
-                                        "value": null,
-                                        "required": false,
-                                        "type": "string"
-                                    },
-                                    {
-                                        "name": "trustStore",
-                                        "value": null,
-                                        "required": false,
-                                        "type": "string"
-                                    }
-                                ],
-                                "inputMappings":[
-				                    {
-                                        "type":1,
-                                        "value":"${env.TRUST_STORE}",
-                                        "mapTo":"trustStore"
-                                    },
-				                    {
-                                        "type":1,
-                                        "value":"${env.SERVER_KEY}",
-                                        "mapTo":"serverKey"
-                                    },
-				                    {
-                                        "type":1,
-                                        "value":"${env.SERVER_CERT}",
-                                        "mapTo":"serverCert"
-                                    },
-                                    {
-                                        "type":1,
-                                        "value":"${env.ENDPOINT_URL}",
-                                        "mapTo":"uri"
-                                    }
-				                ]
-                            },
-                            {
-                                "id": 3,
-                                "name": "Reply To Trigger",
-                                "description": "Simple Reply Activity",
-                                "type": 1,
-                                "activityType": "github-com-tibco-software-flogo-contrib-activity-reply",
-                                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/actreply",
-                                "attributes": [
-                                    {
-                                        "name": "code",
-                                        "value": "200",
-                                        "required": true,
-                                        "type": "integer"
-                                    },
-                                    {
-                                        "name": "data",
-                                        "value": "success",
-                                        "required": false,
-                                        "type": "any"
-                                    }
-                                ],
-                                "inputMappings": [
-                                    {
-                                        "type": 1,
-                                        "value": "{A2.result}",
-                                        "mapTo": "data"
-                                    }
-                                ]
-                            }
-                        ],
-                        "links": [
-                            {
-                                "id": 1,
-                                "from": 2,
-                                "to": 3,
-                                "type": 0
-                            }
-                        ],
-                        "attributes": []
-                    }
-                }
-            },
-            "id": "check",
-            "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+                    "value": "${env.TRUST_STORE}",
+                    "mapTo": "trustStore"
+                  },
+                  {
+                    "type": 1,
+                    "value": "${env.SERVER_KEY}",
+                    "mapTo": "serverKey"
+                  },
+                  {
+                    "type": 1,
+                    "value": "${env.SERVER_CERT}",
+                    "mapTo": "serverCert"
+                  },
+                  {
+                    "type": 1,
+                    "value": "${env.ENDPOINT_URL}",
+                    "mapTo": "uri"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Reply To Trigger",
+                "description": "Simple Reply Activity",
+                "type": 1,
+                "activityType": "github-com-tibco-software-flogo-contrib-activity-reply",
+                "activityRef": "github.com/TIBCOSoftware/flogo-contrib/activity/actreply",
+                "attributes": [
+                  {
+                    "name": "code",
+                    "value": "200",
+                    "required": true,
+                    "type": "integer"
+                  },
+                  {
+                    "name": "data",
+                    "value": "success",
+                    "required": false,
+                    "type": "any"
+                  }
+                ],
+                "inputMappings": [
+                  {
+                    "type": 1,
+                    "value": "$activity.2.result",
+                    "mapTo": "data"
+                  }
+                ]
+              }
+            ],
+            "links": [
+              {
+                "id": 1,
+                "from": 2,
+                "to": 3,
+                "type": 0
+              }
+            ],
+            "attributes": []
+          }
         }
-    ]
+      },
+      "id": "check",
+      "ref": "github.com/TIBCOSoftware/flogo-contrib/action/flow"
+    }
+  ]
 }
