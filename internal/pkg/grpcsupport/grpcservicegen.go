@@ -200,6 +200,12 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	package client
 	
 	import (
+		"context"
+		"encoding/json"
+		"log"
+
+		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
+
 		servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
 		pb "{{.ProtoImpPath}}"
 		"google.golang.org/grpc"
@@ -227,7 +233,40 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	func (cs *clientService{{$protoName}}{{$serviceName}}) ServiceInfo() *servInfo.ServiceInfo {
 		return cs.serviceInfo
 	}
+
+	func (cs *clientService{{$protoName}}{{$serviceName}}) InvokeMethod(reqArr map[string]interface{}) []interface{} {
+
+		clientObject := reqArr["ClientObject"].(pb.{{$serviceName}}Client)
+		methodName := reqArr["MethodName"].(string)
+		pathParams := reqArr["PathParams"]
 	
+		switch methodName {
+		{{- range .MethodInfo }}
+		case "{{.MethodName}}":
+			return {{.MethodName}}(clientObject, pathParams)
+		{{- end }}
+		}
+	
+		return nil
+	}
+
+	{{- range .MethodInfo }}
+	func {{.MethodName}}(client pb.{{$serviceName}}Client, values interface{}) []interface{} {
+		req := &pb.{{.MethodReqName}}{}
+		grpcsupport.AssignStructValues(req, values)
+		res, err := client.{{.MethodName}}(context.Background(), req)
+		b, errMarshl := json.Marshal(res)
+		if errMarshl != nil {
+			log.Println("Error: ", errMarshl)
+			return nil
+		}
+		var resIntfc []interface{}
+		resIntfc = make([]interface{}, 2)
+		resIntfc[0] = b
+		resIntfc[1] = err
+		return resIntfc
+	}
+	{{- end }}
 	`))
 
 // Exec executes a command within the build context.

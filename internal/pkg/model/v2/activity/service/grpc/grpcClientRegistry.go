@@ -11,6 +11,7 @@ var ClientServiceRegistery = NewServiceRegistry()
 type ClientService interface {
 	ServiceInfo() *ServiceInfo
 	GetRegisteredClientService(cs *grpc.ClientConn) interface{}
+	InvokeMethod(map[string]interface{}) []interface{}
 }
 
 type ServiceInfo struct {

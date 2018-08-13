@@ -2,10 +2,7 @@ package grpc
 
 import (
 	"errors"
-	"reflect"
 	"strings"
-
-	"fmt"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 
@@ -18,29 +15,39 @@ import (
 // log is the default package logger
 var log = logger.GetLogger("tibco-service-grpc")
 
-//GRPC is a grpc service
+// GRPC is grpc service
 type GRPC struct {
 	Request  GRPCRequest  `json:"request"`
 	Response GRPCResponse `json:"response"`
 }
 
-//GRPCRequest is a grpc service request
+// GRPCRequest is grpc service request
 type GRPCRequest struct {
 	HostURL          string                 `json:"hosturl"`
 	GrpcMthdParamtrs map[string]interface{} `json:"grpcMthdParamtrs"`
 	EnableTLS        string                 `json:"enableTLS"`
 	ClientCert       string                 `json:"clientCert"`
+	Headers          map[string]string      `json:"headers"`
+	PathParams       map[string]string      `json:"pathParams"`
+	OperatingMode    string                 `json:"operatingMode"`
+	ServiceName      string                 `json:"serviceName"`
+	ProtoName        string                 `json:"protoName"`
+	MethodName       string                 `json:"methodName"`
 }
 
-//GRPCResponse is a grpc service response
+// GRPCResponse is grpc service response
 type GRPCResponse struct {
-	Body interface{} `json:"body"`
+	StatusCode int               `json:"statusCode"`
+	Body       interface{}       `json:"body"`
+	Headers    map[string]string `json:"headers"`
 }
 
-//InitializeGRPC  initializes an GRPC service with provided settings.
+// InitializeGRPC  initialize GRPC service with provided settings.
 func InitializeGRPC(settings map[string]interface{}) (grpcService *GRPC, err error) {
 	grpc := &GRPC{}
 	req := GRPCRequest{}
+	req.PathParams = make(map[string]string)
+	req.Headers = make(map[string]string)
 	req.GrpcMthdParamtrs = make(map[string]interface{})
 	grpc.Request = req
 	err = grpc.setRequestValues(settings)
@@ -50,11 +57,12 @@ func InitializeGRPC(settings map[string]interface{}) (grpcService *GRPC, err err
 // Execute invokes this GRPC service.
 func (g *GRPC) Execute() (err error) {
 
+	g.Response = GRPCResponse{}
+
 	opts := []grpc.DialOption{}
 	log.Debug("enableTLS: ", g.Request.EnableTLS)
 	if strings.Compare(g.Request.EnableTLS, "true") == 0 {
 		log.Debug("ClientCert: ", g.Request.ClientCert)
-		fmt.Println("g.Request.ClientCert", g.Request.ClientCert)
 		creds, err := credentials.NewClientTLSFromFile(g.Request.ClientCert, "")
 		if err != nil {
 			log.Error(err)
@@ -72,48 +80,15 @@ func (g *GRPC) Execute() (err error) {
 	}
 	defer conn.Close()
 
-	var clientInterfaceObj interface{}
+	log.Info("operating mode:", g.Request.OperatingMode)
 
-	servicename := g.Request.GrpcMthdParamtrs["servicename"].(string)
-	protoname := g.Request.GrpcMthdParamtrs["protoname"].(string)
-	protoname = strings.Split(protoname, ".")[0]
-
-	if len(servicename) == 0 && len(protoname) == 0 {
-		return errors.New("Service name and Proto name required")
+	switch g.Request.OperatingMode {
+	case "grpc-to-grpc":
+		return gRPCTogRPCHandler(g, conn)
+	case "rest-to-grpc":
+		return restTogRPCHandler(g, conn)
 	}
 
-	clServFlag := false
-	if len(ClientServiceRegistery.ClientServices) != 0 {
-		for k, service := range ClientServiceRegistery.ClientServices {
-			if strings.Compare(k, protoname+servicename) == 0 {
-				log.Debugf("client service object found for proto [%v] and service [%v]", protoname, servicename)
-				clientInterfaceObj = service.GetRegisteredClientService(conn)
-				clServFlag = true
-			}
-		}
-		if !clServFlag {
-			log.Errorf("client service object not found for proto [%v] and service [%v]", protoname, servicename)
-		}
-	} else {
-		log.Errorf("gRPC Client services not registered")
-	}
-
-	inputs := make([]reflect.Value, 2)
-
-	inputs[0] = reflect.ValueOf(g.Request.GrpcMthdParamtrs["contextdata"])
-	inputs[1] = reflect.ValueOf(g.Request.GrpcMthdParamtrs["reqdata"])
-
-	resultArr := reflect.ValueOf(clientInterfaceObj).MethodByName(g.Request.GrpcMthdParamtrs["methodname"].(string)).Call(inputs)
-
-	res := resultArr[0]
-	grpcErr := resultArr[1]
-	if !grpcErr.IsNil() {
-		log.Error("Propagating error to calling function")
-		log.Error("Error Details: ", grpcErr.Interface())
-		g.Response.Body = grpcErr.Interface()
-	} else {
-		g.Response.Body = res.Interface()
-	}
 	return nil
 }
 
@@ -144,6 +119,7 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 			}
 			g.Request.ClientCert = clientCert
 		case "grpcMthdParamtrs":
+			g.Request.OperatingMode = "grpc-to-grpc"
 			grpcData, ok := v.(map[string]interface{})
 			if !ok {
 				return errors.New("invalid type for grpcData")
@@ -151,6 +127,42 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 			if err := mergo.Merge(&g.Request.GrpcMthdParamtrs, grpcData, mergo.WithOverride); err != nil {
 				return errors.New("unable to merge params values")
 			}
+		case "headers":
+			g.Request.OperatingMode = "rest-to-grpc"
+			headers, ok := v.(map[string]string)
+			if !ok {
+				return errors.New("invalid type for headers")
+			}
+			if err := mergo.Merge(&g.Request.Headers, headers, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge header values")
+			}
+		case "pathParams":
+			g.Request.OperatingMode = "rest-to-grpc"
+			pathParams, ok := v.(map[string]string)
+			if !ok {
+				return errors.New("invalid type for pathParams")
+			}
+			if err := mergo.Merge(&g.Request.PathParams, pathParams, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge pathParams values")
+			}
+		case "serviceName":
+			name, ok := v.(string)
+			if !ok {
+				return errors.New("invalid type for serviceName")
+			}
+			g.Request.ServiceName = name
+		case "protoName":
+			name, ok := v.(string)
+			if !ok {
+				return errors.New("invalid type for protoName")
+			}
+			g.Request.ProtoName = name
+		case "methodName":
+			name, ok := v.(string)
+			if !ok {
+				return errors.New("invalid type for methodName")
+			}
+			g.Request.MethodName = name
 		default:
 			// ignore and move on.
 		}
