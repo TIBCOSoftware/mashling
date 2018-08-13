@@ -166,6 +166,7 @@ func createResource(actionData *ActionData) (string, error) {
 
 	manager := resource.GetManager(support.RESTYPE_FLOW)
 
+	time.Sleep(time.Nanosecond)
 	resourceCfg := &resource.Config{ID: "flow:" + strconv.Itoa(time.Now().Nanosecond())}
 
 	if actionData.FlowCompressed != nil {
