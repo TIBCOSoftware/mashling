@@ -27,7 +27,7 @@ type GRPCRequest struct {
 	GrpcMthdParamtrs map[string]interface{} `json:"grpcMthdParamtrs"`
 	EnableTLS        string                 `json:"enableTLS"`
 	ClientCert       string                 `json:"clientCert"`
-	Headers          map[string]string      `json:"headers"`
+	Header           map[string]string      `json:"header"`
 	PathParams       map[string]string      `json:"pathParams"`
 	OperatingMode    string                 `json:"operatingMode"`
 	ServiceName      string                 `json:"serviceName"`
@@ -40,9 +40,7 @@ type GRPCRequest struct {
 
 // GRPCResponse is grpc service response
 type GRPCResponse struct {
-	StatusCode int               `json:"statusCode"`
-	Body       interface{}       `json:"body"`
-	Headers    map[string]string `json:"headers"`
+	Body interface{} `json:"body"`
 }
 
 // InitializeGRPC  initialize GRPC service with provided settings.
@@ -50,7 +48,7 @@ func InitializeGRPC(settings map[string]interface{}) (grpcService *GRPC, err err
 	grpc := &GRPC{}
 	req := GRPCRequest{}
 	req.PathParams = make(map[string]string)
-	req.Headers = make(map[string]string)
+	req.Header = make(map[string]string)
 	req.GrpcMthdParamtrs = make(map[string]interface{})
 	req.Params = make(map[string]string)
 	req.QueryParams = make(map[string]string)
@@ -143,13 +141,13 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 			if err := mergo.Merge(&g.Request.GrpcMthdParamtrs, grpcData, mergo.WithOverride); err != nil {
 				return errors.New("unable to merge params values")
 			}
-		case "headers":
+		case "header":
 			g.Request.OperatingMode = "rest-to-grpc"
-			headers, ok := v.(map[string]string)
+			header, ok := v.(map[string]string)
 			if !ok {
-				return errors.New("invalid type for headers")
+				return errors.New("invalid type for header")
 			}
-			if err := mergo.Merge(&g.Request.Headers, headers, mergo.WithOverride); err != nil {
+			if err := mergo.Merge(&g.Request.Header, header, mergo.WithOverride); err != nil {
 				return errors.New("unable to merge header values")
 			}
 		case "serviceName":
@@ -200,6 +198,12 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 			if err := mergo.Merge(&g.Request.PathParams, pathParams, mergo.WithOverride); err != nil {
 				return errors.New("unable to merge pathParams values")
 			}
+		case "operatingMode":
+			mode, ok := v.(string)
+			if !ok {
+				return errors.New("invalid type for operatingMode")
+			}
+			g.Request.OperatingMode = mode
 		default:
 			// ignore and move on.
 		}

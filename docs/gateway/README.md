@@ -556,6 +556,15 @@ The service `settings` and available `input` for the request are as follows:
 | hosturl | string | A gRPC end point url with port |
 | enableTLS | bool | true - To enable TLS (Transport Layer Security), false - No TLS security  |
 | clientCert | string | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
+| params | JSON object | HTTP request params |
+| pathParams | JSON object | HTTP request path params |
+| queryParams | JSON object | HTTP request query params |
+| header | JSON object | HTTP request header params|
+| content | JSON object | HTTP request paylod |
+| operatingMode | string | Internally used to know type of operation like rest-to-grpc/grpc-to-grpc |
+| serviceName | string | Name of the service present in proto |
+| protoName | string | Name of the proto file used |
+| methodName | string | rpc method name present inside service |
 
 The available response outputs are as follows:
 
