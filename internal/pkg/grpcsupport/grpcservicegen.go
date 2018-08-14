@@ -202,6 +202,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	import (
 		"context"
 		"encoding/json"
+		"errors"
 		"log"
 
 		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
