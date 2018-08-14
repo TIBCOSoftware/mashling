@@ -248,7 +248,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		}
 	
 		resMap := make(map[string]interface{},2)
-		resMap["Response"] = nil
+		resMap["Response"] = []byte("null")
 		resMap["Error"] = errors.New("Method not Available: " + methodName)
 		return resMap
 	}
