@@ -234,7 +234,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		return cs.serviceInfo
 	}
 
-	func (cs *clientService{{$protoName}}{{$serviceName}}) InvokeMethod(reqArr map[string]interface{}) []interface{} {
+	func (cs *clientService{{$protoName}}{{$serviceName}}) InvokeMethod(reqArr map[string]interface{}) map[string]interface{} {
 
 		clientObject := reqArr["ClientObject"].(pb.{{$serviceName}}Client)
 		methodName := reqArr["MethodName"].(string)
@@ -246,11 +246,14 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		{{- end }}
 		}
 	
-		return nil
+		resMap := make(map[string]interface{},2)
+		resMap["Response"] = nil
+		resMap["Error"] = errors.New("Method not Available: " + methodName)
+		return resMap
 	}
 
 	{{- range .MethodInfo }}
-	func {{.MethodName}}(client pb.{{$serviceName}}Client, values interface{}) []interface{} {
+	func {{.MethodName}}(client pb.{{$serviceName}}Client, values interface{}) map[string]interface{} {
 		req := &pb.{{.MethodReqName}}{}
 		grpcsupport.AssignStructValues(req, values)
 		res, err := client.{{.MethodName}}(context.Background(), req)
@@ -259,11 +262,11 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 			log.Println("Error: ", errMarshl)
 			return nil
 		}
-		var resIntfc []interface{}
-		resIntfc = make([]interface{}, 2)
-		resIntfc[0] = b
-		resIntfc[1] = err
-		return resIntfc
+		
+		resMap = make(map[string]interface{}, 2)
+		resMap["Response"] = b
+		resMap["Error"] = err
+		return resMap
 	}
 	{{- end }}
 	`))

@@ -31,14 +31,14 @@ func restTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
 					InvokeMethodData["Content"] = g.Request.Content
 				}
 
-				values := service.InvokeMethod(InvokeMethodData)
-				if strings.Compare(string(values[0].([]byte)), "null") != 0 {
-					err := util.Unmarshal("application/json", values[0].([]byte), &g.Response.Body)
+				resMap := service.InvokeMethod(InvokeMethodData)
+				if strings.Compare(string(resMap["Response"].([]byte)), "null") != 0 {
+					err := util.Unmarshal("application/json", resMap["Response"].([]byte), &g.Response.Body)
 					if err != nil {
 						return err
 					}
 				} else {
-					erroString := fmt.Sprintf("%v", values[1])
+					erroString := fmt.Sprintf("%v", resMap["Error"])
 					erroString = "{\"error\":\"true\",\"details\":{\"error\":\"" + erroString + "\"}}"
 					err := util.Unmarshal("application/json", []byte(erroString), &g.Response.Body)
 					if err != nil {
