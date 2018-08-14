@@ -9,10 +9,6 @@ import (
 )
 
 func restTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
-
-	fmt.Println("@@@@@@@in grpc service ", g.Request.Headers)
-	fmt.Println("@@@@@@@@in grpc service ", g.Request.PathParams)
-
 	clServFlag := false
 	if len(ClientServiceRegistery.ClientServices) != 0 {
 		for k, service := range ClientServiceRegistery.ClientServices {
@@ -22,7 +18,18 @@ func restTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
 				InvokeMethodData := make(map[string]interface{})
 				InvokeMethodData["ClientObject"] = service.GetRegisteredClientService(conn)
 				InvokeMethodData["MethodName"] = g.Request.MethodName
-				InvokeMethodData["PathParams"] = g.Request.PathParams
+				if len(g.Request.PathParams) != 0 {
+					InvokeMethodData["PathParams"] = g.Request.PathParams
+				}
+				if len(g.Request.Params) != 0 {
+					InvokeMethodData["Params"] = g.Request.Params
+				}
+				if len(g.Request.QueryParams) != 0 {
+					InvokeMethodData["QueryParams"] = g.Request.QueryParams
+				}
+				if g.Request.Content != nil {
+					InvokeMethodData["Content"] = g.Request.Content
+				}
 
 				values := service.InvokeMethod(InvokeMethodData)
 				if strings.Compare(string(values[0].([]byte)), "null") != 0 {

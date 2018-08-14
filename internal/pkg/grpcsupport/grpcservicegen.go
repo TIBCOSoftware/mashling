@@ -238,12 +238,11 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 
 		clientObject := reqArr["ClientObject"].(pb.{{$serviceName}}Client)
 		methodName := reqArr["MethodName"].(string)
-		pathParams := reqArr["PathParams"]
-	
+
 		switch methodName {
 		{{- range .MethodInfo }}
 		case "{{.MethodName}}":
-			return {{.MethodName}}(clientObject, pathParams)
+			return {{.MethodName}}(clientObject, reqArr)
 		{{- end }}
 		}
 	

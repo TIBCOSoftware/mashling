@@ -33,6 +33,9 @@ type GRPCRequest struct {
 	ServiceName      string                 `json:"serviceName"`
 	ProtoName        string                 `json:"protoName"`
 	MethodName       string                 `json:"methodName"`
+	Params           map[string]string      `json:"params"`
+	QueryParams      map[string]string      `json:"queryParams"`
+	Content          interface{}            `json:"content"`
 }
 
 // GRPCResponse is grpc service response
@@ -49,6 +52,8 @@ func InitializeGRPC(settings map[string]interface{}) (grpcService *GRPC, err err
 	req.PathParams = make(map[string]string)
 	req.Headers = make(map[string]string)
 	req.GrpcMthdParamtrs = make(map[string]interface{})
+	req.Params = make(map[string]string)
+	req.QueryParams = make(map[string]string)
 	grpc.Request = req
 	err = grpc.setRequestValues(settings)
 	return grpc, err
@@ -80,7 +85,17 @@ func (g *GRPC) Execute() (err error) {
 	}
 	defer conn.Close()
 
-	log.Info("operating mode:", g.Request.OperatingMode)
+	// check for method name
+	if len(g.Request.MethodName) == 0 {
+		if len(g.Request.PathParams["grpcMethodName"]) == 0 {
+			log.Error("Method name not provided in json/pathParams")
+			return errors.New("Method name not provided")
+		}
+		g.Request.MethodName = g.Request.PathParams["grpcMethodName"]
+		log.Debug("Method name: ", g.Request.MethodName)
+	}
+
+	log.Debug("operating mode: ", g.Request.OperatingMode)
 
 	switch g.Request.OperatingMode {
 	case "grpc-to-grpc":
@@ -89,7 +104,8 @@ func (g *GRPC) Execute() (err error) {
 		return restTogRPCHandler(g, conn)
 	}
 
-	return nil
+	log.Error("Invalid use of service , OperatingMode not recognised")
+	return errors.New("Invalid use of service , OperatingMode not recognised")
 }
 
 // UpdateRequest updates a request on an existing GRPC service instance with new values.
@@ -136,15 +152,6 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 			if err := mergo.Merge(&g.Request.Headers, headers, mergo.WithOverride); err != nil {
 				return errors.New("unable to merge header values")
 			}
-		case "pathParams":
-			g.Request.OperatingMode = "rest-to-grpc"
-			pathParams, ok := v.(map[string]string)
-			if !ok {
-				return errors.New("invalid type for pathParams")
-			}
-			if err := mergo.Merge(&g.Request.PathParams, pathParams, mergo.WithOverride); err != nil {
-				return errors.New("unable to merge pathParams values")
-			}
 		case "serviceName":
 			name, ok := v.(string)
 			if !ok {
@@ -163,6 +170,36 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 				return errors.New("invalid type for methodName")
 			}
 			g.Request.MethodName = name
+		case "params":
+			g.Request.OperatingMode = "rest-to-grpc"
+			params, ok := v.(map[string]string)
+			if !ok {
+				return errors.New("invalid type for params")
+			}
+			if err := mergo.Merge(&g.Request.Params, params, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge params values")
+			}
+		case "queryParams":
+			g.Request.OperatingMode = "rest-to-grpc"
+			queryParams, ok := v.(map[string]string)
+			if !ok {
+				return errors.New("invalid type for queryParams")
+			}
+			if err := mergo.Merge(&g.Request.QueryParams, queryParams, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge queryParams values")
+			}
+		case "content":
+			g.Request.OperatingMode = "rest-to-grpc"
+			g.Request.Content = v
+		case "pathParams":
+			g.Request.OperatingMode = "rest-to-grpc"
+			pathParams, ok := v.(map[string]string)
+			if !ok {
+				return errors.New("invalid type for pathParams")
+			}
+			if err := mergo.Merge(&g.Request.PathParams, pathParams, mergo.WithOverride); err != nil {
+				return errors.New("unable to merge pathParams values")
+			}
 		default:
 			// ignore and move on.
 		}

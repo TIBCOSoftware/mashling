@@ -2,6 +2,7 @@ package grpcsupport
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
@@ -15,8 +16,7 @@ import (
 )
 
 // ConvertValues converts given string values to appropriate protobuf data types
-func ConvertValues(v reflect.Value, value string) {
-	fmt.Println("type values @@@@@@@", v.Type(), value)
+func convertAndApplyValues(v reflect.Value, value string) {
 	switch fmt.Sprintf("%s", v.Type()) {
 	case "string":
 		v.SetString(value)
@@ -96,13 +96,39 @@ func ConvertValues(v reflect.Value, value string) {
 
 // AssignStructValues assigns given struct to values map
 func AssignStructValues(structVal interface{}, values interface{}) {
-	for field, value := range values.(map[string]string) {
+	for k, v := range values.(map[string]interface{}) {
+		switch k {
+		case "PathParams", "Params", "QueryParams":
+			mapStructWithValues(structVal, v.(map[string]string))
+		case "Content":
+			mapStructWithContent(structVal, v)
+		}
+	}
+}
+
+// mapStructWithValues assigns given struct to values map
+func mapStructWithValues(structVal interface{}, values map[string]string) {
+	for field, value := range values {
 		temp := field[:1]
 		field = strings.ToUpper(temp) + field[1:]
 		v := reflect.ValueOf(structVal).Elem().FieldByName(field)
 		if v.IsValid() {
-			fmt.Printf("\n%T:%v", v.Type(), v.Type())
-			ConvertValues(v, value)
+			log.Printf("\n%T:%v", v.Type(), v.Type())
+			convertAndApplyValues(v, value)
 		}
 	}
+}
+
+func mapStructWithContent(structVal interface{}, content interface{}) {
+
+	bytes, err := json.Marshal(content)
+	if err != nil {
+		log.Fatal("error in mapStructWithContent: ", err)
+	}
+
+	err = json.Unmarshal(bytes, structVal)
+	if err != nil {
+		log.Fatal("error in mapStructWithContent: ", err)
+	}
+
 }
