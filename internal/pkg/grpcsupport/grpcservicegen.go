@@ -263,7 +263,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 			return nil
 		}
 		
-		resMap = make(map[string]interface{}, 2)
+		resMap := make(map[string]interface{}, 2)
 		resMap["Response"] = b
 		resMap["Error"] = err
 		return resMap
