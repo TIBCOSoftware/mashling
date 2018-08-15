@@ -400,7 +400,19 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		c := cors.New(REST_CORS_PREFIX, log)
 		c.WriteCorsActualRequestHeaders(w)
 
-		//get path params
+		// authenticate
+		if isAuthEnabled(rt.config.Settings) {
+			log.Debugf("Authenticating the request")
+			if !authenticate(r, rt.config.Settings) {
+				replyCode := http.StatusForbidden
+				log.Debugf("Authentication failed, returning with status code[%d]", replyCode)
+				serverSpan.SetTag("http.status_code", replyCode)
+				w.WriteHeader(replyCode)
+				return
+			}
+		}
+
+		// get path params
 		vars := mux.Vars(r)
 		pathParams := make(map[string]string)
 		for k, v := range vars {
@@ -424,6 +436,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			}
 		}
 
+		// get query params
 		queryValues := r.URL.Query()
 		queryParams := make(map[string]string, len(queryValues))
 
@@ -431,7 +444,7 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 			queryParams[key] = strings.Join(value, ",")
 		}
 
-		//get headers
+		// get headers
 		header := make(map[string]interface{})
 		for key, value := range r.Header {
 			//If header has single value, then add to map as a string
@@ -559,29 +572,18 @@ func newActionHandler(rt *RestTrigger, handler *OptimizedHandler, method, url st
 		var replyCode int
 		var replyData interface{}
 
-		allowed := true
-		if isAuthEnabled(rt.config.Settings) {
-			log.Debugf("Authenticating the request.")
-			if !authenticate(r, rt.config.Settings) {
-				replyCode = http.StatusForbidden
-				allowed = false
-			}
+		results, eErr := rt.runner.RunAction(context, action, nil)
+		if eErr != nil {
+			err = eErr
 		}
-
-		if allowed {
-			results, eErr := rt.runner.RunAction(context, action, nil)
-			if eErr != nil {
-				err = eErr
+		if len(results) != 0 {
+			dataAttr, ok := results["data"]
+			if ok {
+				replyData = dataAttr.Value()
 			}
-			if len(results) != 0 {
-				dataAttr, ok := results["data"]
-				if ok {
-					replyData = dataAttr.Value()
-				}
-				codeAttr, ok := results["code"]
-				if ok {
-					replyCode, _ = fData.CoerceToInteger(codeAttr.Value())
-				}
+			codeAttr, ok := results["code"]
+			if ok {
+				replyCode, _ = fData.CoerceToInteger(codeAttr.Value())
 			}
 		}
 
