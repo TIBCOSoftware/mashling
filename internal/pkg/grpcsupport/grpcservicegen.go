@@ -25,7 +25,7 @@ var (
 	cmdExePath    string
 )
 
-//MethodInfoTree holds method information
+// MethodInfoTree holds method information
 type MethodInfoTree struct {
 	MethodName    string
 	MethodReqName string
@@ -33,7 +33,7 @@ type MethodInfoTree struct {
 	serviceName   string
 }
 
-//ProtoData holds proto file data
+// ProtoData holds proto file data
 type ProtoData struct {
 	Timestamp      time.Time
 	MethodInfo     []MethodInfoTree
@@ -42,12 +42,12 @@ type ProtoData struct {
 	ProtoName      string
 }
 
-//AssignValues will set fullpath value
+// AssignValues will set fullpath value
 func AssignValues(path string) {
 	appPath = path
 }
 
-//GenerateSupportFiles creates auto genearted code
+// GenerateSupportFiles creates auto genearted code
 func GenerateSupportFiles(path string) error {
 
 	path, _ = filepath.Abs(path)
@@ -200,6 +200,13 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	package client
 	
 	import (
+		"context"
+		"encoding/json"
+		"errors"
+		"log"
+
+		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
+
 		servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
 		pb "{{.ProtoImpPath}}"
 		"google.golang.org/grpc"
@@ -227,7 +234,42 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	func (cs *clientService{{$protoName}}{{$serviceName}}) ServiceInfo() *servInfo.ServiceInfo {
 		return cs.serviceInfo
 	}
+
+	func (cs *clientService{{$protoName}}{{$serviceName}}) InvokeMethod(reqArr map[string]interface{}) map[string]interface{} {
+
+		clientObject := reqArr["ClientObject"].(pb.{{$serviceName}}Client)
+		methodName := reqArr["MethodName"].(string)
+
+		switch methodName {
+		{{- range .MethodInfo }}
+		case "{{.MethodName}}":
+			return {{.MethodName}}(clientObject, reqArr)
+		{{- end }}
+		}
 	
+		resMap := make(map[string]interface{},2)
+		resMap["Response"] = []byte("null")
+		resMap["Error"] = errors.New("Method not Available: " + methodName)
+		return resMap
+	}
+
+	{{- range .MethodInfo }}
+	func {{.MethodName}}(client pb.{{$serviceName}}Client, values interface{}) map[string]interface{} {
+		req := &pb.{{.MethodReqName}}{}
+		grpcsupport.AssignStructValues(req, values)
+		res, err := client.{{.MethodName}}(context.Background(), req)
+		b, errMarshl := json.Marshal(res)
+		if errMarshl != nil {
+			log.Println("Error: ", errMarshl)
+			return nil
+		}
+		
+		resMap := make(map[string]interface{}, 2)
+		resMap["Response"] = b
+		resMap["Error"] = err
+		return resMap
+	}
+	{{- end }}
 	`))
 
 // Exec executes a command within the build context.
@@ -246,7 +288,7 @@ func Exec(name string, arg ...string) error {
 	return nil
 }
 
-//generatePbFiles generates stub file based on given proto
+// generatePbFiles generates stub file based on given proto
 func generatePbFiles() error {
 	fullPath := filepath.Join(appPath, "src", protoImpPath)
 
@@ -267,7 +309,7 @@ func generatePbFiles() error {
 	return nil
 }
 
-//getProtoData reads proto and returns proto data present in proto file
+// getProtoData reads proto and returns proto data present in proto file
 func getProtoData(protoPath string) ([]ProtoData, error) {
 	var regServiceName string
 	var methodInfoList []MethodInfoTree
@@ -324,7 +366,7 @@ func getProtoData(protoPath string) ([]ProtoData, error) {
 	return ProtodataArr, nil
 }
 
-//generateServiceImplFile creates implimentation files supported for grpc trigger and grpc service
+// generateServiceImplFile creates implementation files supported for grpc trigger and grpc service
 func generateServiceImplFile(pdArr []ProtoData, option string) error {
 	dirPath := filepath.Join(appPath, "src", grpcGenPath, option)
 	_, fileErr := os.Stat(dirPath)
