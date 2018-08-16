@@ -13,12 +13,12 @@
       "required": true
     },
     {
-      "name": "protoname",
+      "name": "protoName",
       "type": "string",
       "required": true
     },
     {
-      "name": "servicename",
+      "name": "serviceName",
       "type": "string",
       "required": true
     },

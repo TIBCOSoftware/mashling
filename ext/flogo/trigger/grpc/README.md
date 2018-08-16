@@ -12,12 +12,12 @@ settings, outputs and handler:
       "required": true
     },
     {
-      "name": "protoname",
+      "name": "protoName",
       "type": "string",
       "required": true
     },
     {
-      "name": "servicename",
+      "name": "serviceName",
       "type": "string",
       "required": true
     },
@@ -65,8 +65,8 @@ settings, outputs and handler:
 | Key    | Description   |
 |:-----------|:--------------|
 | port | The port to listen on |
-| protoname | The name of the proto file|
-| servicename | The name of the service mentioned in proto file|
+| protoName | The name of the proto file|
+| serviceName | The name of the service mentioned in proto file|
 | enableTLS | true - To enable TLS (Transport Layer Security), false - No TLS security  |
 | serverCert | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 | serverKey | Server private key file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
@@ -102,8 +102,8 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                 "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/grpc",
                 "settings": {
                     "port": 9096,
-                    "protoname":"messages",
-                    "servicename":"PetService",
+                    "protoName":"messages",
+                    "serviceName":"PetService",
                     "enableTLS": "true",
                     "serverCert": "${env.SERVER_CERT}",
                     "serverKey": "${env.SERVER_KEY}"
