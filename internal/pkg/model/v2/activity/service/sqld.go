@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pointlander/injectsec"
-	"github.com/pointlander/injectsec/gru"
+	"github.com/mashling-support/injectsec"
+	"github.com/mashling-support/injectsec/gru"
 )
 
 var maker *injectsec.DetectorMaker

@@ -358,6 +358,16 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/mashling-support/injectsec"
+  packages = [
+    ".",
+    "data",
+    "gru"
+  ]
+  revision = "248c2c8dc76024f6aae4cb6fdd0fba98c5cde3c4"
+
+[[projects]]
+  branch = "master"
   name = "github.com/mashling-support/jsonschema"
   packages = ["."]
   revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
@@ -429,16 +439,6 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/pointlander/injectsec"
-  packages = [
-    ".",
-    "data",
-    "gru"
-  ]
-  revision = "82571f700201ad9c38e9f19133f496e6f84b6e51"
 
 [[projects]]
   branch = "master"
@@ -673,6 +673,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6ca4ea2785a992577bd1c93931ed987b9662b72f5afd5fa4134860558ef4aacb"
+  inputs-digest = "dfdbd944c2c3acbf0399b1e4731558fc4e9ca56f0c3f30187488ad65fbd96140"
   solver-name = "gps-cdcl"
   solver-version = 1
