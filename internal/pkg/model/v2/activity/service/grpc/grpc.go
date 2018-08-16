@@ -142,7 +142,9 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 				return errors.New("unable to merge params values")
 			}
 		case "header":
-			g.Request.OperatingMode = "rest-to-grpc"
+			if len(g.Request.OperatingMode) == 0 {
+				g.Request.OperatingMode = "rest-to-grpc"
+			}
 			header, ok := v.(map[string]string)
 			if !ok {
 				return errors.New("invalid type for header")
@@ -169,7 +171,9 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 			}
 			g.Request.MethodName = name
 		case "params":
-			g.Request.OperatingMode = "rest-to-grpc"
+			if len(g.Request.OperatingMode) == 0 {
+				g.Request.OperatingMode = "rest-to-grpc"
+			}
 			params, ok := v.(map[string]string)
 			if !ok {
 				return errors.New("invalid type for params")
@@ -178,7 +182,9 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 				return errors.New("unable to merge params values")
 			}
 		case "queryParams":
-			g.Request.OperatingMode = "rest-to-grpc"
+			if len(g.Request.OperatingMode) == 0 {
+				g.Request.OperatingMode = "rest-to-grpc"
+			}
 			queryParams, ok := v.(map[string]string)
 			if !ok {
 				return errors.New("invalid type for queryParams")
@@ -187,10 +193,14 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 				return errors.New("unable to merge queryParams values")
 			}
 		case "content":
-			g.Request.OperatingMode = "rest-to-grpc"
+			if len(g.Request.OperatingMode) == 0 {
+				g.Request.OperatingMode = "rest-to-grpc"
+			}
 			g.Request.Content = v
 		case "pathParams":
-			g.Request.OperatingMode = "rest-to-grpc"
+			if len(g.Request.OperatingMode) == 0 {
+				g.Request.OperatingMode = "rest-to-grpc"
+			}
 			pathParams, ok := v.(map[string]string)
 			if !ok {
 				return errors.New("invalid type for pathParams")

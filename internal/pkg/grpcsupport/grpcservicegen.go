@@ -25,7 +25,7 @@ var (
 	cmdExePath    string
 )
 
-//MethodInfoTree holds method information
+// MethodInfoTree holds method information
 type MethodInfoTree struct {
 	MethodName    string
 	MethodReqName string
@@ -33,7 +33,7 @@ type MethodInfoTree struct {
 	serviceName   string
 }
 
-//ProtoData holds proto file data
+// ProtoData holds proto file data
 type ProtoData struct {
 	Timestamp      time.Time
 	MethodInfo     []MethodInfoTree
@@ -42,12 +42,12 @@ type ProtoData struct {
 	ProtoName      string
 }
 
-//AssignValues will set fullpath value
+// AssignValues will set fullpath value
 func AssignValues(path string) {
 	appPath = path
 }
 
-//GenerateSupportFiles creates auto genearted code
+// GenerateSupportFiles creates auto genearted code
 func GenerateSupportFiles(path string) error {
 
 	path, _ = filepath.Abs(path)
@@ -288,7 +288,7 @@ func Exec(name string, arg ...string) error {
 	return nil
 }
 
-//generatePbFiles generates stub file based on given proto
+// generatePbFiles generates stub file based on given proto
 func generatePbFiles() error {
 	fullPath := filepath.Join(appPath, "src", protoImpPath)
 
@@ -309,7 +309,7 @@ func generatePbFiles() error {
 	return nil
 }
 
-//getProtoData reads proto and returns proto data present in proto file
+// getProtoData reads proto and returns proto data present in proto file
 func getProtoData(protoPath string) ([]ProtoData, error) {
 	var regServiceName string
 	var methodInfoList []MethodInfoTree
@@ -366,7 +366,7 @@ func getProtoData(protoPath string) ([]ProtoData, error) {
 	return ProtodataArr, nil
 }
 
-//generateServiceImplFile creates implimentation files supported for grpc trigger and grpc service
+// generateServiceImplFile creates implementation files supported for grpc trigger and grpc service
 func generateServiceImplFile(pdArr []ProtoData, option string) error {
 	dirPath := filepath.Join(appPath, "src", grpcGenPath, option)
 	_, fileErr := os.Stat(dirPath)

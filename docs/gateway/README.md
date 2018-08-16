@@ -561,7 +561,6 @@ The service `settings` and available `input` for the request are as follows:
 | queryParams | JSON object | HTTP request query params |
 | header | JSON object | HTTP request header params|
 | content | JSON object | HTTP request paylod |
-| operatingMode | string | Internally used to know type of operation like rest-to-grpc/grpc-to-grpc |
 | serviceName | string | Name of the service present in proto |
 | protoName | string | Name of the proto file used |
 | methodName | string | rpc method name present inside service |

@@ -119,6 +119,7 @@ func mapStructWithValues(structVal interface{}, values map[string]string) {
 	}
 }
 
+// mapStructWithContent assigns given struct to content data
 func mapStructWithContent(structVal interface{}, content interface{}) {
 
 	bytes, err := json.Marshal(content)

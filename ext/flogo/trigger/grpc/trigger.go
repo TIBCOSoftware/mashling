@@ -182,7 +182,7 @@ type OptimizedHandler struct {
 	dispatches        []*Dispatch
 }
 
-// CreateHandlers creates handlers mapped to thier topic
+// CreateHandlers creates handlers mapped to their topic
 func (t *GRPCTrigger) CreateHandlers() map[string]*OptimizedHandler {
 	handlers := make(map[string]*OptimizedHandler)
 
@@ -215,7 +215,7 @@ func (t *GRPCTrigger) CreateHandlers() map[string]*OptimizedHandler {
 	return handlers
 }
 
-// CallHandler is to call a perticular handler based on method name
+// CallHandler is to call a particular handler based on method name
 func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interface{}, error) {
 	log.Info("CallHandler method invoked")
 	// getting values from inputrequestdata and mapping it to params which can be used in different services like HTTP pathparams etc.
@@ -240,7 +240,7 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 
 	handlers := t.config.Handlers
 
-	//calling perticular handler based on method name specification in gateway json file
+	//calling particular handler based on method name specification in gateway json file
 	for _, hand := range handlers {
 		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodname"].(string)) == 0 {
 			log.Debug("Dispatch Found for ", hand.GetSetting("methodName"), " Handler Invoked: ", hand.ActionId)
