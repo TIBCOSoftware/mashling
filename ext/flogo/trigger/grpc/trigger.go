@@ -227,12 +227,25 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 		params[typeOfT.Field(i).Name] = f.Interface()
 	}
 
+	// assign req data content to trigger content
+	var content interface{}
+	dataBytes, err := util.Marshal(grpcData["reqdata"])
+	if err != nil {
+		log.Error("Marshal failed on grpc request data")
+	}
+
+	err = util.Unmarshal("application/json", dataBytes, &content)
+	if err != nil {
+		log.Error("Unmarshal failed on grpc request data")
+	}
+
 	grpcData["serviceName"] = t.config.GetSetting("serviceName")
 	grpcData["protoName"] = t.config.GetSetting("protoName")
 
 	data := map[string]interface{}{
 		"params":   params,
 		"grpcData": grpcData,
+		"content":  content,
 	}
 
 	//todo handle error
