@@ -159,8 +159,7 @@
 [[projects]]
   name = "github.com/chewxy/math32"
   packages = ["."]
-  revision = "d1e7b22839c693f54edf7811dd9487623abf2cd2"
-  version = "v1.0.0"
+  revision = "9a000fcb79dff2019bd78fc28bd676198ff3a616"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -673,6 +672,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6ca4ea2785a992577bd1c93931ed987b9662b72f5afd5fa4134860558ef4aacb"
+  inputs-digest = "91f6c3c19686b960a033d4d80bf60d4bb891ce1a240b8bf0e03924bada4f4060"
   solver-name = "gps-cdcl"
   solver-version = 1

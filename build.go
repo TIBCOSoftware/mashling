@@ -411,7 +411,7 @@ func releaseGatewayWithTarget(os string, arch string) (string, error) {
 		extension = ".exe"
 	}
 	gateway := fmt.Sprintf("release/mashling-gateway-%s-%s%s", os, arch, extension)
-	cmd := exec.Command(Go, "build", "-tags", "release",
+	cmd := exec.Command(Go, "build", "-tags", "release noasm",
 		"-ldflags", ReleaseLdflags(),
 		"-o", gateway,
 		fmt.Sprintf("%s/cmd/mashling-gateway", ImportPath))
@@ -431,7 +431,7 @@ func releaseCLIWithTarget(os string, arch string) (string, error) {
 		extension = ".exe"
 	}
 	cli := fmt.Sprintf("release/mashling-cli-%s-%s%s", os, arch, extension)
-	cmd := exec.Command(Go, "build", "-tags", "release",
+	cmd := exec.Command(Go, "build", "-tags", "release noasm",
 		"-ldflags", ReleaseLdflags(),
 		"-o", cli,
 		fmt.Sprintf("%s/cmd/mashling-cli", ImportPath))
