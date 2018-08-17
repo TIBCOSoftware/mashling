@@ -26,22 +26,22 @@ const settingDest = "dest"
 // log is the default package logger
 var log = logger.GetLogger("trigger-tibco-grpc")
 
-//GRPCTriggerFactory gRPC Trigger factory
+// GRPCTriggerFactory is a gRPC Trigger factory
 type GRPCTriggerFactory struct {
 	metadata *trigger.Metadata
 }
 
-//NewFactory create a new Trigger factory
+// NewFactory creates a new Trigger factory
 func NewFactory(md *trigger.Metadata) trigger.Factory {
 	return &GRPCTriggerFactory{metadata: md}
 }
 
-//New Creates a new trigger instance for a given id
+// New Creates a new trigger instance for a given id
 func (t *GRPCTriggerFactory) New(config *trigger.Config) trigger.Trigger {
 	return &GRPCTrigger{metadata: t.metadata, config: config}
 }
 
-//GRPCTrigger is a stub for your Trigger implementation
+// GRPCTrigger is a stub for your Trigger implementation
 type GRPCTrigger struct {
 	metadata *trigger.Metadata
 	runner   action.Runner
@@ -51,7 +51,7 @@ type GRPCTrigger struct {
 	TLSConfig
 }
 
-//TLSConfig is stub for tls support
+// TLSConfig is to hold tls support data
 type TLSConfig struct {
 	enableTLS bool
 	serveKey  string
@@ -169,21 +169,21 @@ func (t *GRPCTrigger) Start() error {
 	return nil
 }
 
-//Dispatch holds dispatch actionId and condition
+// Dispatch holds dispatch actionId and condition
 type Dispatch struct {
 	actionID   string
 	condition  string
 	handlerCfg *trigger.HandlerConfig
 }
 
-//OptimizedHandler optimized handler
+// OptimizedHandler optimized handler
 type OptimizedHandler struct {
 	defaultActionID   string
 	defaultHandlerCfg *trigger.HandlerConfig
 	dispatches        []*Dispatch
 }
 
-// CreateHandlers creates handlers mapped to thier topic
+// CreateHandlers creates handlers mapped to their topic
 func (t *GRPCTrigger) CreateHandlers() map[string]*OptimizedHandler {
 	handlers := make(map[string]*OptimizedHandler)
 
@@ -216,7 +216,7 @@ func (t *GRPCTrigger) CreateHandlers() map[string]*OptimizedHandler {
 	return handlers
 }
 
-//CallHandler call to perticular handler
+// CallHandler is to call a particular handler based on method name
 func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interface{}, error) {
 	log.Info("CallHandler method invoked")
 	// getting values from inputrequestdata and mapping it to params which can be used in different services like HTTP pathparams etc.
@@ -243,7 +243,7 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 
 	var replyCode int
 	var replyData interface{}
-	//calling perticular handler based on method name specification in gateway json file
+	//calling particular handler based on method name specification in gateway json file
 	for _, hand := range handlers {
 		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodname"].(string)) == 0 {
 			log.Debug("Dispatch Found for ", hand.GetSetting("methodName"), " Handler Invoked: ", hand.ActionId)
