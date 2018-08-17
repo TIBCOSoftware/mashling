@@ -31,10 +31,10 @@ const (
 var (
 	// Platforms are the supported platforms this build process supports.
 	Platforms = [...]Platform{
-		{"darwin", "amd64"},
-		{"linux", "amd64"},
-		{"linux", "arm64"},
-		{"windows", "amd64"},
+		{"darwin", "amd64", ""},
+		{"linux", "amd64", ""},
+		{"linux", "arm64", "noasm"},
+		{"windows", "amd64", ""},
 	}
 	// Date is the date.
 	Date = time.Now().Format("2006-01-02T15:04:05-0700")
@@ -56,7 +56,7 @@ var (
 
 // Platform represents a golang OS and ARCH build target.
 type Platform struct {
-	os, arch string
+	os, arch, tags string
 }
 
 func init() {
@@ -88,6 +88,24 @@ func init() {
 	if v != "" {
 		V = v
 	}
+}
+
+func GetCurrentPlatform() (Platform, error) {
+	os := TargetOS
+	arch := TargetArch
+	if os == "" {
+		os = runtime.GOOS
+	}
+	if arch == "" {
+		arch = runtime.GOARCH
+	}
+	for _, platform := range Platforms {
+		if platform.os == os && platform.arch == arch {
+			return platform, nil
+		}
+	}
+
+	return Platform{}, errors.New("platform not found")
 }
 
 // Step is a function that represents a step in the build process.
@@ -264,9 +282,13 @@ func build() error {
 func buildgateway() error {
 	Print("building gateway executable...")
 
-	err := Exec(Go, "install", "-ldflags",
-		Ldflags(),
-		fmt.Sprintf("%s/cmd/mashling-gateway", ImportPath))
+	arg := []string{"install"}
+	platform, err := GetCurrentPlatform()
+	if err == nil && platform.tags != "" {
+		arg = append(arg, "-tags", platform.tags)
+	}
+	arg = append(arg, "-ldflags", Ldflags(), fmt.Sprintf("%s/cmd/mashling-gateway", ImportPath))
+	err = Exec(Go, arg...)
 	if err != nil {
 		return err
 	}
@@ -277,9 +299,13 @@ func buildgateway() error {
 func buildcli() error {
 	Print("building CLI executable...")
 
-	err := Exec(Go, "install", "-ldflags",
-		Ldflags(),
-		fmt.Sprintf("%s/cmd/mashling-cli", ImportPath))
+	arg := []string{"install"}
+	platform, err := GetCurrentPlatform()
+	if err == nil && platform.tags != "" {
+		arg = append(arg, "-tags", platform.tags)
+	}
+	arg = append(arg, "-ldflags", Ldflags(), fmt.Sprintf("%s/cmd/mashling-cli", ImportPath))
+	err = Exec(Go, arg...)
 	if err != nil {
 		return err
 	}
@@ -331,11 +357,11 @@ func releaseall() error {
 	Print("building release executables")
 
 	for _, platform := range Platforms {
-		gateway, err := releaseGatewayWithTarget(platform.os, platform.arch)
+		gateway, err := releaseGatewayWithTarget(platform.os, platform.arch, platform.tags)
 		if err != nil {
 			return err
 		}
-		cli, cErr := releaseCLIWithTarget(platform.os, platform.arch)
+		cli, cErr := releaseCLIWithTarget(platform.os, platform.arch, platform.tags)
 		if cErr != nil {
 			return cErr
 		}
@@ -356,15 +382,11 @@ func releasegateway() error {
 	Resolve(upx)
 
 	Print("building gateway release executable")
-	os := TargetOS
-	arch := TargetArch
-	if os == "" {
-		os = runtime.GOOS
+	platform, err := GetCurrentPlatform()
+	if err != nil {
+		return err
 	}
-	if arch == "" {
-		arch = runtime.GOARCH
-	}
-	gateway, err := releaseGatewayWithTarget(os, arch)
+	gateway, err := releaseGatewayWithTarget(platform.os, platform.arch, platform.tags)
 	if err != nil {
 		return err
 	}
@@ -383,15 +405,11 @@ func releasecli() error {
 	Resolve(upx)
 
 	Print("building CLI release executable")
-	os := TargetOS
-	arch := TargetArch
-	if os == "" {
-		os = runtime.GOOS
+	platform, err := GetCurrentPlatform()
+	if err != nil {
+		return err
 	}
-	if arch == "" {
-		arch = runtime.GOARCH
-	}
-	cli, err := releaseCLIWithTarget(os, arch)
+	cli, err := releaseCLIWithTarget(platform.os, platform.arch, platform.tags)
 	if err != nil {
 		return err
 	}
@@ -405,13 +423,13 @@ func releasecli() error {
 	return nil
 }
 
-func releaseGatewayWithTarget(os string, arch string) (string, error) {
+func releaseGatewayWithTarget(os string, arch string, tags string) (string, error) {
 	var extension string
 	if os == "windows" {
 		extension = ".exe"
 	}
 	gateway := fmt.Sprintf("release/mashling-gateway-%s-%s%s", os, arch, extension)
-	cmd := exec.Command(Go, "build", "-tags", "release noasm",
+	cmd := exec.Command(Go, "build", "-tags", "release "+tags,
 		"-ldflags", ReleaseLdflags(),
 		"-o", gateway,
 		fmt.Sprintf("%s/cmd/mashling-gateway", ImportPath))
@@ -425,13 +443,13 @@ func releaseGatewayWithTarget(os string, arch string) (string, error) {
 	return gateway, nil
 }
 
-func releaseCLIWithTarget(os string, arch string) (string, error) {
+func releaseCLIWithTarget(os string, arch string, tags string) (string, error) {
 	var extension string
 	if os == "windows" {
 		extension = ".exe"
 	}
 	cli := fmt.Sprintf("release/mashling-cli-%s-%s%s", os, arch, extension)
-	cmd := exec.Command(Go, "build", "-tags", "release noasm",
+	cmd := exec.Command(Go, "build", "-tags", "release "+tags,
 		"-ldflags", ReleaseLdflags(),
 		"-o", cli,
 		fmt.Sprintf("%s/cmd/mashling-cli", ImportPath))
