@@ -120,3 +120,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/golang/protobuf"
+
+[[override]]
+  name = "github.com/chewxy/math32"
+  revision = "9a000fcb79dff2019bd78fc28bd676198ff3a616"
