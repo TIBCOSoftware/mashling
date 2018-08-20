@@ -255,7 +255,7 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 
 	//calling particular handler based on method name specification in gateway json file
 	for _, hand := range handlers {
-		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodname"].(string)) == 0 {
+		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodName"].(string)) == 0 {
 			log.Debug("Dispatch Found for ", hand.GetSetting("methodName"), " Handler Invoked: ", hand.ActionId)
 			actID := action.Get(hand.ActionId)
 			context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: hand})
