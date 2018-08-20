@@ -75,6 +75,7 @@ settings, outputs and handler:
 | Key    | Description   |
 |:-----------|:--------------|
 | params | Request params |
+| content | HTTP request paylod |
 | grpcData | gRPC Method parameters |
 
 ### Handler settings
@@ -102,8 +103,8 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                 "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/grpc",
                 "settings": {
                     "port": 9096,
-                    "protoName":"messages",
-                    "serviceName":"PetService",
+                    "protoName":"petstore",
+                    "serviceName":"PetStoreService",
                     "enableTLS": "true",
                     "serverCert": "${env.SERVER_CERT}",
                     "serverKey": "${env.SERVER_KEY}"
@@ -138,7 +139,7 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                                 "service": "PetStorePets",
                                 "input": {
                                     "method": "GET",
-                                    "pathParams.id": "${payload.pathParams.Id}"
+                                    "pathParams.id": "${payload.params.Id}"
                                 }
                             }
                         ],
@@ -165,7 +166,7 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                                 "service": "PetStoreUsersByName",
                                 "input": {
                                     "method": "GET",
-                                    "pathParams.username": "${payload.pathParams.Username}"
+                                    "pathParams.username": "${payload.params.Username}"
                                 }
                             }
                         ],
@@ -213,6 +214,5 @@ Sample demonstration of this trigger can be found in gRPC [recipe](https://githu
 #### Note
 Currently This Trigger handles.<br>
 1. Unary methods propagation.
-2. GET method is supported in REST end point.
-3. REST path params can be mapped through params output key.
-4. Routing can be done based on method names.
+2. REST path/query params can be mapped through params output key.
+3. Routing can be done based on method names.
