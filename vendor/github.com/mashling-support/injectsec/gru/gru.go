@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pointlander/injectsec/data"
+	"github.com/mashling-support/injectsec/data"
 	G "gorgonia.org/gorgonia"
 )
 

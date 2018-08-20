@@ -182,8 +182,7 @@
 [[projects]]
   name = "github.com/chewxy/math32"
   packages = ["."]
-  revision = "d1e7b22839c693f54edf7811dd9487623abf2cd2"
-  version = "v1.0.0"
+  revision = "9a000fcb79dff2019bd78fc28bd676198ff3a616"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -399,6 +398,16 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/mashling-support/injectsec"
+  packages = [
+    ".",
+    "data",
+    "gru"
+  ]
+  revision = "248c2c8dc76024f6aae4cb6fdd0fba98c5cde3c4"
+
+[[projects]]
+  branch = "master"
   name = "github.com/mashling-support/jsonschema"
   packages = ["."]
   revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
@@ -525,16 +534,6 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/pointlander/injectsec"
-  packages = [
-    ".",
-    "data",
-    "gru"
-  ]
-  revision = "82571f700201ad9c38e9f19133f496e6f84b6e51"
 
 [[projects]]
   branch = "master"
@@ -802,6 +801,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6ca4ea2785a992577bd1c93931ed987b9662b72f5afd5fa4134860558ef4aacb"
+  inputs-digest = "91f6c3c19686b960a033d4d80bf60d4bb891ce1a240b8bf0e03924bada4f4060"
   solver-name = "gps-cdcl"
   solver-version = 1
