@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -9,6 +10,16 @@ import (
 )
 
 func restTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
+	// check for method name
+	if len(g.Request.MethodName) == 0 {
+		if len(g.Request.PathParams["grpcMethodName"]) == 0 {
+			log.Error("Method name not provided in json/pathParams")
+			return errors.New("Method name not provided")
+		}
+		g.Request.MethodName = g.Request.PathParams["grpcMethodName"]
+		log.Debug("Method name: ", g.Request.MethodName)
+	}
+
 	clServFlag := false
 	if len(ClientServiceRegistery.ClientServices) != 0 {
 		for k, service := range ClientServiceRegistery.ClientServices {
