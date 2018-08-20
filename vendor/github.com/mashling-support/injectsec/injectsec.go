@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/pointlander/injectsec/gru"
+	"github.com/mashling-support/injectsec/gru"
 )
 
 // DetectorMaker makes SQL injection attack detectors
