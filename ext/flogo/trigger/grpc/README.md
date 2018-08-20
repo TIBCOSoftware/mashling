@@ -42,6 +42,10 @@ settings, outputs and handler:
     {
       "name": "grpcData",
       "type": "object"
+    },
+    {
+      "name": "content",
+      "type": "any"
     }
   ],
   "handler": {

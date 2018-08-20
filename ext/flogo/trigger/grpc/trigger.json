@@ -47,10 +47,6 @@
     {
       "name": "content",
       "type": "any"
-    },
-    {
-      "name": "header",
-      "type": "params"
     }
   ],
   "handler": {
