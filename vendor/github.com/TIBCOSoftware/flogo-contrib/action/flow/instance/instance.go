@@ -240,6 +240,7 @@ func (inst *Instance) AddAttr(attrName string, attrType data.Type, value interfa
 
 	if exists {
 		attr = existingAttr
+		attr.SetValue(value)
 	} else {
 		//todo handle error
 		attr, _ = data.NewAttribute(attrName, attrType, value)

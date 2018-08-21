@@ -34,7 +34,18 @@ func (a *ReturnActivity) Metadata() *activity.Metadata {
 // Eval implements api.Activity.Eval - Invokes a REST Operation
 func (a *ReturnActivity) Eval(ctx activity.Context) (done bool, err error) {
 
-	mappings := ctx.GetInput(ivMappings).([]interface{})
+	actionCtx := ctx.ActivityHost()
+
+	if ctx.GetInput(ivMappings) == nil {
+		//No mapping
+		actionCtx.Return(nil, nil)
+		return true, nil
+	}
+
+	mappings, ok := ctx.GetInput(ivMappings).([]interface{})
+	if !ok {
+		return false, activity.NewError("invalid return mappings, mappings must be array", "", nil)
+	}
 
 	log.Debugf("Mappings: %+v", mappings)
 
@@ -42,19 +53,17 @@ func (a *ReturnActivity) Eval(ctx activity.Context) (done bool, err error) {
 
 	//todo move this to a action instance level initialization, need the notion of static inputs or config
 	returnMapper := mapper.NewBasicMapper(mapperDef, ctx.ActivityHost().GetResolver())
-
 	if err != nil {
-		return false, err
+		return false, activity.NewError(err.Error(), "", nil)
 	}
 
-	actionCtx := ctx.ActivityHost()
 	outputScope := newOutputScope(actionCtx, mapperDef)
 	inputScope := actionCtx.WorkingData() //flow data
 
 	err = returnMapper.Apply(inputScope, outputScope)
 
 	if err != nil {
-		return false, err
+		return false, activity.NewError(err.Error(), "", nil)
 	}
 
 	actionCtx.Return(outputScope.GetAttrs(), nil)

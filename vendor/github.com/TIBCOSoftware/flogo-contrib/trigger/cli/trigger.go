@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
 	"reflect"
 
 	"github.com/TIBCOSoftware/flogo-lib/config"
@@ -117,15 +116,16 @@ func (t *CliTrigger) Stop() error {
 }
 
 func Invoke() (string, error) {
-	// Build an array of flags that are not the command
-	// before we parse the flags, otherwise extra flags
-	// will be seen as an error
-	args := os.Args[2:]
 
-	// Create a new string array
-	os.Args = []string{"", os.Args[1]}
-
+	var args []string
 	flag.Parse()
+
+	// if we have additional args (after the cmd name and the flow cmd switch)
+	// stuff those into args and pass to Invoke(). The action will only receive the
+	// aditional args that were intending for the action logic.
+	if arg := flag.Args(); len(arg) >= 2 {
+		args = flag.Args()[2:]
+	}
 
 	for _, info := range singleton.handlerInfos {
 

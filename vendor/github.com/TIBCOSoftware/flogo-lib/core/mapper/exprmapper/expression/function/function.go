@@ -270,8 +270,71 @@ func (f *FunctionExp) callFunction(fdata interface{}, inputScope data.Scope, res
 	}
 
 	logrus.Debugf("Input Parameters: %+v", inputs)
-	values := method.Call(inputs)
+	args, err := ensureArguments(method, inputs)
+	if err != nil {
+		return reflect.Value{}, fmt.Errorf("Function '%s' argument validation failed due to error %s", f.Name, err.Error())
+	}
+	values := method.Call(args)
 	return f.extractErrorFromValues(values)
+}
+
+func ensureArguments(method reflect.Value, in []reflect.Value) ([]reflect.Value, error) {
+
+	var retInputs []reflect.Value
+	methodType := method.Type()
+	n := method.Type().NumIn()
+	for i := 0; i < n; i++ {
+		if xt, targ := in[i].Type(), methodType.In(i); !xt.AssignableTo(targ) {
+			v, err := convertArgs(targ, in[i])
+			if err != nil {
+				return nil, fmt.Errorf("argument type mismatch. Can not convert type %s to type %s. ", xt.String(), targ.String())
+			}
+			retInputs = append(retInputs, reflect.ValueOf(v))
+		} else {
+			retInputs = append(retInputs, in[i])
+		}
+	}
+
+	if methodType.IsVariadic() {
+		m := len(in) - n
+		elem := methodType.In(n - 1).Elem()
+		for j := 0; j < m; j++ {
+			x := in[n+j]
+			if xt := x.Type(); !xt.AssignableTo(elem) {
+				v, err := convertArgs(elem, x)
+				if err != nil {
+					return nil, fmt.Errorf("argument type mismatch. Can not convert type %s to type %s. ", xt.String(), elem.String())
+				}
+				retInputs = append(retInputs, reflect.ValueOf(v))
+			} else {
+				retInputs = append(retInputs, x)
+			}
+		}
+	}
+	return retInputs, nil
+}
+
+func convertArgs(argType reflect.Type, in reflect.Value) (interface{}, error) {
+	var v interface{}
+	var err error
+	switch argType.Kind() {
+	case reflect.Bool:
+		v, err = data.CoerceToBoolean(in.Interface())
+	case reflect.Interface:
+		v, err = data.CoerceToAny(in.Interface())
+	case reflect.Int:
+		v, err = data.CoerceToInteger(in.Interface())
+	case reflect.Int64:
+		v, err = data.CoerceToLong(in.Interface())
+	case reflect.String:
+		v, err = data.CoerceToString(in.Interface())
+	case reflect.Float64:
+		v, err = data.CoerceToDouble(in.Interface())
+	default:
+		v = in.Interface()
+	}
+	return v, err
+
 }
 
 func (f *FunctionExp) extractErrorFromValues(values []reflect.Value) (reflect.Value, error) {

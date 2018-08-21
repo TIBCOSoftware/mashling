@@ -1,0 +1,37 @@
+{
+  "name": "flogo-channel",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/channel",
+  "version": "0.0.1",
+  "title": "Channel",
+  "description": "Simple Channel Activity",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/channel",
+  "settings": [
+    {
+      "name": "channel",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "input":[
+    {
+      "name": "channel",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "value",
+      "type": "any"
+    }
+  ],
+  "output": [
+    {
+      "name": "result",
+      "type": "any"
+    },
+    {
+      "name": "report",
+      "type": "boolean"
+    }
+  ]
+}

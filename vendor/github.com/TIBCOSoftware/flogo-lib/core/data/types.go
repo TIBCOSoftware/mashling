@@ -20,6 +20,7 @@ const (
 	TypeComplexObject
 	TypeArray
 	TypeParams
+
 )
 
 var types = [...]string{

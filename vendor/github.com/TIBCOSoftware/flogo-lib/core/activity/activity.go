@@ -2,6 +2,7 @@ package activity
 
 import "github.com/TIBCOSoftware/flogo-lib/core/data"
 
+
 // Activity is an interface for defining a custom Activity Execution
 type Activity interface {
 
@@ -12,14 +13,6 @@ type Activity interface {
 	// Metadata returns the metadata of the activity
 	Metadata() *Metadata
 }
-
-// Initializable is an optional interface that can be implemented by an activity.  If implemented,
-// it will be invoked for each corresponding activity configuration that has settings.
-//type Initializable interface {
-//
-//	// Initialize is called to initialize the Activity for a particular configuration
-//	Initialize(ctx InitContext) error
-//}
 
 // DynamicIO is an optional interface that can be implemented by an activity.  If implemented,
 // IOMetadata() will be invoked to determine the inputs/outputs of the activity instead of

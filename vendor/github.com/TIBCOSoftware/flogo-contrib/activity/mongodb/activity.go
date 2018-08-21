@@ -70,7 +70,13 @@ func (a *MongoDbActivity) Eval(ctx activity.Context) (done bool, err error) {
 	value := ctx.GetInput(ivData)
 
 	//todo implement shared sessions
-	client, err := mongo.NewClient(connectionURI)
+	// client, err := mongo.NewClient(connectionURI)
+	/*
+	The above function was giving below error;
+	"data not inserted topology is closed"
+	*/
+	
+	client, err := mongo.Connect(context.Background(), connectionURI, nil)
 	if err != nil {
 		activityLog.Errorf("Connection error: %v", err)
 		return false, err

@@ -95,9 +95,10 @@ func (c *Config) GetSetting(setting string) string {
 
 type HandlerConfig struct {
 	parent   *Config
+	Name     string `json:"name,omitempty"`
 	Settings map[string]interface{} `json:"settings"`
 	Output   map[string]interface{} `json:"output"`
-	Action   *action.Config
+	Action   *ActionConfig
 
 	// Deprecated: Use Action (*action.Config)
 	ActionId string `json:"actionId"`
@@ -109,6 +110,15 @@ type HandlerConfig struct {
 	ActionInputMappings []*data.MappingDef `json:"actionInputMappings,omitempty"`
 	// Deprecated: Use Output
 	Outputs map[string]interface{} `json:"outputs"`
+}
+
+// ActionConfig is the configuration for the Action
+type ActionConfig struct {
+	*action.Config
+
+	Mappings *data.IOMappings `json:"mappings"`
+
+	Act action.Action
 }
 
 func (hc *HandlerConfig) GetSetting(setting string) string {

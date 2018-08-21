@@ -187,6 +187,12 @@ func CoerceToObject(val interface{}) (map[string]interface{}, error) {
 	switch t := val.(type) {
 	case map[string]interface{}:
 		return t, nil
+	case map[string]string:
+		ret := make(map[string]interface{}, len(t))
+		for key, value := range t {
+			ret[key] = value
+		}
+		return ret, nil
 	case string:
 		m := make(map[string]interface{})
 		if t != "" {

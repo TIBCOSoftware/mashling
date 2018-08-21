@@ -22,6 +22,7 @@ type HandlerMetadata struct {
 }
 
 // NewMetadata creates a Metadata object from the json representation
+//todo should return error instead of panic
 func NewMetadata(jsonMetadata string) *Metadata {
 	md := &Metadata{}
 	err := json.Unmarshal([]byte(jsonMetadata), md)

@@ -6,5 +6,5 @@ type AsyncActivity interface {
 
 	// PostEval is called when a activity that didn't complete during the Eval
 	// needs to be notified.  Returning true indicates that the activity is done.
-	PostEval(context Context, userData interface{}) (done bool, evalError *Error)
+	PostEval(context Context, userData interface{}) (done bool, err error)
 }

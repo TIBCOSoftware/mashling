@@ -13,9 +13,12 @@ func getArrayFieldName(fields []string) ([]string, int, int) {
 	var arrayIndex int
 	for i, field := range fields {
 		if strings.Index(field, "[") >= 0 && strings.Index(field, "]") >= 0 {
-			tmpFields = append(tmpFields, getFieldName(field))
 			arrayIndex, _ = getFieldSliceIndex(field)
+			fieldName := getFieldName(field)
 			index = i
+			if fieldName != "" {
+				tmpFields = append(tmpFields, getFieldName(field))
+			}
 			break
 		} else {
 			tmpFields = append(tmpFields, field)

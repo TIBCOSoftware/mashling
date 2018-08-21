@@ -1,0 +1,53 @@
+{
+  "name": "flogo-timer",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/timer",
+  "version": "0.0.1",
+  "title": "Timer",
+  "description": "Simple Timer trigger",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/timer",
+  "settings": [
+  ],
+  "output": [
+    {
+      "name": "params",
+      "type": "params"
+    },
+    {
+      "name": "content",
+      "type": "object"
+    }
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "repeating",
+        "type": "string",
+        "value": "false",
+        "required" : true
+      },
+      {
+        "name": "notImmediate",
+        "type": "string",
+        "value": "true"
+      },
+      {
+        "name": "startDate",
+        "type": "string",
+        "value": "2018-01-01T12:00:00Z00:00"
+      },
+      {
+        "name": "hours",
+        "type": "string"
+      },
+      {
+        "name": "minutes",
+        "type": "string"
+      },
+      {
+        "name": "seconds",
+        "type": "string"
+      }
+    ]
+  }
+}

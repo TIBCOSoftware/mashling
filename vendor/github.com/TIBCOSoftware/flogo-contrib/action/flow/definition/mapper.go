@@ -229,7 +229,10 @@ func (*DummyTaskCtx) GetOutput(name string) interface{} {
 }
 
 func (*DummyTaskCtx) SetOutput(name string, value interface{}) {
+}
 
+func (*DummyTaskCtx) GetSharedTempData() map[string]interface{} {
+	return nil
 }
 
 func (ctx *DummyTaskCtx) TaskName() string {

@@ -9,6 +9,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"io/ioutil"
+	"regexp"
+	"strings"
 )
 
 // App is the configuration for the App
@@ -17,12 +20,12 @@ type Config struct {
 	Type        string             `json:"type"`
 	Version     string             `json:"version"`
 	Description string             `json:"description"`
+
 	Properties  []*data.Attribute  `json:"properties"`
+	Channels    []string           `json:"channels"`
 	Triggers    []*trigger.Config  `json:"triggers"`
 	Resources   []*resource.Config `json:"resources"`
-
-	//for backwards compatibility
-	Actions []*action.Config `json:"actions"`
+	Actions     []*action.Config   `json:"actions"`
 }
 
 // defaultConfigProvider implementation of ConfigProvider
@@ -41,22 +44,64 @@ func DefaultConfigProvider() ConfigProvider {
 
 // GetApp returns the app configuration
 func (d *defaultConfigProvider) GetApp() (*Config, error) {
+	return LoadConfig("")
+}
 
-	configPath := config.GetFlogoConfigPath()
+func LoadConfig(flogoJson string) (*Config, error) {
+	if flogoJson == "" {
+		configPath := config.GetFlogoConfigPath()
 
-	flogo, err := os.Open(configPath)
-	if err != nil {
-		return nil, err
+		flogo, err := os.Open(configPath)
+		if err != nil {
+			return nil, err
+		}
+
+		file, err := ioutil.ReadAll(flogo)
+		if err != nil {
+			return nil, err
+		}
+
+		updated, err := preprocessConfig(file)
+		if err != nil {
+			return nil, err
+		}
+
+		app := &Config{}
+		err = json.Unmarshal(updated, &app)
+		if err != nil {
+			return nil, err
+		}
+		return app, nil
+	} else {
+		updated, err := preprocessConfig([]byte(flogoJson))
+		if err != nil {
+			return nil, err
+		}
+
+		app := &Config{}
+		err = json.Unmarshal(updated, &app)
+		if err != nil {
+			return nil, err
+		}
+		return app, nil
+	}
+}
+
+func preprocessConfig(appJson []byte) ([]byte, error) {
+
+	// For now decode secret values
+	re := regexp.MustCompile("SECRET:[^\\\\\"]*")
+	for _, match := range re.FindAll(appJson, -1) {
+		encodedValue := string(match[7:])
+		decodedValue, err := data.GetSecretValueHandler().DecodeValue(encodedValue)
+		if err != nil {
+			return nil, err
+		}
+		appstring := strings.Replace(string(appJson), string(match), decodedValue, -1)
+		appJson = []byte(appstring)
 	}
 
-	jsonParser := json.NewDecoder(flogo)
-	app := &Config{}
-	err = jsonParser.Decode(&app)
-	if err != nil {
-		return nil, err
-	}
-
-	return app, nil
+	return appJson, nil
 }
 
 func GetProperties(properties []*data.Attribute) (map[string]interface{}, error) {
@@ -88,41 +133,43 @@ func GetProperties(properties []*data.Attribute) (map[string]interface{}, error)
 	return props, nil
 }
 
-func FixUpApp(cfg *Config) {
+//used for old action config
 
-	if cfg.Resources != nil || cfg.Actions == nil {
-		//already new app format
-		return
-	}
-
-	idToAction := make(map[string]*action.Config)
-	for _, act := range cfg.Actions {
-		idToAction[act.Id] = act
-	}
-
-	for _, trg := range cfg.Triggers {
-		for _, handler := range trg.Handlers {
-
-			oldAction := idToAction[handler.ActionId]
-
-			newAction := &action.Config{Ref: oldAction.Ref}
-
-			if oldAction != nil {
-				newAction.Mappings = oldAction.Mappings
-			} else {
-				if handler.ActionInputMappings != nil {
-					newAction.Mappings = &data.IOMappings{}
-					newAction.Mappings.Input = handler.ActionInputMappings
-					newAction.Mappings.Output = handler.ActionOutputMappings
-				}
-			}
-
-			newAction.Data = oldAction.Data
-			newAction.Metadata = oldAction.Metadata
-
-			handler.Action = newAction
-		}
-	}
-
-	cfg.Actions = nil
-}
+//func FixUpApp(cfg *Config) {
+//
+//	if cfg.Resources != nil || cfg.Actions == nil {
+//		//already new app format
+//		return
+//	}
+//
+//	idToAction := make(map[string]*action.Config)
+//	for _, act := range cfg.Actions {
+//		idToAction[act.Id] = act
+//	}
+//
+//	for _, trg := range cfg.Triggers {
+//		for _, handler := range trg.Handlers {
+//
+//			oldAction := idToAction[handler.ActionId]
+//
+//			newAction := &action.Config{Ref: oldAction.Ref}
+//
+//			if oldAction != nil {
+//				newAction.Mappings = oldAction.Mappings
+//			} else {
+//				if handler.ActionInputMappings != nil {
+//					newAction.Mappings = &data.IOMappings{}
+//					newAction.Mappings.Input = handler.ActionInputMappings
+//					newAction.Mappings.Output = handler.ActionOutputMappings
+//				}
+//			}
+//
+//			newAction.Data = oldAction.Data
+//			newAction.Metadata = oldAction.Metadata
+//
+//			handler.Action = newAction
+//		}
+//	}
+//
+//	cfg.Actions = nil
+//}

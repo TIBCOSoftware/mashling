@@ -6,11 +6,12 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
+//todo needs to move to lib
 // NewTestActivityContext creates a new TestActivityContext
 func NewTestActivityContext(metadata *activity.Metadata) *TestActivityContext {
 
-	input := map[string]*data.Attribute{"Input1":data.NewZeroAttribute("Input1", data.TypeString)}
-	output := map[string]*data.Attribute{"Output1":data.NewZeroAttribute("Output1", data.TypeString)}
+	input := map[string]*data.Attribute{"Input1": data.NewZeroAttribute("Input1", data.TypeString)}
+	output := map[string]*data.Attribute{"Output1": data.NewZeroAttribute("Output1", data.TypeString)}
 
 	ac := &TestActivityHost{
 		HostId:     "1",
@@ -31,12 +32,14 @@ func NewTestActivityContextWithAction(metadata *activity.Metadata, activityHost 
 	}
 
 	tc := &TestActivityContext{
-		details:fd,
-		activityHost:     activityHost,
-		TaskNameVal: "Test TaskOld",
-		Attrs:       make(map[string]*data.Attribute),
-		inputs:      make(map[string]*data.Attribute, len(metadata.Input)),
-		outputs:     make(map[string]*data.Attribute, len(metadata.Output)),
+		metadata:     metadata,
+		details:      fd,
+		activityHost: activityHost,
+		TaskNameVal:  "Test TaskOld",
+		Attrs:        make(map[string]*data.Attribute),
+		inputs:       make(map[string]*data.Attribute, len(metadata.Input)),
+		outputs:      make(map[string]*data.Attribute, len(metadata.Output)),
+		settings:     make(map[string]*data.Attribute, len(metadata.Settings)),
 	}
 
 	for _, element := range metadata.Input {
@@ -128,14 +131,17 @@ func (ac *TestActivityHost) GetResolver() data.Resolver {
 
 // TestActivityContext is a dummy ActivityContext to assist in testing
 type TestActivityContext struct {
-	details     activity.FlowDetails
-	TaskNameVal string
-	Attrs       map[string]*data.Attribute
-	activityHost        activity.Host
+	details      activity.FlowDetails
+	TaskNameVal  string
+	Attrs        map[string]*data.Attribute
+	activityHost activity.Host
 
 	metadata *activity.Metadata
+	settings map[string]*data.Attribute
 	inputs   map[string]*data.Attribute
 	outputs  map[string]*data.Attribute
+
+	shared map[string]interface{}
 }
 
 func (c *TestActivityContext) FlowDetails() activity.FlowDetails {
@@ -153,6 +159,12 @@ func (c *TestActivityContext) Name() string {
 // GetSetting implements activity.Context.GetSetting
 func (c *TestActivityContext) GetSetting(setting string) (value interface{}, exists bool) {
 
+	attr, found := c.settings[setting]
+
+	if found {
+		return attr.Value(), true
+	}
+
 	return nil, false
 }
 
@@ -160,7 +172,6 @@ func (c *TestActivityContext) GetSetting(setting string) (value interface{}, exi
 func (c *TestActivityContext) GetInitValue(key string) (value interface{}, exists bool) {
 	return nil, false
 }
-
 
 // TaskName implements activity.Context.TaskName
 func (c *TestActivityContext) TaskName() string {
@@ -213,6 +224,18 @@ func (c *TestActivityContext) SetInput(name string, value interface{}) {
 	}
 }
 
+// SetInput implements activity.Context.SetInput
+func (c *TestActivityContext) SetSetting(name string, value interface{}) {
+
+	attr, found := c.metadata.Settings[name]
+	if found {
+		s, _ := data.NewAttribute(name, attr.Type(), value)
+		c.settings[name] = s
+	} else {
+		//error?
+	}
+}
+
 // GetInput implements activity.Context.GetInput
 func (c *TestActivityContext) GetInput(name string) interface{} {
 
@@ -249,3 +272,10 @@ func (c *TestActivityContext) GetOutput(name string) interface{} {
 	return nil
 }
 
+func (c *TestActivityContext) GetSharedTempData() map[string]interface{} {
+
+	if c.shared == nil {
+		c.shared = make(map[string]interface{})
+	}
+	return c.shared
+}

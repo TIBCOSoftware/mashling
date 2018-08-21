@@ -96,7 +96,8 @@ func (h *Handler) Handle(ctx context.Context, triggerData map[string]interface{}
 		return nil, err
 	}
 
-	results, err := h.runner.Execute(ctx, h.act, inputs)
+	newCtx := NewHandlerContext(ctx, h.config)
+	results, err := h.runner.Execute(newCtx, h.act, inputs)
 
 	if err != nil {
 		return nil, err
@@ -162,20 +163,37 @@ func (h *Handler) generateInputs(triggerData map[string]interface{}) (map[string
 		inputMetadata := h.act.IOMetadata().Input
 
 		inScope := data.NewSimpleScope(triggerAttrs, nil)
-		outScope := data.NewFixedScope(inputMetadata)
 
-		err := h.actionInputMapper.Apply(inScope, outScope)
-		if err != nil {
-			return nil, err
+		var attrs map[string]*data.Attribute
+
+		//todo clean this up
+		if h.act.Metadata() != nil && h.act.Metadata().Passthru {
+			outScope := data.NewFlexableScope(inputMetadata)
+
+			err := h.actionInputMapper.Apply(inScope, outScope)
+			if err != nil {
+				return nil, err
+			}
+
+			attrs = outScope.GetAttrs()
+
+		} else {
+			outScope := data.NewFixedScope(inputMetadata)
+
+			err := h.actionInputMapper.Apply(inScope, outScope)
+			if err != nil {
+				return nil, err
+			}
+
+			attrs = outScope.GetAttrs()
 		}
 
-		attrs := outScope.GetAttrs()
-
-		inputs = make(map[string]*data.Attribute, len(inputMetadata))
+		inputs = make(map[string]*data.Attribute, len(attrs))
 
 		for _, attr := range attrs {
 			inputs[attr.Name()] = attr
 		}
+
 	} else {
 		// for backwards compatibility make trigger outputs map directly to action inputs
 

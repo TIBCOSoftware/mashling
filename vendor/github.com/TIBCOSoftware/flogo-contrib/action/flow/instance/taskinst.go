@@ -165,6 +165,13 @@ func (ti *TaskInst) SetOutput(name string, value interface{}) {
 	ti.OutputScope().SetAttrValue(name, value)
 }
 
+func (ti *TaskInst) GetSharedTempData() map[string]interface{} {
+
+	//todo implement
+	return nil
+}
+
+
 // TaskName implements activity.Context.TaskName method
 // Deprecated
 func (ti *TaskInst) TaskName() string {

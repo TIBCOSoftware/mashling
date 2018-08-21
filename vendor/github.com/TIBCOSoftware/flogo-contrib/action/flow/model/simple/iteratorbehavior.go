@@ -5,6 +5,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/model"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"reflect"
 )
 
@@ -44,6 +45,8 @@ func (tb *IteratorTaskBehavior) Eval(ctx model.TaskContext) (evalResult model.Ev
 		case string:
 			count, err := data.CoerceToInteger(iterateOn)
 			if err != nil {
+				err = fmt.Errorf("Iterator '%s' not properly configured. '%s' is not a valid iterate value.", task.Name(), iterateOn)
+				logger.Error(err)
 				return model.EVAL_FAIL, err
 			}
 			itx = NewIntIterator(count)
@@ -66,7 +69,9 @@ func (tb *IteratorTaskBehavior) Eval(ctx model.TaskContext) (evalResult model.Ev
 			if rt == reflect.Array || rt == reflect.Slice {
 				itx = NewReflectIterator(val)
 			} else {
-				return model.EVAL_FAIL, fmt.Errorf("unsupported type '%s' for iterateOn", t)
+				err = fmt.Errorf("Iterator '%s' not properly configured. '%+v' is not a valid iterate value.", task.Name(), iterateOn)
+				logger.Error(err)
+				return model.EVAL_FAIL, err
 			}
 		}
 

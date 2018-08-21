@@ -35,7 +35,8 @@ func Translate(gateway *types.Schema) ([]byte, error) {
 			flogoActions = append(flogoActions, action)
 		}
 		for _, handler := range trigger.Handlers {
-			newHandler := &ftrigger.HandlerConfig{ActionId: handler.Dispatch, Settings: handler.Settings}
+			actConfig := &ftrigger.ActionConfig{Config: &faction.Config{Id: handler.Dispatch}}
+			newHandler := &ftrigger.HandlerConfig{Settings: handler.Settings, Action: actConfig}
 			handlers = append(handlers, newHandler)
 		}
 

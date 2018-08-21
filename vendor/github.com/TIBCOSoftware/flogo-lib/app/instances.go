@@ -8,7 +8,28 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 )
 
-func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[string]trigger.Trigger, error) {
+func CreateSharedActions(actionConfigs []*action.Config) (map[string]action.Action, error) {
+
+	actions := make(map[string]action.Action)
+
+	for _, config := range actionConfigs {
+		actionFactory := action.GetFactory(config.Ref)
+		if actionFactory == nil {
+			return nil, fmt.Errorf("Action Factory '%s' not registered", config.Ref)
+		}
+
+		act, err := actionFactory.New(config)
+		if err != nil {
+			return nil, err
+		}
+
+		actions[config.Id] = act
+	}
+
+	return actions, nil
+}
+
+func CreateTriggers(tConfigs []*trigger.Config, actions map[string]action.Action, runner action.Runner) (map[string]trigger.Trigger, error) {
 
 	triggers := make(map[string]trigger.Trigger)
 	for _, tConfig := range tConfigs {
@@ -52,15 +73,25 @@ func CreateTriggers(tConfigs []*trigger.Config, runner action.Runner) (map[strin
 			if hConfig.Action.Act != nil {
 				act = hConfig.Action.Act
 			} else {
-				//create the action
-				actionFactory := action.GetFactory(hConfig.Action.Ref)
-				if actionFactory == nil {
-					return nil, fmt.Errorf("Action Factory '%s' not registered", hConfig.Action.Ref)
-				}
 
-				act, err = actionFactory.New(hConfig.Action)
-				if err != nil {
-					return nil, err
+				if hConfig.Action.Id != "" {
+
+					act, exists = actions[hConfig.Action.Id]
+					if act == nil {
+						return nil, fmt.Errorf("Shared Action '%s' does not exists", hConfig.Action.Id)
+					}
+
+				} else {
+					//create the action
+					actionFactory := action.GetFactory(hConfig.Action.Ref)
+					if actionFactory == nil {
+						return nil, fmt.Errorf("Action Factory '%s' not registered", hConfig.Action.Ref)
+					}
+
+					act, err = actionFactory.New(hConfig.Action.Config)
+					if err != nil {
+						return nil, err
+					}
 				}
 			}
 

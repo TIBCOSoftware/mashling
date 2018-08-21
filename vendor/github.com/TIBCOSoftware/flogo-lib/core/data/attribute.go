@@ -68,13 +68,13 @@ func (a *Attribute) SetValue(value interface{}) (err error) {
 func (a *Attribute) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&struct {
-		Name  string      `json:"name"`
-		Type  string      `json:"type"`
-		Value interface{} `json:"value"`
+		Name   string      `json:"name"`
+		Type   string      `json:"type"`
+		Value  interface{} `json:"value"`
 	}{
-		Name:  a.name,
-		Type:  a.dataType.String(),
-		Value: a.value,
+		Name:   a.name,
+		Type:   a.dataType.String(),
+		Value:  a.value,
 	})
 }
 
@@ -82,9 +82,9 @@ func (a *Attribute) MarshalJSON() ([]byte, error) {
 func (a *Attribute) UnmarshalJSON(data []byte) error {
 
 	ser := &struct {
-		Name  string      `json:"name"`
-		Type  string      `json:"type"`
-		Value interface{} `json:"value"`
+		Name   string      `json:"name"`
+		Type   string      `json:"type"`
+		Value  interface{} `json:"value"`
 	}{}
 
 	if err := json.Unmarshal(data, ser); err != nil {

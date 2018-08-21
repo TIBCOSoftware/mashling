@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"sync"
+	"fmt"
 )
 
 //func init() {
@@ -239,5 +240,86 @@ func (s *FixedScope) SetAttrValue(name string, value interface{}) error {
 		}
 	}
 
-	return errors.New("attribute not in scope")
+	return fmt.Errorf("attribute '%s' not in scope", name)
+}
+
+//todo fix up all the scopes!
+
+// FixedScope is an implementation of a empty scope fixed to a particular set of metadata
+type FlexableScope struct {
+	attrs    map[string]*Attribute
+	metadata map[string]*Attribute
+}
+
+// NewFlexableScope creates a new SimpleScope
+func NewFlexableScope(metadata map[string]*Attribute) *FlexableScope {
+
+	scope := &FlexableScope{
+		metadata: make(map[string]*Attribute),
+		attrs:    make(map[string]*Attribute),
+	}
+
+	scope.metadata = metadata
+
+	return scope
+}
+
+func NewFlexableScopeFromMap(metadata map[string]*Attribute) *FlexableScope {
+
+	scope := &FlexableScope{
+		metadata: metadata,
+		attrs:    make(map[string]*Attribute),
+	}
+
+	return scope
+}
+
+// GetAttr implements Scope.GetAttr
+func (s *FlexableScope) GetAttr(name string) (attr *Attribute, exists bool) {
+
+	attr, found := s.attrs[name]
+
+	if found {
+		return attr, true
+	} else {
+		metaAttr, found := s.metadata[name]
+		if found {
+			attr, _ := NewAttribute(name, metaAttr.Type(), metaAttr.value)
+			s.attrs[name] = attr
+			return attr, true
+		}
+	}
+	return nil, false
+}
+
+// GetAttrs gets the attributes set in the scope
+func (s *FlexableScope) GetAttrs() map[string]*Attribute {
+	return s.attrs
+}
+
+// SetAttrValue implements Scope.SetAttrValue
+func (s *FlexableScope) SetAttrValue(name string, value interface{}) error {
+
+	attr, found := s.attrs[name]
+
+	if found {
+		attr.SetValue(value)
+		return nil
+	} else {
+		metaAttr, found := s.metadata[name]
+		if found {
+			attr, err := NewAttribute(name, metaAttr.Type(), value)
+			s.attrs[name] = attr
+			return err
+		}
+	}
+
+	t, err := GetType(value)
+	if err != nil {
+		t = TypeAny
+	}
+
+	s.attrs[name], err = NewAttribute(name, t, value)
+
+	return err
 }

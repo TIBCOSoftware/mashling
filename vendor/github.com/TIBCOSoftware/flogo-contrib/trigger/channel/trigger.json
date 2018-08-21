@@ -1,0 +1,28 @@
+{
+  "name": "flogo-channel",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/channel",
+  "version": "0.0.1",
+  "title": "Listen to Channel",
+  "description": "Simple Channel Trigger",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/trigger/channel",
+  "settings": [
+  ],
+  "output": [
+    {
+      "name": "data",
+      "type": "any"
+    }
+  ],
+  "reply": [
+  ],
+  "handler": {
+    "settings": [
+      {
+        "name": "channel",
+        "type": "string",
+        "required" : true
+      }
+    ]
+  }
+}
