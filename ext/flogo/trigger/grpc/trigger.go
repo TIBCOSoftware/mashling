@@ -138,21 +138,21 @@ func (t *GRPCTrigger) Start() error {
 
 	t.server = grpc.NewServer(opts...)
 
-	servicename := t.config.GetSetting("servicename")
-	protoname := t.config.GetSetting("protoname")
-	protoname = strings.Split(protoname, ".")[0]
+	serviceName := t.config.GetSetting("serviceName")
+	protoName := t.config.GetSetting("protoName")
+	protoName = strings.Split(protoName, ".")[0]
 
 	servRegFlag := false
 	if len(ServiceRegistery.ServerServices) != 0 {
 		for k, service := range ServiceRegistery.ServerServices {
-			if strings.Compare(k, protoname+servicename) == 0 {
-				log.Infof("Registered Proto [%v] and Service [%v]", protoname, servicename)
+			if strings.Compare(k, protoName+serviceName) == 0 {
+				log.Infof("Registered Proto [%v] and Service [%v]", protoName, serviceName)
 				service.RunRegisterServerService(t.server, t)
 				servRegFlag = true
 			}
 		}
 		if !servRegFlag {
-			log.Errorf("Proto [%s] and Service [%s] not registered", protoname, servicename)
+			log.Errorf("Proto [%s] and Service [%s] not registered", protoName, serviceName)
 		}
 	} else {
 		log.Error("gRPC server services not registered")
@@ -227,12 +227,25 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 		params[typeOfT.Field(i).Name] = f.Interface()
 	}
 
-	grpcData["servicename"] = t.config.GetSetting("servicename")
-	grpcData["protoname"] = t.config.GetSetting("protoname")
+	// assign req data content to trigger content
+	var content interface{}
+	dataBytes, err := util.Marshal(grpcData["reqdata"])
+	if err != nil {
+		log.Error("Marshal failed on grpc request data")
+	}
+
+	err = util.Unmarshal("application/json", dataBytes, &content)
+	if err != nil {
+		log.Error("Unmarshal failed on grpc request data")
+	}
+
+	grpcData["serviceName"] = t.config.GetSetting("serviceName")
+	grpcData["protoName"] = t.config.GetSetting("protoName")
 
 	data := map[string]interface{}{
 		"params":   params,
 		"grpcData": grpcData,
+		"content":  content,
 	}
 
 	//todo handle error
@@ -242,7 +255,7 @@ func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interfa
 
 	//calling particular handler based on method name specification in gateway json file
 	for _, hand := range handlers {
-		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodname"].(string)) == 0 {
+		if strings.Compare(hand.GetSetting("methodName"), grpcData["methodName"].(string)) == 0 {
 			log.Debug("Dispatch Found for ", hand.GetSetting("methodName"), " Handler Invoked: ", hand.ActionId)
 			actID := action.Get(hand.ActionId)
 			context := trigger.NewContextWithData(context.Background(), &trigger.ContextData{Attrs: startAttrs, HandlerCfg: hand})

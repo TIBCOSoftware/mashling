@@ -83,7 +83,7 @@ func vendorGithubComTibcosoftwareFlogoContribActionFlowActionJson() (*asset, err
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/action/flow/action.json", size: 302, mode: os.FileMode(436), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/action/flow/action.json", size: 302, mode: os.FileMode(436), modTime: time.Unix(1534156629, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

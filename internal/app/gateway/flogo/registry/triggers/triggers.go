@@ -93,7 +93,7 @@ func extFlogoTriggerEftlTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/eftl/trigger.json", size: 1722, mode: os.FileMode(436), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/eftl/trigger.json", size: 1722, mode: os.FileMode(436), modTime: time.Unix(1533890606, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -113,12 +113,12 @@ func extFlogoTriggerGorillamuxtriggerTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/gorillamuxtrigger/trigger.json", size: 2859, mode: os.FileMode(509), modTime: time.Unix(1533708843, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/gorillamuxtrigger/trigger.json", size: 2859, mode: os.FileMode(509), modTime: time.Unix(1533890606, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _extFlogoTriggerGrpcTriggerJson = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\x52\xcd\x6e\xd3\x40\x10\xbe\xfb\x29\x46\x3e\xb7\x71\xb9\x46\x08\x21\xc2\x81\xaa\xa8\xa0\x26\x9c\x50\x0f\x63\x7b\xb2\x5e\x64\xef\x98\xd9\xd9\x96\xa8\xea\xbb\xa3\x5d\xdb\x24\xe0\xa6\x41\xd0\x8b\x7f\x76\xe6\xfb\xd9\x6f\xe6\x21\x03\xc8\x1d\x76\x94\x2f\x21\x57\x5b\x56\x7c\x6e\x50\xe9\x1e\x77\xe7\x46\xfa\x2a\x3f\x8b\x75\xdd\xf5\xa9\xde\xa1\x6f\x5a\xeb\xcc\x52\xc5\x1a\x43\x32\x54\x85\xb6\xb1\x68\xac\x36\xa1\x5c\x54\xdc\x15\x9b\xcb\x77\xab\x4f\x6b\xde\xea\x3d\x0a\x15\x13\xaa\xa0\x1f\x5a\x6c\x5b\x36\x5c\x8c\xf8\x62\x2f\x71\x47\xe2\x2d\xbb\x48\x74\xb1\xb8\x58\xbc\x1a\x85\xad\xb6\x49\xd9\xdc\x7c\x5e\xc1\x66\x40\xc1\x17\x8f\x86\x86\x06\x0c\xda\xb0\xc4\x8e\x6b\x14\xf2\x0d\x5c\x85\x0e\x05\x36\x0d\x2b\xc2\x6b\xa7\xf1\xfd\x36\x5d\x2b\x1a\x7b\x33\x80\x6a\xf2\x95\xd8\x5e\x47\xbd\xb5\xed\xfa\x96\xe0\x37\x89\x2d\x0b\x4c\xbe\x61\x0c\x64\x00\x7b\x52\xb5\xce\xf8\x7c\x09\x5f\x33\x00\x80\x87\xf4\x3c\x48\xb1\x67\xd1\xd4\x9b\x4e\xa7\xec\xac\x53\x9a\x22\x4b\x05\xa1\xef\xc1\x0a\xd5\xf9\x12\x54\x02\xa5\xe3\xc7\xb3\x23\x94\xc2\xca\xe9\x67\xc6\xeb\x55\xac\x33\xff\x46\xeb\x49\xee\x6c\x45\x2f\x4f\x4c\x0e\xcb\x96\x36\x1f\xd7\x73\xda\x92\xb9\x25\x74\xf9\x49\x63\x24\x2b\x7a\x2a\xc8\xd1\xd7\x5f\xe0\xaf\x68\x77\x02\x9e\x01\xdc\xa6\xa9\x72\xd0\x3e\xe8\x73\x43\x45\xc1\xce\xcf\xe9\xc6\xf3\x67\xdd\xc4\x2d\x7f\x8f\x8a\x73\x34\x97\xdf\xa8\xd2\x3f\xcd\x34\xe8\xea\x96\xe2\x56\x0f\x54\xf3\x9d\xdb\x8b\x1c\xc8\x60\x50\xbe\xac\x6f\xa8\x6f\xf7\xd7\x3e\x16\xfc\x2f\xb3\x4f\x32\x05\x4f\x89\xe6\xc3\x68\xe4\xff\xd8\x3a\xd2\x86\xeb\xeb\xc3\x25\x3b\x32\x8f\x21\x04\x80\xdb\x2c\x7e\x3d\x66\x3f\x03\x00\x00\xff\xff\xde\xf8\x46\x33\x9d\x04\x00\x00")
+var _extFlogoTriggerGrpcTriggerJson = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\x53\xcd\x6e\xd3\x40\x10\xbe\xfb\x29\x46\x3e\xb7\x71\xb9\x46\x08\x21\xc2\x81\xaa\xa8\xa0\x26\x9c\x50\x0f\x63\x7b\xb2\x5e\x64\xef\x98\xd9\xd9\x96\xa8\xea\xbb\xa3\x5d\xdb\xa4\xc5\x49\x8a\x80\x4b\x62\xef\xcc\xf7\xb3\xdf\x8c\x1f\x32\x80\xdc\x61\x47\xf9\x12\x72\xb5\x65\xc5\xe7\x06\x95\xee\x71\x77\x6e\xa4\xaf\xf2\xb3\x58\xd7\x5d\x9f\xea\x1d\xfa\xa6\xb5\xce\x2c\x55\xac\x31\x24\x43\x55\x68\x1b\x8b\xc6\x6a\x13\xca\x45\xc5\x5d\xb1\xb9\x7c\xb7\xfa\xb4\xe6\xad\xde\xa3\x50\x31\xa1\x0a\xfa\xa1\xc5\xb6\x65\xc3\xc5\x88\x2f\xf6\x12\x77\x24\xde\xb2\x8b\x44\x17\x8b\x8b\xc5\xab\x51\xd8\x6a\x9b\x94\xcd\xcd\xe7\x15\x6c\x06\x14\x7c\xf1\x68\x68\x68\xc0\xa0\x0d\x4b\xec\xb8\x46\x21\xdf\xc0\x55\xe8\x50\x60\xd3\xb0\x22\xbc\x76\x1a\xff\xdf\xa6\x6b\x45\x63\x6f\x06\x50\x4d\xbe\x12\xdb\xeb\xa8\xb7\xb6\x5d\xdf\x12\x3c\x93\xd8\xb2\xc0\xe4\x1b\xc6\x40\x06\xb0\x27\x55\xeb\x8c\xcf\x97\xf0\x35\x03\x00\x78\x48\xbf\x4f\x52\xec\x59\x34\xf5\xa6\xd3\x29\x3b\xeb\x94\xa6\xc8\x52\x41\xe8\x7b\xb0\x42\x75\xbe\x04\x95\x40\xe9\xf8\xf1\xec\x08\xa5\xb0\xf2\x75\x7c\x99\xf1\x7a\x15\xeb\xcc\xdf\xd1\x7a\x92\x3b\x5b\xd1\xff\x27\x26\x87\x65\x4b\x9b\x8f\xeb\x39\x6d\xc9\xdc\x12\xba\xfc\x45\x63\x24\x2b\x3a\x14\xe4\xe8\xeb\x0f\xf0\x57\xb4\x7b\x01\x9e\x01\xdc\xa6\xa9\x72\xd0\x3e\xe8\xa9\xa1\xa2\x60\xe7\xe7\x74\xe3\xf9\x49\x37\x71\xcb\xdf\xa3\xe2\x1c\xcd\xe5\x37\xaa\xf4\x34\xba\x62\xa7\xe4\x0e\x04\x81\x6e\xf7\xfb\x35\x1a\x74\x75\x4b\xf1\x7b\x18\x68\xe6\xdb\xba\x17\x78\x22\x81\x41\xf9\xb2\xbe\xa1\xbe\xdd\x07\x76\x6c\x64\xbf\x8c\x1e\x64\x0a\x9e\x12\xcd\x87\xd1\xc8\xbf\xb1\x75\xa4\x0d\xd7\xcf\xd6\xf3\xc8\x24\x87\x10\x00\x6e\xb3\xf8\xf4\x98\xfd\x0c\x00\x00\xff\xff\x3a\x31\xd2\x89\xd7\x04\x00\x00")
 
 func extFlogoTriggerGrpcTriggerJsonBytes() ([]byte, error) {
 	return bindataRead(
@@ -133,7 +133,7 @@ func extFlogoTriggerGrpcTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/grpc/trigger.json", size: 1181, mode: os.FileMode(436), modTime: time.Unix(1533711850, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/grpc/trigger.json", size: 1239, mode: os.FileMode(436), modTime: time.Unix(1534759917, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -153,7 +153,7 @@ func extFlogoTriggerKafkasubrouterTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/kafkasubrouter/trigger.json", size: 1161, mode: os.FileMode(509), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/kafkasubrouter/trigger.json", size: 1161, mode: os.FileMode(509), modTime: time.Unix(1533890606, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -173,7 +173,7 @@ func extFlogoTriggerMqttTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/mqtt/trigger.json", size: 1911, mode: os.FileMode(436), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/mqtt/trigger.json", size: 1911, mode: os.FileMode(436), modTime: time.Unix(1533890606, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -193,7 +193,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerCliTriggerJson() (*asset, er
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/cli/trigger.json", size: 638, mode: os.FileMode(436), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/cli/trigger.json", size: 638, mode: os.FileMode(436), modTime: time.Unix(1534156629, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -213,7 +213,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerCoapTriggerJson() (*asset, e
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/coap/trigger.json", size: 756, mode: os.FileMode(509), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/coap/trigger.json", size: 756, mode: os.FileMode(509), modTime: time.Unix(1534156629, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -233,7 +233,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerKafkasubTriggerJson() (*asse
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub/trigger.json", size: 964, mode: os.FileMode(509), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub/trigger.json", size: 964, mode: os.FileMode(509), modTime: time.Unix(1534156629, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -253,7 +253,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerLambdaTriggerJson() (*asset,
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/lambda/trigger.json", size: 578, mode: os.FileMode(436), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/lambda/trigger.json", size: 578, mode: os.FileMode(436), modTime: time.Unix(1534156629, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -273,7 +273,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerMqttTriggerJson() (*asset, e
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt/trigger.json", size: 1163, mode: os.FileMode(509), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt/trigger.json", size: 1163, mode: os.FileMode(509), modTime: time.Unix(1534156629, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -293,7 +293,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerRestTriggerJson() (*asset, e
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/rest/trigger.json", size: 1157, mode: os.FileMode(436), modTime: time.Unix(1533193461, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/rest/trigger.json", size: 1157, mode: os.FileMode(436), modTime: time.Unix(1534156629, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
