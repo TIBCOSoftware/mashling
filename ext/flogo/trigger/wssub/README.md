@@ -24,7 +24,6 @@ Settings, Outputs and Handlers:
 ```
 
 ## Example Configurations
-This example flow subscribes to the syslog subject of bilbo's kafka server using a plain text connection with no authentication.
 
 ```json
 {
@@ -39,9 +38,7 @@ This example flow subscribes to the syslog subject of bilbo's kafka server using
       "output": null,
       "handlers": [
         {
-          "settings": {
-            "format": "json"
-          },
+          "settings": null,
           "output": null,
           "Action": null,
           "actionId": "flow1",
