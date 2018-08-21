@@ -12,12 +12,12 @@ settings, outputs and handler:
       "required": true
     },
     {
-      "name": "protoname",
+      "name": "protoName",
       "type": "string",
       "required": true
     },
     {
-      "name": "servicename",
+      "name": "serviceName",
       "type": "string",
       "required": true
     },
@@ -42,6 +42,10 @@ settings, outputs and handler:
     {
       "name": "grpcData",
       "type": "object"
+    },
+    {
+      "name": "content",
+      "type": "any"
     }
   ],
   "handler": {
@@ -65,8 +69,8 @@ settings, outputs and handler:
 | Key    | Description   |
 |:-----------|:--------------|
 | port | The port to listen on |
-| protoname | The name of the proto file|
-| servicename | The name of the service mentioned in proto file|
+| protoName | The name of the proto file|
+| serviceName | The name of the service mentioned in proto file|
 | enableTLS | true - To enable TLS (Transport Layer Security), false - No TLS security  |
 | serverCert | Server certificate file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
 | serverKey | Server private key file in PEM format. Need to provide file name along with path. Path can be relative to gateway binary location. |
@@ -75,6 +79,7 @@ settings, outputs and handler:
 | Key    | Description   |
 |:-----------|:--------------|
 | params | Request params |
+| content | HTTP request paylod |
 | grpcData | gRPC Method parameters |
 
 ### Handler settings
@@ -102,8 +107,8 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                 "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/grpc",
                 "settings": {
                     "port": 9096,
-                    "protoname":"messages",
-                    "servicename":"PetService",
+                    "protoName":"petstore",
+                    "serviceName":"PetStoreService",
                     "enableTLS": "true",
                     "serverCert": "${env.SERVER_CERT}",
                     "serverKey": "${env.SERVER_KEY}"
@@ -138,7 +143,7 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                                 "service": "PetStorePets",
                                 "input": {
                                     "method": "GET",
-                                    "pathParams.id": "${payload.pathParams.Id}"
+                                    "pathParams.id": "${payload.params.Id}"
                                 }
                             }
                         ],
@@ -165,7 +170,7 @@ Following is the example mashling gateway descriptor uses a grpc trigger.
                                 "service": "PetStoreUsersByName",
                                 "input": {
                                     "method": "GET",
-                                    "pathParams.username": "${payload.pathParams.Username}"
+                                    "pathParams.username": "${payload.params.Username}"
                                 }
                             }
                         ],
@@ -213,6 +218,5 @@ Sample demonstration of this trigger can be found in gRPC [recipe](https://githu
 #### Note
 Currently This Trigger handles.<br>
 1. Unary methods propagation.
-2. GET method is supported in REST end point.
-3. REST path params can be mapped through params output key.
-4. Routing can be done based on method names.
+2. REST path/query params can be mapped through params output key.
+3. Routing can be done based on method names.

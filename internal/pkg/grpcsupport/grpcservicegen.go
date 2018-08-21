@@ -146,7 +146,7 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.
 	methodName := "{{.MethodName}}"
 
 	grpcData := make(map[string]interface{})
-	grpcData["methodname"] = methodName
+	grpcData["methodName"] = methodName
 	grpcData["contextdata"] = ctx
 	grpcData["reqdata"] = req
 

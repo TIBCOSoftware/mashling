@@ -83,16 +83,6 @@ func (g *GRPC) Execute() (err error) {
 	}
 	defer conn.Close()
 
-	// check for method name
-	if len(g.Request.MethodName) == 0 {
-		if len(g.Request.PathParams["grpcMethodName"]) == 0 {
-			log.Error("Method name not provided in json/pathParams")
-			return errors.New("Method name not provided")
-		}
-		g.Request.MethodName = g.Request.PathParams["grpcMethodName"]
-		log.Debug("Method name: ", g.Request.MethodName)
-	}
-
 	log.Debug("operating mode: ", g.Request.OperatingMode)
 
 	switch g.Request.OperatingMode {

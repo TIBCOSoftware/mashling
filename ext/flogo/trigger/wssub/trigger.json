@@ -1,0 +1,24 @@
+{
+  "name": "tibco-wssub",
+  "type": "flogo:trigger",
+  "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/wssub",
+  "version": "0.0.1",
+  "title": "Receive websocket message events",
+  "author": "Ramesh Polishetti <rpolishe@tibco.com>",
+  "description": "Websocket message event trigger",
+  "settings":[
+    {
+      "name": "url",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "content",
+      "type": "any"
+    }
+  ],
+  "handler": {
+    "settings": []
+  }
+}
