@@ -116,9 +116,14 @@ func (c *CircuitBreakerContexts) GetContext(context string, threshold int) *Circ
 		return cbContext
 	}
 
+	buffer := make([]Record, threshold)
 	cbContext = &CircuitBreakerContext{
-		buffer: make([]Record, threshold),
+		buffer: buffer,
 	}
+	for i := range buffer {
+		buffer[i].Weight = CircuitBreakerSuccess
+	}
+
 	c.Lock()
 	c.contexts[context] = cbContext
 	c.Unlock()
