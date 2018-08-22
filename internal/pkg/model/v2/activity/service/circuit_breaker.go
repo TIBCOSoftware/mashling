@@ -26,6 +26,11 @@ const (
 	CircuitBreakerSuccess = 1.0
 )
 
+// ErrorCircuitBreakerTripped happens when the circuit breaker has tripped
+var ErrorCircuitBreakerTripped = errors.New("circuit breaker tripped")
+
+var now = time.Now
+
 // CircuitBreaker is a circuit breaker service
 type CircuitBreaker struct {
 	operation, context, mode string
@@ -87,7 +92,6 @@ func (c *CircuitBreakerContext) Probability(now time.Time) float64 {
 		sum += record.Weight * a
 	}
 	sum /= factor
-
 	return 1 / (1 + math.Exp(8*sum))
 }
 
@@ -131,7 +135,7 @@ func (c *CircuitBreaker) Execute() (err error) {
 		return errors.New("invalid threshold")
 	}
 
-	context, now := circuitBreakerContexts.GetContext(c.context, c.threshold), time.Now()
+	context, now := circuitBreakerContexts.GetContext(c.context, c.threshold), now()
 	switch c.operation {
 	case "counter":
 		context.Lock()
@@ -188,18 +192,18 @@ func (c *CircuitBreaker) Execute() (err error) {
 			context.RUnlock()
 			if timeout.Sub(now) > 0 {
 				c.Tripped = true
-				return errors.New("circuit breaker tripped")
+				return ErrorCircuitBreakerTripped
 			}
 		case CircuitBreakerModeD:
 			context.RLock()
 			p := context.Probability(now)
 			context.RUnlock()
-			if rand.Float64()*100 < math.Floor(p*100) {
+			if rand.Float64()*1000 < math.Floor(p*1000) {
 				context.Lock()
 				context.AddRecord(CircuitBreakerUnknown, now)
 				context.Unlock()
 				c.Tripped = true
-				return errors.New("circuit breaker tripped")
+				return ErrorCircuitBreakerTripped
 			}
 		}
 	}
@@ -219,6 +223,7 @@ func (c *CircuitBreaker) UpdateRequest(values map[string]interface{}) (err error
 			case CircuitBreakerModeA:
 			case CircuitBreakerModeB:
 			case CircuitBreakerModeC:
+			case CircuitBreakerModeD:
 			default:
 				return errors.New("invalid mode")
 			}
