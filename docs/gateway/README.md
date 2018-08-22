@@ -197,6 +197,7 @@ The service `settings` and available `input` for the request are as follows:
 | headers | JSON object | Key/value pairs representing headers to send to the HTTP target|
 | query | JSON object | Key/value pairs representing query parameters that are appended to the URL |
 | timeout | integer | Timeout in seconds for this HTTP request (default is 5 seconds) |
+| netError | boolean | Set to true for returning network errors in netError |
 
 The available response outputs are as follows:
 
@@ -205,6 +206,7 @@ The available response outputs are as follows:
 | statusCode | integer | The HTTP status code of the response |
 | body | JSON object | The response body |
 | headers | JSON object | The key/value pairs representing the headers returned from the HTTP target |
+| netError | string | Is a network error. Enabled with netError setting |
 
 A sample `service` definition is:
 
@@ -619,11 +621,11 @@ The service `settings` and available `input` for the request are as follows:
 
 | Name   |  Type   | Description   |
 |:-----------|:--------|:--------------|
-| mode | string | The tripping mode: 'a' for contiguous errors, 'b' for errors within a time period, and 'c' for contiguous errors within a time period. Defaults to mode 'a' |
+| mode | string | The tripping mode: 'a' for contiguous errors, 'b' for errors within a time period, 'c' for contiguous errors within a time period, and 'd' for a probabilistic smart circuit breaker mode. Defaults to mode 'a' |
 | operation | string | An operation to perform: '' for protecting a service, 'counter' for processing errors, and 'reset' for processing non-errors. Defaults to '' |
 | context | string | The name of the circuit breaker |
 | threshold | number | The number of errors required for tripping. Defaults to 5 errors |
-| timeout | number | Number of seconds that the circuit breaker will remain tripped. Defaults to 60 seconds |
+| timeout | number | Number of seconds that the circuit breaker will remain tripped. Applies to modes 'a', 'b', 'c'. Defaults to 60 seconds |
 | period | number | Number of seconds in which errors have to occur for the circuit breaker to trip. Applies to modes 'b' and 'c'. Defaults to 60 seconds |
 
 The available response outputs are as follows:
