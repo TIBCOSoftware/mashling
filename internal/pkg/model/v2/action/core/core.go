@@ -16,7 +16,7 @@ import (
 
 var log = logger.GetLogger("action-mashling")
 
-func ExecuteMashling(payload interface{}, routes []types.Route, services []types.Service) (code int, output interface{}, err error) {
+func ExecuteMashling(payload interface{}, configuration map[string]interface{}, routes []types.Route, services []types.Service) (code int, output interface{}, err error) {
 	// Create services map
 	serviceMap := make(map[string]types.Service)
 	for _, service := range services {
@@ -39,6 +39,8 @@ func ExecuteMashling(payload interface{}, routes []types.Route, services []types
 		envFlags[pair[0]] = pair[1]
 	}
 	vmDefaults["env"] = envFlags
+	// Add configuration toe the vmDefaults
+	vmDefaults["conf"] = configuration
 	vm, err := mservice.NewVM(vmDefaults)
 	if err != nil {
 		return -1, nil, err
@@ -61,6 +63,7 @@ func ExecuteMashling(payload interface{}, routes []types.Route, services []types
 	executionContext := make(map[string]interface{})
 	executionContext["payload"] = &payload
 	executionContext["env"] = envFlags
+	executionContext["conf"] = &configuration
 
 	// Execute the identified route if it exists and handle the async option.
 	if routeToExecute != nil {
@@ -174,6 +177,7 @@ func evaluateTruthiness(condition string, vm *mservice.VM) (truthy bool, err err
 
 func invokeService(serviceDef types.Service, executionContext *map[string]interface{}, input map[string]interface{}, vm *mservice.VM) (err error) {
 	log.Info("invoking service type: ", serviceDef.Type)
+	// TODO: Translate service definition variables.
 	serviceInstance, err := mservice.Initialize(serviceDef)
 	if err != nil {
 		return err

@@ -1,0 +1,59 @@
+{
+  "dispatch": {
+    "name": "DefaultHttpPattern",
+    "routes": [
+      {
+        "steps": [
+          {
+            "if": "conf.useJWT == true",
+            "service": "JWTValidator",
+            "input": {
+              "token": "${payload.header.Authorization}"
+            }
+          },
+          {
+            "if": "conf.useJWT == false || JWTValidator.response.valid == true",
+            "service": "HttpBackend",
+            "input": {
+              "url": "${conf.backendUrl}"
+            }
+          }
+        ],
+        "responses": [
+          {
+            "if": "conf.useJWT == true && JWTValidator.response.valid == false",
+            "error": true,
+            "output": {
+              "code": 401,
+              "data": {
+                "error": "${JWTValidator.response}"
+              }
+            }
+          },
+          {
+            "error": false,
+            "output": {
+              "code": 200,
+              "data": "${HttpBackend.response.body}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "services": [
+    {
+      "name": "JWTValidator",
+      "description": "Validate some tokens",
+      "type": "jwt",
+      "settings": {
+        "key": "${conf.jwtKey}"
+      }
+    },
+    {
+      "name": "HttpBackend",
+      "description": "Make an http call to your backend",
+      "type": "http"
+    }
+  ]
+}

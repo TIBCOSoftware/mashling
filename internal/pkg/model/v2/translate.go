@@ -10,8 +10,10 @@ import (
 )
 
 type mashlingActionData struct {
-	Dispatch types.Dispatch  `json:"dispatch"`
-	Services []types.Service `json:"services"`
+	Dispatch      types.Dispatch         `json:"dispatch"`
+	Services      []types.Service        `json:"services"`
+	Pattern       string                 `json:"pattern"`
+	Configuration map[string]interface{} `json:"configuration"`
 }
 
 // Translate translates a v2 mashling gateway JSON config to a Flogo JSON.
@@ -24,7 +26,7 @@ func Translate(gateway *types.Schema) ([]byte, error) {
 		var handlers []*ftrigger.HandlerConfig
 		flogoActionMap := map[string]*faction.Config{}
 		for _, dispatch := range gateway.Gateway.Dispatches {
-			actionData := &mashlingActionData{Dispatch: dispatch, Services: gateway.Gateway.Services}
+			actionData := &mashlingActionData{Dispatch: dispatch, Services: gateway.Gateway.Services, Pattern: dispatch.Pattern, Configuration: dispatch.Configuration}
 			rawAction, err := json.Marshal(actionData)
 			if err != nil {
 				return nil, err

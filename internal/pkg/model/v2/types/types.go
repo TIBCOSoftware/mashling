@@ -13,9 +13,9 @@ type Gateway struct {
 	DisplayName  string     `json:"display_name,omitempty"`
 	DisplayImage string     `json:"display_image,omitempty"`
 	Description  string     `json:"description,omitempty"`
-	Triggers     []Trigger  `json:"triggers" jsonschema:"required,minItems=1,uniqueItems=true"`
-	Dispatches   []Dispatch `json:"dispatches" jsonschema:"required,minItems=1,uniqueItems=true"`
-	Services     []Service  `json:"services,omitempty" jsonschema:"required,minItems=1,uniqueItems=true"`
+	Triggers     []Trigger  `json:"triggers,omitempty" jsonschema:"uniqueItems=true"`
+	Dispatches   []Dispatch `json:"dispatches,omitempty" jsonschema:"required,minItems=1,uniqueItems=true"`
+	Services     []Service  `json:"services,omitempty" jsonschema:"uniqueItems=true"`
 }
 
 // Trigger contains the event listener definitions and configurations.
@@ -29,8 +29,10 @@ type Trigger struct {
 
 // Dispatch links events on a trigger to execution flows.
 type Dispatch struct {
-	Name   string  `json:"name" jsonschema:"required"`
-	Routes []Route `json:"routes" jsonschema:"required,minItems=1,uniqueItems=true"`
+	Name          string                 `json:"name" jsonschema:"required"`
+	Pattern       string                 `json:"pattern,omitempty"`
+	Routes        []Route                `json:"routes,omitempty" jsonschema:"uniqueItems=true"`
+	Configuration map[string]interface{} `json:"configuration,omitempty" jsonschema:"additionalProperties"`
 }
 
 // Route conditionally defines an execution flow.

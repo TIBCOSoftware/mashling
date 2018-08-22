@@ -8,6 +8,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/action/core"
+	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/action/pattern"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 )
 
@@ -16,14 +17,18 @@ const (
 )
 
 type MashlingAction struct {
-	ioMetadata *data.IOMetadata
-	dispatch   types.Dispatch
-	services   []types.Service
+	ioMetadata    *data.IOMetadata
+	dispatch      types.Dispatch
+	services      []types.Service
+	pattern       string
+	configuration map[string]interface{}
 }
 
 type Data struct {
-	Dispatch json.RawMessage `json:"dispatch"`
-	Services json.RawMessage `json:"services"`
+	Dispatch      json.RawMessage        `json:"dispatch"`
+	Services      json.RawMessage        `json:"services"`
+	Pattern       string                 `json:"pattern"`
+	Configuration map[string]interface{} `json:"configuration"`
 }
 
 //todo fix this
@@ -47,21 +52,34 @@ func (f *Factory) New(config *action.Config) (action.Action, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load mashling data: '%s' error '%s'", config.Id, err.Error())
 	}
-	// Parse routes
-	var dispatch types.Dispatch
-	err = json.Unmarshal(actionData.Dispatch, &dispatch)
-	if err != nil {
-		return nil, err
+	// Extract configuration
+	mAction.configuration = actionData.Configuration
+	// Extract pattern
+	mAction.pattern = actionData.Pattern
+	if mAction.pattern == "" {
+		// Parse routes
+		var dispatch types.Dispatch
+		err = json.Unmarshal(actionData.Dispatch, &dispatch)
+		if err != nil {
+			return nil, err
+		}
+		// Parse services
+		var services []types.Service
+		err = json.Unmarshal(actionData.Services, &services)
+		if err != nil {
+			return nil, err
+		}
+		mAction.dispatch = dispatch
+		mAction.services = services
+	} else {
+		pDef, err := pattern.Load(mAction.pattern)
+		if err != nil {
+			return nil, err
+		}
+		mAction.dispatch = pDef.Dispatch
+		mAction.services = pDef.Services
 	}
 
-	// Parse services
-	var services []types.Service
-	err = json.Unmarshal(actionData.Services, &services)
-	if err != nil {
-		return nil, err
-	}
-	mAction.dispatch = dispatch
-	mAction.services = services
 	return mAction, nil
 }
 
@@ -78,7 +96,7 @@ func (m *MashlingAction) Run(context context.Context, inputs map[string]*data.At
 	for k, v := range inputs {
 		payload[k] = v.Value()
 	}
-	code, mData, err := core.ExecuteMashling(payload, m.dispatch.Routes, m.services)
+	code, mData, err := core.ExecuteMashling(payload, m.configuration, m.dispatch.Routes, m.services)
 	output := make(map[string]*data.Attribute)
 	codeAttr, err := data.NewAttribute("code", data.TypeInteger, code)
 	if err != nil {

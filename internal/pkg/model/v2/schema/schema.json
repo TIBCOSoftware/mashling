@@ -4,11 +4,30 @@
     "definitions": {
         "Dispatch": {
             "required": [
-                "name",
-                "routes"
+                "name"
             ],
             "properties": {
+                "configuration": {
+                    "patternProperties": {
+                        ".*": {
+                            "additionalProperties": true,
+                            "type": [
+                                "array",
+                                "boolean",
+                                "integer",
+                                "number",
+                                "null",
+                                "object",
+                                "string"
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "pattern": {
                     "type": "string"
                 },
                 "routes": {
@@ -16,7 +35,6 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Route"
                     },
-                    "minItems": 1,
                     "uniqueItems": true,
                     "type": "array"
                 }
@@ -27,9 +45,7 @@
         "Gateway": {
             "required": [
                 "name",
-                "version",
-                "triggers",
-                "dispatches"
+                "version"
             ],
             "properties": {
                 "description": {
@@ -58,7 +74,6 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Service"
                     },
-                    "minItems": 1,
                     "uniqueItems": true,
                     "type": "array"
                 },
@@ -67,7 +82,6 @@
                         "$schema": "http://json-schema.org/draft-04/schema#",
                         "$ref": "#/definitions/Trigger"
                     },
-                    "minItems": 1,
                     "uniqueItems": true,
                     "type": "array"
                 },
