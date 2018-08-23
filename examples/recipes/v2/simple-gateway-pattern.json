@@ -30,9 +30,10 @@
         "name": "HTTP",
         "pattern": "DefaultHttpPattern",
         "configuration": {
-          "useJWT": false,
+          "useJWT": true,
+          "useCircuitBreaker": true,
           "jwtKey": "qwertyuiopasdfghjklzxcvbnm123456",
-          "backendUrl": "http://www.cnn.com"
+          "backendUrl": "https://petstore.swagger.io/v2/pet/32"
         }
       }
     ]

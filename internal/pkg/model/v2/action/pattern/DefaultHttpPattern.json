@@ -8,14 +8,34 @@
             "if": "conf.useJWT == true",
             "service": "JWTValidator",
             "input": {
-              "token": "${payload.header.Authorization}"
+              "token": "${payload.header.Authorization}",
+              "key": "${conf.jwtKey}"
             }
+          },
+          {
+            "if": "conf.useCircuitBreaker == true",
+            "service": "CircuitBreaker"
           },
           {
             "if": "conf.useJWT == false || JWTValidator.response.valid == true",
             "service": "HttpBackend",
             "input": {
-              "url": "${conf.backendUrl}"
+              "url": "${conf.backendUrl}",
+              "netError": true
+            }
+          },
+          {
+            "if": "conf.useCircuitBreaker == true && HttpBackend.response.netError != ''",
+            "service": "CircuitBreaker",
+            "input": {
+              "operation": "counter"
+            }
+          },
+          {
+            "if": "conf.useCircuitBreaker == true && HttpBackend.response.netError == ''",
+            "service": "CircuitBreaker",
+            "input": {
+              "operation": "reset"
             }
           }
         ],
@@ -27,6 +47,16 @@
               "code": 401,
               "data": {
                 "error": "${JWTValidator.response}"
+              }
+            }
+          },
+          {
+            "if": "conf.useCircuitBreaker && CircuitBreaker.tripped == true",
+            "error": true,
+            "output": {
+              "code": 403,
+              "data": {
+                "error": "circuit breaker tripped"
               }
             }
           },
@@ -45,9 +75,15 @@
     {
       "name": "JWTValidator",
       "description": "Validate some tokens",
-      "type": "jwt",
+      "type": "jwt"
+    },
+    {
+      "name": "CircuitBreaker",
+      "description": "Circuit breaker service",
+      "type": "circuitBreaker",
       "settings": {
-        "key": "${conf.jwtKey}"
+        "mode": "a",
+        "context": "get"
       }
     },
     {

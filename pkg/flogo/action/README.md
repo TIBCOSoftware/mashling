@@ -13,7 +13,20 @@ This action provides all of the features of Mashling for consumption within Flog
     {
       "name": "services",
       "type": "object"
-    }]
+    },
+    {
+      "name": "mashlingURI",
+      "type": "string"
+    },
+    {
+      "name": "pattern",
+      "type": "string"
+    },
+    {
+      "name": "configuration",
+      "type": "object"
+    }
+  ]
 }
 ```
 
@@ -22,6 +35,9 @@ This action provides all of the features of Mashling for consumption within Flog
 |:-----------|:--------------|
 | dispatch | A mashling dispatch as JSON |
 | services | Mashling services used as a dispatch as JSON |
+| mashlingURI | Mashling URI to resource data in Flogo |
+| pattern | Mashling out-of-the-box gateway pattern to use |
+| configuration | Mashling configuration specific to this action |
 
 ## Example Flogo JSON Usage of a Mashling Action
 
@@ -31,7 +47,6 @@ This action provides all of the features of Mashling for consumption within Flog
     "type": "flogo:app",
     "version": "1.0.0",
     "description": "This is a simple proxy.",
-    "properties": null,
     "triggers": [
         {
             "name": "MyProxy",
@@ -40,113 +55,46 @@ This action provides all of the features of Mashling for consumption within Flog
             "settings": {
                 "port": "9096"
             },
-            "output": null,
             "handlers": [
                 {
                     "settings": {
                         "autoIdReply": "false",
                         "method": "GET",
-                        "path": "/pets/{petId}",
+                        "path": "/magic",
                         "useReplyHandler": "false"
                     },
-                    "output": null,
-                    "Action": null,
-                    "actionId": "Pets",
-                    "outputs": null
+                    "Action": {
+                        "id": "mashling:HTTP"
+                    }
                 }
-            ],
-            "outputs": null
+            ]
         }
     ],
-    "resources": null,
+    "resources": [
+        {
+            "id": "mashling:HTTP",
+            "compressed": false,
+            "data": {
+                "pattern": "DefaultHttpPattern",
+                "configuration": {
+                    "backendUrl": "https://petstore.swagger.io/v2/pet/32",
+                    "jwtKey": "qwertyuiopasdfghjklzxcvbnm123456",
+                    "useCircuitBreaker": true,
+                    "useJWT": true
+                }
+            }
+        }
+    ],
     "actions": [
         {
             "ref": "github.com/TIBCOSoftware/mashling/pkg/flogo/action",
             "data": {
-                "dispatch": {
-                    "name": "Pets",
-                    "routes": [
-                        {
-                            "if": "payload.pathParams.petId \u003e= 8 \u0026\u0026 payload.pathParams.petId \u003c= 15",
-                            "steps": [
-                                {
-                                    "service": "PetStorePets",
-                                    "input": {
-                                        "method": "GET",
-                                        "pathParams.id": "${payload.pathParams.petId}"
-                                    }
-                                },
-                                {
-                                    "if": "PetStorePets.response.body.status == 'available'",
-                                    "service": "PetStoreInventory",
-                                    "input": {
-                                        "method": "GET"
-                                    }
-                                }
-                            ],
-                            "responses": [
-                                {
-                                    "if": "payload.pathParams.petId == 13",
-                                    "error": true,
-                                    "output": {
-                                        "code": 404,
-                                        "data": {
-                                            "error": "petId is invalid"
-                                        }
-                                    }
-                                },
-                                {
-                                    "if": "PetStorePets.response.body.status != 'available'",
-                                    "error": true,
-                                    "output": {
-                                        "code": 403,
-                                        "data": {
-                                            "error": "Pet is unavailable."
-                                        }
-                                    }
-                                },
-                                {
-                                    "if": "PetStorePets.response.body.status == 'available'",
-                                    "error": false,
-                                    "output": {
-                                        "code": 200,
-                                        "data": {
-                                            "inventory": "${PetStoreInventory.response.body}",
-                                            "pet": "${PetStorePets.response.body}"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                },
-                "services": [
-                    {
-                        "name": "PetStorePets",
-                        "type": "http",
-                        "description": "Make calls to find pets",
-                        "settings": {
-                            "url": "http://petstore.swagger.io/v2/pet/:id"
-                        }
-                    },
-                    {
-                        "name": "PetStoreInventory",
-                        "type": "http",
-                        "description": "Get pet store inventory.",
-                        "settings": {
-                            "url": "http://petstore.swagger.io/v2/store/inventory"
-                        }
-                    }
-                ]
+                "mashlingURI": "mashling:HTTP"
             },
-            "mappings": null,
-            "Act": null,
-            "id": "Pets",
-            "metadata": null
+            "id": "mashling:HTTP"
         }
     ]
 }
-
 ```
 
 ## Example Flogo API Usage of a Mashling Action
@@ -168,12 +116,11 @@ import (
 
 func main() {
 	app := flogo.NewApp()
+	app.AddResource("mashling:HTTP", Data)
 
 	trg := app.NewTrigger(&gorillamuxtrigger.RestTrigger{}, map[string]interface{}{"port": "8080"})
-
-	h1 := trg.NewHandler(map[string]interface{}{"method": "GET", "path": "/pets/{petId}", "autoIdReply": "false", "useReplyHandler": "true"})
-	a := h1.NewAction(&mAction.MashlingAction{}, map[string]interface{}{"dispatch": DefaultDispatch, "services": DefaultServices, "instance": "MyPetsAction", "identifier": "Pets"})
-	a.SetInputMappings("content=$trigger.content", "header=$trigger.header", "params=$trigger.params", "pathParams=$trigger.pathParams", "queryParams=$trigger.queryParams", "tracing=$trigger.tracing")
+	h1 := trg.NewHandler(map[string]interface{}{"method": "GET", "path": "/magic", "autoIdReply": "false", "useReplyHandler": "true"})
+	h1.NewAction(&mAction.MashlingAction{}, map[string]interface{}{"mashlingURI": "mashling:HTTP"})
 	e, err := flogo.NewEngine(app)
 	if err != nil {
 		logger.Error(err)
@@ -183,81 +130,13 @@ func main() {
 	engine.RunEngine(e)
 }
 
-var DefaultServices = json.RawMessage(`[
-  {
-    "name": "PetStorePets",
-    "description": "Make calls to find pets",
-    "type": "http",
-    "settings": {
-      "url": "http://petstore.swagger.io/v2/pet/:id"
+var Data = json.RawMessage(`{
+    "pattern": "DefaultHttpPattern",
+    "configuration": {
+        "backendUrl": "https://petstore.swagger.io/v2/pet/32",
+        "jwtKey": "qwertyuiopasdfghjklzxcvbnm123456",
+        "useCircuitBreaker": true,
+        "useJWT": true
     }
-  },
-  {
-    "name": "PetStoreInventory",
-    "description": "Get pet store inventory.",
-    "type": "http",
-    "settings": {
-      "url": "http://petstore.swagger.io/v2/store/inventory"
-    }
-  }
-]`)
-
-var DefaultDispatch = json.RawMessage(`{
-  "name": "Pets",
-  "routes": [
-    {
-      "if": "payload.pathParams.petId >= 8 && payload.pathParams.petId <= 15",
-      "steps": [
-        {
-          "service": "PetStorePets",
-          "input": {
-            "method": "GET",
-            "pathParams.id": "${payload.pathParams.petId}"
-          }
-        },
-        {
-          "if": "PetStorePets.response.body.status == 'available'",
-          "service": "PetStoreInventory",
-          "input": {
-            "method": "GET"
-          }
-        }
-      ],
-      "responses": [
-        {
-          "if": "payload.pathParams.petId == 13",
-          "error": true,
-          "output": {
-            "code": 404,
-            "data": {
-              "error": "petId is invalid"
-            }
-          }
-        },
-        {
-          "if": "PetStorePets.response.body.status != 'available'",
-          "error": true,
-          "output": {
-            "code": 403,
-            "data": {
-              "error": "Pet is unavailable."
-            }
-          }
-        },
-        {
-          "if": "PetStorePets.response.body.status == 'available'",
-          "error": false,
-          "output": {
-            "code": 200,
-            "data": {
-              "pet": "${PetStorePets.response.body}",
-              "inventory": "${PetStoreInventory.response.body}"
-            }
-          }
-        }
-      ]
-    }
-  ]
 }`)
-
 ```

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/TIBCOSoftware/flogo-lib/app/resource"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/action/core"
@@ -16,7 +17,13 @@ const (
 	MashlingActionRef = "github.com/TIBCOSoftware/mashling/pkg/flogo/action"
 )
 
+var (
+	metadata       = &action.Metadata{ID: MashlingActionRef}
+	defaultManager *MashlingManager
+)
+
 type MashlingAction struct {
+	mashlingURI   string
 	ioMetadata    *data.IOMetadata
 	dispatch      types.Dispatch
 	services      []types.Service
@@ -25,17 +32,40 @@ type MashlingAction struct {
 }
 
 type Data struct {
+	MashlingURI   string                 `json:"mashlingURI"`
 	Dispatch      json.RawMessage        `json:"dispatch"`
 	Services      json.RawMessage        `json:"services"`
 	Pattern       string                 `json:"pattern"`
 	Configuration map[string]interface{} `json:"configuration"`
 }
 
-//todo fix this
-var metadata = &action.Metadata{ID: "github.com/TIBCOSoftware/mashling/pkg/flogo/action"}
+type MashlingManager struct {
+	resMashlings map[string]*Data
+}
 
 func init() {
 	action.RegisterFactory(MashlingActionRef, &Factory{})
+	defaultManager := &MashlingManager{}
+	defaultManager.resMashlings = make(map[string]*Data)
+	resource.RegisterManager("mashling", defaultManager)
+}
+
+func (mm *MashlingManager) LoadResource(config *resource.Config) error {
+
+	mashlingDefBytes := config.Data
+
+	var mashlingDefinition *Data
+	err := json.Unmarshal(mashlingDefBytes, &mashlingDefinition)
+	if err != nil {
+		return fmt.Errorf("error marshalling mashling definition resource with id '%s', %s", config.ID, err.Error())
+	}
+
+	mm.resMashlings[config.ID] = mashlingDefinition
+	return nil
+}
+
+func (mm *MashlingManager) GetResource(id string) interface{} {
+	return mm.resMashlings[id]
 }
 
 type Factory struct {
@@ -47,10 +77,18 @@ func (f *Factory) Init() error {
 
 func (f *Factory) New(config *action.Config) (action.Action, error) {
 	mAction := &MashlingAction{}
-	var actionData Data
+	var actionData *Data
 	err := json.Unmarshal(config.Data, &actionData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load mashling data: '%s' error '%s'", config.Id, err.Error())
+	}
+	if actionData.MashlingURI != "" {
+		// Load action data from resources
+		resData, err := resource.Get(actionData.MashlingURI)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load mashling URI data: '%s' error '%s'", config.Id, err.Error())
+		}
+		actionData = resData.(*Data)
 	}
 	// Extract configuration
 	mAction.configuration = actionData.Configuration

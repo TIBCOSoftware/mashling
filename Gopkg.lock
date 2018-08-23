@@ -72,7 +72,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0ac8c0c59ea3f7526833bfffc0b1630c82529ba0be493530e4309fa672ee7002"
+  digest = "1:e7788265138ffaa96648e34d31fa03091ff5a45f8153f248cad684a6018e6edf"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
@@ -106,6 +106,7 @@
     "engine",
     "engine/channels",
     "engine/runner",
+    "flogo",
     "logger",
     "util",
     "util/managed",
@@ -1021,12 +1022,14 @@
     "github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors",
     "github.com/TIBCOSoftware/flogo-contrib/trigger/timer",
     "github.com/TIBCOSoftware/flogo-lib/app",
+    "github.com/TIBCOSoftware/flogo-lib/app/resource",
     "github.com/TIBCOSoftware/flogo-lib/core/action",
     "github.com/TIBCOSoftware/flogo-lib/core/activity",
     "github.com/TIBCOSoftware/flogo-lib/core/data",
     "github.com/TIBCOSoftware/flogo-lib/core/trigger",
     "github.com/TIBCOSoftware/flogo-lib/engine",
     "github.com/TIBCOSoftware/flogo-lib/engine/runner",
+    "github.com/TIBCOSoftware/flogo-lib/flogo",
     "github.com/TIBCOSoftware/flogo-lib/logger",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/credentials",
