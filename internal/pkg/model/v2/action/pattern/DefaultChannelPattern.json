@@ -1,0 +1,99 @@
+{
+  "dispatch": {
+    "name": "DefaultHttpPattern",
+    "routes": [
+      {
+        "steps": [
+          {
+            "if": "conf.useJWT == true",
+            "service": "JWTValidator",
+            "input": {
+              "token": "${payload.header.Authorization}",
+              "key": "${conf.jwtKey}"
+            }
+          },
+          {
+            "if": "conf.useCircuitBreaker == true",
+            "service": "CircuitBreaker"
+          },
+          {
+            "if": "conf.useJWT == false || JWTValidator.response.valid == true",
+            "service": "ActionBackend",
+            "input": {
+              "inputs": {
+                "channel": "${conf.channelName}"
+              }
+            }
+          },
+          {
+            "if": "conf.useCircuitBreaker == true && ActionBackend.response.error == true",
+            "service": "CircuitBreaker",
+            "input": {
+              "operation": "counter"
+            }
+          },
+          {
+            "if": "conf.useCircuitBreaker == true && ActionBackend.response.error == false",
+            "service": "CircuitBreaker",
+            "input": {
+              "operation": "reset"
+            }
+          }
+        ],
+        "responses": [
+          {
+            "if": "conf.useJWT == true && JWTValidator.response.valid == false",
+            "error": true,
+            "output": {
+              "code": 401,
+              "data": {
+                "error": "${JWTValidator.response}"
+              }
+            }
+          },
+          {
+            "if": "conf.useCircuitBreaker && CircuitBreaker.tripped == true",
+            "error": true,
+            "output": {
+              "code": 403,
+              "data": {
+                "error": "circuit breaker tripped"
+              }
+            }
+          },
+          {
+            "error": false,
+            "output": {
+              "code": 200,
+              "data": "${ActionBackend.response}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "services": [
+    {
+      "name": "JWTValidator",
+      "description": "Validate some tokens",
+      "type": "jwt"
+    },
+    {
+      "name": "CircuitBreaker",
+      "description": "Circuit breaker service",
+      "type": "circuitBreaker",
+      "settings": {
+        "mode": "a",
+        "context": "get"
+      }
+    },
+    {
+      "name": "ActionBackend",
+      "description": "Make an action call to your backend",
+      "type": "flogoActivity",
+      "settings": {
+        "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/channel"
+      }
+    }
+  ]
+}
