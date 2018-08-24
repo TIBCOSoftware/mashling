@@ -18,12 +18,12 @@ const (
 )
 
 var (
-	metadata       = &action.Metadata{ID: MashlingActionRef}
 	defaultManager *MashlingManager
 )
 
 type MashlingAction struct {
 	mashlingURI   string
+	metadata      *action.Metadata
 	ioMetadata    *data.IOMetadata
 	dispatch      types.Dispatch
 	services      []types.Service
@@ -77,6 +77,7 @@ func (f *Factory) Init() error {
 
 func (f *Factory) New(config *action.Config) (action.Action, error) {
 	mAction := &MashlingAction{}
+	mAction.metadata = &action.Metadata{ID: config.Id}
 	var actionData *Data
 	err := json.Unmarshal(config.Data, &actionData)
 	if err != nil {
@@ -122,7 +123,7 @@ func (f *Factory) New(config *action.Config) (action.Action, error) {
 }
 
 func (m *MashlingAction) Metadata() *action.Metadata {
-	return metadata
+	return m.metadata
 }
 
 func (m *MashlingAction) IOMetadata() *data.IOMetadata {
@@ -134,6 +135,7 @@ func (m *MashlingAction) Run(context context.Context, inputs map[string]*data.At
 	for k, v := range inputs {
 		payload[k] = v.Value()
 	}
+
 	code, mData, err := core.ExecuteMashling(payload, m.configuration, m.dispatch.Routes, m.services)
 	output := make(map[string]*data.Attribute)
 	codeAttr, err := data.NewAttribute("code", data.TypeInteger, code)

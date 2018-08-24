@@ -23,39 +23,40 @@ func Translate(gateway *types.Schema) ([]byte, error) {
 	flogoTriggers := []*ftrigger.Config{}
 	flogoActions := []*faction.Config{}
 	flogoResources := []*resource.Config{}
+	flogoActionMap := map[string]*faction.Config{}
+	flogoResourceMap := map[string]*resource.Config{}
 
+	// Map dispatches to Actions
+	for _, dispatch := range gateway.Gateway.Dispatches {
+		// Add action data with mashling resource reference
+		actionData := &mashlingActionData{MashlingURI: "mashling:" + dispatch.Name}
+		rawAction, err := json.Marshal(actionData)
+		if err != nil {
+			return nil, err
+		}
+		flogoActionMap[dispatch.Name] = &faction.Config{Id: "mashling:" + dispatch.Name, Data: rawAction, Ref: "github.com/TIBCOSoftware/mashling/pkg/flogo/action"}
+		// Add full action data definition as resource
+		var resourceActionData *mashlingActionData
+		if dispatch.Pattern == "" {
+			resourceActionData = &mashlingActionData{Dispatch: &dispatch, Services: gateway.Gateway.Services, Configuration: dispatch.Configuration}
+		} else {
+			resourceActionData = &mashlingActionData{Pattern: dispatch.Pattern, Configuration: dispatch.Configuration}
+		}
+		rawResourceAction, err := json.Marshal(resourceActionData)
+		if err != nil {
+			return nil, err
+		}
+		flogoResourceMap[dispatch.Name] = &resource.Config{ID: "mashling:" + dispatch.Name, Data: rawResourceAction}
+	}
+	for _, resource := range flogoResourceMap {
+		flogoResources = append(flogoResources, resource)
+	}
+	for _, action := range flogoActionMap {
+		flogoActions = append(flogoActions, action)
+	}
 	// Triggers and handlers get mapped to appropriate actions.
 	for _, trigger := range gateway.Gateway.Triggers {
 		var handlers []*ftrigger.HandlerConfig
-		flogoActionMap := map[string]*faction.Config{}
-		flogoResourceMap := map[string]*resource.Config{}
-		for _, dispatch := range gateway.Gateway.Dispatches {
-			// Add action data with mashling resource reference
-			actionData := &mashlingActionData{MashlingURI: "mashling:" + dispatch.Name}
-			rawAction, err := json.Marshal(actionData)
-			if err != nil {
-				return nil, err
-			}
-			flogoActionMap[dispatch.Name] = &faction.Config{Id: "mashling:" + dispatch.Name, Data: rawAction, Ref: "github.com/TIBCOSoftware/mashling/pkg/flogo/action"}
-			// Add full action data definition as resource
-			var resourceActionData *mashlingActionData
-			if dispatch.Pattern == "" {
-				resourceActionData = &mashlingActionData{Dispatch: &dispatch, Services: gateway.Gateway.Services, Configuration: dispatch.Configuration}
-			} else {
-				resourceActionData = &mashlingActionData{Pattern: dispatch.Pattern, Configuration: dispatch.Configuration}
-			}
-			rawResourceAction, err := json.Marshal(resourceActionData)
-			if err != nil {
-				return nil, err
-			}
-			flogoResourceMap[dispatch.Name] = &resource.Config{ID: "mashling:" + dispatch.Name, Data: rawResourceAction}
-		}
-		for _, resource := range flogoResourceMap {
-			flogoResources = append(flogoResources, resource)
-		}
-		for _, action := range flogoActionMap {
-			flogoActions = append(flogoActions, action)
-		}
 		for _, handler := range trigger.Handlers {
 			actConfig := &ftrigger.ActionConfig{Config: &faction.Config{Id: "mashling:" + handler.Dispatch}}
 			newHandler := &ftrigger.HandlerConfig{Settings: handler.Settings, Action: actConfig}

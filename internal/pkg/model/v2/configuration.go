@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
@@ -95,6 +96,15 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 	err = jsonParser.Decode(&gw.FlogoApp)
 	if err != nil {
 		return gw, err
+	}
+	// Add channels to engine
+	for _, trigger := range gw.FlogoApp.Triggers {
+		if strings.Compare(trigger.Ref, "github.com/TIBCOSoftware/flogo-contrib/trigger/channel") == 0 {
+			channel, ok := trigger.Settings["channel"].(string)
+			if ok {
+				gw.FlogoApp.Channels = append(gw.FlogoApp.Channels, channel)
+			}
+		}
 	}
 
 	gw.FlogoEngine, err = engine.New(&gw.FlogoApp)

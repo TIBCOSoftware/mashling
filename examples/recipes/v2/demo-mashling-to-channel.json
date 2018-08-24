@@ -1,0 +1,79 @@
+{
+  "mashling_schema": "1.0",
+  "gateway": {
+    "name": "MyProxy",
+    "version": "1.0.0",
+    "description": "This is a simple proxy.",
+    "triggers": [
+      {
+        "name": "MyProxy",
+        "description": "HTTP Trigger Using the Default Gateway Pattern",
+        "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+        "settings": {
+          "port": "9096"
+        },
+        "handlers": [
+          {
+            "dispatch": "FrontChannel",
+            "settings": {
+              "autoIdReply": "false",
+              "method": "GET",
+              "path": "/magic",
+              "useReplyHandler": "false"
+            }
+          }
+        ]
+      },
+      {
+        "name": "ChannelMagic",
+        "description": "Initiate flow based off of channel",
+        "type": "github.com/TIBCOSoftware/flogo-contrib/trigger/channel",
+        "settings": {
+          "channel": "test"
+        },
+        "handlers": [
+          {
+            "dispatch": "SimpleMashlingAction"
+          }
+        ]
+      }
+    ],
+    "dispatches": [
+      {
+        "name": "SimpleMashlingAction",
+        "routes": [
+          {
+            "steps": [
+              {
+                "service": "LogSomething"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "FrontChannel",
+        "pattern": "DefaultChannelPattern",
+        "configuration": {
+          "useJWT": false,
+          "useCircuitBreaker": false,
+          "jwtKey": "qwertyuiopasdfghjklzxcvbnm123456",
+          "channelName": "test"
+        }
+      }
+    ],
+    "services": [
+      {
+        "name": "LogSomething",
+        "description": "Log.",
+        "type": "flogoActivity",
+        "settings": {
+          "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+          "inputs": {
+            "message": "Yay!"
+          }
+        }
+      }
+    ]
+  }
+}

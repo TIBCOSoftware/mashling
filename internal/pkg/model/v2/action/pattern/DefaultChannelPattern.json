@@ -1,6 +1,6 @@
 {
   "dispatch": {
-    "name": "DefaultHttpPattern",
+    "name": "DefaultChannelPattern",
     "routes": [
       {
         "steps": [
@@ -21,19 +21,20 @@
             "service": "ActionBackend",
             "input": {
               "inputs": {
-                "channel": "${conf.channelName}"
+                "channel": "test",
+                "value": "test"
               }
             }
           },
           {
-            "if": "conf.useCircuitBreaker == true && ActionBackend.response.error == true",
+            "if": "conf.useCircuitBreaker == true && ActionBackend.response.error != ''",
             "service": "CircuitBreaker",
             "input": {
               "operation": "counter"
             }
           },
           {
-            "if": "conf.useCircuitBreaker == true && ActionBackend.response.error == false",
+            "if": "conf.useCircuitBreaker == true && ActionBackend.response.error == ''",
             "service": "CircuitBreaker",
             "input": {
               "operation": "reset"
@@ -52,7 +53,7 @@
             }
           },
           {
-            "if": "conf.useCircuitBreaker && CircuitBreaker.tripped == true",
+            "if": "conf.useCircuitBreaker == true && CircuitBreaker.tripped == true",
             "error": true,
             "output": {
               "code": 403,
@@ -65,7 +66,9 @@
             "error": false,
             "output": {
               "code": 200,
-              "data": "${ActionBackend.response}"
+              "data": {
+                "response": "Success!"
+              }
             }
           }
         ]
@@ -92,7 +95,7 @@
       "description": "Make an action call to your backend",
       "type": "flogoActivity",
       "settings": {
-        "ref": "github.com/TIBCOSoftware/mashling/ext/flogo/activity/channel"
+        "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/channel"
       }
     }
   ]

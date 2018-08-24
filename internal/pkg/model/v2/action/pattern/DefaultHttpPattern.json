@@ -51,7 +51,7 @@
             }
           },
           {
-            "if": "conf.useCircuitBreaker && CircuitBreaker.tripped == true",
+            "if": "conf.useCircuitBreaker == true && CircuitBreaker.tripped == true",
             "error": true,
             "output": {
               "code": 403,
