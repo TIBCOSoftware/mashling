@@ -458,7 +458,7 @@ func (t *Trigger) constructStartRequest(message []byte, span Span) (string, map[
 	var content map[string]interface{}
 	err := util.Unmarshal("", message, &content)
 	if err != nil {
-		span.Error("Error unmarshaling message ", err.Error())
+		span.Error("Error unmarshaling message %s", err.Error())
 	}
 
 	replyTo := ""

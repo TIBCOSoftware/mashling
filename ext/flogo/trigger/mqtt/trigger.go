@@ -440,7 +440,7 @@ func (t *MqttTrigger) constructStartRequest(message string, span Span) *StartReq
 	var content map[string]interface{}
 	err := json.Unmarshal([]byte(message), &content)
 	if err != nil {
-		span.Error("Error unmarshaling message ", err.Error())
+		span.Error("Error unmarshaling message %s", err.Error())
 	}
 
 	if replyTo := content["replyTo"]; replyTo != nil {
