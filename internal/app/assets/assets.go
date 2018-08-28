@@ -83,7 +83,7 @@ func bannerTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "banner.txt", size: 2435, mode: os.FileMode(420), modTime: time.Unix(1526897826, 0)}
+	info := bindataFileInfo{name: "banner.txt", size: 2435, mode: os.FileMode(420), modTime: time.Unix(1528122438, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
