@@ -3,7 +3,6 @@ package mqtt
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -18,11 +17,7 @@ import (
 	"github.com/TIBCOSoftware/mashling/lib/util"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	lightstep "github.com/lightstep/lightstep-tracer-go"
 	opentracing "github.com/opentracing/opentracing-go"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
-	"sourcegraph.com/sourcegraph/appdash"
-	appdashtracing "sourcegraph.com/sourcegraph/appdash/opentracing"
 )
 
 const (
@@ -31,26 +26,14 @@ const (
 	TracerAPPDash   = "appdash"
 	TracerLightStep = "lightstep"
 
-	settingTopic          = "topic"
-	settingTracer         = "tracer"
-	settingTracerEndpoint = "tracerEndpoint"
-	settingTracerToken    = "tracerToken"
-	settingTracerDebug    = "tracerDebug"
-	settingTracerSameSpan = "tracerSameSpan"
-	settingTracerID128Bit = "tracerID128Bit"
-	settingBroker         = "broker"
-	settingID             = "id"
-	settingUser           = "user"
-	settingPassword       = "password"
-	settingCleansess      = "cleansess"
-	settingStore          = "store"
-	settingQOS            = "qos"
-)
-
-var (
-	ErrorTracerEndpointRequired = errors.New("tracer endpoint required")
-	ErrorInvalidTracer          = errors.New("invalid tracer")
-	ErrorTracerTokenRequired    = errors.New("tracer token required")
+	settingTopic     = "topic"
+	settingBroker    = "broker"
+	settingID        = "id"
+	settingUser      = "user"
+	settingPassword  = "password"
+	settingCleansess = "cleansess"
+	settingStore     = "store"
+	settingQOS       = "qos"
 )
 
 // log is the default package logger
@@ -221,83 +204,6 @@ func getLocalIP() string {
 	return "0.0.0.0"
 }
 
-// configureTracer configures the distributed tracer
-func (t *MqttTrigger) configureTracer() {
-	tracer := TracerNoOP
-	if setting, ok := t.config.Settings[settingTracer]; ok {
-		tracer = setting.(string)
-	}
-	tracerEndpoint := ""
-	if setting, ok := t.config.Settings[settingTracerEndpoint]; ok {
-		tracerEndpoint = setting.(string)
-	}
-	tracerToken := ""
-	if setting, ok := t.config.Settings[settingTracerToken]; ok {
-		tracerToken = setting.(string)
-	}
-	tracerDebug := false
-	if setting, ok := t.config.Settings[settingTracerDebug]; ok {
-		tracerDebug = setting.(bool)
-	}
-	tracerSameSpan := false
-	if setting, ok := t.config.Settings[settingTracerSameSpan]; ok {
-		tracerSameSpan = setting.(bool)
-	}
-	tracerID128Bit := true
-	if setting, ok := t.config.Settings[settingTracerID128Bit]; ok {
-		tracerID128Bit = setting.(bool)
-	}
-
-	switch tracer {
-	case TracerNoOP:
-		opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
-	case TracerZipKin:
-		if tracerEndpoint == "" {
-			panic(ErrorTracerEndpointRequired)
-		}
-
-		collector, err := zipkin.NewHTTPCollector(tracerEndpoint)
-		if err != nil {
-			panic(fmt.Sprintf("unable to create Zipkin HTTP collector: %+v\n", err))
-		}
-
-		recorder := zipkin.NewRecorder(collector, tracerDebug,
-			getLocalIP(), t.config.Name)
-
-		tracer, err := zipkin.NewTracer(
-			recorder,
-			zipkin.ClientServerSameSpan(tracerSameSpan),
-			zipkin.TraceID128Bit(tracerID128Bit),
-		)
-		if err != nil {
-			panic(fmt.Sprintf("unable to create Zipkin tracer: %+v\n", err))
-		}
-
-		opentracing.SetGlobalTracer(tracer)
-	case TracerAPPDash:
-		if tracerEndpoint == "" {
-			panic(ErrorTracerEndpointRequired)
-		}
-
-		collector := appdash.NewRemoteCollector(tracerEndpoint)
-		chunkedCollector := appdash.NewChunkedCollector(collector)
-		tracer := appdashtracing.NewTracer(chunkedCollector)
-		opentracing.SetGlobalTracer(tracer)
-	case TracerLightStep:
-		if tracerToken == "" {
-			panic(ErrorTracerTokenRequired)
-		}
-
-		lightstepTracer := lightstep.NewTracer(lightstep.Options{
-			AccessToken: tracerToken,
-		})
-
-		opentracing.SetGlobalTracer(lightstepTracer)
-	default:
-		panic(ErrorInvalidTracer)
-	}
-}
-
 // Start implements ext.Trigger.Start
 func (t *MqttTrigger) Start() error {
 
@@ -316,7 +222,11 @@ func (t *MqttTrigger) Start() error {
 		opts.SetStore(mqtt.NewFileStore(t.config.GetSetting(settingStore)))
 	}
 
-	t.configureTracer()
+	err = util.ConfigureTracer(t.config.Settings, getLocalIP(), t.config.Name)
+	if err != nil {
+		log.Error("Error setting up tracer ", err.Error())
+		return err
+	}
 
 	t.handlers = t.CreateHandlers()
 	opts.SetDefaultPublishHandler(func(client mqtt.Client, msg mqtt.Message) {
