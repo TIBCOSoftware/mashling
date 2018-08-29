@@ -130,6 +130,7 @@ type MqttTrigger struct {
 	client   mqtt.Client
 	config   *trigger.Config
 	handlers map[string]*OptimizedHandler
+	tracer   util.Tracer
 }
 
 //NewFactory create a new Trigger factory
@@ -222,7 +223,7 @@ func (t *MqttTrigger) Start() error {
 		opts.SetStore(mqtt.NewFileStore(t.config.GetSetting(settingStore)))
 	}
 
-	err = util.ConfigureTracer(t.config.Settings, getLocalIP(), t.config.Name)
+	err = t.tracer.ConfigureTracer(t.config.Settings, getLocalIP(), t.config.Name)
 	if err != nil {
 		log.Error("Error setting up tracer ", err.Error())
 		return err
@@ -285,7 +286,7 @@ func (t *MqttTrigger) Stop() error {
 
 	t.client.Disconnect(250)
 
-	return nil
+	return t.tracer.Close()
 }
 
 // RunAction starts a new Process Instance

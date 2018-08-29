@@ -62,6 +62,7 @@ type RestTrigger struct {
 	server   *Server
 	config   *trigger.Config
 	localIP  string
+	tracer   util.Tracer
 }
 
 //NewFactory create a new Trigger factory
@@ -125,7 +126,7 @@ func (t *RestTrigger) Init(runner action.Runner) {
 	t.runner = runner
 	t.localIP = getLocalIP()
 
-	err = util.ConfigureTracer(t.config.Settings, t.localIP+":"+t.config.GetSetting("port"),
+	err = t.tracer.ConfigureTracer(t.config.Settings, t.localIP+":"+t.config.GetSetting("port"),
 		t.config.Name)
 	if err != nil {
 		panic(err)
@@ -266,7 +267,11 @@ func (t *RestTrigger) Start() error {
 
 // Stop implements util.Managed.Stop
 func (t *RestTrigger) Stop() error {
-	return t.server.Stop()
+	err := t.server.Stop()
+	if err != nil {
+		return err
+	}
+	return t.tracer.Close()
 }
 
 // Handles the cors preflight request

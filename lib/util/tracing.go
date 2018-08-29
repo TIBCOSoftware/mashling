@@ -8,10 +8,18 @@ package util
 import (
 	"errors"
 	"fmt"
+	"io"
+	"strings"
+	"time"
 
 	lightstep "github.com/lightstep/lightstep-tracer-go"
 	opentracing "github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	jaeger "github.com/uber/jaeger-client-go"
+	jaegerconfig "github.com/uber/jaeger-client-go/config"
+	jaegerlog "github.com/uber/jaeger-client-go/log"
+	jaegertransport "github.com/uber/jaeger-client-go/transport"
+	"github.com/uber/jaeger-lib/metrics"
 	"sourcegraph.com/sourcegraph/appdash"
 	appdashtracing "sourcegraph.com/sourcegraph/appdash/opentracing"
 )
@@ -21,6 +29,7 @@ const (
 	tracerZipKin          = "zipkin"
 	tracerAPPDash         = "appdash"
 	tracerLightStep       = "lightstep"
+	tracerJaeger          = "jaeger"
 	settingTracer         = "tracer"
 	settingTracerEndpoint = "tracerEndpoint"
 	settingTracerToken    = "tracerToken"
@@ -38,8 +47,13 @@ var (
 	ErrorTracerTokenRequired = errors.New("tracer token required")
 )
 
+// Tracer is an open tracer
+type Tracer struct {
+	closer io.Closer
+}
+
 // ConfigureTracer configures the distributed tracer
-func ConfigureTracer(settings map[string]interface{}, address, name string) error {
+func (t *Tracer) ConfigureTracer(settings map[string]interface{}, address, name string) error {
 	tracer := tracerNoOP
 	if setting, ok := settings[settingTracer]; ok {
 		tracer = setting.(string)
@@ -109,9 +123,55 @@ func ConfigureTracer(settings map[string]interface{}, address, name string) erro
 		})
 
 		opentracing.SetGlobalTracer(lightstepTracer)
+	case tracerJaeger:
+		configuration := jaegerconfig.Configuration{
+			Sampler: &jaegerconfig.SamplerConfig{
+				Type:  "const",
+				Param: 1,
+			},
+		}
+
+		logger := jaegerlog.StdLogger
+		metricsFactory := metrics.NullFactory
+
+		var sender jaeger.Transport
+		if strings.HasPrefix(tracerEndpoint, "http://") {
+			sender = jaegertransport.NewHTTPTransport(
+				tracerEndpoint,
+				jaegertransport.HTTPBatchSize(1),
+			)
+		} else {
+			if s, err := jaeger.NewUDPTransport(tracerEndpoint, 0); err != nil {
+				return err
+			} else {
+				sender = s
+			}
+		}
+		closer, err := configuration.InitGlobalTracer(
+			name,
+			jaegerconfig.Logger(logger),
+			jaegerconfig.Metrics(metricsFactory),
+			jaegerconfig.Reporter(jaeger.NewRemoteReporter(
+				sender,
+				jaeger.ReporterOptions.BufferFlushInterval(1*time.Second),
+				jaeger.ReporterOptions.Logger(logger),
+			)),
+		)
+		if err != nil {
+			return err
+		}
+		t.closer = closer
 	default:
 		return ErrorInvalidTracer
 	}
 
+	return nil
+}
+
+// Close closes the tracer
+func (t *Tracer) Close() error {
+	if t.closer != nil {
+		return t.closer.Close()
+	}
 	return nil
 }
