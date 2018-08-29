@@ -156,6 +156,7 @@ func (t *Tracer) ConfigureTracer(settings map[string]interface{}, address, name 
 				jaeger.ReporterOptions.BufferFlushInterval(1*time.Second),
 				jaeger.ReporterOptions.Logger(logger),
 			)),
+			jaegerconfig.Gen128Bit(tracerID128Bit),
 		)
 		if err != nil {
 			return err
