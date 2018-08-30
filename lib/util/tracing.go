@@ -124,6 +124,10 @@ func (t *Tracer) ConfigureTracer(settings map[string]interface{}, address, name 
 
 		opentracing.SetGlobalTracer(lightstepTracer)
 	case tracerJaeger:
+		if tracerEndpoint == "" {
+			return ErrorTracerEndpointRequired
+		}
+
 		configuration := jaegerconfig.Configuration{
 			Sampler: &jaegerconfig.SamplerConfig{
 				Type:  "const",
