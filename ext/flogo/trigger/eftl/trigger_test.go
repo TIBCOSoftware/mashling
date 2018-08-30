@@ -118,11 +118,17 @@ func TestConfigureTracer(t *testing.T) {
 	eftl.config.Settings["tracerDebug"] = true
 	eftl.config.Settings["tracerSameSpan"] = true
 	eftl.config.Settings["tracerID128Bit"] = true
-	eftl.tracer.ConfigureTracer(eftl.config.Settings, "localhost", "test")
+	err = eftl.tracer.ConfigureTracer(eftl.config.Settings, "localhost", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	eftl.config.Settings["tracer"] = "appdash"
 	eftl.config.Settings["tracerEndpoint"] = "localhost:7701"
-	eftl.tracer.ConfigureTracer(eftl.config.Settings, "localhost", "test")
+	err = eftl.tracer.ConfigureTracer(eftl.config.Settings, "localhost", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestEndpoint(t *testing.T) {

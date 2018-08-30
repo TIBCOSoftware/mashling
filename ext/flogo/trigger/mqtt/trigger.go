@@ -21,11 +21,6 @@ import (
 )
 
 const (
-	TracerNoOP      = "noop"
-	TracerZipKin    = "zipkin"
-	TracerAPPDash   = "appdash"
-	TracerLightStep = "lightstep"
-
 	settingTopic     = "topic"
 	settingBroker    = "broker"
 	settingID        = "id"

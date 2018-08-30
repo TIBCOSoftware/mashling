@@ -115,11 +115,17 @@ func TestConfigureTracer(t *testing.T) {
 	mqtt.config.Settings["tracerDebug"] = true
 	mqtt.config.Settings["tracerSameSpan"] = true
 	mqtt.config.Settings["tracerID128Bit"] = true
-	mqtt.tracer.ConfigureTracer(mqtt.config.Settings, "localhost", "test")
+	err = mqtt.tracer.ConfigureTracer(mqtt.config.Settings, "localhost", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	mqtt.config.Settings["tracer"] = TracerAPPDash
+	mqtt.config.Settings["tracer"] = "appdash"
 	mqtt.config.Settings["tracerEndpoint"] = "localhost:7701"
-	mqtt.tracer.ConfigureTracer(mqtt.config.Settings, "localhost", "test")
+	err = mqtt.tracer.ConfigureTracer(mqtt.config.Settings, "localhost", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestEndpoint(t *testing.T) {
