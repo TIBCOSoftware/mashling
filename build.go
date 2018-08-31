@@ -39,7 +39,7 @@ var (
 	// Date is the date.
 	Date = time.Now().Format("2006-01-02T15:04:05-0700")
 	// Version is the default build version to use if no other is found.
-	Version = "v0.4.0"
+	Version = "v0.4.1"
 	// V represents verbosity for the build context.
 	V = "0"
 	// Env represents the environment for the build context.
@@ -61,24 +61,27 @@ type Platform struct {
 
 func init() {
 	var output []byte
-	_, err := exec.LookPath(Git)
+	var err error
+	output, err = ioutil.ReadFile(".version")
 	if err != nil {
-		fmt.Println("Git not found...")
-	} else {
-		cmd := exec.Command(Git, "describe", "--tags", "--always", "--dirty", "--match=v*")
-		output, err = cmd.Output()
-		if err != nil {
-			fmt.Println("Project is not a git repository...")
-		}
+		fmt.Println(".version file not found...")
 	}
 	if len(output) == 0 {
-		output, err = ioutil.ReadFile(".version")
+		_, err := exec.LookPath(Git)
 		if err != nil {
-			fmt.Println(".version file not found, using default version:", Version)
+			fmt.Println("Git not found...")
+		} else {
+			cmd := exec.Command(Git, "describe", "--tags", "--always", "--dirty", "--match=v*")
+			output, err = cmd.Output()
+			if err != nil {
+				fmt.Println("Project is not a git repository...")
+			}
 		}
 	}
 	if len(output) > 0 {
 		Version = strings.TrimSpace(string(output))
+	} else {
+		fmt.Println("no version found, using default version:", Version)
 	}
 
 	Env = os.Environ()
