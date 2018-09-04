@@ -54,8 +54,10 @@ func TestHTTP(t *testing.T) {
 			t.Fatal("there should be a TEST header")
 		}
 	})
+	done := make(chan bool, 1)
 	go func() {
 		server.ListenAndServe()
+		done <- true
 	}()
 	_, err := http.Get("http://localhost:8181/pet/json")
 	for err != nil {
@@ -66,6 +68,7 @@ func TestHTTP(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		<-done
 	}()
 
 	service := types.Service{
