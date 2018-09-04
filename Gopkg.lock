@@ -471,6 +471,16 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/ulule/limiter"
+  packages = [
+    ".",
+    "drivers/store/common",
+    "drivers/store/memory"
+  ]
+  revision = "f568e151b79a917792d148bdd59c0bdc2b5fabb3"
+
+[[projects]]
+  branch = "master"
   name = "github.com/xeipuuv/gojsonpointer"
   packages = ["."]
   revision = "4e3ac2762d5f479393488629ee9370b50873b3a6"
@@ -672,6 +682,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "91f6c3c19686b960a033d4d80bf60d4bb891ce1a240b8bf0e03924bada4f4060"
+  inputs-digest = "0055080cc855d2c0916fc1d2d58d25307a9dbc358a2626c749fd31e2aa339fd1"
   solver-name = "gps-cdcl"
   solver-version = 1
