@@ -55,10 +55,7 @@ func TestHTTP(t *testing.T) {
 		}
 	})
 	go func() {
-		err := server.ListenAndServe()
-		if err != nil {
-			t.Fatal(err)
-		}
+		server.ListenAndServe()
 	}()
 	_, err := http.Get("http://localhost:8181/pet/json")
 	for err != nil {
