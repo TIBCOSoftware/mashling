@@ -84,7 +84,7 @@ func pkgFlogoActionActionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "pkg/flogo/action/action.json", size: 361, mode: os.FileMode(420), modTime: time.Unix(1534945857, 0)}
+	info := bindataFileInfo{name: "pkg/flogo/action/action.json", size: 361, mode: os.FileMode(420), modTime: time.Unix(1536238166, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +104,7 @@ func vendorGithubComTibcosoftwareFlogoContribActionFlowActionJson() (*asset, err
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/action/flow/action.json", size: 302, mode: os.FileMode(420), modTime: time.Unix(1535057610, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/action/flow/action.json", size: 302, mode: os.FileMode(420), modTime: time.Unix(1536241890, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

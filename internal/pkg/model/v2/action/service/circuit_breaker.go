@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
+	"math"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -14,7 +16,20 @@ const (
 	CircuitBreakerModeB = "b"
 	// CircuitBreakerModeC triggers the circuit breaker when there are contiguous errors over time
 	CircuitBreakerModeC = "c"
+	// CircuitBreakerModeD is a probabilistic smart circuit breaker
+	CircuitBreakerModeD = "d"
+	// CircuitBreakerFailure is a failure
+	CircuitBreakerFailure = -1.0
+	// CircuitBreakerUnknown is an onknown status
+	CircuitBreakerUnknown = 0.0
+	// CircuitBreakerSuccess isa success
+	CircuitBreakerSuccess = 1.0
 )
+
+// ErrorCircuitBreakerTripped happens when the circuit breaker has tripped
+var ErrorCircuitBreakerTripped = errors.New("circuit breaker tripped")
+
+var now = time.Now
 
 // CircuitBreaker is a circuit breaker service
 type CircuitBreaker struct {
@@ -36,13 +51,19 @@ func InitializeCircuitBreaker(settings map[string]interface{}) (service *Circuit
 	return circuit, nil
 }
 
+// Record is a record of a request
+type Record struct {
+	Weight float64
+	Stamp  time.Time
+}
+
 // CircuitBreakerContext is a circuit breaker context
 type CircuitBreakerContext struct {
 	counter   int
 	processed uint64
 	timeout   time.Time
 	index     int
-	buffer    []time.Time
+	buffer    []Record
 	tripped   bool
 	sync.RWMutex
 }
@@ -52,6 +73,26 @@ func (c *CircuitBreakerContext) Trip(now time.Time, timeout time.Duration) {
 	c.timeout = now.Add(timeout)
 	c.counter = 0
 	c.tripped = true
+}
+
+func (c *CircuitBreakerContext) AddRecord(weight float64, now time.Time) {
+	c.processed++
+	c.buffer[c.index].Weight = weight
+	c.buffer[c.index].Stamp = now
+	c.index = (c.index + 1) % len(c.buffer)
+}
+
+// Probability computes the probability for mode d
+func (c *CircuitBreakerContext) Probability(now time.Time) float64 {
+	records, factor, sum := c.buffer, 0.0, 0.0
+	max := float64(now.Sub(records[c.index].Stamp))
+	for _, record := range records {
+		a := math.Exp(-float64(now.Sub(record.Stamp)) / max)
+		factor += a
+		sum += record.Weight * a
+	}
+	sum /= factor
+	return 1 / (1 + math.Exp(8*sum))
 }
 
 // CircuitBreakerContexts holds a bunch of circuit breaker contexts
@@ -75,9 +116,14 @@ func (c *CircuitBreakerContexts) GetContext(context string, threshold int) *Circ
 		return cbContext
 	}
 
+	buffer := make([]Record, threshold)
 	cbContext = &CircuitBreakerContext{
-		buffer: make([]time.Time, threshold),
+		buffer: buffer,
 	}
+	for i := range buffer {
+		buffer[i].Weight = CircuitBreakerSuccess
+	}
+
 	c.Lock()
 	c.contexts[context] = cbContext
 	c.Unlock()
@@ -94,7 +140,7 @@ func (c *CircuitBreaker) Execute() (err error) {
 		return errors.New("invalid threshold")
 	}
 
-	context, now := circuitBreakerContexts.GetContext(c.context, c.threshold), time.Now()
+	context, now := circuitBreakerContexts.GetContext(c.context, c.threshold), now()
 	switch c.operation {
 	case "counter":
 		context.Lock()
@@ -103,9 +149,7 @@ func (c *CircuitBreaker) Execute() (err error) {
 			break
 		}
 		context.counter++
-		context.processed++
-		context.buffer[context.index] = now
-		context.index = (context.index + 1) % c.threshold
+		context.AddRecord(CircuitBreakerFailure, now)
 		if context.tripped {
 			context.Trip(now, c.timeout)
 			context.Unlock()
@@ -120,7 +164,7 @@ func (c *CircuitBreaker) Execute() (err error) {
 			if context.processed < uint64(c.threshold) {
 				break
 			}
-			if now.Sub(context.buffer[context.index]) < c.period {
+			if now.Sub(context.buffer[context.index].Stamp) < c.period {
 				context.Trip(now, c.timeout)
 			}
 		case CircuitBreakerModeC:
@@ -128,25 +172,44 @@ func (c *CircuitBreaker) Execute() (err error) {
 				break
 			}
 			if context.counter >= c.threshold &&
-				now.Sub(context.buffer[context.index]) < c.period {
+				now.Sub(context.buffer[context.index].Stamp) < c.period {
 				context.Trip(now, c.timeout)
 			}
 		}
 		context.Unlock()
 	case "reset":
 		context.Lock()
-		if context.timeout.Sub(now) <= 0 {
-			context.counter = 0
-			context.tripped = false
+		switch c.mode {
+		case CircuitBreakerModeA, CircuitBreakerModeB, CircuitBreakerModeC:
+			if context.timeout.Sub(now) <= 0 {
+				context.counter = 0
+				context.tripped = false
+			}
+		case CircuitBreakerModeD:
+			context.AddRecord(CircuitBreakerSuccess, now)
 		}
 		context.Unlock()
 	default:
-		context.RLock()
-		timeout := context.timeout
-		context.RUnlock()
-		if timeout.Sub(now) > 0 {
-			c.Tripped = true
-			return errors.New("circuit breaker tripped")
+		switch c.mode {
+		case CircuitBreakerModeA, CircuitBreakerModeB, CircuitBreakerModeC:
+			context.RLock()
+			timeout := context.timeout
+			context.RUnlock()
+			if timeout.Sub(now) > 0 {
+				c.Tripped = true
+				return ErrorCircuitBreakerTripped
+			}
+		case CircuitBreakerModeD:
+			context.RLock()
+			p := context.Probability(now)
+			context.RUnlock()
+			if rand.Float64()*1000 < math.Floor(p*1000) {
+				context.Lock()
+				context.AddRecord(CircuitBreakerUnknown, now)
+				context.Unlock()
+				c.Tripped = true
+				return ErrorCircuitBreakerTripped
+			}
 		}
 	}
 	return nil
@@ -165,6 +228,7 @@ func (c *CircuitBreaker) UpdateRequest(values map[string]interface{}) (err error
 			case CircuitBreakerModeA:
 			case CircuitBreakerModeB:
 			case CircuitBreakerModeC:
+			case CircuitBreakerModeD:
 			default:
 				return errors.New("invalid mode")
 			}

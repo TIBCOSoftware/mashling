@@ -84,7 +84,7 @@ func defaulthttppatternJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "DefaultHttpPattern.json", size: 2430, mode: os.FileMode(420), modTime: time.Unix(1535121682, 0)}
+	info := bindataFileInfo{name: "DefaultHttpPattern.json", size: 2430, mode: os.FileMode(420), modTime: time.Unix(1536238166, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +104,7 @@ func defaultchannelpatternJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "DefaultChannelPattern.json", size: 2609, mode: os.FileMode(420), modTime: time.Unix(1535124491, 0)}
+	info := bindataFileInfo{name: "DefaultChannelPattern.json", size: 2609, mode: os.FileMode(420), modTime: time.Unix(1536238166, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -9,7 +9,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -22,37 +21,16 @@ import (
 	"github.com/TIBCOSoftware/mashling/lib/eftl"
 	"github.com/TIBCOSoftware/mashling/lib/util"
 
-	lightstep "github.com/lightstep/lightstep-tracer-go"
 	opentracing "github.com/opentracing/opentracing-go"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
-	"sourcegraph.com/sourcegraph/appdash"
-	appdashtracing "sourcegraph.com/sourcegraph/appdash/opentracing"
 )
 
 const (
-	TracerNoOP      = "noop"
-	TracerZipKin    = "zipkin"
-	TracerAPPDash   = "appdash"
-	TracerLightStep = "lightstep"
-
-	settingURL            = "url"
-	settingID             = "id"
-	settingUser           = "user"
-	settingPassword       = "password"
-	settingCA             = "ca"
-	settingTracer         = "tracer"
-	settingTracerEndpoint = "tracerEndpoint"
-	settingTracerToken    = "tracerToken"
-	settingTracerDebug    = "tracerDebug"
-	settingTracerSameSpan = "tracerSameSpan"
-	settingTracerID128Bit = "tracerID128Bit"
-	settingDest           = "dest"
-)
-
-var (
-	ErrorTracerEndpointRequired = errors.New("tracer endpoint required")
-	ErrorInvalidTracer          = errors.New("invalid tracer")
-	ErrorTracerTokenRequired    = errors.New("tracer token required")
+	settingURL      = "url"
+	settingID       = "id"
+	settingUser     = "user"
+	settingPassword = "password"
+	settingCA       = "ca"
+	settingDest     = "dest"
 )
 
 // log is the default package logger
@@ -156,6 +134,7 @@ type Trigger struct {
 	handlers   map[string]*OptimizedHandler
 	connection *eftl.Connection
 	stop       chan bool
+	tracer     util.Tracer
 }
 
 // Factory MQTT Trigger factory
@@ -233,86 +212,13 @@ func getLocalIP() string {
 	return "0.0.0.0"
 }
 
-// configureTracer configures the distributed tracer
-func (t *Trigger) configureTracer() {
-	tracer := TracerNoOP
-	if setting, ok := t.config.Settings[settingTracer]; ok {
-		tracer = setting.(string)
-	}
-	tracerEndpoint := ""
-	if setting, ok := t.config.Settings[settingTracerEndpoint]; ok {
-		tracerEndpoint = setting.(string)
-	}
-	tracerToken := ""
-	if setting, ok := t.config.Settings[settingTracerToken]; ok {
-		tracerToken = setting.(string)
-	}
-	tracerDebug := false
-	if setting, ok := t.config.Settings[settingTracerDebug]; ok {
-		tracerDebug = setting.(bool)
-	}
-	tracerSameSpan := false
-	if setting, ok := t.config.Settings[settingTracerSameSpan]; ok {
-		tracerSameSpan = setting.(bool)
-	}
-	tracerID128Bit := true
-	if setting, ok := t.config.Settings[settingTracerID128Bit]; ok {
-		tracerID128Bit = setting.(bool)
-	}
-
-	switch tracer {
-	case TracerNoOP:
-		opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
-	case TracerZipKin:
-		if tracerEndpoint == "" {
-			panic(ErrorTracerEndpointRequired)
-		}
-
-		collector, err := zipkin.NewHTTPCollector(tracerEndpoint)
-		if err != nil {
-			panic(fmt.Sprintf("unable to create Zipkin HTTP collector: %+v\n", err))
-		}
-
-		recorder := zipkin.NewRecorder(collector, tracerDebug,
-			getLocalIP(), t.config.Name)
-
-		tracer, err := zipkin.NewTracer(
-			recorder,
-			zipkin.ClientServerSameSpan(tracerSameSpan),
-			zipkin.TraceID128Bit(tracerID128Bit),
-		)
-		if err != nil {
-			panic(fmt.Sprintf("unable to create Zipkin tracer: %+v\n", err))
-		}
-
-		opentracing.SetGlobalTracer(tracer)
-	case TracerAPPDash:
-		if tracerEndpoint == "" {
-			panic(ErrorTracerEndpointRequired)
-		}
-
-		collector := appdash.NewRemoteCollector(tracerEndpoint)
-		chunkedCollector := appdash.NewChunkedCollector(collector)
-		tracer := appdashtracing.NewTracer(chunkedCollector)
-		opentracing.SetGlobalTracer(tracer)
-	case TracerLightStep:
-		if tracerToken == "" {
-			panic(ErrorTracerTokenRequired)
-		}
-
-		lightstepTracer := lightstep.NewTracer(lightstep.Options{
-			AccessToken: tracerToken,
-		})
-
-		opentracing.SetGlobalTracer(lightstepTracer)
-	default:
-		panic(ErrorInvalidTracer)
-	}
-}
-
 // Start implements ext.Trigger.Start
 func (t *Trigger) Start() error {
-	t.configureTracer()
+	err := t.tracer.ConfigureTracer(t.config.Settings, getLocalIP(), t.config.Name)
+	if err != nil {
+		log.Errorf("configure tracer failed: %s", err)
+		return err
+	}
 
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
@@ -343,7 +249,6 @@ func (t *Trigger) Start() error {
 
 	url := t.config.GetSetting(settingURL)
 	errorsChannel := make(chan error, 1)
-	var err error
 	t.connection, err = eftl.Connect(url, options, errorsChannel)
 	if err != nil {
 		log.Errorf("connection failed: %s", err)
@@ -401,7 +306,7 @@ func (t *Trigger) Stop() error {
 	if t.stop != nil {
 		t.stop <- true
 	}
-	return nil
+	return t.tracer.Close()
 }
 
 // RunAction starts a new Process Instance
@@ -466,7 +371,7 @@ func (t *Trigger) constructStartRequest(message []byte, span Span) (string, map[
 	var content map[string]interface{}
 	err := util.Unmarshal("", message, &content)
 	if err != nil {
-		span.Error("Error unmarshaling message ", err.Error())
+		span.Error("Error unmarshaling message %s", err.Error())
 	}
 
 	replyTo := ""

@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/mashling/internal/app/cli/assets"
+	"github.com/TIBCOSoftware/mashling/internal/app/version"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/pkg/files"
@@ -122,6 +123,15 @@ func create(command *cobra.Command, args []string) {
 	}
 	err = files.UnpackBytes(stub, fullPathName)
 	if err != nil {
+		log.Fatal(err)
+	}
+	// Write version to .version file
+	vFile, err := os.OpenFile(filepath.Join(fullPathName, ".version"), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer vFile.Close()
+	if _, err = vFile.WriteString(version.Version); err != nil {
 		log.Fatal(err)
 	}
 
