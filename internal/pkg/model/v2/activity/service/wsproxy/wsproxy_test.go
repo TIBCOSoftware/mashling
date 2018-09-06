@@ -3,6 +3,7 @@ package wsproxy
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 	"github.com/gorilla/websocket"
@@ -88,5 +89,9 @@ func TestWSProxy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	<-fini
+	select {
+	case <-fini:
+	case <-time.After(30 * time.Second):
+		t.Fatal("test failed: timed out")
+	}
 }
