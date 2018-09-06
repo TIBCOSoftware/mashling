@@ -136,18 +136,20 @@
                     "type": "any"
                   }
                 ],
-                "inputMappings": [
-                  {
-                    "type": 1,
-                    "value": "$activity[rest_2].status",
-                    "mapTo": "code"
-                  },
-                  {
-                    "type": 1,
-                    "value": "$activity[rest_2].result",
-                    "mapTo": "data"
-                  }
-                ]
+                "input": {
+                  "mappings": [
+                    {
+                      "type": 1,
+                      "value": "$activity[rest_2].status",
+                      "mapTo": "code"
+                    },
+                    {
+                      "type": 1,
+                      "value": "$activity[rest_2].result",
+                      "mapTo": "data"
+                    }
+                  ]
+                }
               },
               {
                 "id": "log_4",
@@ -198,18 +200,20 @@
                     "type": "any"
                   }
                 ],
-                "inputMappings": [
-                  {
-                    "type": 1,
-                    "value": "$activity[rest_2].status",
-                    "mapTo": "code"
-                  },
-                  {
-                    "type": 1,
-                    "value": "$activity[rest_2].result",
-                    "mapTo": "data"
-                  }
-                ]
+                "input": {
+                  "mappings": [
+                    {
+                      "type": 1,
+                      "value": "$activity[rest_2].status",
+                      "mapTo": "code"
+                    },
+                    {
+                      "type": 1,
+                      "value": "$activity[rest_2].result",
+                      "mapTo": "data"
+                    }
+                  ]
+                }
               }
             ],
             "links": [

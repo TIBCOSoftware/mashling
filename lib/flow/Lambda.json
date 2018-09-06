@@ -80,7 +80,7 @@
                   {
                     "name": "tracing",
                     "value": null,
-                    "required" : false,
+                    "required": false,
                     "type": "any"
                   }
                 ],
@@ -128,18 +128,20 @@
                     "type": "any"
                   }
                 ],
-                "inputMappings": [
-                  {
-                    "type": 1,
-                    "value": "${activity.2.result}",
-                    "mapTo": "data"
-                  },
-                  {
-                    "type": 1,
-                    "value": "${activity.2.status}",
-                    "mapTo": "code"
-                  }
-                ]
+                "input": {
+                  "mappings": [
+                    {
+                      "type": 1,
+                      "value": "${activity.2.result}",
+                      "mapTo": "data"
+                    },
+                    {
+                      "type": 1,
+                      "value": "${activity.2.status}",
+                      "mapTo": "code"
+                    }
+                  ]
+                }
               }
             ],
             "links": [
