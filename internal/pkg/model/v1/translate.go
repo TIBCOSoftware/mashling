@@ -254,6 +254,7 @@ func createFlogoTrigger(configDefinitions map[string]types.Config, trigger types
 		flogoTrigger.Settings = triggerSettings
 		flogoHandler := ftrigger.HandlerConfig{
 			ActionId:       handler.Name,
+			Action:         &ftrigger.ActionConfig{Config: &faction.Config{Id: handler.Name}},
 			Settings:       handlerSettings[handler.Name],
 			ActionMappings: actionMappings,
 		}
