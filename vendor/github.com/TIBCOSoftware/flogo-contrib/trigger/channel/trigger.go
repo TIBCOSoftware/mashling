@@ -1,14 +1,14 @@
 package channel
 
 import (
+	"context"
+	"fmt"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"context"
-	"github.com/TIBCOSoftware/flogo-lib/engine/channels"
-	"fmt"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"github.com/TIBCOSoftware/flogo-lib/engine/channels"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 // log is the default package logger
@@ -19,8 +19,7 @@ const ovData = "data"
 // ChannelTrigger CHANNEL trigger struct
 type ChannelTrigger struct {
 	metadata *trigger.Metadata
-	config *trigger.Config
-	cancel context.CancelFunc
+	config   *trigger.Config
 	handlers []*trigger.Handler
 }
 
@@ -57,69 +56,45 @@ func (t *ChannelTrigger) Initialize(ctx trigger.InitContext) error {
 		if ch == nil {
 			return fmt.Errorf("unknown engine channel '%s'", channel)
 		}
+
+		l := &ChannelListener{handler: handler}
+		ch.RegisterCallback(l.OnMessage)
 	}
 
 	return nil
 }
 
 func (t *ChannelTrigger) Start() error {
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	for _, handler := range t.handlers {
-
-		// setup handlers
-		channel := strings.ToLower(handler.GetStringSetting("channel"))
-		log.Debugf("Registering handler for channel [%s]", channel)
-
-		ch := channels.Get(channel)
-
-		go handleChannel(ctx, ch, handler)
-	}
-
-	t.cancel = cancel
-
 	return nil
 }
 
 // Stop implements util.Managed.Stop
 func (t *ChannelTrigger) Stop() error {
-
-	t.cancel()
 	return nil
 }
 
-func handleChannel(ctx context.Context, ch chan interface{}, handler *trigger.Handler) {
-	for {
-		select {
-		case val, ok := <-ch:
-			if !ok {
-				//channel closed, so return
-				return
-			}
+type ChannelListener struct {
+	handler *trigger.Handler
+}
 
-			triggerData := make(map[string]interface{})
+func (l *ChannelListener) OnMessage(msg interface{}) {
+	triggerData := make(map[string]interface{})
 
-			if attrs, ok:=val.(map[string]*data.Attribute); ok{
+	if attrs, ok := msg.(map[string]*data.Attribute); ok {
 
-				vals := make(map[string]interface{})
-				for name, attr := range attrs {
-					vals[name] = attr.Value()
-				}
-				triggerData[ovData] = vals
-			} else {
-				triggerData[ovData] = val
-			}
-
-			//todo what should we do with the results?
-			_, err := handler.Handle(context.TODO(), triggerData)
-
-			if err != nil {
-				log.Error(err)
-			}
-
-		case <-ctx.Done():
-			return
+		vals := make(map[string]interface{})
+		for name, attr := range attrs {
+			vals[name] = attr.Value()
 		}
+		triggerData[ovData] = vals
+	} else {
+		triggerData[ovData] = msg
+	}
+
+	//todo what should we do with the results?
+	_, err := l.handler.Handle(context.TODO(), triggerData)
+
+	if err != nil {
+		log.Error(err)
 	}
 }

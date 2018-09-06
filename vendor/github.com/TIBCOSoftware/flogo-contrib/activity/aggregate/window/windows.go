@@ -2,38 +2,38 @@ package window
 
 import (
 	"fmt"
-	"time"
-	"strings"
 	"strconv"
+	"strings"
+	"sync"
+	"time"
 )
 
 type Settings struct {
-	Size               int
-	Resolution         int
-	ExternalTimer      bool
+	Size          int
+	Resolution    int
+	ExternalTimer bool
 
 	TotalCountModifier int
 }
 
-func (s *Settings) SetAdditionalSettings( as map[string]string) error {
+func (s *Settings) SetAdditionalSettings(as map[string]string) error {
 
 	for key, value := range as {
 		if strings.ToLower(key) == "totalcountmodifier" {
 			//todo should we return an error?
-			s.TotalCountModifier, _ =  strconv.Atoi(value)
+			s.TotalCountModifier, _ = strconv.Atoi(value)
 		}
 	}
 
 	return nil
 }
 
-
 ///////////////////
 // Tumbling Window
 
 func NewTumblingWindow(addFunc AddSampleFunc, aggFunc AggregateSingleFunc, settings *Settings) Window {
 
-	return &TumblingWindow{addFunc: addFunc, aggFunc: aggFunc, settings: settings}
+	return &TumblingWindow{addFunc: addFunc, aggFunc: aggFunc, settings: settings, mutex: &sync.Mutex{}}
 }
 
 //note:  using interface{} 4x slower than using specific types, starting with interface{} for expediency
@@ -44,9 +44,15 @@ type TumblingWindow struct {
 
 	data       interface{}
 	numSamples int
+
+	mutex *sync.Mutex
 }
 
+// AddSample implements window.Window.AddSample
 func (w *TumblingWindow) AddSample(sample interface{}) (bool, interface{}) {
+
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
 
 	//sample size should match data size
 	w.data = w.addFunc(w.data, sample)
@@ -69,7 +75,7 @@ func (w *TumblingWindow) AddSample(sample interface{}) (bool, interface{}) {
 // Tumbling Time Window
 
 func NewTumblingTimeWindow(addFunc AddSampleFunc, aggFunc AggregateSingleFunc, settings *Settings) TimeWindow {
-	return &TumblingTimeWindow{addFunc: addFunc, aggFunc: aggFunc, settings: settings}
+	return &TumblingTimeWindow{addFunc: addFunc, aggFunc: aggFunc, settings: settings, mutex: &sync.Mutex{}}
 }
 
 // TumblingTimeWindow - A tumbling window based on time. Relies on external entity moving window along
@@ -86,9 +92,13 @@ type TumblingTimeWindow struct {
 
 	nextEmit int
 	lastAdd  int
+
+	mutex *sync.Mutex
 }
 
 func (w *TumblingTimeWindow) AddSample(sample interface{}) (bool, interface{}) {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
 
 	w.data = w.addFunc(w.data, sample)
 	w.numSamples++
@@ -102,8 +112,8 @@ func (w *TumblingTimeWindow) AddSample(sample interface{}) (bool, interface{}) {
 
 		//todo what do we do if this greatly exceeds the nextEmit time?
 		if currentTime >= w.nextEmit {
-			w.nextEmit = + w.settings.Size // size == time in millis
-			return w.NextBlock()
+			w.nextEmit = +w.settings.Size // size == time in millis
+			return w.nextBlock()
 		}
 	}
 
@@ -111,6 +121,13 @@ func (w *TumblingTimeWindow) AddSample(sample interface{}) (bool, interface{}) {
 }
 
 func (w *TumblingTimeWindow) NextBlock() (bool, interface{}) {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	return w.nextBlock()
+}
+
+func (w *TumblingTimeWindow) nextBlock() (bool, interface{}) {
 
 	// aggregate and emit
 	val := w.aggFunc(w.data, w.maxSamples) //num samples or max samples?
@@ -134,6 +151,7 @@ func NewSlidingWindow(aggFunc AggregateBlocksFunc, settings *Settings) Window {
 
 	w := &SlidingWindow{aggFunc: aggFunc, settings: settings}
 	w.blocks = make([]interface{}, settings.Size)
+	w.mutex = &sync.Mutex{}
 
 	return w
 }
@@ -148,9 +166,15 @@ type SlidingWindow struct {
 	numSamples   int
 	currentBlock int
 	canEmit      bool
+
+	mutex *sync.Mutex
 }
 
+// AddSample implements window.Window.AddSample
 func (w *SlidingWindow) AddSample(sample interface{}) (bool, interface{}) {
+
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
 
 	//sample size should match data size
 	w.blocks[w.currentBlock] = sample //no addSampleFunc required, just tracking all values
@@ -191,6 +215,7 @@ func NewSlidingTimeWindow(addFunc AddSampleFunc, aggFunc AggregateBlocksFunc, se
 	w := &SlidingTimeWindow{addFunc: addFunc, aggFunc: aggFunc, numBlocks: numBlocks, settings: settings}
 
 	w.blocks = make([]interface{}, numBlocks)
+	w.mutex = &sync.Mutex{}
 
 	return w
 }
@@ -212,9 +237,15 @@ type SlidingTimeWindow struct {
 
 	nextBlockTime int
 	lastAdd       int
+
+	mutex *sync.Mutex
 }
 
+// AddSample implements window.Window.AddSample
 func (w *SlidingTimeWindow) AddSample(sample interface{}) (bool, interface{}) {
+
+	w.mutex.Lock()
+	defer w.mutex.Lock()
 
 	//sample size should match data size
 	w.blocks[w.currentBlock] = w.addFunc(w.blocks[w.currentBlock], sample)
@@ -230,7 +261,7 @@ func (w *SlidingTimeWindow) AddSample(sample interface{}) (bool, interface{}) {
 
 		if currentTime > w.nextBlockTime {
 			w.nextBlockTime += w.settings.Resolution
-			return w.NextBlock()
+			return w.nextBlock()
 		}
 
 		return false, nil
@@ -240,6 +271,14 @@ func (w *SlidingTimeWindow) AddSample(sample interface{}) (bool, interface{}) {
 }
 
 func (w *SlidingTimeWindow) NextBlock() (bool, interface{}) {
+
+	w.mutex.Lock()
+	defer w.mutex.Lock()
+
+	return w.nextBlock()
+}
+
+func (w *SlidingTimeWindow) nextBlock() (bool, interface{}) {
 
 	if !w.canEmit {
 		if w.currentBlock == w.numBlocks-1 {

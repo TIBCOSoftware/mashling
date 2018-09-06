@@ -5,14 +5,13 @@ import (
 	"strings"
 
 	"encoding/json"
-	"reflect"
-	"strconv"
-
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"reflect"
+	"strconv"
 )
 
 // toAppConfig converts an App to the core app configuration model
@@ -38,7 +37,7 @@ func toAppConfig(a *App) *app.Config {
 // toTriggerConfig converts Trigger to the core Trigger configuration model
 func toTriggerConfig(id string, trg *Trigger) *trigger.Config {
 
-	triggerConfig := &trigger.Config{Id: id, Ref: trg.ref, Settings: trg.Settings()}
+	triggerConfig := &trigger.Config{Id:id, Ref: trg.ref, Settings: trg.Settings()}
 
 	//todo add output
 	//trigger.Config struct { Output   map[string]interface{} `json:"output"` }
@@ -71,8 +70,8 @@ func toActionConfig(act *Action) *trigger.ActionConfig {
 		return actionCfg
 	}
 
-	// actionCfg.Ref = act.ref
-	actionCfg.Config = &action.Config{Ref: act.ref}
+	actionCfg.Ref = act.ref
+
 	//todo handle error
 	jsonData, _ := json.Marshal(act.Settings())
 	actionCfg.Data = jsonData

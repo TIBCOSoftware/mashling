@@ -112,12 +112,13 @@ func (e *engineImpl) Init(directRunner bool) error {
 		}
 
 		//add engine channels
-		channelNames := e.app.Channels
-		if len(channelNames) > 0 {
-			for _, channelName := range channelNames {
+		channelDescriptors := e.app.Channels
+		if len(channelDescriptors) > 0 {
+			for _, descriptor := range channelDescriptors {
+				name, buffSize := channels.Decode(descriptor)
 
-				logger.Debugf("Creating Engine Channel '%s'", channelName)
-				channels.Add(channelName)
+				logger.Debugf("Creating Engine Channel '%s'", name)
+				channels.New(name, buffSize)
 			}
 		}
 
@@ -228,6 +229,12 @@ func (e *engineImpl) Start() error {
 
 	logger.Info("Triggers Started")
 
+	if channels.Count() > 0 {
+		logger.Info("Starting Engine Channels...")
+		channels.Start()
+		logger.Info("Engine Channels Started")
+	}
+
 	logger.Info("Engine Started")
 
 	return nil
@@ -237,8 +244,9 @@ func (e *engineImpl) Stop() error {
 	logger.Info("Engine Stopping...")
 
 	if channels.Count() > 0 {
-		logger.Info("Closing Engine Channels...")
-		channels.Close()
+		logger.Info("Stopping Engine Channels...")
+		channels.Stop()
+		logger.Info("Engine Channels Stopped...")
 	}
 
 	logger.Info("Stopping Triggers...")

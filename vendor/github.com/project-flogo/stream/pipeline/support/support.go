@@ -1,15 +1,15 @@
 package support
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"time"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 )
 
 type TimerCallback func(ctx activity.Context) (resume bool)
 
 // TimerSupport is used to create a timer on behalf of the activity
 type TimerSupport interface {
-
 	// HasTimer indicates if a timer already exists
 	HasTimer(repeating bool) bool
 
@@ -25,6 +25,6 @@ type TimerSupport interface {
 // GetTimerSupport for the activity
 func GetTimerSupport(ctx activity.Context) (TimerSupport, bool) {
 
-	ts, ok :=  ctx.(TimerSupport)
+	ts, ok := ctx.(TimerSupport)
 	return ts, ok
 }

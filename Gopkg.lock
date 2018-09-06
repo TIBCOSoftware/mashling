@@ -19,7 +19,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d66f23a2cd81d85a2bbad0a80e5c71e8fc87bd9dcd6cdd2ed7d8e89886a0b869"
+  digest = "1:d099489d9186322cec48159dae497f20bec1f249eac7a7f55b45c12c007e7999"
   name = "github.com/TIBCOSoftware/flogo-contrib"
   packages = [
     "action/flow",
@@ -65,14 +65,13 @@
     "trigger/mqtt",
     "trigger/rest",
     "trigger/rest/cors",
-    "trigger/timer",
   ]
   pruneopts = "UT"
-  revision = "6e771648620d84a2b084efb86eb08927821de886"
+  revision = "a88c6270567dbd537e2471a98287ea0c33b78427"
 
 [[projects]]
   branch = "master"
-  digest = "1:e7788265138ffaa96648e34d31fa03091ff5a45f8153f248cad684a6018e6edf"
+  digest = "1:b6b000f61304a7f54712d27ef9e507cd987fd6b33d3c1771548b458092b254d9"
   name = "github.com/TIBCOSoftware/flogo-lib"
   packages = [
     "app",
@@ -112,7 +111,7 @@
     "util/managed",
   ]
   pruneopts = "UT"
-  revision = "1d825abbac88bc156afab781c18da16ebb6168ac"
+  revision = "114e413e627f47a9ec474f49b6e546aab18bf1b8"
 
 [[projects]]
   digest = "1:e64acfe8cda1955db545ede8e863c54d69f1ac6cd058df4349be4040320840fd"
@@ -197,14 +196,6 @@
   revision = "f4dd9f5a6b441265aefc1d44872a6f8c10f42b37"
 
 [[projects]]
-  branch = "master"
-  digest = "1:6795e26123f9d723de821958327f6650baa5d9a61d12b8a4c98d1039d20de79d"
-  name = "github.com/carlescere/scheduler"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ee74d2f83d82cd1d2e92ed3ec3dbaf162ca5ece5"
-
-[[projects]]
   digest = "1:7471447f18b90de5d6adfd51fe8ced6be2dc160d264ccbcd6fcefbd4b79f639e"
   name = "github.com/chewxy/hm"
   packages = ["."]
@@ -221,11 +212,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:4c4c33075b704791d6a7f09dfb55c66769e8a1dc6adf87026292d274fe8ad113"
   name = "github.com/codahale/hdrhistogram"
   packages = ["."]
+  pruneopts = "UT"
   revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
 
 [[projects]]
+  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   pruneopts = "UT"
@@ -307,14 +301,6 @@
   ]
   pruneopts = "UT"
   revision = "9ec68b7894ac4cd48fc9126e910e571d50eb5d9c"
-
-[[projects]]
-  branch = "master"
-  digest = "1:7307da225b51accb24bddc744bd3c7d676ea26c604461e91825698f9496500f8"
-  name = "github.com/flogo-oss/stream"
-  packages = ["pipeline/support"]
-  pruneopts = "UT"
-  revision = "dc38f4ebee4c94b1b2a0bc3acdc999b1662f4471"
 
 [[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
@@ -669,6 +655,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:1e51896d14e8d47413c2cba19fbfcceb0158fafc964ccc7d60e7f2bbff61159c"
+  name = "github.com/project-flogo/stream"
+  packages = ["pipeline/support"]
+  pruneopts = "UT"
+  revision = "bd255af992c663ea08388f73c919a2c208efb18e"
+
+[[projects]]
+  branch = "master"
   digest = "1:565770be35414989a808a4c2fd74a9b0b1d48ca0b6c615f2f5908ab99bf77eee"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
@@ -708,6 +702,7 @@
   version = "v1.2.1"
 
 [[projects]]
+  digest = "1:ac3e06510078eedd3ccaa4238d74a6736910e18e89b6c95a20ff8b6977bd8b56"
   name = "github.com/uber/jaeger-client-go"
   packages = [
     ".",
@@ -726,14 +721,17 @@
     "thrift-gen/sampling",
     "thrift-gen/zipkincore",
     "transport",
-    "utils"
+    "utils",
   ]
+  pruneopts = "UT"
   revision = "b043381d944715b469fd6b37addfd30145ca1758"
   version = "v2.14.0"
 
 [[projects]]
+  digest = "1:0f09db8429e19d57c8346ad76fbbc679341fa86073d3b8fb5ac919f0357d8f4c"
   name = "github.com/uber/jaeger-lib"
   packages = ["metrics"]
+  pruneopts = "UT"
   revision = "ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5"
   version = "v1.5.0"
 
@@ -1055,7 +1053,6 @@
     "github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt",
     "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
     "github.com/TIBCOSoftware/flogo-contrib/trigger/rest/cors",
-    "github.com/TIBCOSoftware/flogo-contrib/trigger/timer",
     "github.com/TIBCOSoftware/flogo-lib/app",
     "github.com/TIBCOSoftware/flogo-lib/app/resource",
     "github.com/TIBCOSoftware/flogo-lib/core/action",
@@ -1093,6 +1090,11 @@
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
     "github.com/stretchr/testify/assert",
+    "github.com/uber/jaeger-client-go",
+    "github.com/uber/jaeger-client-go/config",
+    "github.com/uber/jaeger-client-go/log",
+    "github.com/uber/jaeger-client-go/transport",
+    "github.com/uber/jaeger-lib/metrics",
     "github.com/xeipuuv/gojsonschema",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
