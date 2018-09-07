@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -65,38 +66,43 @@ var limiters = Limiters{
 // * 5 requests / minute : "5-M"
 // * 5 requests / hour : "5-H"
 type RateLimiter struct {
-	serviceName string
+	Name string
 
+	// inputs
 	Limit string `json:"limit"`
 	Token string `json:"token"`
 
-	QuotaExceeded  bool  `json:"quotaExceeded"`
-	AvailableQuota int64 `json:"availableQuota"`
+	// outputs
+	LimitReached   bool   `json:"limitReached"`
+	LimitAvailable int64  `json:"limitAvailable"`
+	Error          bool   `json:"error"`
+	ErrorMessage   string `json:"errorMessage"`
 }
 
 // Execute invokes this service
 func (rl *RateLimiter) Execute() (err error) {
-
-	//check for request token
+	// check for request token
 	if rl.Token == "" {
-		//TODO: Need to handle 'token not found' case elegantly. Time being set to dummy value.
-		rl.Token = "DUMMYTOKEN"
+		rl.Error = true
+		rl.ErrorMessage = "Token not found"
+		return nil
 	}
 
-	limiter := limiters.Lookup("NAME", rl.Limit)
+	limiterID := fmt.Sprintf("%s:%s:%s", rl.Name, rl.Limit, rl.Token)
+	limiter := limiters.Lookup(limiterID, rl.Limit)
 
-	//consume quota
+	// consume limit
 	limiterContext, err := limiter.Get(context.TODO(), rl.Token)
 	if err != nil {
 		return nil
 	}
 
-	//check the ratelimit
-	rl.AvailableQuota = limiterContext.Remaining
+	// check the ratelimit
+	rl.LimitAvailable = limiterContext.Remaining
 	if limiterContext.Reached {
-		rl.QuotaExceeded = true
+		rl.LimitReached = true
 	} else {
-		rl.QuotaExceeded = false
+		rl.LimitReached = false
 	}
 
 	return nil
@@ -111,7 +117,7 @@ func (rl *RateLimiter) UpdateRequest(values map[string]interface{}) (err error) 
 // InitializeRateLimiter initializes a RateLimiter services with provided settings.
 func InitializeRateLimiter(name string, settings map[string]interface{}) (rl *RateLimiter, err error) {
 	rl = &RateLimiter{
-		serviceName: name,
+		Name: name,
 	}
 	err = rl.setRequestValues(settings)
 	return
