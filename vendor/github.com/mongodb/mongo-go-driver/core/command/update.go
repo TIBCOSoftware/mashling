@@ -45,8 +45,11 @@ func (u *Update) Encode(desc description.SelectedServer) (wiremessage.WireMessag
 func (u *Update) encode(desc description.SelectedServer) (*Write, error) {
 	command := bson.NewDocument(bson.EC.String("update", u.NS.Collection))
 	vals := make([]*bson.Value, 0, len(u.Docs))
+	docs := make([]*bson.Document, 0, len(u.Docs)) // copy of all the documents
 	for _, doc := range u.Docs {
-		vals = append(vals, bson.VC.Document(doc))
+		newDoc := doc.Copy()
+		docs = append(docs, newDoc)
+		vals = append(vals, bson.VC.Document(newDoc))
 	}
 	command.Append(bson.EC.ArrayFromElements("updates", vals...))
 
@@ -55,7 +58,7 @@ func (u *Update) encode(desc description.SelectedServer) (*Write, error) {
 		case nil:
 			continue
 		case option.OptUpsert, option.OptCollation, option.OptArrayFilters:
-			for _, doc := range u.Docs {
+			for _, doc := range docs {
 				err := opt.Option(doc)
 				if err != nil {
 					return nil, err
@@ -69,6 +72,9 @@ func (u *Update) encode(desc description.SelectedServer) (*Write, error) {
 		}
 	}
 
+	if u.Session != nil && u.Session.TransactionRunning() {
+		u.WriteConcern = nil
+	}
 	return &Write{
 		Clock:        u.Clock,
 		DB:           u.NS.DB,
@@ -116,5 +122,6 @@ func (u *Update) RoundTrip(ctx context.Context, desc description.SelectedServer,
 	if err != nil {
 		return result.Update{}, err
 	}
+
 	return u.decode(desc, rdr).Result()
 }

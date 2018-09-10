@@ -67,7 +67,7 @@
     "trigger/rest/cors",
   ]
   pruneopts = "UT"
-  revision = "a88c6270567dbd537e2471a98287ea0c33b78427"
+  revision = "299e2304e4c92700a873d616e71ebbea9c83b2e7"
 
 [[projects]]
   branch = "master"
@@ -511,13 +511,15 @@
   revision = "a2e6c52ea8d93f1cd8dec661e8a6b495a81e623b"
 
 [[projects]]
-  digest = "1:e274a8817ced03e0eaab6615aee825e4bd374a31180a3f5c2c640403840cc9dc"
+  branch = "master"
+  digest = "1:7ab8bef92dc8d00a4bb6b9b911db7b3a402b86f0fd6790a3a9bced010856a2cf"
   name = "github.com/mongodb/mongo-go-driver"
   packages = [
     "bson",
     "bson/builder",
     "bson/decimal",
     "bson/elements",
+    "bson/internal/llbson",
     "bson/objectid",
     "bson/parser",
     "bson/parser/ast",
@@ -561,11 +563,12 @@
     "mongo/mongoopt",
     "mongo/replaceopt",
     "mongo/runcmdopt",
+    "mongo/sessionopt",
+    "mongo/transactionopt",
     "mongo/updateopt",
   ]
   pruneopts = "UT"
-  revision = "8df56f107cdd485351eb2523992c3364114b4b2e"
-  version = "v0.0.10"
+  revision = "46eb1c8d5562b601a29716199bad4ca1ca052147"
 
 [[projects]]
   branch = "master"
@@ -734,6 +737,22 @@
   pruneopts = "UT"
   revision = "ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5"
   version = "v1.5.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:40fdfd6ab85ca32b6935853bbba35935dcb1d796c8135efd85947566c76e662e"
+  name = "github.com/xdg/scram"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7eeb5667e42c09cb51bf7b7c28aea8c56767da90"
+
+[[projects]]
+  digest = "1:577b99fc55ee19cbf1ffd072808c91ced78cd732bd9d0517bec9b90e532069cb"
+  name = "github.com/xdg/stringprep"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bd625b8dc1e3b0f57412280ccbcc317f0c69d8db"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"

@@ -1,3 +1,9 @@
+// Copyright (C) MongoDB, Inc. 2017-present.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License. You may obtain
+// a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
 package clientopt
 
 import (
@@ -55,7 +61,7 @@ type SSLOpt struct {
 // Credential holds auth options.
 //
 // AuthMechanism indicates the mechanism to use for authentication.
-// Supported values include "SCRAM-SHA-1", "MONGODB-CR", "PLAIN", "GSSAPI", and "MONGODB-X509".
+// Supported values include "SCRAM-SHA-256", "SCRAM-SHA-1", "MONGODB-CR", "PLAIN", "GSSAPI", and "MONGODB-X509".
 //
 // AuthMechanismProperties specifies additional configuration options which may be used by certain
 // authentication mechanisms.
@@ -77,6 +83,8 @@ type Credential struct {
 type Client struct {
 	TopologyOptions []topology.Option
 	ConnString      connstring.ConnString
+	RetryWrites     bool
+	RetryWritesSet  bool
 	ReadPreference  *readpref.ReadPref
 	ReadConcern     *readconcern.ReadConcern
 	WriteConcern    *writeconcern.WriteConcern
@@ -226,6 +234,14 @@ func (cb *ClientBundle) ReadPreference(rp *readpref.ReadPref) *ClientBundle {
 func (cb *ClientBundle) ReplicaSet(s string) *ClientBundle {
 	return &ClientBundle{
 		option: ReplicaSet(s),
+		next:   cb,
+	}
+}
+
+// RetryWrites specifies whether the client has retryable writes enabled.
+func (cb *ClientBundle) RetryWrites(b bool) *ClientBundle {
+	return &ClientBundle{
+		option: RetryWrites(b),
 		next:   cb,
 	}
 }
@@ -536,6 +552,18 @@ func ReplicaSet(s string) Option {
 		})
 }
 
+// RetryWrites specifies whether the client has retryable writes enabled.
+func RetryWrites(b bool) Option {
+	return optionFunc(
+		func(c *Client) error {
+			if !c.RetryWritesSet {
+				c.RetryWrites = b
+				c.RetryWritesSet = true
+			}
+			return nil
+		})
+}
+
 // ServerSelectionTimeout specifies a timeout in milliseconds to block for server selection.
 func ServerSelectionTimeout(d time.Duration) Option {
 	return optionFunc(
@@ -587,7 +615,7 @@ func SSL(ssl *SSLOpt) Option {
 				c.ConnString.SSL = ssl.Enabled
 				c.ConnString.SSLSet = true
 			}
-			if !c.ConnString.SSLClientCertificateKeyFileSet {
+			if !c.ConnString.SSLClientCertificateKeyFileSet && ssl.ClientCertificateKeyFile != "" {
 				c.ConnString.SSLClientCertificateKeyFile = ssl.ClientCertificateKeyFile
 				c.ConnString.SSLClientCertificateKeyFileSet = true
 			}

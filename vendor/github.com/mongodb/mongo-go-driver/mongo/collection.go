@@ -66,6 +66,11 @@ func newCollection(db *Database, name string, opts ...collectionopt.Option) *Col
 		rp = collOpt.ReadPreference
 	}
 
+	readSelector := description.CompositeSelector([]description.ServerSelector{
+		description.ReadPrefSelector(rp),
+		description.LatencySelector(db.client.localThreshold),
+	})
+
 	coll := &Collection{
 		client:         db.client,
 		db:             db,
@@ -73,7 +78,7 @@ func newCollection(db *Database, name string, opts ...collectionopt.Option) *Col
 		readPreference: rp,
 		readConcern:    rc,
 		writeConcern:   wc,
-		readSelector:   db.readSelector,
+		readSelector:   readSelector,
 		writeSelector:  db.writeSelector,
 	}
 
@@ -112,6 +117,11 @@ func (coll *Collection) Clone(opts ...collectionopt.Option) (*Collection, error)
 	if optsColl.ReadPreference != nil {
 		copyColl.readPreference = optsColl.ReadPreference
 	}
+
+	copyColl.readSelector = description.CompositeSelector([]description.ServerSelector{
+		description.ReadPrefSelector(copyColl.readPreference),
+		description.LatencySelector(copyColl.client.localThreshold),
+	})
 
 	return copyColl, nil
 }
@@ -163,12 +173,16 @@ func (coll *Collection) InsertOne(ctx context.Context, document interface{},
 		return nil, err
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
 	oldns := coll.namespace()
 	cmd := command.Insert{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Docs:         []*bson.Document{doc},
 		Opts:         oneOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -179,6 +193,7 @@ func (coll *Collection) InsertOne(ctx context.Context, document interface{},
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		coll.client.retryWrites,
 	)
 
 	rr, err := processWriteError(res.WriteConcernError, res.WriteErrors, err)
@@ -234,12 +249,17 @@ func (coll *Collection) InsertMany(ctx context.Context, documents []interface{},
 		return nil, err
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Insert{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Docs:         docs,
 		Opts:         manyOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -250,6 +270,7 @@ func (coll *Collection) InsertMany(ctx context.Context, documents []interface{},
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		coll.client.retryWrites,
 	)
 
 	switch err {
@@ -302,12 +323,17 @@ func (coll *Collection) DeleteOne(ctx context.Context, filter interface{},
 		return nil, err
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Delete{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Deletes:      deleteDocs,
 		Opts:         deleteOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -318,6 +344,7 @@ func (coll *Collection) DeleteOne(ctx context.Context, filter interface{},
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		coll.client.retryWrites,
 	)
 
 	rr, err := processWriteError(res.WriteConcernError, res.WriteErrors, err)
@@ -357,12 +384,17 @@ func (coll *Collection) DeleteMany(ctx context.Context, filter interface{},
 		return nil, err
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Delete{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Deletes:      deleteDocs,
 		Opts:         deleteOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -373,6 +405,7 @@ func (coll *Collection) DeleteMany(ctx context.Context, filter interface{},
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		false,
 	)
 
 	rr, err := processWriteError(res.WriteConcernError, res.WriteErrors, err)
@@ -397,12 +430,17 @@ func (coll *Collection) updateOrReplaceOne(ctx context.Context, filter,
 		),
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Update{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Docs:         updateDocs,
 		Opts:         opts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -413,6 +451,7 @@ func (coll *Collection) updateOrReplaceOne(ctx context.Context, filter,
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		coll.client.retryWrites,
 	)
 	if err != nil && err != command.ErrUnacknowledgedWrite {
 		return nil, err
@@ -519,12 +558,17 @@ func (coll *Collection) UpdateMany(ctx context.Context, filter interface{}, upda
 		return nil, err
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Update{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Docs:         updateDocs,
 		Opts:         updOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -535,6 +579,7 @@ func (coll *Collection) UpdateMany(ctx context.Context, filter interface{}, upda
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		false,
 	)
 	if err != nil && err != command.ErrUnacknowledgedWrite {
 		return nil, err
@@ -632,14 +677,24 @@ func (coll *Collection) Aggregate(ctx context.Context, pipeline interface{},
 		return nil, err
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
+	rc := coll.readConcern
+	if sess != nil && (sess.TransactionInProgress()) {
+		rc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Aggregate{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Pipeline:     pipelineArr,
 		Opts:         aggOpts,
 		ReadPref:     coll.readPreference,
-		WriteConcern: coll.writeConcern,
-		ReadConcern:  coll.readConcern,
+		WriteConcern: wc,
+		ReadConcern:  rc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -682,17 +737,115 @@ func (coll *Collection) Count(ctx context.Context, filter interface{},
 		return 0, err
 	}
 
+	rc := coll.readConcern
+	if sess != nil && (sess.TransactionInProgress()) {
+		rc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Count{
 		NS:          command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Query:       f,
 		Opts:        countOpts,
 		ReadPref:    coll.readPreference,
-		ReadConcern: coll.readConcern,
+		ReadConcern: rc,
 		Session:     sess,
 		Clock:       coll.client.clock,
 	}
 
+	return dispatch.Count(
+		ctx, cmd,
+		coll.client.topology,
+		coll.readSelector,
+		coll.client.id,
+		coll.client.topology.SessionPool,
+	)
+}
+
+// CountDocuments gets the number of documents matching the filter. A user can supply a
+// custom context to this method, or nil to default to context.Background().
+//
+// This method uses countDocumentsAggregatePipeline to turn the filter parameter and options
+// into aggregate pipeline.
+func (coll *Collection) CountDocuments(ctx context.Context, filter interface{},
+	opts ...countopt.Count) (int64, error) {
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	pipelineArr, err := countDocumentsAggregatePipeline(filter, opts...)
+	if err != nil {
+		return 0, err
+	}
+
+	countOpts, sess, err := countopt.BundleCount(opts...).Unbundle(true)
+	if err != nil {
+		return 0, err
+	}
+
+	err = coll.client.ValidSession(sess)
+	if err != nil {
+		return 0, err
+	}
+
+	rc := coll.readConcern
+	if sess != nil && (sess.TransactionInProgress()) {
+		rc = nil
+	}
+
+	oldns := coll.namespace()
+	cmd := command.CountDocuments{
+		NS:          command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
+		Pipeline:    pipelineArr,
+		Opts:        countOpts,
+		ReadPref:    coll.readPreference,
+		ReadConcern: rc,
+		Session:     sess,
+		Clock:       coll.client.clock,
+	}
+	return dispatch.CountDocuments(
+		ctx, cmd,
+		coll.client.topology,
+		coll.readSelector,
+		coll.client.id,
+		coll.client.topology.SessionPool,
+	)
+}
+
+// EstimatedDocumentCount gets an estimate of the count of documents in a collection using collection metadata.
+func (coll *Collection) EstimatedDocumentCount(ctx context.Context,
+	opts ...countopt.EstimatedDocumentCount) (int64, error) {
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	countOpts, sess, err := countopt.BundleEstimatedDocumentCount(opts...).Unbundle(true)
+	if err != nil {
+		return 0, err
+	}
+
+	err = coll.client.ValidSession(sess)
+	if err != nil {
+		return 0, err
+	}
+
+	rc := coll.readConcern
+	if sess != nil && (sess.TransactionInProgress()) {
+		rc = nil
+	}
+
+	oldns := coll.namespace()
+	cmd := command.Count{
+		NS:          command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
+		Query:       bson.NewDocument(),
+		Opts:        countOpts,
+		ReadPref:    coll.readPreference,
+		ReadConcern: rc,
+		Session:     sess,
+		Clock:       coll.client.clock,
+	}
 	return dispatch.Count(
 		ctx, cmd,
 		coll.client.topology,
@@ -735,6 +888,11 @@ func (coll *Collection) Distinct(ctx context.Context, fieldName string, filter i
 		return nil, err
 	}
 
+	rc := coll.readConcern
+	if sess != nil && (sess.TransactionInProgress()) {
+		rc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Distinct{
 		NS:          command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
@@ -742,7 +900,7 @@ func (coll *Collection) Distinct(ctx context.Context, fieldName string, filter i
 		Query:       f,
 		Opts:        distinctOpts,
 		ReadPref:    coll.readPreference,
-		ReadConcern: coll.readConcern,
+		ReadConcern: rc,
 		Session:     sess,
 		Clock:       coll.client.clock,
 	}
@@ -793,13 +951,18 @@ func (coll *Collection) Find(ctx context.Context, filter interface{},
 		return nil, err
 	}
 
+	rc := coll.readConcern
+	if sess != nil && (sess.TransactionInProgress()) {
+		rc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Find{
 		NS:          command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Filter:      f,
 		Opts:        findOpts,
 		ReadPref:    coll.readPreference,
-		ReadConcern: coll.readConcern,
+		ReadConcern: rc,
 		Session:     sess,
 		Clock:       coll.client.clock,
 	}
@@ -847,13 +1010,18 @@ func (coll *Collection) FindOne(ctx context.Context, filter interface{},
 		return &DocumentResult{err: err}
 	}
 
+	rc := coll.readConcern
+	if sess != nil && (sess.TransactionInProgress()) {
+		rc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.Find{
 		NS:          command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Filter:      f,
 		Opts:        findOneOpts,
 		ReadPref:    coll.readPreference,
-		ReadConcern: coll.readConcern,
+		ReadConcern: rc,
 		Session:     sess,
 		Clock:       coll.client.clock,
 	}
@@ -908,11 +1076,16 @@ func (coll *Collection) FindOneAndDelete(ctx context.Context, filter interface{}
 	}
 
 	oldns := coll.namespace()
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	cmd := command.FindOneAndDelete{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Query:        f,
 		Opts:         findOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -923,6 +1096,7 @@ func (coll *Collection) FindOneAndDelete(ctx context.Context, filter interface{}
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		coll.client.retryWrites,
 	)
 	if err != nil {
 		return &DocumentResult{err: err}
@@ -972,13 +1146,18 @@ func (coll *Collection) FindOneAndReplace(ctx context.Context, filter interface{
 		return &DocumentResult{err: err}
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.FindOneAndReplace{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Query:        f,
 		Replacement:  r,
 		Opts:         findOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -989,6 +1168,7 @@ func (coll *Collection) FindOneAndReplace(ctx context.Context, filter interface{
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		coll.client.retryWrites,
 	)
 	if err != nil {
 		return &DocumentResult{err: err}
@@ -1037,13 +1217,18 @@ func (coll *Collection) FindOneAndUpdate(ctx context.Context, filter interface{}
 		return &DocumentResult{err: err}
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	oldns := coll.namespace()
 	cmd := command.FindOneAndUpdate{
 		NS:           command.Namespace{DB: oldns.DB, Collection: oldns.Collection},
 		Query:        f,
 		Update:       u,
 		Opts:         findOpts,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}
@@ -1054,6 +1239,7 @@ func (coll *Collection) FindOneAndUpdate(ctx context.Context, filter interface{}
 		coll.writeSelector,
 		coll.client.id,
 		coll.client.topology.SessionPool,
+		coll.client.retryWrites,
 	)
 	if err != nil {
 		return &DocumentResult{err: err}
@@ -1093,10 +1279,15 @@ func (coll *Collection) Drop(ctx context.Context, opts ...dropcollopt.DropColl) 
 		return err
 	}
 
+	wc := coll.writeConcern
+	if sess != nil && sess.TransactionRunning() {
+		wc = nil
+	}
+
 	cmd := command.DropCollection{
 		DB:           coll.db.name,
 		Collection:   coll.name,
-		WriteConcern: coll.writeConcern,
+		WriteConcern: wc,
 		Session:      sess,
 		Clock:        coll.client.clock,
 	}

@@ -109,6 +109,7 @@ type IsMaster struct {
 	OK                           int32             `bson:"ok"`
 	Passives                     []string          `bson:"passives,omitempty"`
 	ReadOnly                     bool              `bson:"readOnly,omitempty"`
+	SaslSupportedMechs           []string          `bson:"saslSupportedMechs,omitempty"`
 	Secondary                    bool              `bson:"secondary,omitempty"`
 	SetName                      string            `bson:"setName,omitempty"`
 	SetVersion                   uint32            `bson:"setVersion,omitempty"`
@@ -149,4 +150,9 @@ type CreateIndexes struct {
 	CreatedCollectionAutomatically bool `bson:"createdCollectionAutomatically"`
 	IndexesBefore                  int  `bson:"numIndexesBefore"`
 	IndexesAfter                   int  `bson:"numIndexesAfter"`
+}
+
+// TransactionResult holds the result of committing or aborting a transaction.
+type TransactionResult struct {
+	WriteConcernError *WriteConcernError `bson:"writeConcernError"`
 }

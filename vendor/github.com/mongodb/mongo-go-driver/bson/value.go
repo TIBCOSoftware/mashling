@@ -598,17 +598,32 @@ func (v *Value) BooleanOK() (bool, bool) {
 	return v.Boolean(), true
 }
 
-// DateTime returns the BSON datetime value the Value represents. It panics if the value is a BSON
-// type other than datetime.
-func (v *Value) DateTime() time.Time {
+// DateTime returns the BSON datetime value the Value represents as a
+// unix timestamp. It panics if the value is a BSON type other than datetime.
+func (v *Value) DateTime() int64 {
 	if v == nil || v.offset == 0 || v.data == nil {
 		panic(ErrUninitializedElement)
 	}
 	if v.data[v.start] != '\x09' {
 		panic(ElementTypeError{"compact.Element.dateTime", Type(v.data[v.start])})
 	}
-	i := v.getUint64()
+	return int64(v.getUint64())
+}
+
+// Time returns the BSON datetime value the Value represents. It panics if the value is a BSON
+// type other than datetime.
+func (v *Value) Time() time.Time {
+	i := v.DateTime()
 	return time.Unix(int64(i)/1000, int64(i)%1000*1000000)
+}
+
+// TimeOK is the same as Time, except it returns a boolean instead of
+// panicking.
+func (v *Value) TimeOK() (time.Time, bool) {
+	if v == nil || v.offset == 0 || v.data == nil || Type(v.data[v.start]) != TypeDateTime {
+		return time.Time{}, false
+	}
+	return v.Time(), true
 }
 
 // Regex returns the BSON regex value the Value represents. It panics if the value is a BSON
@@ -638,9 +653,9 @@ func (v *Value) Regex() (pattern, options string) {
 
 // DateTimeOK is the same as DateTime, except it returns a boolean instead of
 // panicking.
-func (v *Value) DateTimeOK() (time.Time, bool) {
+func (v *Value) DateTimeOK() (int64, bool) {
 	if v == nil || v.offset == 0 || v.data == nil || Type(v.data[v.start]) != TypeDateTime {
-		return time.Time{}, false
+		return 0, false
 	}
 	return v.DateTime(), true
 }
@@ -766,10 +781,10 @@ func (v *Value) MutableJavaScriptWithScope() (code string, d *Document) {
 	// If the length of the string is larger than the total length of the
 	// field minus the int32 for length, 5 bytes for a minimum document
 	// size, and an int32 for the string length the value is invalid.
-	str := string(v.data[v.offset+4 : v.offset+4+uint32(sLength)])
+	str := string(v.data[v.offset+4+4 : v.offset+4+4+uint32(sLength)-1]) // offset + total length + string length + bytes - null byte
 	if v.d == nil {
 		var err error
-		v.d, err = ReadDocument(v.data[v.offset+4+uint32(sLength) : v.offset+uint32(l)])
+		v.d, err = ReadDocument(v.data[v.offset+4+4+uint32(sLength) : v.offset+uint32(l)])
 		if err != nil {
 			panic(err)
 		}
