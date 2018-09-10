@@ -162,6 +162,12 @@
   revision = "9a000fcb79dff2019bd78fc28bd676198ff3a616"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/codahale/hdrhistogram"
+  packages = ["."]
+  revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -470,6 +476,36 @@
   version = "v1.2.1"
 
 [[projects]]
+  name = "github.com/uber/jaeger-client-go"
+  packages = [
+    ".",
+    "config",
+    "internal/baggage",
+    "internal/baggage/remote",
+    "internal/spanlog",
+    "internal/throttler",
+    "internal/throttler/remote",
+    "log",
+    "rpcmetrics",
+    "thrift",
+    "thrift-gen/agent",
+    "thrift-gen/baggage",
+    "thrift-gen/jaeger",
+    "thrift-gen/sampling",
+    "thrift-gen/zipkincore",
+    "transport",
+    "utils"
+  ]
+  revision = "b043381d944715b469fd6b37addfd30145ca1758"
+  version = "v2.14.0"
+
+[[projects]]
+  name = "github.com/uber/jaeger-lib"
+  packages = ["metrics"]
+  revision = "ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5"
+  version = "v1.5.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/ulule/limiter"
   packages = [
@@ -682,6 +718,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0055080cc855d2c0916fc1d2d58d25307a9dbc358a2626c749fd31e2aa339fd1"
+  inputs-digest = "98cb7869770743080cc0a82bb4aacade2a76f4658c3bc4a9e9e713c2efb2add5"
   solver-name = "gps-cdcl"
   solver-version = 1

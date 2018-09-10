@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -28,27 +27,12 @@ import (
 	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	lightstep "github.com/lightstep/lightstep-tracer-go"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
-	"sourcegraph.com/sourcegraph/appdash"
-	appdashtracing "sourcegraph.com/sourcegraph/appdash/opentracing"
 )
 
 const (
 	REST_CORS_PREFIX = "REST_TRIGGER"
-
-	TracerNoOP      = "noop"
-	TracerZipKin    = "zipkin"
-	TracerAPPDash   = "appdash"
-	TracerLightStep = "lightstep"
-)
-
-var (
-	ErrorTracerEndpointRequired = errors.New("tracer endpoint required")
-	ErrorInvalidTracer          = errors.New("invalid tracer")
-	ErrorTracerTokenRequired    = errors.New("tracer token required")
 )
 
 // log is the default package logger
@@ -78,6 +62,7 @@ type RestTrigger struct {
 	server   *Server
 	config   *trigger.Config
 	localIP  string
+	tracer   util.Tracer
 }
 
 //NewFactory create a new Trigger factory
@@ -141,7 +126,11 @@ func (t *RestTrigger) Init(runner action.Runner) {
 	t.runner = runner
 	t.localIP = getLocalIP()
 
-	t.configureTracer()
+	err = t.tracer.ConfigureTracer(t.config.Settings, t.localIP+":"+t.config.GetSetting("port"),
+		t.config.Name)
+	if err != nil {
+		panic(err)
+	}
 
 	if isAuthEnabled(t.config.Settings) {
 		setupAuth(t.config.Settings)
@@ -272,90 +261,17 @@ func (t *RestTrigger) Init(runner action.Runner) {
 	t.server = NewServer(addr, router, enableTLS, serverCert, serverKey, enableClientAuth, trustStore)
 }
 
-// configureTracer configures the distributed tracer
-func (t *RestTrigger) configureTracer() {
-	tracer := TracerNoOP
-	if setting, ok := t.config.Settings["tracer"]; ok {
-		tracer = setting.(string)
-	}
-	tracerEndpoint := ""
-	if setting, ok := t.config.Settings["tracerEndpoint"]; ok {
-		tracerEndpoint = setting.(string)
-	}
-	tracerToken := ""
-	if setting, ok := t.config.Settings["tracerToken"]; ok {
-		tracerToken = setting.(string)
-	}
-	tracerDebug := false
-	if setting, ok := t.config.Settings["tracerDebug"]; ok {
-		tracerDebug = setting.(bool)
-	}
-	tracerSameSpan := false
-	if setting, ok := t.config.Settings["tracerSameSpan"]; ok {
-		tracerSameSpan = setting.(bool)
-	}
-	tracerID128Bit := true
-	if setting, ok := t.config.Settings["tracerID128Bit"]; ok {
-		tracerID128Bit = setting.(bool)
-	}
-
-	switch tracer {
-	case TracerNoOP:
-		opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
-	case TracerZipKin:
-		if tracerEndpoint == "" {
-			panic(ErrorTracerEndpointRequired)
-		}
-
-		collector, err := zipkin.NewHTTPCollector(tracerEndpoint)
-		if err != nil {
-			panic(fmt.Sprintf("unable to create Zipkin HTTP collector: %+v\n", err))
-		}
-
-		recorder := zipkin.NewRecorder(collector, tracerDebug,
-			t.localIP+":"+t.config.GetSetting("port"), t.config.Name)
-
-		tracer, err := zipkin.NewTracer(
-			recorder,
-			zipkin.ClientServerSameSpan(tracerSameSpan),
-			zipkin.TraceID128Bit(tracerID128Bit),
-		)
-		if err != nil {
-			panic(fmt.Sprintf("unable to create Zipkin tracer: %+v\n", err))
-		}
-
-		opentracing.SetGlobalTracer(tracer)
-	case TracerAPPDash:
-		if tracerEndpoint == "" {
-			panic(ErrorTracerEndpointRequired)
-		}
-
-		collector := appdash.NewRemoteCollector(tracerEndpoint)
-		chunkedCollector := appdash.NewChunkedCollector(collector)
-		tracer := appdashtracing.NewTracer(chunkedCollector)
-		opentracing.SetGlobalTracer(tracer)
-	case TracerLightStep:
-		if tracerToken == "" {
-			panic(ErrorTracerTokenRequired)
-		}
-
-		lightstepTracer := lightstep.NewTracer(lightstep.Options{
-			AccessToken: tracerToken,
-		})
-
-		opentracing.SetGlobalTracer(lightstepTracer)
-	default:
-		panic(ErrorInvalidTracer)
-	}
-}
-
 func (t *RestTrigger) Start() error {
 	return t.server.Start()
 }
 
 // Stop implements util.Managed.Stop
 func (t *RestTrigger) Stop() error {
-	return t.server.Stop()
+	err := t.server.Stop()
+	if err != nil {
+		return err
+	}
+	return t.tracer.Close()
 }
 
 // Handles the cors preflight request

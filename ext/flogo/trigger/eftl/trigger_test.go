@@ -113,16 +113,22 @@ func TestConfigureTracer(t *testing.T) {
 	// tgr.Init(runner)
 
 	eftl := tgr.(*Trigger)
-	eftl.config.Settings[settingTracer] = TracerZipKin
-	eftl.config.Settings[settingTracerEndpoint] = "http://localhost:9411/api/v1/spans"
-	eftl.config.Settings[settingTracerDebug] = true
-	eftl.config.Settings[settingTracerSameSpan] = true
-	eftl.config.Settings[settingTracerID128Bit] = true
-	eftl.configureTracer()
+	eftl.config.Settings["tracer"] = "zipkin"
+	eftl.config.Settings["tracerEndpoint"] = "http://localhost:9411/api/v1/spans"
+	eftl.config.Settings["tracerDebug"] = true
+	eftl.config.Settings["tracerSameSpan"] = true
+	eftl.config.Settings["tracerID128Bit"] = true
+	err = eftl.tracer.ConfigureTracer(eftl.config.Settings, "localhost", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	eftl.config.Settings[settingTracer] = TracerAPPDash
-	eftl.config.Settings[settingTracerEndpoint] = "localhost:7701"
-	eftl.configureTracer()
+	eftl.config.Settings["tracer"] = "appdash"
+	eftl.config.Settings["tracerEndpoint"] = "localhost:7701"
+	err = eftl.tracer.ConfigureTracer(eftl.config.Settings, "localhost", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestEndpoint(t *testing.T) {
