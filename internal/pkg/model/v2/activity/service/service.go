@@ -38,6 +38,8 @@ func Initialize(serviceDef types.Service) (service Service, err error) {
 		return InitializeJWT(serviceDef.Settings)
 	case "ws":
 		return wsproxy.InitializeWSProxy(serviceDef.Name, serviceDef.Settings)
+	case "ratelimiter":
+		return InitializeRateLimiter(serviceDef.Name, serviceDef.Settings)
 	default:
 		return nil, errors.New("unknown service type")
 	}
