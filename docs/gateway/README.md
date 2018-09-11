@@ -818,8 +818,10 @@ The available response outputs are as follows:
 
 | Name   |  Type   | Description   |
 |:-----------|:--------|:--------------|
-| limitReached | bool | if the limit exceeds |
-| limitAvailable | integer | available limit |
+| limitReached | bool | If the limit exceeds |
+| limitAvailable | integer | Available limit |
+| error | bool | If any error occured while applying the rate limit |
+| errorMessage | string | The error message |
 
 A sample `service` definition is:
 
@@ -843,6 +845,17 @@ An example `step` that invokes the above `ratelimiter` service to consume a `tok
     }
 }
 ```
+Note: When `token` is not supplied or empty, service sets `error` to true. This can be handled by configuring `token` to some constant value, In this way service can be operated as global rate limiter. An example shown below:
+
+```json
+{
+    "service": "RateLimiter",
+    "input": {
+        "token": "MY_GLOBAL_TOKEN"
+    }
+}
+```
+
 Utilizing and extracting the response values can be seen in both a conditional evaluation:
 ```json
 {"if": "RateLimiter.limitReached == true"}
