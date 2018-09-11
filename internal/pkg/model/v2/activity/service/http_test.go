@@ -21,7 +21,7 @@ func TestHTTP(t *testing.T) {
 		case http.MethodGet:
 			w.Header().Add("Content-Type", "application/json")
 			io.WriteString(w, jsonPayload)
-		case http.MethodPost:
+		case http.MethodPost, http.MethodPut, http.MethodPatch:
 			data, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				t.Fatal(err)
@@ -36,7 +36,7 @@ func TestHTTP(t *testing.T) {
 		case http.MethodGet:
 			w.Header().Add("Content-Type", "text/xml")
 			io.WriteString(w, xmlPayload)
-		case http.MethodPost:
+		case http.MethodPost, http.MethodPut, http.MethodPatch:
 			data, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				t.Fatal(err)
@@ -76,117 +76,101 @@ func TestHTTP(t *testing.T) {
 		Settings: map[string]interface{}{},
 	}
 
+	test := func(values map[string]interface{}, mime, input, output string) {
+		instance, err := Initialize(service)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if input != "" {
+			var body interface{}
+			err = util.Unmarshal(mime, []byte(input), &body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			values["body"] = body
+		}
+		err = instance.UpdateRequest(values)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = instance.Execute()
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := util.Marshal(instance.(*HTTP).Response.Body)
+		if err != nil {
+			panic(err)
+		}
+		if string(data) != output {
+			t.Fatalf("payload is %s and should be %s", string(data), output)
+		}
+	}
+
 	// json GET test
-	instance, err := Initialize(service)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.UpdateRequest(map[string]interface{}{
-		"method": "GET",
+	test(map[string]interface{}{
+		"method": methodGET,
 		"url":    "http://localhost:8181/pet/json",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.Execute()
-	if err != nil {
-		t.Fatal(err)
-	}
-	data, err := util.Marshal(instance.(*HTTP).Response.Body)
-	if err != nil {
-		panic(err)
-	}
-	if string(data) != jsonPayload {
-		t.Fatalf("payload is %s and should be %s", string(data), jsonPayload)
-	}
+	}, "", "", jsonPayload)
 
 	// xml GET test
-	instance, err = Initialize(service)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.UpdateRequest(map[string]interface{}{
-		"method": "GET",
+	test(map[string]interface{}{
+		"method": methodGET,
 		"url":    "http://localhost:8181/pet/xml",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.Execute()
-	if err != nil {
-		t.Fatal(err)
-	}
-	data, err = util.Marshal(instance.(*HTTP).Response.Body)
-	if err != nil {
-		panic(err)
-	}
-	if string(data) != xmlPayload {
-		t.Fatalf("payload is %s and should be %s", string(data), xmlPayload)
-	}
+	}, "", "", xmlPayload)
 
 	// json POST test
-	instance, err = Initialize(service)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var body interface{}
-	err = util.Unmarshal("application/json", []byte(jsonPayload), &body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.UpdateRequest(map[string]interface{}{
-		"method": "POST",
+	test(map[string]interface{}{
+		"method": methodPOST,
 		"url":    "http://localhost:8181/pet/json",
-		"body":   body,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.Execute()
-	if err != nil {
-		t.Fatal(err)
-	}
+	}, "application/json", jsonPayload, "")
 
 	// xml POST test
-	instance, err = Initialize(service)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = util.Unmarshal("text/xml", []byte(xmlPayload), &body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.UpdateRequest(map[string]interface{}{
-		"method": "POST",
+	test(map[string]interface{}{
+		"method": methodPOST,
 		"url":    "http://localhost:8181/pet/xml",
-		"body":   body,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.Execute()
-	if err != nil {
-		t.Fatal(err)
-	}
+	}, "text/xml", xmlPayload, "")
+
+	// json PUT test
+	test(map[string]interface{}{
+		"method": methodPUT,
+		"url":    "http://localhost:8181/pet/json",
+	}, "application/json", jsonPayload, "")
+
+	// xml PUT test
+	test(map[string]interface{}{
+		"method": methodPUT,
+		"url":    "http://localhost:8181/pet/xml",
+	}, "text/xml", xmlPayload, "")
+
+	// json PATCH test
+	test(map[string]interface{}{
+		"method": methodPATCH,
+		"url":    "http://localhost:8181/pet/json",
+	}, "application/json", jsonPayload, "")
+
+	// xml PATCH test
+	test(map[string]interface{}{
+		"method": methodPATCH,
+		"url":    "http://localhost:8181/pet/xml",
+	}, "text/xml", xmlPayload, "")
 
 	// path test
-	instance, err = Initialize(service)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.UpdateRequest(map[string]interface{}{
-		"method":     "GET",
+	test(map[string]interface{}{
+		"method":     methodGET,
 		"url":        "http://localhost:8181/",
 		"path":       "path/:id",
 		"headers":    map[string]interface{}{"TEST": "TEST"},
 		"query":      map[string]string{"a": "b"},
 		"pathParams": map[string]interface{}{"id": 1},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = instance.Execute()
-	if err != nil {
-		t.Fatal(err)
-	}
+	}, "", "", "")
+
+	// DELETE test
+	test(map[string]interface{}{
+		"method":     methodDELETE,
+		"url":        "http://localhost:8181/",
+		"path":       "path/:id",
+		"headers":    map[string]interface{}{"TEST": "TEST"},
+		"query":      map[string]string{"a": "b"},
+		"pathParams": map[string]interface{}{"id": 1},
+	}, "", "", "")
 }
