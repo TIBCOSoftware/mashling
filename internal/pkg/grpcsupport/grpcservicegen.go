@@ -207,7 +207,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 
 		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
 
-		servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
+		servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/action/service/grpc"
 		pb "{{.ProtoImpPath}}"
 		"google.golang.org/grpc"
 	)
