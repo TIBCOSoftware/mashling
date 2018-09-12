@@ -141,7 +141,7 @@ func ExecuteMashling(payload interface{}, configuration map[string]interface{}, 
 			}
 		}
 	}
-	return 0, nil, err
+	return 404, nil, err
 }
 
 func executeRoute(route *types.Route, services map[string]types.Service, executionContext *map[string]interface{}, vm *mservice.VM) (err error) {
