@@ -95,7 +95,7 @@ func extFlogoTriggerEftlTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/eftl/trigger.json", size: 1722, mode: os.FileMode(436), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/eftl/trigger.json", size: 1722, mode: os.FileMode(420), modTime: time.Unix(1528122438, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -115,7 +115,7 @@ func extFlogoTriggerGorillamuxtriggerTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/gorillamuxtrigger/trigger.json", size: 2859, mode: os.FileMode(509), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/gorillamuxtrigger/trigger.json", size: 2859, mode: os.FileMode(493), modTime: time.Unix(1533818487, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -135,7 +135,7 @@ func extFlogoTriggerGrpcTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/grpc/trigger.json", size: 1236, mode: os.FileMode(436), modTime: time.Unix(1536643220, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/grpc/trigger.json", size: 1236, mode: os.FileMode(420), modTime: time.Unix(1536242031, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -155,7 +155,7 @@ func extFlogoTriggerKafkasubrouterTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/kafkasubrouter/trigger.json", size: 1161, mode: os.FileMode(509), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/kafkasubrouter/trigger.json", size: 1161, mode: os.FileMode(493), modTime: time.Unix(1505224225, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -175,7 +175,7 @@ func extFlogoTriggerMqttTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/mqtt/trigger.json", size: 1911, mode: os.FileMode(436), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/mqtt/trigger.json", size: 1911, mode: os.FileMode(420), modTime: time.Unix(1528122416, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -195,7 +195,7 @@ func extFlogoTriggerWssubTriggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ext/flogo/trigger/wssub/trigger.json", size: 492, mode: os.FileMode(509), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "ext/flogo/trigger/wssub/trigger.json", size: 492, mode: os.FileMode(493), modTime: time.Unix(1534855360, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -215,7 +215,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerChannelTriggerJson() (*asset
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/channel/trigger.json", size: 564, mode: os.FileMode(436), modTime: time.Unix(1536041955, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/channel/trigger.json", size: 564, mode: os.FileMode(420), modTime: time.Unix(1536674097, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -235,7 +235,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerCliTriggerJson() (*asset, er
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/cli/trigger.json", size: 638, mode: os.FileMode(436), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/cli/trigger.json", size: 638, mode: os.FileMode(420), modTime: time.Unix(1536608032, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -255,7 +255,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerCoapTriggerJson() (*asset, e
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/coap/trigger.json", size: 756, mode: os.FileMode(509), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/coap/trigger.json", size: 756, mode: os.FileMode(493), modTime: time.Unix(1536608032, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -275,7 +275,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerKafkasubTriggerJson() (*asse
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub/trigger.json", size: 964, mode: os.FileMode(509), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/kafkasub/trigger.json", size: 964, mode: os.FileMode(493), modTime: time.Unix(1536608032, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -295,7 +295,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerLambdaTriggerJson() (*asset,
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/lambda/trigger.json", size: 669, mode: os.FileMode(436), modTime: time.Unix(1536041955, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/lambda/trigger.json", size: 669, mode: os.FileMode(420), modTime: time.Unix(1536674097, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -315,7 +315,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerMqttTriggerJson() (*asset, e
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt/trigger.json", size: 1104, mode: os.FileMode(509), modTime: time.Unix(1536041955, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt/trigger.json", size: 1104, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -335,7 +335,7 @@ func vendorGithubComTibcosoftwareFlogoContribTriggerRestTriggerJson() (*asset, e
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/rest/trigger.json", size: 1157, mode: os.FileMode(436), modTime: time.Unix(1535605435, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/trigger/rest/trigger.json", size: 1157, mode: os.FileMode(420), modTime: time.Unix(1536608032, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
