@@ -10,6 +10,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/flogo-lib/engine"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo/registry"
+	"github.com/TIBCOSoftware/mashling/internal/app/version"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/cache"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v1"
@@ -24,7 +25,7 @@ func LoadGateway(configuration []byte) (*Gateway, error) {
 	gateway := &types.Schema{}
 	gw.SchemaVersion = Version
 	var flogoJSON []byte
-	key, err := files.ChecksumContents(configuration)
+	key, err := files.ChecksumContents(append(configuration, version.Version...))
 	if err != nil {
 		return gw, err
 	}
