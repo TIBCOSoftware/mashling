@@ -10,7 +10,7 @@ import (
 
 	"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
 
-	servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
+	servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/action/service/grpc"
 	pb "github.com/TIBCOSoftware/mashling/test/gen/grpc/petstore"
 	"google.golang.org/grpc"
 )

@@ -6,7 +6,7 @@ import (
 	"net"
 	"testing"
 
-	g "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
+	g "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/action/service/grpc"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
 	_ "github.com/TIBCOSoftware/mashling/test/gen/grpc/client"
 	pb "github.com/TIBCOSoftware/mashling/test/gen/grpc/petstore"
