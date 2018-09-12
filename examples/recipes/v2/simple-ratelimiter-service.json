@@ -1,0 +1,102 @@
+{
+    "mashling_schema": "1.0",
+    "gateway": {
+        "name": "RateLimiter",
+        "version": "1.0.0",
+        "display_name": "Rate Limiter Gateway",
+        "display_image": "displayImage.svg",
+        "description": "This is a simple gateway applies rate limit on specified end points per API token.",
+        "triggers": [
+            {
+                "name": "MyProxy",
+                "description": "Animals rest trigger - GET animal details",
+                "type": "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/gorillamuxtrigger",
+                "settings": {
+                    "port": "9096"
+                },
+                "handlers": [
+                    {
+                        "dispatch": "Pets",
+                        "settings": {
+                            "autoIdReply": "false",
+                            "method": "GET",
+                            "path": "/pets/{petId}",
+                            "useReplyHandler": "false"
+                        }
+                    }
+                ]
+            }
+        ],
+        "dispatches": [
+            {
+                "name": "Pets",
+                "routes": [
+                    {
+                        "steps": [
+                            {
+                                "service": "RateLimiter",
+                                "input": {
+                                    "token": "${payload.header.Token}"
+                                }
+                            },
+                            {
+                                "service": "call_pet_store",
+                                "input": {
+                                    "method": "GET",
+                                    "pathParams.id": "${payload.pathParams.petId}"
+                                }
+                            }
+                        ],
+                        "responses": [
+                            {
+                                "if": "RateLimiter.error == true",
+                                "error": true,
+                                "output": {
+                                    "code": 403,
+                                    "data": {
+                                        "status":"${RateLimiter.errorMessage}"
+                                    }
+                                }
+                            },
+                            {
+                                "if": "RateLimiter.limitReached == true",
+                                "error": true,
+                                "output": {
+                                    "code": 403,
+                                    "data": {
+                                        "status":"Rate Limit Exceeded - The service you have requested is over the allowed limit."
+                                    }
+                                }
+                            },
+                            {
+                                "error": false,
+                                "output": {
+                                    "code": 200,
+                                    "data": "${call_pet_store.response.body}"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "services": [
+            {
+                "name": "RateLimiter",
+                "description": "Rate limiter",
+                "type": "ratelimiter",
+                "settings": {
+                    "limit": "3-M"
+                }
+            },
+            {
+                "name": "call_pet_store",
+                "description": "Animals rest trigger - GET animal details",
+                "type": "http",
+                "settings": {
+                    "url": "http://petstore.swagger.io/v2/pet/:id"
+                }
+            }
+        ]
+    }
+}

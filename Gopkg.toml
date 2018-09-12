@@ -128,3 +128,7 @@
 [[constraint]]
   name = "github.com/uber/jaeger-client-go"
   version = "2.14.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ulule/limiter"

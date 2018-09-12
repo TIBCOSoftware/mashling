@@ -740,6 +740,18 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:7108df662f887f0c6c04dad98114f85f6ee15ea3fd5d4bc4370ae4f9890eaee6"
+  name = "github.com/ulule/limiter"
+  packages = [
+    ".",
+    "drivers/store/common",
+    "drivers/store/memory",
+  ]
+  pruneopts = "UT"
+  revision = "f568e151b79a917792d148bdd59c0bdc2b5fabb3"
+
+[[projects]]
+  branch = "master"
   digest = "1:40fdfd6ab85ca32b6935853bbba35935dcb1d796c8135efd85947566c76e662e"
   name = "github.com/xdg/scram"
   packages = ["."]
@@ -1114,6 +1126,8 @@
     "github.com/uber/jaeger-client-go/log",
     "github.com/uber/jaeger-client-go/transport",
     "github.com/uber/jaeger-lib/metrics",
+    "github.com/ulule/limiter",
+    "github.com/ulule/limiter/drivers/store/memory",
     "github.com/xeipuuv/gojsonschema",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
