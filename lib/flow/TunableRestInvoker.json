@@ -131,6 +131,11 @@
                       "type": 1,
                       "value": "${activity.rest_2.result}",
                       "mapTo": "data"
+                    },
+                    {
+                      "type": 1,
+                      "value": "${activity.rest_2.status}",
+                      "mapTo": "code"
                     }
                   ]
                 }

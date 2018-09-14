@@ -146,6 +146,11 @@
                       "type": 1,
                       "value": "$activity.3.result",
                       "mapTo": "data"
+                    },
+                    {
+                      "type": 1,
+                      "value": "$activity.3.status",
+                      "mapTo": "code"
                     }
                   ]
                 }
