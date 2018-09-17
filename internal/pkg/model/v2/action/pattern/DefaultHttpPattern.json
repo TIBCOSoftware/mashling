@@ -5,6 +5,13 @@
       {
         "steps": [
           {
+            "if": "conf.useRateLimiter == true",
+            "service": "RateLimiter",
+            "input": {
+              "limit": "${conf.rateLimit}"
+            }
+          },
+          {
             "if": "conf.useJWT == true",
             "service": "JWTValidator",
             "input": {
@@ -41,6 +48,16 @@
         ],
         "responses": [
           {
+            "if": "RateLimiter.limitReached == true",
+            "error": true,
+            "output": {
+              "code": 403,
+              "data": {
+                "status": "Rate Limit Exceeded - The service you have requested is over the allowed limit."
+              }
+            }
+          },
+          {
             "if": "conf.useJWT == true && JWTValidator.response.valid == false",
             "error": true,
             "output": {
@@ -72,6 +89,11 @@
     ]
   },
   "services": [
+    {
+      "name": "RateLimiter",
+      "description": "Rate limiter",
+      "type": "ratelimiter"
+    },
     {
       "name": "JWTValidator",
       "description": "Validate some tokens",

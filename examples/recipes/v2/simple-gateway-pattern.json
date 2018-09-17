@@ -30,8 +30,10 @@
         "name": "HTTP",
         "pattern": "DefaultHttpPattern",
         "configuration": {
+          "useRateLimiter": true,
           "useJWT": true,
           "useCircuitBreaker": true,
+          "rateLimit": "5-M",
           "jwtKey": "qwertyuiopasdfghjklzxcvbnm123456",
           "backendUrl": "https://petstore.swagger.io/v2/pet/32"
         }
