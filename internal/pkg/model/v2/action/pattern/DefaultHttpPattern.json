@@ -8,6 +8,7 @@
             "if": "conf.useRateLimiter == true",
             "service": "RateLimiter",
             "input": {
+              "token": "global",
               "limit": "${conf.rateLimit}"
             }
           },

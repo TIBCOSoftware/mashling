@@ -228,7 +228,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityActreplyActivityJson() (*as
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreply/activity.json", size: 577, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreply/activity.json", size: 577, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -248,7 +248,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityActreturnActivityJson() (*a
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreturn/activity.json", size: 572, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/actreturn/activity.json", size: 572, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -268,7 +268,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityAggregateActivityJson() (*a
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/aggregate/activity.json", size: 1162, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/aggregate/activity.json", size: 1162, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -328,7 +328,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityAwssnsActivityJson() (*asse
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awssns/activity.json", size: 1395, mode: os.FileMode(420), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/awssns/activity.json", size: 1395, mode: os.FileMode(420), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -348,7 +348,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityChannelActivityJson() (*ass
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/channel/activity.json", size: 705, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/channel/activity.json", size: 705, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -368,7 +368,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityCoapActivityJson() (*asset,
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json", size: 927, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/coap/activity.json", size: 927, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -388,7 +388,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityCouchbaseActivityJson() (*a
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/couchbase/activity.json", size: 1251, mode: os.FileMode(420), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/couchbase/activity.json", size: 1251, mode: os.FileMode(420), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -508,7 +508,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityMapperActivityJson() (*asse
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/mapper/activity.json", size: 541, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/mapper/activity.json", size: 541, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -528,7 +528,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityMongodbActivityJson() (*ass
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/mongodb/activity.json", size: 1129, mode: os.FileMode(420), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/mongodb/activity.json", size: 1129, mode: os.FileMode(420), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -568,7 +568,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivitySubflowActivityJson() (*ass
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/subflow/activity.json", size: 441, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/subflow/activity.json", size: 441, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -608,7 +608,7 @@ func vendorGithubComTibcosoftwareFlogoContribActivityWsmessageActivityJson() (*a
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage/activity.json", size: 941, mode: os.FileMode(493), modTime: time.Unix(1536674097, 0)}
+	info := bindataFileInfo{name: "vendor/github.com/TIBCOSoftware/flogo-contrib/activity/wsmessage/activity.json", size: 941, mode: os.FileMode(493), modTime: time.Unix(1536933184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
