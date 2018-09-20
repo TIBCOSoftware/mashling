@@ -2,9 +2,11 @@ package grpc
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/TIBCOSoftware/mashling/lib/util"
 	"google.golang.org/grpc"
 )
 
@@ -27,6 +29,46 @@ func gRPCTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
 				log.Debugf("client service object found for proto [%v] and service [%v]", protoName, serviceName)
 				clientInterfaceObj = service.GetRegisteredClientService(conn)
 				clServFlag = true
+
+				if g.Request.GrpcMthdParamtrs["contextdata"] != nil {
+
+					inputs := make([]reflect.Value, 2)
+
+					inputs[0] = reflect.ValueOf(g.Request.GrpcMthdParamtrs["contextdata"])
+					inputs[1] = reflect.ValueOf(g.Request.GrpcMthdParamtrs["reqdata"])
+
+					resultArr := reflect.ValueOf(clientInterfaceObj).MethodByName(g.Request.GrpcMthdParamtrs["methodName"].(string)).Call(inputs)
+
+					res := resultArr[0]
+					grpcErr := resultArr[1]
+					if !grpcErr.IsNil() {
+						log.Error("Propagating error to calling function")
+						log.Error("Error Details: ", grpcErr.Interface())
+						g.Response.Body = grpcErr.Interface()
+					} else {
+						g.Response.Body = res.Interface()
+					}
+				} else {
+					InvokeMethodData := make(map[string]interface{})
+					InvokeMethodData["ClientObject"] = clientInterfaceObj
+					InvokeMethodData["MethodName"] = g.Request.GrpcMthdParamtrs["methodName"]
+					InvokeMethodData["reqdata"] = g.Request.GrpcMthdParamtrs["reqdata"]
+					InvokeMethodData["strmReq"] = g.Request.GrpcMthdParamtrs["strmReq"]
+
+					resMap := service.InvokeMethod(InvokeMethodData)
+
+					if resMap["Error"] != 0 {
+						log.Errorf("Error occured:%v", resMap["Error"])
+						erroString := fmt.Sprintf("%v", resMap["Error"])
+						erroString = "{\"error\":\"true\",\"details\":{\"error\":\"" + erroString + "\"}}"
+						err := util.Unmarshal("application/json", []byte(erroString), &g.Response.Body)
+						if err != nil {
+							return err
+						}
+					}
+
+				}
+
 			}
 		}
 		if !clServFlag {
@@ -34,23 +76,6 @@ func gRPCTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
 		}
 	} else {
 		log.Errorf("gRPC Client services not registered")
-	}
-
-	inputs := make([]reflect.Value, 2)
-
-	inputs[0] = reflect.ValueOf(g.Request.GrpcMthdParamtrs["contextdata"])
-	inputs[1] = reflect.ValueOf(g.Request.GrpcMthdParamtrs["reqdata"])
-
-	resultArr := reflect.ValueOf(clientInterfaceObj).MethodByName(g.Request.GrpcMthdParamtrs["methodName"].(string)).Call(inputs)
-
-	res := resultArr[0]
-	grpcErr := resultArr[1]
-	if !grpcErr.IsNil() {
-		log.Error("Propagating error to calling function")
-		log.Error("Error Details: ", grpcErr.Interface())
-		g.Response.Body = grpcErr.Interface()
-	} else {
-		g.Response.Body = res.Interface()
 	}
 	return nil
 }

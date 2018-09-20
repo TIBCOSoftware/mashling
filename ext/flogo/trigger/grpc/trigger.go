@@ -218,27 +218,32 @@ func (t *GRPCTrigger) CreateHandlers() map[string]*OptimizedHandler {
 // CallHandler is to call a particular handler based on method name
 func (t *GRPCTrigger) CallHandler(grpcData map[string]interface{}) (int, interface{}, error) {
 	log.Info("CallHandler method invoked")
-	// getting values from inputrequestdata and mapping it to params which can be used in different services like HTTP pathparams etc.
-	s := reflect.ValueOf(grpcData["reqdata"]).Elem()
-	typeOfT := s.Type()
+
 	params := make(map[string]interface{})
-	for i := 0; i < s.NumField(); i++ {
-		f := s.Field(i)
-		params[typeOfT.Field(i).Name] = f.Interface()
-	}
-
-	// assign req data content to trigger content
 	var content interface{}
-	dataBytes, err := util.Marshal(grpcData["reqdata"])
-	if err != nil {
-		log.Error("Marshal failed on grpc request data")
-	}
 
-	err = util.Unmarshal("application/json", dataBytes, &content)
-	if err != nil {
-		log.Error("Unmarshal failed on grpc request data")
-	}
+	// blocking the code for streaming requests
+	if grpcData["contextdata"] != nil {
+		// getting values from inputrequestdata and mapping it to params which can be used in different services like HTTP pathparams etc.
+		s := reflect.ValueOf(grpcData["reqdata"]).Elem()
+		typeOfT := s.Type()
 
+		for i := 0; i < s.NumField(); i++ {
+			f := s.Field(i)
+			params[typeOfT.Field(i).Name] = f.Interface()
+		}
+
+		// assign req data content to trigger content
+		dataBytes, err := util.Marshal(grpcData["reqdata"])
+		if err != nil {
+			log.Error("Marshal failed on grpc request data")
+		}
+
+		err = util.Unmarshal("application/json", dataBytes, &content)
+		if err != nil {
+			log.Error("Unmarshal failed on grpc request data")
+		}
+	}
 	grpcData["serviceName"] = t.config.GetSetting("serviceName")
 	grpcData["protoName"] = t.config.GetSetting("protoName")
 
