@@ -143,7 +143,7 @@ func (m *MashlingAction) Run(context context.Context, inputs map[string]*data.At
 		return nil, err
 	}
 	output["code"] = codeAttr
-	dataAttr, err := data.NewAttribute("data", data.TypeObject, mData)
+	dataAttr, err := data.NewAttribute("data", data.TypeAny, mData)
 	if err != nil {
 		return nil, err
 	}
