@@ -278,6 +278,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		"log"
 
 		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
+		"github.com/imdario/mergo"
 
 		servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
 		pb "{{.ProtoImpPath}}"
@@ -347,8 +348,14 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 
 	func {{.MethodName}}(client pb.{{$serviceName}}Client, reqArr map[string]interface{}) map[string]interface{} {
 		resMap := make(map[string]interface{}, 1)
+
 		req := &pb.{{.MethodReqName}}{}
-		// to do map the req with reqArr reqdata
+		reqData := reqArr["reqdata"].(*pb.{{.MethodReqName}})
+		if err := mergo.Merge(req, reqData, mergo.WithOverride); err != nil {
+			resMap["Error"] = errors.New("unable to merge reqData values")
+			return resMap
+		}
+
 		sReq := reqArr["strmReq"].(pb.{{$serviceName}}_{{.MethodName}}Server)
 	
 		stream, err := client.{{.MethodName}}(context.Background(), req)
