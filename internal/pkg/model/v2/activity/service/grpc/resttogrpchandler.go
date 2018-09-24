@@ -41,9 +41,9 @@ func restTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
 				if g.Request.Content != nil {
 					InvokeMethodData["Content"] = g.Request.Content
 				}
-
+				InvokeMethodData["Mode"] = "rest-to-grpc"
 				resMap := service.InvokeMethod(InvokeMethodData)
-				if strings.Compare(string(resMap["Response"].([]byte)), "null") != 0 {
+				if resMap["Response"] != nil && strings.Compare(string(resMap["Response"].([]byte)), "null") != 0 {
 					err := util.Unmarshal("application/json", resMap["Response"].([]byte), &g.Response.Body)
 					if err != nil {
 						return err

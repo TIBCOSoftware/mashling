@@ -274,6 +274,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		"context"
 		"encoding/json"
 		"errors"
+		"strings"
 		"io"
 		"log"
 
@@ -349,6 +350,14 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	func {{.MethodName}}(client pb.{{$serviceName}}Client, reqArr map[string]interface{}) map[string]interface{} {
 		resMap := make(map[string]interface{}, 1)
 
+		if reqArr["Mode"] != nil {
+			mode := reqArr["Mode"].(string)
+			if strings.Compare(mode,"rest-to-grpc") == 0 {
+				resMap["Error"] = errors.New("streaming operation is not allowed in rest to grpc case")
+				return resMap
+			}
+		}
+
 		req := &pb.{{.MethodReqName}}{}
 		reqData := reqArr["reqdata"].(*pb.{{.MethodReqName}})
 		if err := mergo.Merge(req, reqData, mergo.WithOverride); err != nil {
@@ -386,6 +395,14 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	func {{.MethodName}}(client pb.{{$serviceName}}Client, reqArr map[string]interface{}) map[string]interface{} {
 		resMap := make(map[string]interface{}, 1)
 	
+		if reqArr["Mode"] != nil {
+			mode := reqArr["Mode"].(string)
+			if strings.Compare(mode,"rest-to-grpc") == 0 {
+				resMap["Error"] = errors.New("streaming operation is not allowed in rest to grpc case")
+				return resMap
+			}
+		}
+
 		stream, err := client.{{.MethodName}}(context.Background())
 		if err != nil {
 			log.Println("erorr while getting stream object for {{.MethodName}}:", err)
@@ -427,6 +444,14 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 
 	func {{.MethodName}}(client pb.{{$serviceName}}Client, reqArr map[string]interface{}) map[string]interface{} {
 		resMap := make(map[string]interface{}, 1)
+
+		if reqArr["Mode"] != nil {
+			mode := reqArr["Mode"].(string)
+			if strings.Compare(mode,"rest-to-grpc") == 0 {
+				resMap["Error"] = errors.New("streaming operation is not allowed in rest to grpc case")
+				return resMap
+			}
+		}
 	
 		bReq := reqArr["strmReq"].(pb.{{$serviceName}}_{{.MethodName}}Server)
 	
