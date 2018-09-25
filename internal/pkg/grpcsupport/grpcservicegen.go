@@ -484,8 +484,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 				}
 			}
 		}()
-		<-waits
-	
+			
 		waitc := make(chan struct{})
 		go func() {
 			for {
@@ -508,6 +507,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 			}
 		}()
 		<-waitc
+		<-waits
 		return resMap
 	}
 
