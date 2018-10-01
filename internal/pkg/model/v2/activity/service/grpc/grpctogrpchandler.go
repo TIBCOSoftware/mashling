@@ -57,7 +57,7 @@ func gRPCTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
 
 					resMap := service.InvokeMethod(InvokeMethodData)
 
-					if resMap["Error"] != 0 {
+					if resMap["Error"] != nil {
 						log.Errorf("Error occured:%v", resMap["Error"])
 						erroString := fmt.Sprintf("%v", resMap["Error"])
 						erroString = "{\"error\":\"true\",\"details\":{\"error\":\"" + erroString + "\"}}"
