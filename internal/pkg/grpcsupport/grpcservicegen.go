@@ -44,6 +44,7 @@ type ProtoData struct {
 	ProtoImpPath           string
 	RegServiceName         string
 	ProtoName              string
+	Stream                 bool
 }
 
 // AssignValues will set fullpath value
@@ -110,14 +111,16 @@ var registryServerTemplate = template.Must(template.New("").Parse(`// This file 
 package server
 
 import (
+	{{if .UnaryMethodInfo}}
 	"encoding/json"
 	"errors"
-	"log"
 	"fmt"
 	"strings"
+	"golang.org/x/net/context"
+	{{end}}
+	"log"
 	servInfo "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/grpc"
   	pb "{{.ProtoImpPath}}"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 {{$serviceName := .RegServiceName}}
@@ -272,14 +275,19 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	
 	import (
 		"context"
+		{{if .UnaryMethodInfo}}
 		"encoding/json"
+		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
+		{{end}}
 		"errors"
+		{{if .Stream}}
 		"strings"
 		"io"
+		{{end}}
 		"log"
-
-		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
+		{{if .ServerStreamMethodInfo}}
 		"github.com/imdario/mergo"
+		{{end}}
 
 		servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
 		pb "{{.ProtoImpPath}}"
@@ -569,10 +577,12 @@ func arrangeProtoData(pdArr []ProtoData) []ProtoData {
 			if strings.Contains(mthdInfo.MethodReqName, "stream ") {
 				mthdInfo.MethodReqName = strings.Replace(mthdInfo.MethodReqName, "stream ", "", -1)
 				clientStrm = true
+				protoData.Stream = true
 			}
 			if strings.Contains(mthdInfo.MethodResName, "stream ") {
 				mthdInfo.MethodResName = strings.Replace(mthdInfo.MethodResName, "stream ", "", -1)
 				servrStrm = true
+				protoData.Stream = true
 			}
 			if !clientStrm && !servrStrm {
 				protoData.UnaryMethodInfo = append(protoData.UnaryMethodInfo, mthdInfo)
