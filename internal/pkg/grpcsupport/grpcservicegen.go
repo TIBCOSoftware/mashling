@@ -35,11 +35,16 @@ type MethodInfoTree struct {
 
 // ProtoData holds proto file data
 type ProtoData struct {
-	Timestamp      time.Time
-	MethodInfo     []MethodInfoTree
-	ProtoImpPath   string
-	RegServiceName string
-	ProtoName      string
+	Timestamp              time.Time
+	UnaryMethodInfo        []MethodInfoTree
+	ClientStreamMethodInfo []MethodInfoTree
+	ServerStreamMethodInfo []MethodInfoTree
+	BiDiStreamMethodInfo   []MethodInfoTree
+	AllMethodInfo          []MethodInfoTree
+	ProtoImpPath           string
+	RegServiceName         string
+	ProtoName              string
+	Stream                 bool
 }
 
 // AssignValues will set fullpath value
@@ -76,6 +81,9 @@ func GenerateSupportFiles(path string) error {
 		return err
 	}
 
+	// refactoring streaming methods and unary methods
+	pdArr = arrangeProtoData(pdArr)
+
 	log.Println("creating trigger support files")
 	err = generateServiceImplFile(pdArr, "server")
 	if err != nil {
@@ -103,14 +111,16 @@ var registryServerTemplate = template.Must(template.New("").Parse(`// This file 
 package server
 
 import (
+	{{if .UnaryMethodInfo}}
 	"encoding/json"
 	"errors"
-	"log"
 	"fmt"
 	"strings"
+	"golang.org/x/net/context"
+	{{end}}
+	"log"
 	servInfo "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/grpc"
   	pb "{{.ProtoImpPath}}"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 {{$serviceName := .RegServiceName}}
@@ -129,7 +139,7 @@ func init() {
 	servInfo.ServiceRegistery.RegisterServerService(&serviceImpl{{$protoName}}{{$serviceName}}{serviceInfo: serviceInfo{{$protoName}}{{$serviceName}}})
 }
 
-//RunRegisterServerService registers server method implimentaion with grpc
+// RunRegisterServerService registers server method implimentaion with grpc
 func (s *serviceImpl{{$protoName}}{{$serviceName}}) RunRegisterServerService(serv *grpc.Server, trigger *servInfo.GRPCTrigger) {
 	service := &serviceImpl{{$protoName}}{{$serviceName}}{
 		trigger: trigger,
@@ -139,7 +149,7 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) RunRegisterServerService(ser
 }
 
 
-{{- range .MethodInfo }}
+{{- range .UnaryMethodInfo }}
 
 func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.Context, req *pb.{{.MethodReqName}}) (res *pb.{{.MethodResName}},err error) {
 
@@ -188,6 +198,70 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.
 
 {{- end }}
 
+{{- range .ServerStreamMethodInfo }}
+
+func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(req *pb.EmptyReq, sReq pb.{{$serviceName}}_{{.MethodName}}Server) error {
+
+	methodName := "{{.MethodName}}"
+
+	grpcData := make(map[string]interface{})
+	grpcData["methodName"] = methodName
+	grpcData["reqdata"] = req
+	grpcData["strmReq"] = sReq
+
+	_, _, err := s.trigger.CallHandler(grpcData)
+
+	if err != nil {
+		log.Println("error: ", err)
+	}
+
+	return err
+}
+
+{{- end }}
+
+{{- range .ClientStreamMethodInfo }}
+
+func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(cReq pb.{{$serviceName}}_{{.MethodName}}Server) error {
+
+	methodName := "{{.MethodName}}"
+
+	grpcData := make(map[string]interface{})
+	grpcData["methodName"] = methodName
+	grpcData["strmReq"] = cReq
+
+	_, _, err := s.trigger.CallHandler(grpcData)
+
+	if err != nil {
+		log.Println("error: ", err)
+	}
+
+	return err
+}
+
+{{- end }}
+
+{{- range .BiDiStreamMethodInfo }}
+
+func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(bdReq pb.{{$serviceName}}_{{.MethodName}}Server) error {
+
+	methodName := "{{.MethodName}}"
+
+	grpcData := make(map[string]interface{})
+	grpcData["methodName"] = methodName
+	grpcData["strmReq"] = bdReq
+
+	_, _, err := s.trigger.CallHandler(grpcData)
+
+	if err != nil {
+		log.Println("error: ", err)
+	}
+
+	return err
+}
+
+{{- end }}
+
 func (s *serviceImpl{{$protoName}}{{$serviceName}}) ServiceInfo() *servInfo.ServiceInfo {
 	return s.serviceInfo
 }
@@ -201,11 +275,19 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 	
 	import (
 		"context"
+		{{if .UnaryMethodInfo}}
 		"encoding/json"
-		"errors"
-		"log"
-
 		"github.com/TIBCOSoftware/mashling/internal/pkg/grpcsupport"
+		{{end}}
+		"errors"
+		{{if .Stream}}
+		"strings"
+		"io"
+		{{end}}
+		"log"
+		{{if .ServerStreamMethodInfo}}
+		"github.com/imdario/mergo"
+		{{end}}
 
 		servInfo "github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/activity/service/grpc"
 		pb "{{.ProtoImpPath}}"
@@ -241,7 +323,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		methodName := reqArr["MethodName"].(string)
 
 		switch methodName {
-		{{- range .MethodInfo }}
+		{{- range .AllMethodInfo }}
 		case "{{.MethodName}}":
 			return {{.MethodName}}(clientObject, reqArr)
 		{{- end }}
@@ -253,7 +335,7 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		return resMap
 	}
 
-	{{- range .MethodInfo }}
+	{{- range .UnaryMethodInfo }}
 	func {{.MethodName}}(client pb.{{$serviceName}}Client, values interface{}) map[string]interface{} {
 		req := &pb.{{.MethodReqName}}{}
 		grpcsupport.AssignStructValues(req, values)
@@ -270,6 +352,175 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 		return resMap
 	}
 	{{- end }}
+
+	{{- range .ServerStreamMethodInfo }}
+
+	func {{.MethodName}}(client pb.{{$serviceName}}Client, reqArr map[string]interface{}) map[string]interface{} {
+		resMap := make(map[string]interface{}, 1)
+
+		if reqArr["Mode"] != nil {
+			mode := reqArr["Mode"].(string)
+			if strings.Compare(mode,"rest-to-grpc") == 0 {
+				resMap["Error"] = errors.New("streaming operation is not allowed in rest to grpc case")
+				return resMap
+			}
+		}
+
+		req := &pb.{{.MethodReqName}}{}
+		reqData := reqArr["reqdata"].(*pb.{{.MethodReqName}})
+		if err := mergo.Merge(req, reqData, mergo.WithOverride); err != nil {
+			resMap["Error"] = errors.New("unable to merge reqData values")
+			return resMap
+		}
+
+		sReq := reqArr["strmReq"].(pb.{{$serviceName}}_{{.MethodName}}Server)
+	
+		stream, err := client.{{.MethodName}}(context.Background(), req)
+		if err != nil {
+			log.Println("erorr while getting stream object for {{.MethodName}}:", err)
+			resMap["Error"] = err
+			return resMap
+		}
+		for {
+			obj, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Println("erorr occured in {{.MethodName}} Recv():", err)
+				resMap["Error"] = err
+				return resMap
+			}
+			sReq.Send(obj)
+		}
+		resMap["Error"] = nil
+		return resMap
+	}
+	{{- end }}
+
+	{{- range .ClientStreamMethodInfo }}
+
+	func {{.MethodName}}(client pb.{{$serviceName}}Client, reqArr map[string]interface{}) map[string]interface{} {
+		resMap := make(map[string]interface{}, 1)
+	
+		if reqArr["Mode"] != nil {
+			mode := reqArr["Mode"].(string)
+			if strings.Compare(mode,"rest-to-grpc") == 0 {
+				resMap["Error"] = errors.New("streaming operation is not allowed in rest to grpc case")
+				return resMap
+			}
+		}
+
+		stream, err := client.{{.MethodName}}(context.Background())
+		if err != nil {
+			log.Println("erorr while getting stream object for {{.MethodName}}:", err)
+			resMap["Error"] = err
+			return resMap
+		}
+	
+		cReq := reqArr["strmReq"].(pb.{{$serviceName}}_{{.MethodName}}Server)
+	
+		for {
+			dataObj, err := cReq.Recv()
+			if err == io.EOF {
+				obj, err := stream.CloseAndRecv()
+				if err != nil {
+					log.Println("erorr occured in {{.MethodName}} CloseAndRecv():", err)
+					resMap["Error"] = err
+					return resMap
+				}
+				resMap["Error"] = cReq.SendAndClose(obj)
+				return resMap
+			}
+			if err != nil {
+				log.Println("erorr occured in {{.MethodName}} Recv():", err)
+				resMap["Error"] = err
+				return resMap
+			}
+	
+			if err := stream.Send(dataObj); err != nil {
+				log.Println("error while sending dataObj with client stream:", err)
+				resMap["Error"] = err
+				return resMap
+			}
+		}
+	}
+
+	{{- end }}
+
+	{{- range .BiDiStreamMethodInfo }}
+
+	func {{.MethodName}}(client pb.{{$serviceName}}Client, reqArr map[string]interface{}) map[string]interface{} {
+		resMap := make(map[string]interface{}, 1)
+
+		if reqArr["Mode"] != nil {
+			mode := reqArr["Mode"].(string)
+			if strings.Compare(mode,"rest-to-grpc") == 0 {
+				resMap["Error"] = errors.New("streaming operation is not allowed in rest to grpc case")
+				return resMap
+			}
+		}
+	
+		bReq := reqArr["strmReq"].(pb.{{$serviceName}}_{{.MethodName}}Server)
+	
+		stream, err := client.{{.MethodName}}(context.Background())
+		if err != nil {
+			log.Println("error while getting stream object for {{.MethodName}}:", err)
+			resMap["Error"] = err
+			return resMap
+		}
+	
+		waits := make(chan struct{})
+		go func() {
+			for {
+				obj, err := bReq.Recv()
+				if err == io.EOF {
+					resMap["Error"] = nil
+					stream.CloseSend()
+					close(waits)
+					return
+				}
+				if err != nil {
+					log.Println("error occured in {{.MethodName}} bidi Recv():", err)
+					resMap["Error"] = err
+					return
+				}
+				if err := stream.Send(obj); err != nil {
+					log.Println("error while sending obj with stream:", err)
+					resMap["Error"] = err
+					return
+				}
+			}
+		}()
+			
+		waitc := make(chan struct{})
+		go func() {
+			for {
+				obj, err := stream.Recv()
+				if err == io.EOF {
+					resMap["Error"] = nil
+					close(waitc)
+					return
+				}
+				if err != nil {
+					log.Println("erorr occured in {{.MethodName}} stream Recv():", err)
+					resMap["Error"] = err
+					return
+				}
+				if sdErr := bReq.Send(obj); sdErr != nil {
+					log.Println("error while sending obj with bidi Send():", sdErr)
+					resMap["Error"] = sdErr
+					return
+				}
+			}
+		}()
+		<-waitc
+		<-waits
+		return resMap
+	}
+
+	{{- end }}
+
 	`))
 
 // Exec executes a command within the build context.
@@ -297,6 +548,12 @@ func generatePbFiles() error {
 		os.MkdirAll(fullPath, os.ModePerm)
 	}
 
+	_, err = exec.LookPath("protoc")
+	if err != nil {
+		log.Fatal("protoc is not available")
+		return err
+	}
+
 	err = Exec("protoc", "-I", protoPath, protoPath+string(filepath.Separator)+protoFileName, "--go_out=plugins=grpc:"+fullPath)
 	if err != nil {
 		_, statErr := os.Stat(fullPath)
@@ -307,6 +564,40 @@ func generatePbFiles() error {
 		return err
 	}
 	return nil
+}
+
+// arrangeProtoData refactors different types of methods from all method info list
+func arrangeProtoData(pdArr []ProtoData) []ProtoData {
+
+	for index, protoData := range pdArr {
+		for _, mthdInfo := range protoData.AllMethodInfo {
+			clientStrm := false
+			servrStrm := false
+
+			if strings.Contains(mthdInfo.MethodReqName, "stream ") {
+				mthdInfo.MethodReqName = strings.Replace(mthdInfo.MethodReqName, "stream ", "", -1)
+				clientStrm = true
+				protoData.Stream = true
+			}
+			if strings.Contains(mthdInfo.MethodResName, "stream ") {
+				mthdInfo.MethodResName = strings.Replace(mthdInfo.MethodResName, "stream ", "", -1)
+				servrStrm = true
+				protoData.Stream = true
+			}
+			if !clientStrm && !servrStrm {
+				protoData.UnaryMethodInfo = append(protoData.UnaryMethodInfo, mthdInfo)
+			} else if clientStrm && servrStrm {
+				protoData.BiDiStreamMethodInfo = append(protoData.BiDiStreamMethodInfo, mthdInfo)
+			} else if clientStrm {
+				protoData.ClientStreamMethodInfo = append(protoData.ClientStreamMethodInfo, mthdInfo)
+			} else if servrStrm {
+				protoData.ServerStreamMethodInfo = append(protoData.ServerStreamMethodInfo, mthdInfo)
+			}
+		}
+		pdArr[index] = protoData
+	}
+
+	return pdArr
 }
 
 // getProtoData reads proto and returns proto data present in proto file
@@ -349,7 +640,7 @@ func getProtoData(protoPath string) ([]ProtoData, error) {
 			methodInfoList = append(methodInfoList, methodInfo)
 		}
 		protodata := ProtoData{
-			MethodInfo:     methodInfoList,
+			AllMethodInfo:  methodInfoList,
 			Timestamp:      time.Now(),
 			ProtoImpPath:   protoImpPath,
 			RegServiceName: regServiceName,

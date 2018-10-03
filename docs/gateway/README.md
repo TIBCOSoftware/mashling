@@ -612,8 +612,7 @@ Response handler:
 }
 ```
 #### Note
-Currently gRPC mashling service will accept `grpc unary` methods. Support files for this service is generated using proto file during custom creation of gateway with mashling cli create [command](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#create).
-
+Support files for this service is generated using proto file during custom creation of gateway with mashling cli create [command](https://github.com/TIBCOSoftware/mashling/tree/master/docs/cli#create). Unary methods are allowed in all grpc gateway recipes. Streaming methods are allowed only in case of grpc-to-grpc gateway.
 #### <a name="services-circuit-breaker"></a>Circuit Breaker
 
 The circuit breaker prevents the calling of a service when that service has failed in the past. How the circuit breaker is tripped depends on the mode of operation. There are three modes of operation: contiguous errors, errors within a time period, and contiguous errors within a time period.

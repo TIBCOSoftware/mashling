@@ -113,7 +113,7 @@ func mapStructWithValues(structVal interface{}, values map[string]string) {
 		field = strings.ToUpper(temp) + field[1:]
 		v := reflect.ValueOf(structVal).Elem().FieldByName(field)
 		if v.IsValid() {
-			log.Printf("\n%T:%v", v.Type(), v.Type())
+			//log.Printf("\n%T:%v", v.Type(), v.Type())
 			convertAndApplyValues(v, value)
 		}
 	}
