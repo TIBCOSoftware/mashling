@@ -113,12 +113,12 @@ package server
 import (
 	{{if .UnaryMethodInfo}}
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"golang.org/x/net/context"
 	{{end}}
 	"log"
+	"errors"
 	servInfo "github.com/TIBCOSoftware/mashling/ext/flogo/trigger/grpc"
   	pb "{{.ProtoImpPath}}"
 	"google.golang.org/grpc"
@@ -189,7 +189,7 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.
 			}
 		}
 	}
-	log.Println("response: ", res)
+	//log.Println("response: ", res)
 
 	//User implimentation area
 
@@ -209,13 +209,18 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(req *pb.Empt
 	grpcData["reqdata"] = req
 	grpcData["strmReq"] = sReq
 
-	_, _, err := s.trigger.CallHandler(grpcData)
+	_, data, err := s.trigger.CallHandler(grpcData)
 
 	if err != nil {
 		log.Println("error: ", err)
+		return err
 	}
 
-	return err
+	if data != nil && data.(map[string]interface{})["error"] != nil {
+		log.Println("error from end server: ", data.(map[string]interface{})["error"])
+		return errors.New(data.(map[string]interface{})["error"].(string))
+	}
+	return nil
 }
 
 {{- end }}
@@ -230,13 +235,18 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(cReq pb.{{$s
 	grpcData["methodName"] = methodName
 	grpcData["strmReq"] = cReq
 
-	_, _, err := s.trigger.CallHandler(grpcData)
+	_, data, err := s.trigger.CallHandler(grpcData)
 
 	if err != nil {
 		log.Println("error: ", err)
+		return err
 	}
 
-	return err
+	if data != nil && data.(map[string]interface{})["error"] != nil {
+		log.Println("error from end server: ", data.(map[string]interface{})["error"])
+		return errors.New(data.(map[string]interface{})["error"].(string))
+	}
+	return nil
 }
 
 {{- end }}
@@ -251,13 +261,18 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(bdReq pb.{{$
 	grpcData["methodName"] = methodName
 	grpcData["strmReq"] = bdReq
 
-	_, _, err := s.trigger.CallHandler(grpcData)
+	_, data, err := s.trigger.CallHandler(grpcData)
 
 	if err != nil {
 		log.Println("error: ", err)
+		return err
 	}
 
-	return err
+	if data != nil && data.(map[string]interface{})["error"] != nil {
+		log.Println("error from end server: ", data.(map[string]interface{})["error"])
+		return errors.New(data.(map[string]interface{})["error"].(string))
+	}
+	return nil
 }
 
 {{- end }}
@@ -391,7 +406,12 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 				resMap["Error"] = err
 				return resMap
 			}
-			sReq.Send(obj)
+			err = sReq.Send(obj)
+			if err != nil {
+				log.Println("erorr occured in {{.MethodName}} Send():", err)
+				resMap["Error"] = err
+				return resMap
+			}
 		}
 		resMap["Error"] = nil
 		return resMap
@@ -483,11 +503,13 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 				if err != nil {
 					log.Println("error occured in {{.MethodName}} bidi Recv():", err)
 					resMap["Error"] = err
+					close(waits)
 					return
 				}
 				if err := stream.Send(obj); err != nil {
 					log.Println("error while sending obj with stream:", err)
 					resMap["Error"] = err
+					close(waits)
 					return
 				}
 			}
@@ -505,11 +527,13 @@ var registryClientTemplate = template.Must(template.New("").Parse(`// This file 
 				if err != nil {
 					log.Println("erorr occured in {{.MethodName}} stream Recv():", err)
 					resMap["Error"] = err
+					close(waitc)
 					return
 				}
 				if sdErr := bReq.Send(obj); sdErr != nil {
 					log.Println("error while sending obj with bidi Send():", sdErr)
 					resMap["Error"] = sdErr
+					close(waitc)
 					return
 				}
 			}

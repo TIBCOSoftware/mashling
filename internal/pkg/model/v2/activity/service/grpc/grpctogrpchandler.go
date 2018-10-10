@@ -42,9 +42,13 @@ func gRPCTogRPCHandler(g *GRPC, conn *grpc.ClientConn) error {
 					res := resultArr[0]
 					grpcErr := resultArr[1]
 					if !grpcErr.IsNil() {
-						log.Error("Propagating error to calling function")
-						log.Error("Error Details: ", grpcErr.Interface())
-						g.Response.Body = grpcErr.Interface()
+						erroString := fmt.Sprintf("%v", grpcErr.Interface())
+						log.Error("Propagating error to calling function:", erroString)
+						erroString = "{\"error\":\"true\",\"details\":{\"error\":\"" + erroString + "\"}}"
+						err := util.Unmarshal("application/json", []byte(erroString), &g.Response.Body)
+						if err != nil {
+							return err
+						}
 					} else {
 						g.Response.Body = res.Interface()
 					}

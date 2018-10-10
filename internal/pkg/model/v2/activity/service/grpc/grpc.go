@@ -3,6 +3,7 @@ package grpc
 import (
 	"errors"
 	"strings"
+	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 
@@ -14,6 +15,15 @@ import (
 
 // log is the default package logger
 var log = logger.GetLogger("tibco-service-grpc")
+
+//connection holder holds client connection object for each host address
+var conHoldr = make(map[string](*grpc.ClientConn))
+
+//count holder holds connection objects count for each host address
+var conCountHoldr = make(map[string]int)
+
+// mutex for thread safe code
+var l sync.Mutex
 
 // GRPC is grpc service
 type GRPC struct {
@@ -77,19 +87,24 @@ func (g *GRPC) Execute() (err error) {
 		opts = []grpc.DialOption{grpc.WithInsecure()}
 	}
 
-	conn, err := grpc.Dial(g.Request.HostURL, opts...)
+	conn, err := getConnection(g.Request.HostURL, opts)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
-	defer conn.Close()
 
 	log.Debug("operating mode: ", g.Request.OperatingMode)
 
 	switch g.Request.OperatingMode {
 	case "grpc-to-grpc":
-		return gRPCTogRPCHandler(g, conn)
+		err := gRPCTogRPCHandler(g, conn)
+		closeConnection(g.Request.HostURL)
+		conn = nil
+		return err
 	case "rest-to-grpc":
-		return restTogRPCHandler(g, conn)
+		err := restTogRPCHandler(g, conn)
+		closeConnection(g.Request.HostURL)
+		conn = nil
+		return err
 	}
 
 	log.Error("Invalid use of service , OperatingMode not recognised")
@@ -209,4 +224,32 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 		}
 	}
 	return nil
+}
+
+// getconnection returns single client connection object per hostaddress
+func getConnection(hostAdds string, opts []grpc.DialOption) (*grpc.ClientConn, error) {
+	l.Lock()
+	conCountHoldr[hostAdds]++
+	if conHoldr[hostAdds] == nil {
+		conn, err := grpc.Dial(hostAdds, opts...)
+		if err != nil {
+			log.Error(err)
+			l.Unlock()
+			return nil, err
+		}
+		conHoldr[hostAdds] = conn
+	}
+	l.Unlock()
+	return conHoldr[hostAdds], nil
+}
+
+// closeConnection closes created client connection per hostaddress
+func closeConnection(hostAdds string) {
+	l.Lock()
+	conCountHoldr[hostAdds]--
+	if conCountHoldr[hostAdds] <= 0 {
+		conHoldr[hostAdds].Close()
+		conHoldr[hostAdds] = nil
+	}
+	l.Unlock()
 }
