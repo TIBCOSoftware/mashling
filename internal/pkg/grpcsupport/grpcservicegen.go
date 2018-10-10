@@ -173,7 +173,7 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.
 	typeMethodRes := fmt.Sprintf("%T", res)
 	if strings.Compare(typeHandRes, typeMethodRes) == 0 {
 		res = replyData.(*pb.{{.MethodResName}})
-	} else {
+	} else  if replyData != nil {
 		var errValue = replyData.(map[string]interface{})["error"]
 		if errValue != nil && len(errValue.(string)) != 0 {
 			return res, errors.New(errValue.(string))
@@ -188,6 +188,8 @@ func (s *serviceImpl{{$protoName}}{{$serviceName}}) {{.MethodName}}(ctx context.
 				log.Println("error: ", err)
 			}
 		}
+	} else {
+		return nil, errors.New("Exception at gateway end")
 	}
 	//log.Println("response: ", res)
 

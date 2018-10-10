@@ -16,14 +16,19 @@ import (
 // log is the default package logger
 var log = logger.GetLogger("tibco-service-grpc")
 
-//connection holder holds client connection object for each host address
-var conHoldr = make(map[string](*grpc.ClientConn))
+type mashGRPCClienConn struct {
+	conn  *grpc.ClientConn
+	count int
+}
 
-//count holder holds connection objects count for each host address
-var conCountHoldr = make(map[string]int)
+type mashGRPCClinetConns struct {
+	connMap map[string]*mashGRPCClienConn
+	sync.Mutex
+}
 
-// mutex for thread safe code
-var l sync.Mutex
+var conns = mashGRPCClinetConns{
+	connMap: make(map[string]*mashGRPCClienConn),
+}
 
 // GRPC is grpc service
 type GRPC struct {
@@ -91,20 +96,15 @@ func (g *GRPC) Execute() (err error) {
 	if err != nil {
 		return err
 	}
+	defer releaseConnection(g.Request.HostURL)
 
 	log.Debug("operating mode: ", g.Request.OperatingMode)
 
 	switch g.Request.OperatingMode {
 	case "grpc-to-grpc":
-		err := gRPCTogRPCHandler(g, conn)
-		closeConnection(g.Request.HostURL)
-		conn = nil
-		return err
+		return gRPCTogRPCHandler(g, conn)
 	case "rest-to-grpc":
-		err := restTogRPCHandler(g, conn)
-		closeConnection(g.Request.HostURL)
-		conn = nil
-		return err
+		return restTogRPCHandler(g, conn)
 	}
 
 	log.Error("Invalid use of service , OperatingMode not recognised")
@@ -228,28 +228,33 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 
 // getconnection returns single client connection object per hostaddress
 func getConnection(hostAdds string, opts []grpc.DialOption) (*grpc.ClientConn, error) {
-	l.Lock()
-	conCountHoldr[hostAdds]++
-	if conHoldr[hostAdds] == nil {
-		conn, err := grpc.Dial(hostAdds, opts...)
+	conns.Lock()
+	defer conns.Unlock()
+	conn := conns.connMap[hostAdds]
+	if conn == nil {
+		c, err := grpc.Dial(hostAdds, opts...)
 		if err != nil {
 			log.Error(err)
-			l.Unlock()
 			return nil, err
 		}
-		conHoldr[hostAdds] = conn
+		conn = &mashGRPCClienConn{
+			conn:  c,
+			count: 0,
+		}
+		conns.connMap[hostAdds] = conn
 	}
-	l.Unlock()
-	return conHoldr[hostAdds], nil
+	conn.count++
+	return conn.conn, nil
 }
 
-// closeConnection closes created client connection per hostaddress
-func closeConnection(hostAdds string) {
-	l.Lock()
-	conCountHoldr[hostAdds]--
-	if conCountHoldr[hostAdds] <= 0 {
-		conHoldr[hostAdds].Close()
-		conHoldr[hostAdds] = nil
+// releaseConnection closes created client connection per hostaddress
+func releaseConnection(hostAdds string) {
+	conns.Lock()
+	defer conns.Unlock()
+	conn := conns.connMap[hostAdds]
+	conn.count--
+	if conn.count <= 0 {
+		conn.conn.Close()
+		delete(conns.connMap, hostAdds)
 	}
-	l.Unlock()
 }
