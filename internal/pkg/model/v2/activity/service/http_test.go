@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/mashling/commons/lib/util"
 )
 
 func TestHTTP(t *testing.T) {

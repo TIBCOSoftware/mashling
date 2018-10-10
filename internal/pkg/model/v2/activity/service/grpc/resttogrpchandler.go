@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/mashling/commons/lib/util"
 	"google.golang.org/grpc"
 )
 

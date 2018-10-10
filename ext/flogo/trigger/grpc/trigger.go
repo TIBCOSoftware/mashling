@@ -14,7 +14,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/mashling/commons/lib/util"
 	"google.golang.org/grpc"
 )
 

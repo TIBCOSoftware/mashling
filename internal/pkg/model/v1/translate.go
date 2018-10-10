@@ -14,9 +14,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	ftrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo/registry/triggers"
-	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
-	"github.com/TIBCOSoftware/mashling/lib/types"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	condition "github.com/mashling/commons/lib/conditions"
+	"github.com/mashling/commons/lib/types"
+	"github.com/mashling/commons/lib/util"
 )
 
 // Translate translates mashling gateway JSON config to a Flogo app.

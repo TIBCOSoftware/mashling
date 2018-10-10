@@ -22,9 +22,9 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/mashling/commons/lib/util"
 
-	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
+	condition "github.com/mashling/commons/lib/conditions"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	opentracing "github.com/opentracing/opentracing-go"

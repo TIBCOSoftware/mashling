@@ -10,7 +10,7 @@ import (
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/services"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/swagger"
-	"github.com/TIBCOSoftware/mashling/lib/types"
+	"github.com/mashling/commons/lib/types"
 )
 
 // Gateway contains all data needed to run a v1 mashling gateway app.

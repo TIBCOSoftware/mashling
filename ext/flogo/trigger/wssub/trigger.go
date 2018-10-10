@@ -12,7 +12,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/mashling/commons/lib/util"
 	"github.com/gorilla/websocket"
 )
 

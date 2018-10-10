@@ -14,8 +14,8 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/mashling/lib/eftl"
-	"github.com/TIBCOSoftware/mashling/lib/util"
+	"github.com/mashling/commons/lib/eftl"
+	"github.com/mashling/commons/lib/util"
 
 	opentracing "github.com/opentracing/opentracing-go"
 	ctx "golang.org/x/net/context"

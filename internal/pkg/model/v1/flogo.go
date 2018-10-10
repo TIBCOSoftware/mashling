@@ -11,7 +11,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/definition"
 	"github.com/TIBCOSoftware/flogo-lib/app"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo/registry"
-	"github.com/TIBCOSoftware/mashling/lib/types"
+	"github.com/mashling/commons/lib/types"
 	"github.com/TIBCOSoftware/mashling/pkg/strings"
 )
 
