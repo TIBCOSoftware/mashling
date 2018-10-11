@@ -16,8 +16,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/mashling/commons/lib/eftl"
-	"github.com/mashling/commons/lib/util"
+	"github.com/TIBCOSoftware/mashling/lib/eftl"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 
 	opentracing "github.com/opentracing/opentracing-go"
 )

@@ -6,7 +6,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/mashling/commons/lib/util"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 // log is the default package logger

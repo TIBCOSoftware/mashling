@@ -18,7 +18,7 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-contrib/action/flow/test"
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
-	"github.com/mashling/commons/lib/util"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 
 	opentracing "github.com/opentracing/opentracing-go"
 )

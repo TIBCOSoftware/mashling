@@ -14,7 +14,7 @@ import (
 
 	"github.com/imdario/mergo"
 
-	"github.com/mashling/commons/lib/util"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 const (

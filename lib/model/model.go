@@ -8,7 +8,7 @@ package model
 import (
 	"encoding/json"
 
-	"github.com/mashling/commons/lib/types"
+	"github.com/TIBCOSoftware/mashling/lib/types"
 )
 
 func CreateMashlingSampleModel() (types.Microgateway, error) {

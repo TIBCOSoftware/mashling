@@ -9,7 +9,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/activity"
 	"github.com/TIBCOSoftware/mashling/internal/app/gateway/flogo/registry/activities"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v2/types"
-	"github.com/mashling/commons/lib/util"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 )
 
 func TestFlogoActivity(t *testing.T) {

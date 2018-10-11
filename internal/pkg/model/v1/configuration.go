@@ -12,7 +12,7 @@ import (
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/cache"
 	gwerrors "github.com/TIBCOSoftware/mashling/internal/pkg/model/errors"
 	"github.com/TIBCOSoftware/mashling/internal/pkg/model/v1/schema"
-	"github.com/mashling/commons/lib/types"
+	"github.com/TIBCOSoftware/mashling/lib/types"
 	"github.com/TIBCOSoftware/mashling/pkg/files"
 )
 

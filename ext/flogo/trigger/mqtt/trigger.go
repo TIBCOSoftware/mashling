@@ -13,8 +13,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	condition "github.com/mashling/commons/lib/conditions"
-	"github.com/mashling/commons/lib/util"
+	condition "github.com/TIBCOSoftware/mashling/lib/conditions"
+	"github.com/TIBCOSoftware/mashling/lib/util"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	opentracing "github.com/opentracing/opentracing-go"
