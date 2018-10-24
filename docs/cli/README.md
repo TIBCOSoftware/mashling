@@ -82,18 +82,18 @@ Usage:
   mashling-cli create [flags]
 
 Flags:
-  -A, --arch string   target architecture to build for (default is amd64, arm64 is only compatible with Linux)
-  -h, --help          help for create
-  -n, --name string   customized mashling-gateway name (default "mashling-custom")
-  -N, --native        build the customized binary natively instead of using Docker
-  -O, --os string     target OS to build for (default is the host OS, valid values are windows, darwin, and linux)
+  -A, --arch string        target architecture to build for (default is amd64, arm64 is only compatible with Linux)
+  -h, --help               help for create
+  -n, --name string        customized mashling-gateway name (default "mashling-custom")
+  -N, --native             build the customized binary natively instead of using Docker
+  -O, --os string          target OS to build for (default is the host OS, valid values are windows, darwin, and linux)
   -p, --protoPath string   path to proto file for grpc service
 
 Global Flags:
   -c, --config string         mashling gateway configuration (default "mashling.json")
   -e, --env-var-name string   name of the environment variable that contains the base64 encoded mashling gateway configuration (default "MASHLING_CONFIG")
   -l, --load-from-env         load the mashling gateway configuration from an environment variable
-```
+  ```
 
 A simple example usage is:
 
@@ -108,11 +108,10 @@ You can also specify which target OS to build the customized binary for via the 
 A target architecture to build the customized binary for can be specified via the `-A` flag. Supported values are `amd64`, and `arm64`. The default value is `amd64` and will suffice for the vast majority of use cases. Linux is the only compatible target OS for `arm64` architectures.
 
 ##### Note
-In case of gRPC, Create command accepts basic proto file and generates stub file with `protoc` binary. Tool also generates support files for trigger and gRPC service in path `<MASHLING-APP-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
+In case of gRPC, Create command accepts basic proto file and generates stub file with `protoc` binary. CLI also generates support files for trigger and gRPC service in path `<MASHLING-APP-HOME/gen/grpc>`. Trigger support files are created in `server` folder, gRPC service support files are created in `client` folder and stub file is generated in `<PROTONAME>` folder. Currently tool handles below operations.<br>
 
-1. Unary methods alone accepted. Implimentaion code is auto generated in above mentioned path.
-2. RPC method parameters should be declared in proto itself.
-3. Method should have input and output request params of message type.<br>
+1. RPC method parameters should be declared in proto itself.
+2. Method should have input and output request params of message type.<br>
 
 Sample proto file can be found [here](https://github.com/TIBCOSoftware/mashling-recipes/tree/master/recipes/grpc-to-grpc-gateway).
 
