@@ -3,6 +3,7 @@ package grpc
 import (
 	"errors"
 	"strings"
+	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 
@@ -14,6 +15,20 @@ import (
 
 // log is the default package logger
 var log = logger.GetLogger("tibco-service-grpc")
+
+type mashGRPCClienConn struct {
+	conn  *grpc.ClientConn
+	count int
+}
+
+type mashGRPCClinetConns struct {
+	connMap map[string]*mashGRPCClienConn
+	sync.Mutex
+}
+
+var conns = mashGRPCClinetConns{
+	connMap: make(map[string]*mashGRPCClienConn),
+}
 
 // GRPC is grpc service
 type GRPC struct {
@@ -77,11 +92,11 @@ func (g *GRPC) Execute() (err error) {
 		opts = []grpc.DialOption{grpc.WithInsecure()}
 	}
 
-	conn, err := grpc.Dial(g.Request.HostURL, opts...)
+	conn, err := getConnection(g.Request.HostURL, opts)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
-	defer conn.Close()
+	defer releaseConnection(g.Request.HostURL)
 
 	log.Debug("operating mode: ", g.Request.OperatingMode)
 
@@ -209,4 +224,37 @@ func (g *GRPC) setRequestValues(settings map[string]interface{}) (err error) {
 		}
 	}
 	return nil
+}
+
+// getconnection returns single client connection object per hostaddress
+func getConnection(hostAdds string, opts []grpc.DialOption) (*grpc.ClientConn, error) {
+	conns.Lock()
+	defer conns.Unlock()
+	conn := conns.connMap[hostAdds]
+	if conn == nil {
+		c, err := grpc.Dial(hostAdds, opts...)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		conn = &mashGRPCClienConn{
+			conn:  c,
+			count: 0,
+		}
+		conns.connMap[hostAdds] = conn
+	}
+	conn.count++
+	return conn.conn, nil
+}
+
+// releaseConnection closes created client connection per hostaddress
+func releaseConnection(hostAdds string) {
+	conns.Lock()
+	defer conns.Unlock()
+	conn := conns.connMap[hostAdds]
+	conn.count--
+	if conn.count <= 0 {
+		conn.conn.Close()
+		delete(conns.connMap, hostAdds)
+	}
 }
