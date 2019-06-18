@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Project Mashling - Docs and Tutorials</title>
+    <link>https://tibcosoftware.github.io/mashling/</link>
+    <description>Recent content on Project Mashling - Docs and Tutorials</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="https://tibcosoftware.github.io/mashling/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Quick Start</title>
+      <link>https://tibcosoftware.github.io/mashling/getting-started/quickstart/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/getting-started/quickstart/</guid>
+      <description>In this quick start guide, we’ll walk you through the prerequisites for getting your first Mashling application up and running.
+Project Mashling comes with a collection of curated recipes for common microgateway patterns.
+To get started:
+ Find a recipe that you like. (You can browse the details on each recipe.) Download and run the recipe. (Use the Try Now button to download the pre-made Mashling application. Each recipe comes with a README with detailed usage instructions.</description>
+    </item>
+    
+    <item>
+      <title>Gateway</title>
+      <link>https://tibcosoftware.github.io/mashling/getting-started/gateway/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/getting-started/gateway/</guid>
+      <description>Overview The mashling-gateway powers the core event driven routing engine of the Mashling project. This core binary can run all versions of the Mashling schema to date, however for the purposes of this document, we will focus on the 1.0 configuration schema.
+Usage The gateway binary has the following command line arguments available to setup and specify how you would like the binary to operate.
+They can be found by running:</description>
+    </item>
+    
+    <item>
+      <title>Mashling Gateway Model</title>
+      <link>https://tibcosoftware.github.io/mashling/development/recipes/mashling-gatewaymodel/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/recipes/mashling-gatewaymodel/</guid>
+      <description>A gateway configuration file is what contains all details related to the runtime behavior of a mashling-gateway instance. The file can be named anything and pointed to via the -c or &amp;ndash;config flag.
+A gateway configuration specifies the appropriate schema version to load and validate against via the mashling_schema key. This is located at the top level of the configuration JSON schema. All other components specifying runtime behavior are contained within a gateway key and will be explained in detail below.</description>
+    </item>
+    
+    <item>
+      <title>Developing and Building from Source</title>
+      <link>https://tibcosoftware.github.io/mashling/development/developing-from-source/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/developing-from-source/</guid>
+      <description>Development and Building from Source This section only applies if you are actively making changes to the Mashling source code. There is no need to build from source if you just want to get started using the mashling-gateway or mashling-cli tools. Those can be downloaded for your desired platform and run immediately.
+Prerequisites  The Go programming language 1.10 or later should be installed. Set GOPATH environment variable on your system.</description>
+    </item>
+    
+    <item>
+      <title>Build recipe example</title>
+      <link>https://tibcosoftware.github.io/mashling/development/recipes/recipe_tutorial/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/recipes/recipe_tutorial/</guid>
+      <description>In this example we will create a mashling gateway recipe that conditionally invokes a PetStore API. The recipe will either register or retrieve pet data. The scenario assumes that only pets with a category name of DOG or CAT are supported. If an attempt is made to register any other kind of pet the gateway responds with an error message without hitting the PetStore backend.
+Open an editor and define event triggers like the following:</description>
+    </item>
+    
+    <item>
+      <title>VSCode Extension</title>
+      <link>https://tibcosoftware.github.io/mashling/development/vscode-extension/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/vscode-extension/</guid>
+      <description>VSCode Extension The VSCode Extension is an open source developer tool for configuring Mashling extensions, and provides the following features:
+ Intellisense: Provides word-based completions for Mashling json property names. Code completion snippets: Provides json snippets for gateway json body and other subsections. Hover-provider: Provides information for property names on hover. JSON validation: Validates the JSON against predefined schema. Create Mashling gateway: Once the JSON is ready, the Mashling gateway can be created directly through VSCode command palette.</description>
+    </item>
+    
+    <item>
+      <title>Contributing to Project Mashling Recipes</title>
+      <link>https://tibcosoftware.github.io/mashling/contribution/contribute-to-recipes/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/contribution/contribute-to-recipes/</guid>
+      <description>Creating a recipe A recipe can be created by customizing an existing recipe in https://www.mashling.io/moreRecipes or by using an editor such as VS code enabled with a mashling extension
+Adding a recipe to mashling-recipes repo. A recipe should be contained in its own folder under &amp;lsquo;recipes&amp;rsquo; folder. The recipe folder is composed of a gateway json file, README.md, an optional icon image file, optional Gopkg.lock and Gopkg.toml files. In the absence of the icon image file, the default Mashling icon image is used by mashling.</description>
+    </item>
+    
+    <item>
+      <title>Building the docs website</title>
+      <link>https://tibcosoftware.github.io/mashling/contribution/contribute-to-docs/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/contribution/contribute-to-docs/</guid>
+      <description>If you want to contribute to the documentation, that is awesome! Your help is very much appreciated, but please do keep in mind the instructions below.
+Prerequisites These documentation pages are built with Hugo and we do make some assumptions:
+ You have Git 2.5 or greater installed on your machine. You have a GitHub account. Signing up for GitHub is free. You have Hugo installed on your machine.  In Hugo, pages are the core of your site.</description>
+    </item>
+    
+  </channel>
+</rss>

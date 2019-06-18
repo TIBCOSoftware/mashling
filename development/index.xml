@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Development on Project Mashling - Docs and Tutorials</title>
+    <link>https://tibcosoftware.github.io/mashling/development/</link>
+    <description>Recent content in Development on Project Mashling - Docs and Tutorials</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="https://tibcosoftware.github.io/mashling/development/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Developing and Building from Source</title>
+      <link>https://tibcosoftware.github.io/mashling/development/developing-from-source/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/developing-from-source/</guid>
+      <description>Development and Building from Source This section only applies if you are actively making changes to the Mashling source code. There is no need to build from source if you just want to get started using the mashling-gateway or mashling-cli tools. Those can be downloaded for your desired platform and run immediately.
+Prerequisites  The Go programming language 1.10 or later should be installed. Set GOPATH environment variable on your system.</description>
+    </item>
+    
+    <item>
+      <title>VSCode Extension</title>
+      <link>https://tibcosoftware.github.io/mashling/development/vscode-extension/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/vscode-extension/</guid>
+      <description>VSCode Extension The VSCode Extension is an open source developer tool for configuring Mashling extensions, and provides the following features:
+ Intellisense: Provides word-based completions for Mashling json property names. Code completion snippets: Provides json snippets for gateway json body and other subsections. Hover-provider: Provides information for property names on hover. JSON validation: Validates the JSON against predefined schema. Create Mashling gateway: Once the JSON is ready, the Mashling gateway can be created directly through VSCode command palette.</description>
+    </item>
+    
+  </channel>
+</rss>

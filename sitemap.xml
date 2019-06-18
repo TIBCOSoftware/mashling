@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/introduction/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/getting-started/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/getting-started/quickstart/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/getting-started/gateway/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/getting-started/getting-started-cli/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/getting-started/recipes/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/development/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/development/recipes/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/development/recipes/mashling-gatewaymodel/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/development/developing-from-source/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/development/recipes/recipe_tutorial/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/development/vscode-extension/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/contribution/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/contribution/contribute-to-recipes/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/contribution/contribute-to-docs/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://tibcosoftware.github.io/mashling/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

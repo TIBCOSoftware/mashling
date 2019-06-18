@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CLI on Project Mashling - Docs and Tutorials</title>
+    <link>https://tibcosoftware.github.io/mashling/getting-started/getting-started-cli/</link>
+    <description>Recent content in CLI on Project Mashling - Docs and Tutorials</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="https://tibcosoftware.github.io/mashling/getting-started/getting-started-cli/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+  </channel>
+</rss>

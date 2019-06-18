@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Getting started on Project Mashling - Docs and Tutorials</title>
+    <link>https://tibcosoftware.github.io/mashling/getting-started/</link>
+    <description>Recent content in Getting started on Project Mashling - Docs and Tutorials</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="https://tibcosoftware.github.io/mashling/getting-started/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Quick Start</title>
+      <link>https://tibcosoftware.github.io/mashling/getting-started/quickstart/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/getting-started/quickstart/</guid>
+      <description>In this quick start guide, we’ll walk you through the prerequisites for getting your first Mashling application up and running.
+Project Mashling comes with a collection of curated recipes for common microgateway patterns.
+To get started:
+ Find a recipe that you like. (You can browse the details on each recipe.) Download and run the recipe. (Use the Try Now button to download the pre-made Mashling application. Each recipe comes with a README with detailed usage instructions.</description>
+    </item>
+    
+    <item>
+      <title>Gateway</title>
+      <link>https://tibcosoftware.github.io/mashling/getting-started/gateway/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/getting-started/gateway/</guid>
+      <description>Overview The mashling-gateway powers the core event driven routing engine of the Mashling project. This core binary can run all versions of the Mashling schema to date, however for the purposes of this document, we will focus on the 1.0 configuration schema.
+Usage The gateway binary has the following command line arguments available to setup and specify how you would like the binary to operate.
+They can be found by running:</description>
+    </item>
+    
+  </channel>
+</rss>

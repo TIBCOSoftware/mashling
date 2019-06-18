@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Recipes on Project Mashling - Docs and Tutorials</title>
+    <link>https://tibcosoftware.github.io/mashling/development/recipes/</link>
+    <description>Recent content in Recipes on Project Mashling - Docs and Tutorials</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="https://tibcosoftware.github.io/mashling/development/recipes/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Mashling Gateway Model</title>
+      <link>https://tibcosoftware.github.io/mashling/development/recipes/mashling-gatewaymodel/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/recipes/mashling-gatewaymodel/</guid>
+      <description>A gateway configuration file is what contains all details related to the runtime behavior of a mashling-gateway instance. The file can be named anything and pointed to via the -c or &amp;ndash;config flag.
+A gateway configuration specifies the appropriate schema version to load and validate against via the mashling_schema key. This is located at the top level of the configuration JSON schema. All other components specifying runtime behavior are contained within a gateway key and will be explained in detail below.</description>
+    </item>
+    
+    <item>
+      <title>Build recipe example</title>
+      <link>https://tibcosoftware.github.io/mashling/development/recipes/recipe_tutorial/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tibcosoftware.github.io/mashling/development/recipes/recipe_tutorial/</guid>
+      <description>In this example we will create a mashling gateway recipe that conditionally invokes a PetStore API. The recipe will either register or retrieve pet data. The scenario assumes that only pets with a category name of DOG or CAT are supported. If an attempt is made to register any other kind of pet the gateway responds with an error message without hitting the PetStore backend.
+Open an editor and define event triggers like the following:</description>
+    </item>
+    
+  </channel>
+</rss>
